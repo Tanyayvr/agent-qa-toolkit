@@ -1,0 +1,24 @@
+{
+  "name": "tool",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier -w .",
+    "typecheck": "npm --workspaces run typecheck",
+    "audit": "npm audit",
+    "demo": "node scripts/demo.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.30",
+    "@typescript-eslint/eslint-plugin": "8.31.0",
+    "@typescript-eslint/parser": "8.31.0",
+    "eslint": "9.39.2",
+    "eslint-config-prettier": "10.1.1",
+    "prettier": "3.5.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5"
+  }
+}

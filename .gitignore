@@ -1,0 +1,7 @@
+node_modules
+dist
+apps/**/dist
+apps/**/runs
+apps/**/reports
+runs
+reports
