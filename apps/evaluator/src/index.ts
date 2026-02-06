@@ -121,6 +121,7 @@ type RootCause =
   | "missing_required_data"
   | "wrong_tool_choice"
   | "hallucination_signal"
+  | "missing_case"
   | "unknown";
 
 type AssertionDetails = Record<string, unknown>;
@@ -151,6 +152,8 @@ Optional:
   --help, -h     Show this help
 `.trim();
 
+const ARGV = normalizeArgv(process.argv);
+
 class CliUsageError extends Error {
   public readonly exitCode = 2;
   constructor(message: string) {
@@ -159,12 +162,28 @@ class CliUsageError extends Error {
   }
 }
 
+function normalizeArgv(argv: string[]): string[] {
+  const out: string[] = [];
+  for (const a of argv) {
+    if (a.startsWith("--") && a.includes("=")) {
+      const idx = a.indexOf("=");
+      const key = a.slice(0, idx);
+      const val = a.slice(idx + 1);
+      out.push(key);
+      if (val.length) out.push(val);
+    } else {
+      out.push(a);
+    }
+  }
+  return out;
+}
+
 function hasFlag(...names: string[]): boolean {
-  return names.some((n) => process.argv.includes(n));
+  return names.some((n) => ARGV.includes(n));
 }
 
 function assertNoUnknownOptions(allowed: Set<string>): void {
-  const args = process.argv.slice(2);
+  const args = ARGV.slice(2);
   for (const a of args) {
     if (a.startsWith("--") && !allowed.has(a)) {
       throw new CliUsageError(`Unknown option: ${a}\n\n${HELP_TEXT}`);
@@ -173,18 +192,18 @@ function assertNoUnknownOptions(allowed: Set<string>): void {
 }
 
 function assertHasValue(flag: string): void {
-  const idx = process.argv.indexOf(flag);
+  const idx = ARGV.indexOf(flag);
   if (idx === -1) return;
-  const next = process.argv[idx + 1];
+  const next = ARGV[idx + 1];
   if (!next || next.startsWith("--")) {
     throw new CliUsageError(`Missing value for ${flag}\n\n${HELP_TEXT}`);
   }
 }
 
 function getArg(name: string): string | null {
-  const idx = process.argv.indexOf(name);
+  const idx = ARGV.indexOf(name);
   if (idx === -1) return null;
-  const val = process.argv[idx + 1];
+  const val = ARGV[idx + 1];
   if (!val || val.startsWith("--")) return null;
   return val;
 }
@@ -229,7 +248,19 @@ function finalOutputEvents(events: RunEvent[]): FinalOutputEvent[] {
 }
 
 function extractToolCallNames(events: RunEvent[]): string[] {
-  return toolCalls(events).map((e) => e.tool);
+  const calls = toolCalls(events);
+  const withIdx = calls.map((e, idx) => ({ e, idx }));
+  withIdx.sort((a, b) => {
+    const ta = a.e.ts;
+    const tb = b.e.ts;
+    const fa = Number.isFinite(ta);
+    const fb = Number.isFinite(tb);
+    if (fa && fb) return ta - tb;
+    if (fa) return -1;
+    if (fb) return 1;
+    return a.idx - b.idx;
+  });
+  return withIdx.map((x) => x.e.tool);
 }
 
 function extractRetrievalDocIds(events: RunEvent[]): string[] {
@@ -366,6 +397,7 @@ function mapPolicyRules(root: RootCause | undefined, evidenceFailed: boolean): s
   if (root === "format_violation") rules.push("Rule3");
   if (root === "missing_required_data") rules.push("Rule2", "Rule4");
   if (root === "hallucination_signal") rules.push("Rule3", "Rule4");
+  if (root === "missing_case") rules.push("Rule2");
   if (evidenceFailed) rules.push("Rule4");
   return Array.from(new Set(rules));
 }
@@ -398,6 +430,49 @@ function chooseRootCause(assertions: AssertionResult[], resp: AgentResponse): Ro
   }
 
   return "unknown";
+}
+
+function missingTraceSide(reason: string): TraceIntegritySide {
+  return { status: "broken", issues: [reason] };
+}
+
+function renderMissingCaseHtml(caseId: string, missing: { baseline: boolean; new: boolean }): string {
+  const title = `Replay diff · ${caseId}`;
+  const msg = [
+    missing.baseline ? "baseline response missing" : "",
+    missing.new ? "new response missing" : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${title}</title>
+<style>
+  :root { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+  body { margin: 0; background: #0b0d10; color: #e8eaed; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 18px; }
+  .card { background:#0f1217; border:1px solid #232836; border-radius: 12px; padding: 12px; }
+  .muted { color:#9aa4b2; font-size: 13px; }
+  a { color:#8ab4f8; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="font-size:20px;font-weight:800;">${title}</div>
+    <div class="muted">case_id: ${caseId}</div>
+    <div class="card" style="margin-top:12px;">
+      <div style="font-weight:700;">Missing response</div>
+      <div class="muted" style="margin-top:6px;">${msg || "unknown"}</div>
+    </div>
+    <div style="margin-top:12px;"><a href="report.html">Back to report</a></div>
+  </div>
+</body>
+</html>`;
 }
 
 function evaluateOne(c: Case, resp: AgentResponse, ajv: Ajv): EvaluationResult {
@@ -680,13 +755,6 @@ function computeTraceIntegritySide(resp: AgentResponse, expected: Expected): Tra
   return { status: isBroken ? "broken" : "partial", issues };
 }
 
-function computeTraceIntegrity(baseline: AgentResponse, baselineExpected: Expected, neu: AgentResponse, newExpected: Expected): TraceIntegrity {
-  return {
-    baseline: computeTraceIntegritySide(baseline, baselineExpected),
-    new: computeTraceIntegritySide(neu, newExpected),
-  };
-}
-
 function isAbsoluteOrBadHref(href: string): boolean {
   if (!href) return true;
   if (href.startsWith("http://") || href.startsWith("https://")) return true;
@@ -862,16 +930,16 @@ function computeSecuritySide(resp: AgentResponse): { signals: SecuritySignal[]; 
       .join(" · ");
 
     const details: { notes?: string; urls?: string[] } = { notes: note };
-if (rf.url) details.urls = [rf.url];
+    if (rf.url) details.urls = [rf.url];
 
-signals.push({
-  kind: "runner_failure_detected",
-  severity: rf.class === "network_error" || rf.class === "timeout" ? "high" : "medium",
-  confidence: "high",
-  title: "Runner failure captured",
-  details,
-  evidence_refs: evidenceRunner,
-});
+    signals.push({
+      kind: "runner_failure_detected",
+      severity: rf.class === "network_error" || rf.class === "timeout" ? "high" : "medium",
+      confidence: "high",
+      title: "Runner failure captured",
+      details,
+      evidence_refs: evidenceRunner,
+    });
   }
 
   const requiresGate =
@@ -879,15 +947,6 @@ signals.push({
     (resp.runner_failure !== undefined || (resp.events ?? []).length === 0);
 
   return { signals, requires_gate_recommendation: requiresGate };
-}
-
-function computeSecurityPack(baseline: AgentResponse, neu: AgentResponse): SecurityPack {
-  const b = computeSecuritySide(baseline);
-  const n = computeSecuritySide(neu);
-  return {
-    baseline: { signals: b.signals, requires_gate_recommendation: b.requires_gate_recommendation },
-    new: { signals: n.signals, requires_gate_recommendation: n.requires_gate_recommendation },
-  };
 }
 
 function topKinds(signals: SecuritySignal[]): string[] {
@@ -1000,18 +1059,19 @@ async function main(): Promise<void> {
   for (const c of cases) {
     const bEval = baselineEval.find((x) => x.case_id === c.id);
     const nEval = newEval.find((x) => x.case_id === c.id);
-    if (!bEval || !nEval) continue;
-
-    if (bEval.pass) baselinePass += 1;
-    if (nEval.pass) newPass += 1;
-    if (bEval.pass && !nEval.pass) regressions += 1;
-    if (!bEval.pass && nEval.pass) improvements += 1;
-
-    if (!nEval.pass && nEval.root_cause) breakdown[nEval.root_cause] = (breakdown[nEval.root_cause] ?? 0) + 1;
-
     const baseResp = baselineById[c.id];
     const newResp = newById[c.id];
-    if (!baseResp || !newResp) continue;
+
+    const baselinePassFlag = bEval?.pass ?? false;
+    const newPassFlag = nEval?.pass ?? false;
+
+    if (baselinePassFlag) baselinePass += 1;
+    if (newPassFlag) newPass += 1;
+    if (baselinePassFlag && !newPassFlag) regressions += 1;
+    if (!baselinePassFlag && newPassFlag) improvements += 1;
+
+    const newRoot = nEval?.root_cause ?? (newResp ? undefined : "missing_case");
+    if (!newPassFlag && newRoot) breakdown[newRoot] = (breakdown[newRoot] ?? 0) + 1;
 
     const replayDiffHref = `case-${c.id}.html`;
 
@@ -1022,48 +1082,52 @@ async function main(): Promise<void> {
     if (baselineRunHref) artifactLinks.baseline_run_meta_href = baselineRunHref;
     if (newRunHref) artifactLinks.new_run_meta_href = newRunHref;
 
-    const baseRf = baseResp.runner_failure;
-    if (baseRf && typeof baseRf.full_body_saved_to === "string") {
-      const rel = await maybeCopyFailureAsset({
-        projectRoot,
-        reportDir: reportDirAbs,
-        caseId: c.id,
-        version: "baseline",
-        relOrAbsPath: baseRf.full_body_saved_to,
-      });
-      if (rel) artifactLinks.baseline_failure_body_href = rel;
-    }
-    if (baseRf && typeof baseRf.full_body_meta_saved_to === "string") {
-      const rel = await maybeCopyFailureAsset({
-        projectRoot,
-        reportDir: reportDirAbs,
-        caseId: c.id,
-        version: "baseline",
-        relOrAbsPath: baseRf.full_body_meta_saved_to,
-      });
-      if (rel) artifactLinks.baseline_failure_meta_href = rel;
+    if (baseResp) {
+      const baseRf = baseResp.runner_failure;
+      if (baseRf && typeof baseRf.full_body_saved_to === "string") {
+        const rel = await maybeCopyFailureAsset({
+          projectRoot,
+          reportDir: reportDirAbs,
+          caseId: c.id,
+          version: "baseline",
+          relOrAbsPath: baseRf.full_body_saved_to,
+        });
+        if (rel) artifactLinks.baseline_failure_body_href = rel;
+      }
+      if (baseRf && typeof baseRf.full_body_meta_saved_to === "string") {
+        const rel = await maybeCopyFailureAsset({
+          projectRoot,
+          reportDir: reportDirAbs,
+          caseId: c.id,
+          version: "baseline",
+          relOrAbsPath: baseRf.full_body_meta_saved_to,
+        });
+        if (rel) artifactLinks.baseline_failure_meta_href = rel;
+      }
     }
 
-    const newRf = newResp.runner_failure;
-    if (newRf && typeof newRf.full_body_saved_to === "string") {
-      const rel = await maybeCopyFailureAsset({
-        projectRoot,
-        reportDir: reportDirAbs,
-        caseId: c.id,
-        version: "new",
-        relOrAbsPath: newRf.full_body_saved_to,
-      });
-      if (rel) artifactLinks.new_failure_body_href = rel;
-    }
-    if (newRf && typeof newRf.full_body_meta_saved_to === "string") {
-      const rel = await maybeCopyFailureAsset({
-        projectRoot,
-        reportDir: reportDirAbs,
-        caseId: c.id,
-        version: "new",
-        relOrAbsPath: newRf.full_body_meta_saved_to,
-      });
-      if (rel) artifactLinks.new_failure_meta_href = rel;
+    if (newResp) {
+      const newRf = newResp.runner_failure;
+      if (newRf && typeof newRf.full_body_saved_to === "string") {
+        const rel = await maybeCopyFailureAsset({
+          projectRoot,
+          reportDir: reportDirAbs,
+          caseId: c.id,
+          version: "new",
+          relOrAbsPath: newRf.full_body_saved_to,
+        });
+        if (rel) artifactLinks.new_failure_body_href = rel;
+      }
+      if (newRf && typeof newRf.full_body_meta_saved_to === "string") {
+        const rel = await maybeCopyFailureAsset({
+          projectRoot,
+          reportDir: reportDirAbs,
+          caseId: c.id,
+          version: "new",
+          relOrAbsPath: newRf.full_body_meta_saved_to,
+        });
+        if (rel) artifactLinks.new_failure_meta_href = rel;
+      }
     }
 
     const baseCaseSrc = path.join(baselineDirAbs, `${c.id}.json`);
@@ -1075,23 +1139,33 @@ async function main(): Promise<void> {
     if (baseCaseHref) artifactLinks.baseline_case_response_href = baseCaseHref;
     if (newCaseHref) artifactLinks.new_case_response_href = newCaseHref;
 
-    const trace = computeTraceIntegrity(baseResp, c.expected, newResp, c.expected);
-    const security = computeSecurityPack(baseResp, newResp);
+    const trace: TraceIntegrity = {
+      baseline: baseResp ? computeTraceIntegritySide(baseResp, c.expected) : missingTraceSide("missing_response"),
+      new: newResp ? computeTraceIntegritySide(newResp, c.expected) : missingTraceSide("missing_response"),
+    };
+
+    const security: SecurityPack = {
+      baseline: baseResp ? computeSecuritySide(baseResp) : { signals: [], requires_gate_recommendation: false },
+      new: newResp ? computeSecuritySide(newResp) : { signals: [], requires_gate_recommendation: false },
+    };
 
     const item: CompareReport["items"][number] = {
       case_id: c.id,
       title: c.title,
-      baseline_pass: bEval.pass,
-      new_pass: nEval.pass,
-      preventable_by_policy: nEval.preventable_by_policy,
-      recommended_policy_rules: nEval.recommended_policy_rules,
+      baseline_pass: baselinePassFlag,
+      new_pass: newPassFlag,
+      preventable_by_policy: nEval ? nEval.preventable_by_policy : true,
+      recommended_policy_rules: nEval ? nEval.recommended_policy_rules : mapPolicyRules("missing_case", false),
       artifacts: artifactLinks,
       trace_integrity: trace,
       security,
     };
 
-    if (bEval.root_cause !== undefined) item.baseline_root = bEval.root_cause;
-    if (nEval.root_cause !== undefined) item.new_root = nEval.root_cause;
+    if (bEval?.root_cause !== undefined) item.baseline_root = bEval.root_cause;
+    else if (!baseResp) item.baseline_root = "missing_case";
+
+    if (nEval?.root_cause !== undefined) item.new_root = nEval.root_cause;
+    else if (!newResp) item.new_root = "missing_case";
 
     items.push(item);
   }
@@ -1172,31 +1246,34 @@ async function main(): Promise<void> {
 
   await writeFile(path.join(reportDirAbs, "compare-report.json"), JSON.stringify(report, null, 2), "utf-8");
 
-  //tool/apps/evaluator/src/index.ts
+  for (const it of items) {
+    const b = baselineById[it.case_id];
+    const n = newById[it.case_id];
 
-for (const it of items) {
-  const b = baselineById[it.case_id];
-  const n = newById[it.case_id];
-  if (!b || !n) continue;
+    if (!b || !n) {
+      const caseHtml = renderMissingCaseHtml(it.case_id, { baseline: !b, new: !n });
+      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
+      continue;
+    }
 
-  const baseReplay = toReplayResponse(b);
-  const newReplay = toReplayResponse(n);
+    const baseReplay = toReplayResponse(b);
+    const newReplay = toReplayResponse(n);
 
-  const brf = (baseReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
-  if (brf && typeof brf === "object") {
-    if (typeof it.artifacts.baseline_failure_body_href === "string") brf.full_body_saved_to = it.artifacts.baseline_failure_body_href;
-    if (typeof it.artifacts.baseline_failure_meta_href === "string") brf.full_body_meta_saved_to = it.artifacts.baseline_failure_meta_href;
+    const brf = (baseReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
+    if (brf && typeof brf === "object") {
+      if (typeof it.artifacts.baseline_failure_body_href === "string") brf.full_body_saved_to = it.artifacts.baseline_failure_body_href;
+      if (typeof it.artifacts.baseline_failure_meta_href === "string") brf.full_body_meta_saved_to = it.artifacts.baseline_failure_meta_href;
+    }
+
+    const nrf = (newReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
+    if (nrf && typeof nrf === "object") {
+      if (typeof it.artifacts.new_failure_body_href === "string") nrf.full_body_saved_to = it.artifacts.new_failure_body_href;
+      if (typeof it.artifacts.new_failure_meta_href === "string") nrf.full_body_meta_saved_to = it.artifacts.new_failure_meta_href;
+    }
+
+    const caseHtml = renderCaseDiffHtml(it.case_id, baseReplay, newReplay);
+    await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
   }
-
-  const nrf = (newReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
-  if (nrf && typeof nrf === "object") {
-    if (typeof it.artifacts.new_failure_body_href === "string") nrf.full_body_saved_to = it.artifacts.new_failure_body_href;
-    if (typeof it.artifacts.new_failure_meta_href === "string") nrf.full_body_meta_saved_to = it.artifacts.new_failure_meta_href;
-  }
-
-  const caseHtml = renderCaseDiffHtml(it.case_id, baseReplay, newReplay);
-await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
-}
 
 
   const html = renderHtmlReport(report);

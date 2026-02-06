@@ -131,6 +131,8 @@ Examples:
   ts-node src/index.ts --baseUrl http://localhost:8787 --cases cases/cases.json --runId latest
 `.trim();
 
+const ARGV = normalizeArgv(process.argv);
+
 class CliUsageError extends Error {
   public readonly exitCode = 2;
   constructor(message: string) {
@@ -139,24 +141,40 @@ class CliUsageError extends Error {
   }
 }
 
+function normalizeArgv(argv: string[]): string[] {
+  const out: string[] = [];
+  for (const a of argv) {
+    if (a.startsWith("--") && a.includes("=")) {
+      const idx = a.indexOf("=");
+      const key = a.slice(0, idx);
+      const val = a.slice(idx + 1);
+      out.push(key);
+      if (val.length) out.push(val);
+    } else {
+      out.push(a);
+    }
+  }
+  return out;
+}
+
 function hasFlag(...names: string[]): boolean {
-  return names.some((n) => process.argv.includes(n));
+  return names.some((n) => ARGV.includes(n));
 }
 
 function getArg(name: string): string | null {
-  const idx = process.argv.indexOf(name);
+  const idx = ARGV.indexOf(name);
   if (idx === -1) return null;
-  const val = process.argv[idx + 1];
+  const val = ARGV[idx + 1];
   if (!val || val.startsWith("--")) return null;
   return val;
 }
 
 function getFlag(name: string): boolean {
-  return process.argv.includes(name);
+  return ARGV.includes(name);
 }
 
 function assertNoUnknownOptions(allowed: Set<string>): void {
-  const args = process.argv.slice(2);
+  const args = ARGV.slice(2);
   for (const a of args) {
     if (a.startsWith("--") && !allowed.has(a)) {
       throw new CliUsageError(`Unknown option: ${a}\n\n${HELP_TEXT}`);
@@ -165,9 +183,9 @@ function assertNoUnknownOptions(allowed: Set<string>): void {
 }
 
 function assertHasValue(flag: string): void {
-  const idx = process.argv.indexOf(flag);
+  const idx = ARGV.indexOf(flag);
   if (idx === -1) return;
-  const next = process.argv[idx + 1];
+  const next = ARGV[idx + 1];
   if (!next || next.startsWith("--")) {
     throw new CliUsageError(`Missing value for ${flag}\n\n${HELP_TEXT}`);
   }
@@ -215,7 +233,9 @@ function parseCasesJson(raw: string): CaseFileItem[] {
   return parsed.map((x) => {
     if (!isRecord(x)) throw new Error("cases.json element must be an object");
 
-    const id = String(x.id);
+    if (!("id" in x)) throw new Error("cases.json element missing id");
+    const id = String(x.id ?? "").trim();
+    if (!id) throw new Error("cases.json element has empty id");
     const title = String(x.title ?? "");
     const inputObj = isRecord(x.input) ? x.input : {};
     const user = String(inputObj.user ?? "");
@@ -256,6 +276,61 @@ function snippetFromBytes(bytes: Uint8Array, maxBytes: number): string {
   const cut = bytes.byteLength <= maxBytes ? bytes : bytes.slice(0, maxBytes);
   const dec = new TextDecoder("utf-8", { fatal: false });
   return dec.decode(cut);
+}
+
+async function readBodySnippet(res: Response, maxBytes: number): Promise<string> {
+  if (maxBytes <= 0) return "";
+  const body = res.body as unknown as ReadableStream<Uint8Array> | null;
+  if (!body) return "";
+
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  let truncated = false;
+
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      if (total + value.byteLength <= maxBytes) {
+        chunks.push(value);
+        total += value.byteLength;
+      } else {
+        const remain = maxBytes - total;
+        if (remain > 0) {
+          chunks.push(value.slice(0, remain));
+          total += remain;
+        }
+        truncated = true;
+        break;
+      }
+    }
+  } finally {
+    if (truncated) {
+      try {
+        await reader.cancel();
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  const merged =
+    chunks.length === 0
+      ? new Uint8Array(0)
+      : (() => {
+          const out = new Uint8Array(total);
+          let off = 0;
+          for (const c0 of chunks) {
+            out.set(c0, off);
+            off += c0.byteLength;
+          }
+          return out;
+        })();
+
+  return snippetFromBytes(merged, maxBytes);
 }
 
 type SavedBody = {
@@ -489,8 +564,7 @@ async function runOneCaseWithReliability(cfg: RunnerConfig, c: CaseFileItem, ver
           truncated = saved.truncated;
           bytesWritten = saved.bytes_written;
         } else {
-          const text = await res.text();
-          snippet = text.slice(0, Math.max(0, cfg.bodySnippetBytes));
+          snippet = await readBodySnippet(res, cfg.bodySnippetBytes);
         }
 
         const artifact: RunnerFailureArtifact = {

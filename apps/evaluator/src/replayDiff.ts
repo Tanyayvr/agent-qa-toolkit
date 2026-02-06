@@ -15,10 +15,10 @@ type ProposedAction = {
 
 type FinalOutput = { content_type: "text" | "json"; content: unknown };
 
-type ToolCallEvent = leadingToolCallEvent;
-type ToolResultEvent = leadingToolResultEvent;
+type ToolCallEvent = LeadingToolCallEvent;
+type ToolResultEvent = LeadingToolResultEvent;
 
-type leadingToolCallEvent = {
+type LeadingToolCallEvent = {
   type: "tool_call";
   ts: number;
   call_id: string;
@@ -27,7 +27,7 @@ type leadingToolCallEvent = {
   args: Record<string, unknown>;
 };
 
-type leadingToolResultEvent = {
+type LeadingToolResultEvent = {
   type: "tool_result";
   ts: number;
   call_id: string;
