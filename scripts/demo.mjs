@@ -20,7 +20,6 @@ async function isHealthy() {
   }
 }
 
-
 async function waitForHealth(timeoutMs = 15000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
@@ -74,7 +73,7 @@ async function main() {
         "--cases",
         "cases/cases.json",
         "--only",
-        "tool_001,fmt_002,data_001,fail_001,tool_003",
+        "tool_001,fmt_002,data_001,fail_001,tool_003,fetch_http_500_001,fetch_invalid_json_001,fetch_timeout_001,fetch_network_drop_001",
         "--outDir",
         "apps/runner/runs",
         "--runId",

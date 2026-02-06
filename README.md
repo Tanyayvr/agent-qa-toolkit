@@ -4,7 +4,7 @@
 
 Benchmark-quality toolkit for teams building **tool-using AI agents**.
 
-**Goal:** before and after release, automatically detect regressions between agent versions, explain *why* something broke deterministically, and produce **reproducible artifacts** (replay + diff + root-cause) suitable for CI and for sharing with customers / integrators.
+**Goal:** Before and after release, automatically detect regressions between agent versions, explain *why* something broke deterministically, and produce **portable, reproducible artifacts** (replay + diff + root cause) suitable for CI and for sharing with customers / integrators.
 
 ---
 
@@ -25,17 +25,49 @@ Quality bar (benchmark mode):
 
 ---
 
+## Reliability & safety (production-scale regression runs)
+
+This toolkit is designed to be safe and predictable under CI and high-volume runs:
+
+- **Portable artifacts (no absolute paths):** reports and metadata store relative paths only, so runs are shareable across machines and CI runners.
+- **Atomic writes:** run artifacts are written atomically to prevent partially-written JSON on interrupted runs.
+- **Replay diff artifacts (Stage 1):** every regression is reproducible as a portable, case-level replay + structured diff.
+- **Standardized network failure semantics:** timeouts, HTTP errors, non-JSON responses, and parse failures are classified consistently and include structured context (case_id, version, attempt, latency_ms, status).
+- **Console-safe error output:** terminal logs show short snippets, while full bodies are saved into artifacts to avoid log flooding.
+- **Evidence preservation:** reports link to full bodies/payloads stored under `assets/` (snippets in UI, full evidence on disk).
+- **Machine-readable gating:** `compare-report.json` provides stable fields for CI decisions without parsing HTML.
+- **Retry policy with backoff:** retries apply only to transient failure classes (timeouts / network / 5xx), with exponential backoff and jitter to reduce load spikes on the agent service.
+
+---
+
+## Standardized fetch error model (what we guarantee)
+
+When calling the agent endpoint (e.g. `POST /run-case`), failures are categorized into stable classes:
+
+- `timeout` — request exceeded `--timeoutMs`
+- `http_error` — non-2xx status, includes `status`, `statusText`, `latency_ms`
+- `invalid_json` — 2xx response but body is not valid JSON
+- `schema_mismatch` — JSON parsed but does not match the expected minimum response shape
+- `network_error` — DNS / connection / TLS / abort (structured error details)
+
+For each failure, the runner:
+
+- prints a short terminal-friendly snippet
+- writes a full body dump (bounded by size limits) into artifacts
+- records structured metadata suitable for CI dashboards and root-cause analysis
+
+---
+
 ## Quickstart (3 commands)
 
 From repo root:
 
 1) Install
-```bash
+
 npm install
 Run the full demo pipeline (idempotent latest)
 
-bash
-Копировать код
+
 npm run demo
 Open the report
 
@@ -46,17 +78,17 @@ each case diff: apps/evaluator/reports/latest/case-*.html
 Demo pipeline (what npm run demo does)
 Single command, deterministic artifacts:
 
+
 npm run lint
-
 npm run typecheck
-
 npm audit
+Then:
 
-Ensures demo-agent is running (health check; starts if needed)
+ensures demo-agent is running (health check; starts if needed)
 
-Runs runner with --runId latest
+runs runner with --runId latest
 
-Runs evaluator with --reportId latest
+runs evaluator with --reportId latest
 
 Generates:
 
@@ -64,16 +96,30 @@ apps/evaluator/reports/latest/report.html
 
 apps/evaluator/reports/latest/case-<id>.html
 
-All paths in reports and logs are portable (no /Users/...).
+All paths in reports and metadata are portable (no absolute /Users/...).
 
-Agent contract
+## Documentation (contracts)
+
+This repo defines stable, versioned contracts used for integration, CI gating, and portable evidence-sharing:
+
+- `docs/agent-artifact-contract-v1.md` — **Agent Artifact Contract v1**
+  - Defines runner outputs (`run.json`, per-case artifacts, failure artifacts, assets).
+  - Guarantees standardized failure classes and full-body preservation via assets.
+
+- `docs/report-contract-v1.md` — **Report Contract v1**
+  - Defines what must be **visible in HTML** (`report.html`, `case-*.html`) for fast triage.
+  - Defines the stable **machine interface** (`compare-report.json`) for CI and automation.
+  - Requires self-contained, relative-link reports and evidence preservation (snippets in UI + full bodies/payloads in assets).
+
+Contracts are designed to remain stable: future versions only add fields, never change types.
+
+Agent contract (HTTP API)
 Runner calls the agent endpoint:
 
 POST /run-case
 
 Request body
-json
-Копировать код
+
 {
   "case_id": "tool_001",
   "version": "baseline",
@@ -93,8 +139,7 @@ final_output (object)
 
 At minimum:
 
-json
-Копировать код
+
 {
   "case_id": "tool_001",
   "version": "baseline",
@@ -160,16 +205,21 @@ apps/runner/runs/new/<runId>/
 
 Files:
 
-<caseId>.json — raw agent response for the case
+<caseId>.json — case artifact (agent response or runner failure artifact)
 
 run.json — run metadata (portable paths)
 
-(after evaluator) evaluation.json — evaluation results for that version
+assets/ — full bodies / large payloads (created when needed)
+
+assets/manifest.json — asset manifest (recommended)
+
+Evaluator may write:
+
+evaluation.json — evaluation results for that version
 
 Example:
 
-arduino
-Копировать код
+
 apps/runner/runs/
   baseline/
     latest/
@@ -178,6 +228,8 @@ apps/runner/runs/
       ...
       run.json
       evaluation.json
+      assets/
+        ...
   new/
     latest/
       fmt_002.json
@@ -185,6 +237,8 @@ apps/runner/runs/
       ...
       run.json
       evaluation.json
+      assets/
+        ...
 Evaluator outputs
 Evaluator writes:
 
@@ -194,33 +248,34 @@ apps/evaluator/reports/<reportId>/compare-report.json
 
 apps/evaluator/reports/<reportId>/case-<caseId>.html
 
+apps/evaluator/reports/<reportId>/assets/ — full bodies and large payloads referenced by the report (as needed)
+
 Example:
 
-swift
-Копировать код
+
 apps/evaluator/reports/
   latest/
     report.html
     compare-report.json
     case-fmt_002.html
     case-tool_001.html
-    ...
+    assets/
+      ...
 All report paths are relative/portable.
 
 CLI usage
 Runner
-bash
-Копировать код
+Help:
+
+
 npm --workspace runner run dev -- --help
 Common usage:
 
-bash
-Копировать код
+
 npm --workspace runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json --outDir apps/runner/runs --runId latest
 Only selected cases:
 
-bash
-Копировать код
+
 npm --workspace runner run dev -- --only tool_001,fmt_002 --runId latest
 Exit codes:
 
@@ -231,13 +286,14 @@ Exit codes:
 2 bad args / usage
 
 Evaluator
-bash
-Копировать код
+Help:
+
+
+
 npm --workspace evaluator run dev -- --help
 Common usage:
 
-bash
-Копировать код
+
 npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest
 Exit codes:
 
@@ -254,8 +310,7 @@ cases/cases.json
 
 Format: JSON array of case objects:
 
-json
-Копировать код
+
 [
   {
     "id": "tool_001",
@@ -329,12 +384,11 @@ Point runner to your agent:
 
 Example:
 
-bash
-Копировать код
+
 npm --workspace runner run dev -- --baseUrl http://your-agent-host:8787 --runId latest
 You can keep the same evaluator + report generation unchanged.
 
-Stage 2 (future): Action Governance
+Stage 2 (future): Action governance
 Stage 1 already produces policy-ready signals:
 
 proposed_actions + evidence_refs
@@ -345,7 +399,7 @@ recommended_policy_rules
 
 Stage 2 will add:
 
-policy engine (e.g. OPA)
+policy-as-code engine (e.g. OPA)
 
 action-level allow/deny/approve
 
@@ -353,11 +407,8 @@ enforcement in the runner/agent loop
 
 Stage 1 UI can show “Preventable by Policy” without enforcement.
 
-Development
-Recommended commands (repo root):
+Development (repo root)
 
-bash
-Копировать код
 npm run lint
 npm run typecheck
 npm run demo
@@ -366,4 +417,5 @@ Reports:
 apps/evaluator/reports/latest/report.html
 
 apps/evaluator/reports/latest/case-*.html
-EOF
+
+makefile

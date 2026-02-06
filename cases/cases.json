@@ -165,5 +165,42 @@
       "must_include": ["ticket"]
     },
     "metadata": { "tags": ["tool_failure"], "severity": "high", "kind": "tool_agent" }
+  },
+
+  {
+    "id": "fetch_http_500_001",
+    "title": "Runner fetch failure: HTTP 500 with JSON body",
+    "input": {
+      "user": "Trigger an HTTP 500 error from the agent transport layer."
+    },
+    "expected": {},
+    "metadata": { "tags": ["transport", "http_error"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "fetch_invalid_json_001",
+    "title": "Runner fetch failure: 200 OK but invalid JSON body (HTML)",
+    "input": {
+      "user": "Trigger a 200 OK response with non-JSON body."
+    },
+    "expected": {},
+    "metadata": { "tags": ["transport", "invalid_json"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "fetch_timeout_001",
+    "title": "Runner fetch failure: request timeout (server stalls)",
+    "input": {
+      "user": "Trigger a request timeout from the agent (no response within timeout)."
+    },
+    "expected": {},
+    "metadata": { "tags": ["transport", "timeout"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "fetch_network_drop_001",
+    "title": "Runner fetch failure: connection drop (network_error)",
+    "input": {
+      "user": "Trigger a network connection drop during the request."
+    },
+    "expected": {},
+    "metadata": { "tags": ["transport", "network_error"], "severity": "high", "kind": "transport_failure" }
   }
 ]
