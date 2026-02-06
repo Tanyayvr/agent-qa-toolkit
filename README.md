@@ -1,10 +1,22 @@
 <!-- /README.md -->
+# Agent QA Toolkit — Portable Evidence Packs, Regression Diffs, and CI Gates (Stage 1)
 
-# Agent QA Toolkit: Replay Diff + Root-Cause (Stage 1) + (Future) Action Governance (Stage 2)
+Benchmark-quality toolkit for teams building tool-using AI agents.
 
-Benchmark-quality toolkit for teams building **tool-using AI agents**.
+## What you get (Stage 1)
 
-**Goal:** Before and after release, automatically detect regressions between agent versions, explain *why* something broke deterministically, and produce **portable, reproducible artifacts** (replay + diff + root cause) suitable for CI and for sharing with customers / integrators.
+Turn agent runs into a portable evidence pack you can share and gate in CI:
+
+**Incident → Portable Evidence Pack → RCA → Risk/Gate Decision**
+
+You get:
+
+- Baseline vs New regression runs
+- Per-case replay diff (`case-<case_id>.html`) for human triage
+- Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
+- Root cause attribution (RCA) and policy hints
+- Security Signals Pack (signals may be empty in demo)
+- Stage 2 (future): runtime governance (policy-as-code / approvals / runtime gates)
 
 ---
 
@@ -14,47 +26,65 @@ Monorepo (npm workspaces):
 
 - `apps/demo-agent` — demo HTTP agent with deterministic baseline/new responses
 - `apps/runner` — CLI that executes cases against the agent and writes run artifacts
-- `apps/evaluator` — CLI that evaluates artifacts, assigns root cause, and generates HTML reports
+- `apps/evaluator` — CLI that evaluates artifacts, assigns RCA, computes risk/gates, and generates HTML reports
 
 Quality bar (benchmark mode):
 
 - ESLint v9 flat config
 - Strict TypeScript (`strict`, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, no `any`)
 - `npm audit` clean
-- All commands run from **repo root**
+- All commands run from repo root
 
 ---
 
-## Reliability & safety (production-scale regression runs)
+## Stage 1: Portable Evidence Pack (what “portable” means)
 
-This toolkit is designed to be safe and predictable under CI and high-volume runs:
+Evaluator produces a **self-contained report directory** (copyable anywhere) that includes:
 
-- **Portable artifacts (no absolute paths):** reports and metadata store relative paths only, so runs are shareable across machines and CI runners.
-- **Atomic writes:** run artifacts are written atomically to prevent partially-written JSON on interrupted runs.
-- **Replay diff artifacts (Stage 1):** every regression is reproducible as a portable, case-level replay + structured diff.
-- **Standardized network failure semantics:** timeouts, HTTP errors, non-JSON responses, and parse failures are classified consistently and include structured context (case_id, version, attempt, latency_ms, status).
-- **Console-safe error output:** terminal logs show short snippets, while full bodies are saved into artifacts to avoid log flooding.
-- **Evidence preservation:** reports link to full bodies/payloads stored under `assets/` (snippets in UI, full evidence on disk).
-- **Machine-readable gating:** `compare-report.json` provides stable fields for CI decisions without parsing HTML.
-- **Retry policy with backoff:** retries apply only to transient failure classes (timeouts / network / 5xx), with exponential backoff and jitter to reduce load spikes on the agent service.
+- `report.html` — overview report for humans
+- `case-<case_id>.html` — per-case replay diff (**required for humans**)
+- `compare-report.json` — machine report (**source of truth for CI gating**)
+- `assets/` — copies of referenced payload evidence
+
+### Report Contract v2 SHOULD (to remain fully self-contained)
+
+- include `baseline/` and `new/` local raw copies **whenever any raw-evidence href is present**:
+  - `baseline_case_response_href`
+  - `new_case_response_href`
+  - `baseline_run_meta_href`
+  - `new_run_meta_href`
+- include `repro/` when `compare-report.json.repro` is present
+
+### Portability rules (Report Contract v2)
+
+- All **href** values stored in `compare-report.json` are **relative to the report directory** and must resolve **inside** it.
+- href values must contain:
+  - no `../` or `..\\`
+  - no absolute prefixes (`/`, `\`)
+  - no `://` schemes
+- Note: the `://` restriction applies to **href fields**. URLs may still appear as data in `security.signals[].details.urls`.
+- `baseline_dir` / `new_dir` / `cases_path` are **informational only** and must **not** be used to resolve links.
+- `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `tool/docs/report-contract-v2.md`).
 
 ---
 
-## Standardized fetch error model (what we guarantee)
+## CI gating model (Stage 1)
 
-When calling the agent endpoint (e.g. `POST /run-case`), failures are categorized into stable classes:
+Each case in `compare-report.json.items[]` includes:
 
-- `timeout` — request exceeded `--timeoutMs`
-- `http_error` — non-2xx status, includes `status`, `statusText`, `latency_ms`
-- `invalid_json` — 2xx response but body is not valid JSON
-- `schema_mismatch` — JSON parsed but does not match the expected minimum response shape
-- `network_error` — DNS / connection / TLS / abort (structured error details)
+- `risk_level`: `low | medium | high`
+- `risk_tags`: `string[]` (may include security signal kinds and/or operational tags)
+- `gate_recommendation`: `none | require_approval | block` (**single CI truth**)
 
-For each failure, the runner:
+**CI gating reads only:** `compare-report.json.items[].gate_recommendation`  
+Everything else is supporting evidence for humans and RCA.
 
-- prints a short terminal-friendly snippet
-- writes a full body dump (bounded by size limits) into artifacts
-- records structured metadata suitable for CI dashboards and root-cause analysis
+For v1-shape compatibility, the per-version boolean fields:
+
+- `security.baseline.requires_gate_recommendation`
+- `security.new.requires_gate_recommendation`
+
+…are derived from `gate_recommendation`, are **identical** for baseline/new, and must not be interpreted as per-version gating.
 
 ---
 
@@ -62,64 +92,89 @@ For each failure, the runner:
 
 From repo root:
 
-1) Install
+Install:
 
+```bash
 npm install
-Run the full demo pipeline (idempotent latest)
+```
 
+Run the full demo pipeline:
 
+```bash
 npm run demo
-Open the report
+```
 
-apps/evaluator/reports/latest/report.html
+Open the report (macOS):
 
-each case diff: apps/evaluator/reports/latest/case-*.html
+```bash
+open apps/evaluator/reports/latest/report.html
+```
+
+Otherwise, open `apps/evaluator/reports/latest/report.html` in your browser.
+
+Per-case diffs:
+
+`apps/evaluator/reports/latest/case-*.html`
+
+Machine report (CI interface):
+
+`apps/evaluator/reports/latest/compare-report.json`
 
 Demo pipeline (what npm run demo does)
-Single command, deterministic artifacts:
+Runs:
 
-
+```bash
 npm run lint
 npm run typecheck
 npm audit
+```
+
 Then:
 
-ensures demo-agent is running (health check; starts if needed)
+ensures demo-agent is reachable (health check; starts if needed)
 
-runs runner with --runId latest
+runs Runner with `--runId latest`
 
-runs evaluator with --reportId latest
+runs Evaluator with `--reportId latest`
 
-Generates:
+Produces:
 
-apps/evaluator/reports/latest/report.html
+`apps/evaluator/reports/latest/report.html`
 
-apps/evaluator/reports/latest/case-<id>.html
+`apps/evaluator/reports/latest/compare-report.json`
 
-All paths in reports and metadata are portable (no absolute /Users/...).
+`apps/evaluator/reports/latest/case-<id>.html`
 
-## Documentation (contracts)
+`apps/evaluator/reports/latest/assets/`
 
-This repo defines stable, versioned contracts used for integration, CI gating, and portable evidence-sharing:
+Recommended in v2 reports (when enabled):
 
-- `docs/agent-artifact-contract-v1.md` — **Agent Artifact Contract v1**
-  - Defines runner outputs (`run.json`, per-case artifacts, failure artifacts, assets).
-  - Guarantees standardized failure classes and full-body preservation via assets.
+`apps/evaluator/reports/latest/baseline/`
 
-- `docs/report-contract-v1.md` — **Report Contract v1**
-  - Defines what must be **visible in HTML** (`report.html`, `case-*.html`) for fast triage.
-  - Defines the stable **machine interface** (`compare-report.json`) for CI and automation.
-  - Requires self-contained, relative-link reports and evidence preservation (snippets in UI + full bodies/payloads in assets).
+`apps/evaluator/reports/latest/new/`
 
-Contracts are designed to remain stable: future versions only add fields, never change types.
+`apps/evaluator/reports/latest/repro/` (when compare-report.json.repro exists)
+
+Contracts (documentation)
+This repo defines versioned, stable contracts used for CI gating, integrations, and evidence portability.
+
+`tool/docs/agent-artifact-contract-v1.md` — Agent Artifact Contract v1
+Runner outputs (run.json, per-case artifacts, failure artifacts, assets), standardized failure classes, full-body preservation.
+
+`tool/docs/report-contract-v2.md` — Report Contract v2
+Portable evidence pack rules (href resolution, self-contained assets), CI gating fields (risk_level, risk_tags, gate_recommendation), compatibility behavior, and quality_flags truth tests.
+
+`tool/docs/report-contract-v3.md` — Report Contract v3
+Adds data availability and coverage fields, stricter portability rules, and expanded gating metadata.
 
 Agent contract (HTTP API)
 Runner calls the agent endpoint:
 
 POST /run-case
 
-Request body
+Request body:
 
+```json
 {
   "case_id": "tool_001",
   "version": "baseline",
@@ -128,8 +183,8 @@ Request body
     "context": { "optional": "context" }
   }
 }
-Response contract (required)
-Agent must return JSON with:
+```
+Response contract (required): agent must return JSON with:
 
 proposed_actions (array)
 
@@ -137,9 +192,9 @@ events (array)
 
 final_output (object)
 
-At minimum:
+Minimum example:
 
-
+```json
 {
   "case_id": "tool_001",
   "version": "baseline",
@@ -150,43 +205,17 @@ At minimum:
       "action_type": "get_customer",
       "tool_name": "get_customer",
       "params": {},
-      "risk_level": "medium",
-      "risk_tags": [],
-      "evidence_refs": [
-        { "kind": "tool_result", "call_id": "c1" }
-      ]
+      "evidence_refs": [{ "kind": "tool_result", "call_id": "c1" }]
     }
   ],
   "events": [
-    {
-      "type": "tool_call",
-      "ts": 1730000000000,
-      "call_id": "c1",
-      "action_id": "a1",
-      "tool": "get_customer",
-      "args": {}
-    },
-    {
-      "type": "tool_result",
-      "ts": 1730000000100,
-      "call_id": "c1",
-      "action_id": "a1",
-      "status": "ok",
-      "latency_ms": 100,
-      "payload_summary": { "customer_id": "123" }
-    },
-    {
-      "type": "final_output",
-      "ts": 1730000000200,
-      "content_type": "text",
-      "content": "final answer"
-    }
+    { "type": "tool_call", "ts": 1730000000000, "call_id": "c1", "action_id": "a1", "tool": "get_customer", "args": {} },
+    { "type": "tool_result", "ts": 1730000000100, "call_id": "c1", "action_id": "a1", "status": "ok", "latency_ms": 100, "payload_summary": { "customer_id": "123" } },
+    { "type": "final_output", "ts": 1730000000200, "content_type": "text", "content": "final answer" }
   ],
-  "final_output": {
-    "content_type": "text",
-    "content": "final answer"
-  }
+  "final_output": { "content_type": "text", "content": "final answer" }
 }
+```
 Notes:
 
 events must include tool calls/results if tools are used.
@@ -196,87 +225,55 @@ Retrieval (RAG) uses an event of type retrieval.
 evidence_refs are policy-ready (Stage 2 will enforce).
 
 Artifact structure
-Runner outputs
-Runner writes run artifacts to:
+Runner outputs:
+
+Baseline:
 
 apps/runner/runs/baseline/<runId>/
+
+New:
 
 apps/runner/runs/new/<runId>/
 
 Files:
 
-<caseId>.json — case artifact (agent response or runner failure artifact)
+`<caseId>.json` — case artifact (agent response or runner failure artifact)
 
-run.json — run metadata (portable paths)
+`run.json` — run metadata
 
-assets/ — full bodies / large payloads (created when needed)
+`assets/` — full bodies / large payloads when needed
 
-assets/manifest.json — asset manifest (recommended)
+Evaluator outputs:
 
-Evaluator may write:
+`apps/evaluator/reports/<reportId>/report.html`
 
-evaluation.json — evaluation results for that version
+`apps/evaluator/reports/<reportId>/compare-report.json`
 
-Example:
+`apps/evaluator/reports/<reportId>/case-<caseId>.html`
 
+`apps/evaluator/reports/<reportId>/assets/`
 
-apps/runner/runs/
-  baseline/
-    latest/
-      fmt_002.json
-      tool_001.json
-      ...
-      run.json
-      evaluation.json
-      assets/
-        ...
-  new/
-    latest/
-      fmt_002.json
-      tool_001.json
-      ...
-      run.json
-      evaluation.json
-      assets/
-        ...
-Evaluator outputs
-Evaluator writes:
+Recommended in v2 reports:
 
-apps/evaluator/reports/<reportId>/report.html
+`baseline/` and `new/` (local raw copies referenced by hrefs)
 
-apps/evaluator/reports/<reportId>/compare-report.json
-
-apps/evaluator/reports/<reportId>/case-<caseId>.html
-
-apps/evaluator/reports/<reportId>/assets/ — full bodies and large payloads referenced by the report (as needed)
-
-Example:
-
-
-apps/evaluator/reports/
-  latest/
-    report.html
-    compare-report.json
-    case-fmt_002.html
-    case-tool_001.html
-    assets/
-      ...
-All report paths are relative/portable.
+`repro/` (when compare-report.json.repro exists)
 
 CLI usage
 Runner
 Help:
 
-
 npm --workspace runner run dev -- --help
 Common usage:
 
-
+```bash
 npm --workspace runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json --outDir apps/runner/runs --runId latest
+```
 Only selected cases:
 
-
+```bash
 npm --workspace runner run dev -- --only tool_001,fmt_002 --runId latest
+```
 Exit codes:
 
 0 success
@@ -288,13 +285,12 @@ Exit codes:
 Evaluator
 Help:
 
-
-
 npm --workspace evaluator run dev -- --help
 Common usage:
 
-
+```bash
 npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest
+```
 Exit codes:
 
 0 success
@@ -306,11 +302,11 @@ Exit codes:
 Adding or editing test cases
 Cases live in:
 
-cases/cases.json
+`cases/cases.json`
 
 Format: JSON array of case objects:
 
-
+```json
 [
   {
     "id": "tool_001",
@@ -322,6 +318,7 @@ Format: JSON array of case objects:
     }
   }
 ]
+```
 expected supports (Stage 1):
 
 action_required
@@ -330,9 +327,9 @@ tool_required
 
 tool_sequence
 
-json_schema (validated via AJV)
+json_schema (AJV)
 
-retrieval_required (doc ids)
+retrieval_required
 
 must_include
 
@@ -340,82 +337,43 @@ must_not_include
 
 evidence_required_for_actions
 
-Assertions & root-cause rules (how to extend)
-Evaluator core lives in:
+Where to extend (assertions, RCA, risk/gates)
+Evaluator core:
 
-apps/evaluator/src/index.ts
+`apps/evaluator/src/index.ts`
 
 Key extension points:
 
-Assertions are constructed in evaluateOne(...)
+assertions built in evaluateOne(...)
 
-Root cause is selected by chooseRootCause(...)
+RCA selection in chooseRootCause(...)
 
-Policy mapping is in mapPolicyRules(...)
+policy mapping in mapPolicyRules(...)
 
-HTML output:
+Report HTML:
 
-renderHtmlReport(...) in apps/evaluator/src/htmlReport.ts
+`renderHtmlReport(...)` in `apps/evaluator/src/htmlReport.ts`
 
-per-case replay diff: renderCaseDiffHtml(...) in apps/evaluator/src/replayDiff.ts
+Per-case replay diff:
 
-Root cause priority (Stage 1):
+`renderCaseDiffHtml(...)` in `apps/evaluator/src/replayDiff.ts`
 
-tool_failure
+Risk/gate fields (v2):
 
-format_violation
+risk_level, risk_tags, gate_recommendation computed per case
 
-missing_required_data
-
-wrong_tool_choice
-
-hallucination_signal
-
-unknown
-
-Plugging in a real agent (instead of demo-agent)
-Runner only needs an agent that implements:
-
-POST /run-case (request/response contract above)
-
-Point runner to your agent:
-
---baseUrl <your-agent-url>
-
-Example:
-
-
-npm --workspace runner run dev -- --baseUrl http://your-agent-host:8787 --runId latest
-You can keep the same evaluator + report generation unchanged.
-
-Stage 2 (future): Action governance
-Stage 1 already produces policy-ready signals:
-
-proposed_actions + evidence_refs
-
-preventable_by_policy
-
-recommended_policy_rules
-
-Stage 2 will add:
-
-policy-as-code engine (e.g. OPA)
-
-action-level allow/deny/approve
-
-enforcement in the runner/agent loop
-
-Stage 1 UI can show “Preventable by Policy” without enforcement.
+summary.risk_summary, summary.cases_requiring_approval, summary.cases_block_recommended computed across cases
 
 Development (repo root)
-
+```bash
 npm run lint
 npm run typecheck
 npm run demo
+```
 Reports:
 
-apps/evaluator/reports/latest/report.html
+`apps/evaluator/reports/latest/report.html`
 
-apps/evaluator/reports/latest/case-*.html
+`apps/evaluator/reports/latest/case-*.html`
 
-makefile
+`apps/evaluator/reports/latest/compare-report.json`
