@@ -80,7 +80,9 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
 
 Each case in `compare-report.json.items[]` includes:
 
+- `contract_version`: `3` (top-level, MUST)
 - `case_status`: `executed | skipped | filtered_out` (coverage transparency; Stage 1 requires one item per case)
+- `data_availability`: `{ baseline, new }` with status + optional reason_code/details (MUST)
 - `risk_level`: `low | medium | high`
 - `risk_tags`: `string[]` (may include security signal kinds and/or operational tags)
 - `gate_recommendation`: `none | require_approval | block` (**single CI truth**)
@@ -94,6 +96,15 @@ For v1-shape compatibility, the per-version boolean fields:
 - `security.new.requires_gate_recommendation`
 
 …are derived from `gate_recommendation`, are **identical** for baseline/new, and must not be interpreted as per-version gating.
+
+Stage 1 summary MUST include:
+
+- `summary.data_coverage` (coverage transparency)
+- `contract_version: 3`
+
+Optional (recommended in v3):
+
+- `items[].failure_summary` (dashboard-friendly failure summary)
 
 ---
 

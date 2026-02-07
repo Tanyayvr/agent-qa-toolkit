@@ -88,6 +88,8 @@ Stage 1 MUST / SHOULD checklist (productized)
 
 MUST (Stage 1):
 
+contract_version: 3 (top-level)
+
 Portable report directory + strict href rules
 
 items[] coverage: one item per case, no silent omissions
