@@ -124,6 +124,19 @@ type RootCause =
   | "missing_case"
   | "unknown";
 
+type AvailabilityStatus = "present" | "missing" | "broken";
+type CaseStatus = "executed" | "skipped" | "filtered_out";
+
+type DataAvailabilitySide = {
+  status: AvailabilityStatus;
+  reason?: string;
+  reason_code?: string;
+  details?: Record<string, unknown>;
+};
+
+type GateRecommendation = "none" | "require_approval" | "block";
+type RiskLevel = "low" | "medium" | "high";
+
 type AssertionDetails = Record<string, unknown>;
 type AssertionResult = { name: string; pass: boolean; details?: AssertionDetails };
 
@@ -579,25 +592,47 @@ async function readCases(casesPath: string): Promise<Case[]> {
   });
 }
 
-async function readRunDir(dir: string): Promise<{ byId: Record<string, AgentResponse>; meta: Record<string, unknown>; ids: string[] }> {
+async function readRunDir(dir: string): Promise<{
+  byId: Record<string, AgentResponse>;
+  meta: Record<string, unknown>;
+  ids: string[];
+  availability: Record<string, DataAvailabilitySide>;
+}> {
   const runJsonAbs = path.join(dir, "run.json");
   const meta = JSON.parse(await readFile(runJsonAbs, "utf-8")) as Record<string, unknown>;
   const selected = meta.selected_case_ids;
   const ids = Array.isArray(selected) ? selected.map((x) => String(x)) : [];
 
   const byId: Record<string, AgentResponse> = {};
+  const availability: Record<string, DataAvailabilitySide> = {};
   for (const id of ids) {
     const file = path.join(dir, `${id}.json`);
     try {
       const raw = await readFile(file, "utf-8");
       const v = JSON.parse(raw) as AgentResponse;
       byId[id] = v;
-    } catch {
-      continue;
+      availability[id] = { status: "present" };
+    } catch (err) {
+      let missing = false;
+      try {
+        const st = await stat(file);
+        if (!st.isFile()) missing = true;
+      } catch {
+        missing = true;
+      }
+      if (missing) {
+        availability[id] = { status: "missing", reason_code: "missing_file" };
+      } else {
+        availability[id] = {
+          status: "broken",
+          reason_code: "invalid_json",
+          details: { error: err instanceof Error ? err.message : String(err) },
+        };
+      }
     }
   }
 
-  return { byId, meta, ids };
+  return { byId, meta, ids, availability };
 }
 
 function toReplayResponse(resp: AgentResponse): ReplayAgentResponse {
@@ -942,11 +977,72 @@ function computeSecuritySide(resp: AgentResponse): { signals: SecuritySignal[]; 
     });
   }
 
-  const requiresGate =
-    signals.some((s) => s.severity === "high" || s.severity === "critical") &&
-    (resp.runner_failure !== undefined || (resp.events ?? []).length === 0);
+  return { signals, requires_gate_recommendation: false };
+}
 
-  return { signals, requires_gate_recommendation: requiresGate };
+function severityRank(s: SignalSeverity): number {
+  if (s === "critical") return 4;
+  if (s === "high") return 3;
+  if (s === "medium") return 2;
+  return 1;
+}
+
+function maxSeverity(signals: SecuritySignal[]): SignalSeverity | null {
+  if (signals.length === 0) return null;
+  let best: SignalSeverity = "low";
+  for (const s of signals) {
+    if (severityRank(s.severity) > severityRank(best)) best = s.severity;
+  }
+  return best;
+}
+
+function deriveGateRecommendation(params: {
+  newSignals: SecuritySignal[];
+  newAvailability: DataAvailabilitySide;
+  caseStatus: CaseStatus;
+}): GateRecommendation {
+  if (params.caseStatus !== "executed") return "none";
+
+  const sev = maxSeverity(params.newSignals);
+  if (sev === "critical") return "block";
+  if (sev === "high") return "require_approval";
+
+  if (params.newAvailability.status === "missing" || params.newAvailability.status === "broken") {
+    return "require_approval";
+  }
+
+  return "none";
+}
+
+function deriveRiskLevel(gate: GateRecommendation): RiskLevel {
+  if (gate === "block") return "high";
+  if (gate === "require_approval") return "medium";
+  return "low";
+}
+
+function deriveRiskTags(params: {
+  newSignals: SecuritySignal[];
+  regression: boolean;
+  caseStatus: CaseStatus;
+  newAvailability: DataAvailabilitySide;
+}): string[] {
+  const tags = new Set<string>();
+  for (const s of params.newSignals) tags.add(s.kind);
+  if (params.regression) tags.add("regression");
+  if (params.caseStatus === "filtered_out") tags.add("filtered_out");
+  if (params.caseStatus === "skipped") tags.add("skipped");
+  if (params.newAvailability.status === "missing") tags.add("missing_new");
+  if (params.newAvailability.status === "broken") tags.add("broken_new");
+  return Array.from(tags);
+}
+
+function deriveFailureSummarySide(rf: RunnerFailureArtifact | undefined): { class: string; http_status?: number; timeout_ms?: number; attempts?: number } | undefined {
+  if (!rf || rf.type !== "runner_fetch_failure") return undefined;
+  const out: { class: string; http_status?: number; timeout_ms?: number; attempts?: number } = { class: rf.class ?? "other" };
+  if (typeof rf.status === "number") out.http_status = rf.status;
+  if (typeof rf.timeout_ms === "number") out.timeout_ms = rf.timeout_ms;
+  if (typeof rf.attempt === "number") out.attempts = rf.attempt;
+  return out;
 }
 
 function topKinds(signals: SecuritySignal[]): string[] {
@@ -958,21 +1054,26 @@ function topKinds(signals: SecuritySignal[]): string[] {
     .map(([k]) => k);
 }
 
-async function computeQualityFlags(reportDir: string, hrefs: string[]): Promise<QualityFlags> {
+async function computeQualityFlags(
+  reportDir: string,
+  entries: Array<{ field: string; value: string; check_exists: boolean }>
+): Promise<QualityFlags> {
   const missing_assets: string[] = [];
   const path_violations: string[] = [];
 
-  for (const href of hrefs) {
-    if (!href) continue;
+  for (const e of entries) {
+    if (!e.value) continue;
 
-    if (isAbsoluteOrBadHref(href)) {
-      path_violations.push(href);
+    if (isAbsoluteOrBadHref(e.value)) {
+      path_violations.push(`${e.field}=${e.value}`);
       continue;
     }
 
-    const abs = path.resolve(reportDir, href);
-    const ok = await fileExistsAbs(abs);
-    if (!ok) missing_assets.push(href);
+    if (e.check_exists) {
+      const abs = path.resolve(reportDir, e.value);
+      const ok = await fileExistsAbs(abs);
+      if (!ok) missing_assets.push(`${e.field}=${e.value}`);
+    }
   }
 
   const self_contained = missing_assets.length === 0;
@@ -1028,6 +1129,8 @@ async function main(): Promise<void> {
 
   const baselineById = baselineRun.byId;
   const newById = newRun.byId;
+  const baselineSelected = new Set(baselineRun.ids);
+  const newSelected = new Set(newRun.ids);
 
   const ajv = new Ajv({ allErrors: true, strict: false });
 
@@ -1062,8 +1165,40 @@ async function main(): Promise<void> {
     const baseResp = baselineById[c.id];
     const newResp = newById[c.id];
 
-    const baselinePassFlag = bEval?.pass ?? false;
-    const newPassFlag = nEval?.pass ?? false;
+    const baselineAvail: DataAvailabilitySide = baselineSelected.has(c.id)
+      ? baselineRun.availability[c.id] ?? { status: "missing", reason_code: "missing_file" }
+      : { status: "missing", reason_code: "excluded_by_filter" };
+
+    const newAvail: DataAvailabilitySide = newSelected.has(c.id)
+      ? newRun.availability[c.id] ?? { status: "missing", reason_code: "missing_file" }
+      : { status: "missing", reason_code: "excluded_by_filter" };
+
+    if (baseResp?.runner_failure && baselineAvail.status === "present") {
+      baselineAvail.reason_code = baseResp.runner_failure.class;
+      baselineAvail.details = {
+        timeout_ms: baseResp.runner_failure.timeout_ms,
+        http_status: baseResp.runner_failure.status,
+        attempt: baseResp.runner_failure.attempt,
+      };
+    }
+    if (newResp?.runner_failure && newAvail.status === "present") {
+      newAvail.reason_code = newResp.runner_failure.class;
+      newAvail.details = {
+        timeout_ms: newResp.runner_failure.timeout_ms,
+        http_status: newResp.runner_failure.status,
+        attempt: newResp.runner_failure.attempt,
+      };
+    }
+
+    const caseStatus: CaseStatus = baselineSelected.has(c.id) || newSelected.has(c.id) ? "executed" : "filtered_out";
+    const caseStatusReason = caseStatus === "filtered_out" ? "excluded_by_filter" : undefined;
+
+    let baselinePassFlag = bEval?.pass ?? false;
+    let newPassFlag = nEval?.pass ?? false;
+    if (caseStatus !== "executed") {
+      baselinePassFlag = false;
+      newPassFlag = false;
+    }
 
     if (baselinePassFlag) baselinePass += 1;
     if (newPassFlag) newPass += 1;
@@ -1144,14 +1279,36 @@ async function main(): Promise<void> {
       new: newResp ? computeTraceIntegritySide(newResp, c.expected) : missingTraceSide("missing_response"),
     };
 
+    const baselineSecurity = baseResp ? computeSecuritySide(baseResp) : { signals: [], requires_gate_recommendation: false };
+    const newSecurity = newResp ? computeSecuritySide(newResp) : { signals: [], requires_gate_recommendation: false };
+
+    const regression = baselinePassFlag && !newPassFlag;
+    const gateRecommendation = deriveGateRecommendation({
+      newSignals: newSecurity.signals,
+      newAvailability: newAvail,
+      caseStatus,
+    });
+    const riskLevel = deriveRiskLevel(gateRecommendation);
+    const riskTags = deriveRiskTags({ newSignals: newSecurity.signals, regression, caseStatus, newAvailability: newAvail });
+    const requiresGate = gateRecommendation !== "none";
+
     const security: SecurityPack = {
-      baseline: baseResp ? computeSecuritySide(baseResp) : { signals: [], requires_gate_recommendation: false },
-      new: newResp ? computeSecuritySide(newResp) : { signals: [], requires_gate_recommendation: false },
+      baseline: { signals: baselineSecurity.signals, requires_gate_recommendation: requiresGate },
+      new: { signals: newSecurity.signals, requires_gate_recommendation: requiresGate },
     };
+
+    const failureSummary: { baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number }; new?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number } } = {};
+    const fsBaseline = deriveFailureSummarySide(baseResp?.runner_failure);
+    const fsNew = deriveFailureSummarySide(newResp?.runner_failure);
+    if (fsBaseline) failureSummary.baseline = fsBaseline;
+    if (fsNew) failureSummary.new = fsNew;
+    const hasFailureSummary = Boolean(failureSummary.baseline || failureSummary.new);
 
     const item: CompareReport["items"][number] = {
       case_id: c.id,
       title: c.title,
+      data_availability: { baseline: baselineAvail, new: newAvail },
+      case_status: caseStatus,
       baseline_pass: baselinePassFlag,
       new_pass: newPassFlag,
       preventable_by_policy: nEval ? nEval.preventable_by_policy : true,
@@ -1159,7 +1316,12 @@ async function main(): Promise<void> {
       artifacts: artifactLinks,
       trace_integrity: trace,
       security,
+      risk_level: riskLevel,
+      risk_tags: riskTags,
+      gate_recommendation: gateRecommendation,
     };
+    if (caseStatusReason) item.case_status_reason = caseStatusReason;
+    if (hasFailureSummary) item.failure_summary = failureSummary;
 
     if (bEval?.root_cause !== undefined) item.baseline_root = bEval.root_cause;
     else if (!baseResp) item.baseline_root = "missing_case";
@@ -1177,6 +1339,19 @@ async function main(): Promise<void> {
 
   let cases_with_signals_new = 0;
   let cases_with_signals_baseline = 0;
+
+  const risk_summary = { low: 0, medium: 0, high: 0 };
+  let cases_requiring_approval = 0;
+  let cases_block_recommended = 0;
+
+  const data_coverage = {
+    total_cases,
+    items_emitted: total_cases,
+    missing_baseline_artifacts: 0,
+    missing_new_artifacts: 0,
+    broken_baseline_artifacts: 0,
+    broken_new_artifacts: 0,
+  };
 
   const allNewSignals: SecuritySignal[] = [];
   const allBaselineSignals: SecuritySignal[] = [];
@@ -1196,30 +1371,46 @@ async function main(): Promise<void> {
       bumpCounts(signal_counts_new, s.severity);
       allNewSignals.push(s);
     }
+
+    risk_summary[it.risk_level] += 1;
+    if (it.gate_recommendation === "require_approval") cases_requiring_approval += 1;
+    if (it.gate_recommendation === "block") cases_block_recommended += 1;
+
+    if (it.data_availability.baseline.status === "missing") data_coverage.missing_baseline_artifacts += 1;
+    if (it.data_availability.baseline.status === "broken") data_coverage.broken_baseline_artifacts += 1;
+    if (it.data_availability.new.status === "missing") data_coverage.missing_new_artifacts += 1;
+    if (it.data_availability.new.status === "broken") data_coverage.broken_new_artifacts += 1;
   }
 
-  const qualityHrefs: string[] = [];
+  const qualityEntries: Array<{ field: string; value: string; check_exists: boolean }> = [];
+  qualityEntries.push({ field: "baseline_dir", value: normRel(projectRoot, baselineDirAbs), check_exists: false });
+  qualityEntries.push({ field: "new_dir", value: normRel(projectRoot, newDirAbs), check_exists: false });
+  qualityEntries.push({ field: "cases_path", value: normRel(projectRoot, casesPathAbs), check_exists: false });
+
   for (const it of items) {
     const a = it.artifacts;
-    const vals: Array<string | undefined> = [
-      a.replay_diff_href,
-      a.baseline_failure_body_href,
-      a.baseline_failure_meta_href,
-      a.new_failure_body_href,
-      a.new_failure_meta_href,
-      a.baseline_case_response_href,
-      a.new_case_response_href,
-      a.baseline_run_meta_href,
-      a.new_run_meta_href,
+    const vals: Array<[string, string | undefined]> = [
+      ["items[].artifacts.replay_diff_href", a.replay_diff_href],
+      ["items[].artifacts.baseline_failure_body_href", a.baseline_failure_body_href],
+      ["items[].artifacts.baseline_failure_meta_href", a.baseline_failure_meta_href],
+      ["items[].artifacts.new_failure_body_href", a.new_failure_body_href],
+      ["items[].artifacts.new_failure_meta_href", a.new_failure_meta_href],
+      ["items[].artifacts.baseline_case_response_href", a.baseline_case_response_href],
+      ["items[].artifacts.new_case_response_href", a.new_case_response_href],
+      ["items[].artifacts.baseline_run_meta_href", a.baseline_run_meta_href],
+      ["items[].artifacts.new_run_meta_href", a.new_run_meta_href],
     ];
-    for (const v of vals) {
-      if (typeof v === "string" && v.length) qualityHrefs.push(v);
+    for (const [field, v] of vals) {
+      if (typeof v === "string" && v.length) {
+        qualityEntries.push({ field, value: v, check_exists: true });
+      }
     }
   }
 
-  const quality_flags = await computeQualityFlags(reportDirAbs, qualityHrefs);
+  const quality_flags = await computeQualityFlags(reportDirAbs, qualityEntries);
 
   const report: CompareReport = {
+    contract_version: 3,
     report_id: reportId,
     baseline_dir: normRel(projectRoot, baselineDirAbs),
     new_dir: normRel(projectRoot, newDirAbs),
@@ -1239,6 +1430,10 @@ async function main(): Promise<void> {
         top_signal_kinds_new: topKinds(allNewSignals),
         top_signal_kinds_baseline: topKinds(allBaselineSignals),
       },
+      risk_summary,
+      cases_requiring_approval,
+      cases_block_recommended,
+      data_coverage,
     },
     quality_flags,
     items,

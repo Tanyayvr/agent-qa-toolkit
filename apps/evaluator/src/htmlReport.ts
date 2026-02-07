@@ -65,10 +65,16 @@ export type QualityFlags = {
 };
 
 export type CompareReport = {
+  contract_version: 3;
   report_id: string;
   baseline_dir: string;
   new_dir: string;
   cases_path: string;
+
+  repro?: {
+    bundle_manifest_href: string;
+    how_to_reproduce_href: string;
+  };
 
   summary: {
     baseline_pass: number;
@@ -87,6 +93,19 @@ export type CompareReport = {
       top_signal_kinds_new: string[];
       top_signal_kinds_baseline: string[];
     };
+
+    risk_summary: { low: number; medium: number; high: number };
+    cases_requiring_approval: number;
+    cases_block_recommended: number;
+
+    data_coverage: {
+      total_cases: number;
+      items_emitted: number;
+      missing_baseline_artifacts: number;
+      missing_new_artifacts: number;
+      broken_baseline_artifacts: number;
+      broken_new_artifacts: number;
+    };
   };
 
   quality_flags: QualityFlags;
@@ -94,6 +113,14 @@ export type CompareReport = {
   items: Array<{
     case_id: string;
     title: string;
+
+    data_availability: {
+      baseline: { status: "present" | "missing" | "broken"; reason?: string; reason_code?: string; details?: Record<string, unknown> };
+      new: { status: "present" | "missing" | "broken"; reason?: string; reason_code?: string; details?: Record<string, unknown> };
+    };
+
+    case_status: "executed" | "skipped" | "filtered_out";
+    case_status_reason?: string;
 
     baseline_pass: boolean;
     new_pass: boolean;
@@ -106,6 +133,15 @@ export type CompareReport = {
 
     trace_integrity: TraceIntegrity;
     security: SecurityPack;
+
+    risk_level: "low" | "medium" | "high";
+    risk_tags: string[];
+    gate_recommendation: "none" | "require_approval" | "block";
+
+    failure_summary?: {
+      baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number };
+      new?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number };
+    };
 
     artifacts: {
       replay_diff_href: string;
@@ -311,10 +347,13 @@ export function renderHtmlReport(report: CompareReport): string {
     <div style="font-weight:700;">${titleLink}</div>
     <div class="muted">${escHtml(it.title || "")}</div>
   </td>
+  <td><code>${escHtml(it.case_status)}</code></td>
   <td>${base}</td>
   <td>${neu}</td>
   <td>${rootCell(it.baseline_root)}</td>
   <td>${rootCell(it.new_root)}</td>
+  <td><code>${escHtml(it.risk_level)}</code></td>
+  <td><code>${escHtml(it.gate_recommendation)}</code></td>
   <td>${preventable}</td>
   <td>${rulesCell(it.recommended_policy_rules)}</td>
   <td>${traceCell(it.trace_integrity)}</td>
@@ -364,6 +403,7 @@ export function renderHtmlReport(report: CompareReport): string {
   <div class="wrap">
     <div class="h1">Evaluator report</div>
     <div class="muted">
+      contract_version: <code>${escHtml(String(report.contract_version))}</code> ·
       report_id: <code>${escHtml(report.report_id)}</code> ·
       baseline_dir: <code>${escHtml(report.baseline_dir)}</code> ·
       new_dir: <code>${escHtml(report.new_dir)}</code> ·
@@ -383,15 +423,37 @@ export function renderHtmlReport(report: CompareReport): string {
           <div class="k"><div class="v">${escHtml(String(s.improvements))}</div><div class="l">improvements</div></div>
         </div>
 
+        <div style="margin-top:14px; font-size:16px; font-weight:900;">Risk summary</div>
+        <div class="kpi">
+          <div class="k"><div class="v">${escHtml(String(s.risk_summary.low))}</div><div class="l">risk low</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.risk_summary.medium))}</div><div class="l">risk medium</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.risk_summary.high))}</div><div class="l">risk high</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.cases_requiring_approval))}</div><div class="l">require approval</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.cases_block_recommended))}</div><div class="l">block recommended</div></div>
+        </div>
+
+        <div style="margin-top:14px; font-size:16px; font-weight:900;">Data coverage</div>
+        <div class="kpi">
+          <div class="k"><div class="v">${escHtml(String(s.data_coverage.total_cases))}</div><div class="l">total_cases</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.data_coverage.items_emitted))}</div><div class="l">items_emitted</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.data_coverage.missing_baseline_artifacts))}</div><div class="l">missing baseline</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.data_coverage.missing_new_artifacts))}</div><div class="l">missing new</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.data_coverage.broken_baseline_artifacts))}</div><div class="l">broken baseline</div></div>
+          <div class="k"><div class="v">${escHtml(String(s.data_coverage.broken_new_artifacts))}</div><div class="l">broken new</div></div>
+        </div>
+
         <div style="margin-top:14px; font-size:16px; font-weight:900;">Cases</div>
         <table class="table">
           <thead>
             <tr>
               <th>case</th>
+              <th>status</th>
               <th>baseline</th>
               <th>new</th>
               <th>baseline_root</th>
               <th>new_root</th>
+              <th>risk</th>
+              <th>gate</th>
               <th>preventable</th>
               <th>policy_rules</th>
               <th>trace</th>
