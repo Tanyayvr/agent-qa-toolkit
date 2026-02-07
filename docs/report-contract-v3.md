@@ -43,7 +43,7 @@ gate_recommendation is the single source of truth for CI gating.
 security.<version>.requires_gate_recommendation is a compatibility field derived from gate_recommendation and MUST be identical for baseline/new (see 4.9).
 For v3 reports, contract_version MUST be present and MUST equal 3.
 For legacy v1 reports, contract_version MAY be omitted (see Backward compatibility).
-Coverage MUST: compare-report.json.items[] MUST contain one item per case in the compared set (see 4.6). Cases MUST NOT be silently omitted from the report.
+Coverage MUST: compare-report.json.items[] MUST contain one item per case in the compared set (see 4.6). Cases MUST NOT be silently omitted from the report. Cases that were skipped or filtered_out MUST still be represented as items with case_status reflecting the reason.
 SHOULD (recommended for usability)
 The report SHOULD include local raw copies of referenced run artifacts under:
 
@@ -203,6 +203,9 @@ they MUST point to files within the report directory (typically under baseline/ 
         "new": { "status": "present" }
       },
 
+      "case_status": "executed",
+      "case_status_reason": "ok",
+
       "baseline_pass": true,
       "new_pass": false,
 
@@ -232,7 +235,7 @@ they MUST point to files within the report directory (typically under baseline/ 
                 "urls": ["https://example.com/redirect"]
               },
               "evidence_refs": [
-                { "kind": "tool_call", "call_id": "c50" }
+                { "kind": "tool_result", "call_id": "c50" }
               ]
             }
           ],
@@ -292,7 +295,7 @@ new_pass (int, MUST)
 regressions (int, MUST)
 improvements (int, MUST)
 root_cause_breakdown (object<string,int>, MUST)
-root_cause_breakdown MUST include counts for any root cause kinds emitted by items (including missing_artifact if used).
+root_cause_breakdown MUST include counts for any root cause kinds emitted by items (including missing_case if used).
 4.3.1 summary.security (MUST; signals may be empty)
 Aggregates across cases:
 total_cases (int)
@@ -371,6 +374,8 @@ Required:
 case_id (string, MUST)
 title (string, MUST)
 data_availability (object, MUST)
+case_status (string, MUST) — one of: executed | skipped | filtered_out
+case_status_reason (string, optional) — short machine-readable reason (e.g., secrets_required, external_dependency, excluded_by_filter)
 baseline_pass (boolean, MUST)
 new_pass (boolean, MUST)
 preventable_by_policy (boolean, MUST)
@@ -384,39 +389,91 @@ artifacts (object, MUST)
 Optional (omit when absent; must not be undefined):
 baseline_root (string)
 new_root (string)
+case_status_reason (string)
 governance_preview (object)
-4.6.1 case_id validity (MUST)
+4.6.1 case_status (MUST)
+case_status declares how this case was treated in the compared set.
+Allowed values:
+executed — the Evaluator attempted to evaluate the case and produced baseline/new pass signals from available artifacts.
+skipped — the case is part of the compared set but was intentionally not executed/evaluated (e.g., requires secrets, external dependency, or was manually skipped).
+filtered_out — the case is part of the cases source, but was excluded by evaluator/runner filtering for this run (still emitted for coverage transparency).
+Rules (MUST):
+items[] MUST include one item per case in the compared set even when case_status != executed.
+If case_status != executed, this includes skipped and filtered_out.
+When case_status != executed, the item MUST still be emitted and MUST still include data_availability, trace_integrity, security, risk_level, risk_tags, gate_recommendation, and artifacts (artifacts may be partial or empty where not applicable).
+
+4.6.2 case_id validity (MUST)
 case_id MUST be a non-empty string.
 case_id MUST NOT equal "undefined" (string) and MUST NOT be only whitespace.
 case_id SHOULD be safe for filenames and URLs. Producers SHOULD restrict to:
 letters, digits, underscore, dash, dot
 Producers MUST ensure that case-<case_id>.html generation results in a valid filename and a resolvable href within the report directory.
 4.7 data_availability (MUST)
+
 data_availability declares whether baseline/new case artifacts were available and parseable for evaluation.
+
 Shape:
+
 {
-  "baseline": { "status": "present|missing|broken", "reason": "optional" },
-  "new": { "status": "present|missing|broken", "reason": "optional" }
+  "baseline": {
+    "status": "present|missing|broken",
+    "reason": "optional human-readable",
+    "reason_code": "optional machine-readable",
+    "details": { "optional": "structured details" }
+  },
+  "new": {
+    "status": "present|missing|broken",
+    "reason": "optional human-readable",
+    "reason_code": "optional machine-readable",
+    "details": { "optional": "structured details" }
+  }
 }
 
-Rules:
-present means the artifact file existed and could be parsed for evaluation.
-missing means the artifact file was not found.
-broken means the artifact file existed but could not be parsed (e.g., invalid JSON, truncated output).
-If either side is missing or broken, the Evaluator MUST still emit the item and SHOULD prefer conservative values:
+status meanings (MUST):
 
+present — the artifact file existed and could be parsed for evaluation.
 
-baseline_pass SHOULD be false when baseline is missing/broken
+missing — the artifact file was not found.
 
+broken — the artifact file existed but could not be parsed or was not usable for evaluation (e.g., invalid JSON, truncated content, unrecoverable corruption).
 
-new_pass SHOULD be false when new is missing/broken
+reason_code (optional, recommended):
 
+A short machine-readable code that refines missing/broken/present conditions without expanding the status enum.
 
-trace_integrity.<version>.status SHOULD be broken for missing/broken sides
+Recommended values (non-exhaustive; producers MAY add new codes):
 
+missing_file
+invalid_json
+truncated
+redacted
+http_error
+timeout
+network_error
+tool_error
+other
 
-risk_level SHOULD be at least medium when the new side is missing/broken (because CI cannot trust outputs)
+details (optional):
 
+Structured metadata that helps explain availability conditions (e.g., byte limits, truncation stats, retry attempts).
+
+Example details for truncation:
+
+{ "original_bytes": 9000000, "stored_bytes": 200000, "limit_bytes": 200000 }
+
+Rules (MUST):
+
+If either side status is missing or broken, the Evaluator MUST still emit the item.
+
+If either side status is missing or broken, the Evaluator SHOULD prefer conservative values:
+
+baseline_pass SHOULD be false when baseline is missing or broken
+
+new_pass SHOULD be false when new is missing or broken
+
+trace_integrity.<version>.status SHOULD be broken for missing or broken sides
+
+risk_level SHOULD be at least medium when the new side is missing or broken (because CI cannot trust outputs)
 
 4.8 trace_integrity (MUST)
 Shape:
@@ -490,7 +547,15 @@ Signals items:
 }
 
 Evidence reference precision (MUST/SHOULD)
-security.signals[].evidence_refs[].kind MUST be one of the EvidenceRef kinds defined in tool/docs/agent-artifact-contract-v1.md.
+security.signals[].evidence_refs[].kind MUST be one of:
+
+- tool_result
+- retrieval_doc
+- event
+- asset
+- final_output
+- runner_failure
+
 Producers SHOULD choose the most specific available EvidenceRef kind. For retrieval-query related detections, producers SHOULD reference retrieval-specific evidence (retrieval events, retrieval docs, or other retrieval evidence kinds) when available, rather than using unrelated evidence kinds.
 Derived rule (MUST; compatibility field)
 security.baseline.requires_gate_recommendation and security.new.requires_gate_recommendation MUST:
@@ -587,6 +652,9 @@ all hrefs are relative to the report dir, contain no traversal segments, and con
 
 copying the report directory preserves all links (portable)
 
+items[].case_status exists and is one of executed|skipped|filtered_out
+
+data_availability.<version>.reason_code and details may be present; if present, they follow the rules and do not expand the status enum
 
 quality_flags.self_contained accurately reflects presence of all referenced targets
 
@@ -613,3 +681,39 @@ gate_recommendation, risk_level, risk_tags exist for each case item
 
 
 security.<version>.requires_gate_recommendation is identical for baseline/new and derived from gate_recommendation
+4.14 failure_summary (optional, recommended)
+
+items[].failure_summary provides a machine-readable summary of runner/evaluation failures so CI dashboards and triage tools do not need to open assets to classify failures.
+
+Shape:
+
+{
+  "baseline": {
+    "class": "http_error|timeout|network_error|invalid_json|tool_error|other",
+    "http_status": 0,
+    "timeout_ms": 0,
+    "attempts": 0
+  },
+  "new": {
+    "class": "http_error|timeout|network_error|invalid_json|tool_error|other",
+    "http_status": 0,
+    "timeout_ms": 0,
+    "attempts": 0
+  }
+}
+
+Fields (optional unless noted):
+
+class (string, MUST if the version had a failure) — normalized failure class
+
+http_status (number, optional) — for http_error
+
+timeout_ms (number, optional) — for timeout
+
+attempts (number, optional) — number of attempts made by runner reliability logic
+
+Rules:
+
+If emitted, failure_summary MUST be consistent with data_availability.<version>.status and reason_code.
+
+failure_summary is additive and MUST NOT replace full evidence in assets; it is a convenience for dashboards and automation.

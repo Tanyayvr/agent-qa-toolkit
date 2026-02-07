@@ -16,7 +16,15 @@ You get:
 - Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
 - Root cause attribution (RCA) and policy hints
 - Security Signals Pack (signals may be empty in demo)
-- Stage 2 (future): runtime governance (policy-as-code / approvals / runtime gates)
+- Stage 2 (queued): evidence-linked governance (policy-as-code / approvals / runtime gates)
+
+---
+
+## Stages (Stage 1–3)
+
+- **Stage 1 (MUST):** Portable report directory + evidence links + CI gating truth (this repo ships this now).
+- **Stage 2 (QUEUED / NEXT):** Evidence-linked action governance (policy enforcement + approvals) using Stage 1 evidence.
+- **Stage 3 (VISION):** Repro + causal debug platform (replay ladder + counterfactual experiments). Not required for Stage 1.
 
 ---
 
@@ -46,16 +54,16 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
 - `compare-report.json` — machine report (**source of truth for CI gating**)
 - `assets/` — copies of referenced payload evidence
 
-### Report Contract v2 SHOULD (to remain fully self-contained)
+### Report Contract v3 SHOULD (to remain fully self-contained)
 
 - include `baseline/` and `new/` local raw copies **whenever any raw-evidence href is present**:
   - `baseline_case_response_href`
   - `new_case_response_href`
   - `baseline_run_meta_href`
   - `new_run_meta_href`
-- include `repro/` when `compare-report.json.repro` is present
+- include `repro/` when `compare-report.json.repro` is present (recommended for CI/incident reports)
 
-### Portability rules (Report Contract v2)
+### Portability rules (Report Contract v3)
 
 - All **href** values stored in `compare-report.json` are **relative to the report directory** and must resolve **inside** it.
 - href values must contain:
@@ -64,7 +72,7 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
   - no `://` schemes
 - Note: the `://` restriction applies to **href fields**. URLs may still appear as data in `security.signals[].details.urls`.
 - `baseline_dir` / `new_dir` / `cases_path` are **informational only** and must **not** be used to resolve links.
-- `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `tool/docs/report-contract-v2.md`).
+- `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `tool/docs/report-contract-v3.md`).
 
 ---
 
@@ -72,6 +80,7 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
 
 Each case in `compare-report.json.items[]` includes:
 
+- `case_status`: `executed | skipped | filtered_out` (coverage transparency; Stage 1 requires one item per case)
 - `risk_level`: `low | medium | high`
 - `risk_tags`: `string[]` (may include security signal kinds and/or operational tags)
 - `gate_recommendation`: `none | require_approval | block` (**single CI truth**)
@@ -147,7 +156,7 @@ Produces:
 
 `apps/evaluator/reports/latest/assets/`
 
-Recommended in v2 reports (when enabled):
+Recommended in v3 reports (when enabled):
 
 `apps/evaluator/reports/latest/baseline/`
 
@@ -158,14 +167,14 @@ Recommended in v2 reports (when enabled):
 Contracts (documentation)
 This repo defines versioned, stable contracts used for CI gating, integrations, and evidence portability.
 
-`tool/docs/agent-artifact-contract-v1.md` — Agent Artifact Contract v1
+tool/docs/agent-artifact-contract-v1.md — Agent Artifact Contract v1
 Runner outputs (run.json, per-case artifacts, failure artifacts, assets), standardized failure classes, full-body preservation.
 
-`tool/docs/report-contract-v2.md` — Report Contract v2
+tool/docs/report-contract-v2.md — Report Contract v2
 Portable evidence pack rules (href resolution, self-contained assets), CI gating fields (risk_level, risk_tags, gate_recommendation), compatibility behavior, and quality_flags truth tests.
 
-`tool/docs/report-contract-v3.md` — Report Contract v3
-Adds data availability and coverage fields, stricter portability rules, and expanded gating metadata.
+tool/docs/report-contract-v3.md — Report Contract v3 (Stage 1)
+Adds explicit case execution status (case_status), richer data availability (reason_code, details), stricter coverage semantics (no silent omissions, including skipped/filtered-out representation), and optional per-item failure_summary for dashboards.
 
 Agent contract (HTTP API)
 Runner calls the agent endpoint:
@@ -253,7 +262,7 @@ Evaluator outputs:
 
 `apps/evaluator/reports/<reportId>/assets/`
 
-Recommended in v2 reports:
+Recommended in v3 reports:
 
 `baseline/` and `new/` (local raw copies referenced by hrefs)
 
@@ -263,7 +272,10 @@ CLI usage
 Runner
 Help:
 
+```bash
 npm --workspace runner run dev -- --help
+```
+
 Common usage:
 
 ```bash
@@ -285,7 +297,10 @@ Exit codes:
 Evaluator
 Help:
 
+```bash
 npm --workspace evaluator run dev -- --help
+```
+
 Common usage:
 
 ```bash
@@ -340,7 +355,7 @@ evidence_required_for_actions
 Where to extend (assertions, RCA, risk/gates)
 Evaluator core:
 
-`apps/evaluator/src/index.ts`
+apps/evaluator/src/index.ts
 
 Key extension points:
 
@@ -352,13 +367,13 @@ policy mapping in mapPolicyRules(...)
 
 Report HTML:
 
-`renderHtmlReport(...)` in `apps/evaluator/src/htmlReport.ts`
+renderHtmlReport(...) in apps/evaluator/src/htmlReport.ts
 
 Per-case replay diff:
 
-`renderCaseDiffHtml(...)` in `apps/evaluator/src/replayDiff.ts`
+renderCaseDiffHtml(...) in apps/evaluator/src/replayDiff.ts
 
-Risk/gate fields (v2):
+Risk/gate fields (v3):
 
 risk_level, risk_tags, gate_recommendation computed per case
 
