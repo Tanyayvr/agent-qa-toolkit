@@ -2,11 +2,10 @@
 export type SignalSeverity = "low" | "medium" | "high" | "critical";
 export type SignalConfidence = "low" | "medium" | "high";
 
-export type EvidenceRef =
-  | { kind: "tool_result"; call_id: string }
-  | { kind: "retrieval_doc"; id: string }
-  | { kind: "final_output" }
-  | { kind: "runner_failure" };
+export type EvidenceRef = {
+  kind: "tool_result" | "retrieval_doc" | "event" | "asset" | "final_output" | "runner_failure";
+  manifest_key: string;
+};
 
 export type SecuritySignal = {
   kind:
@@ -65,7 +64,7 @@ export type QualityFlags = {
 };
 
 export type CompareReport = {
-  contract_version: 3;
+  contract_version: 5;
   report_id: string;
   baseline_dir: string;
   new_dir: string;
@@ -147,12 +146,18 @@ export type CompareReport = {
       replay_diff_href: string;
 
       baseline_failure_body_href?: string;
+      baseline_failure_body_key?: string;
       baseline_failure_meta_href?: string;
+      baseline_failure_meta_key?: string;
       new_failure_body_href?: string;
+      new_failure_body_key?: string;
       new_failure_meta_href?: string;
+      new_failure_meta_key?: string;
 
       baseline_case_response_href?: string;
+      baseline_case_response_key?: string;
       new_case_response_href?: string;
+      new_case_response_key?: string;
       baseline_run_meta_href?: string;
       new_run_meta_href?: string;
     };
@@ -176,6 +181,16 @@ function badge(text: string, tone: "ok" | "bad" | "mid" = "mid"): string {
 function linkIfPresent(href: string | undefined, label: string): string {
   if (!href) return "";
   return `<a href="${escHtml(href)}" target="_blank" rel="noopener noreferrer">${escHtml(label)}</a>`;
+}
+
+function linkIfPresentWithKey(href: string | undefined, key: string | undefined, label: string): string {
+  if (key) {
+    return `<a data-manifest-key="${escHtml(key)}" target="_blank" rel="noopener noreferrer">${escHtml(label)}</a>`;
+  }
+  if (href) {
+    return `<a href="${escHtml(href)}" target="_blank" rel="noopener noreferrer">${escHtml(label)}</a>`;
+  }
+  return "";
 }
 
 function rulesCell(rules: string[]): string {
@@ -252,7 +267,7 @@ function securityCell(p: SecurityPack): string {
 </div>`.trim();
 }
 
-export function renderHtmlReport(report: CompareReport): string {
+export function renderHtmlReport(report: CompareReport & { embedded_manifest_index?: unknown }): string {
   const s = report.summary;
 
   const breakdownRows = Object.entries(s.root_cause_breakdown ?? {})
@@ -325,13 +340,37 @@ export function renderHtmlReport(report: CompareReport): string {
       const diffHref = it.artifacts.replay_diff_href;
       const titleLink = `<a href="${escHtml(diffHref)}">${escHtml(it.case_id)}</a>`;
 
-      const bBody = linkIfPresent(it.artifacts.baseline_failure_body_href, "body");
-      const bMeta = linkIfPresent(it.artifacts.baseline_failure_meta_href, "meta");
-      const nBody = linkIfPresent(it.artifacts.new_failure_body_href, "body");
-      const nMeta = linkIfPresent(it.artifacts.new_failure_meta_href, "meta");
+      const bBody = linkIfPresentWithKey(
+        it.artifacts.baseline_failure_body_href,
+        it.artifacts.baseline_failure_body_key,
+        "body"
+      );
+      const bMeta = linkIfPresentWithKey(
+        it.artifacts.baseline_failure_meta_href,
+        it.artifacts.baseline_failure_meta_key,
+        "meta"
+      );
+      const nBody = linkIfPresentWithKey(
+        it.artifacts.new_failure_body_href,
+        it.artifacts.new_failure_body_key,
+        "body"
+      );
+      const nMeta = linkIfPresentWithKey(
+        it.artifacts.new_failure_meta_href,
+        it.artifacts.new_failure_meta_key,
+        "meta"
+      );
 
-      const bCase = linkIfPresent(it.artifacts.baseline_case_response_href, "baseline.json");
-      const nCase = linkIfPresent(it.artifacts.new_case_response_href, "new.json");
+      const bCase = linkIfPresentWithKey(
+        it.artifacts.baseline_case_response_href,
+        it.artifacts.baseline_case_response_key,
+        "baseline.json"
+      );
+      const nCase = linkIfPresentWithKey(
+        it.artifacts.new_case_response_href,
+        it.artifacts.new_case_response_key,
+        "new.json"
+      );
 
       const bRun = linkIfPresent(it.artifacts.baseline_run_meta_href, "baseline.run.json");
       const nRun = linkIfPresent(it.artifacts.new_run_meta_href, "new.run.json");
@@ -365,6 +404,9 @@ export function renderHtmlReport(report: CompareReport): string {
 </tr>`;
     })
     .join("");
+
+  const embeddedIndex = (report as unknown as { embedded_manifest_index?: unknown }).embedded_manifest_index;
+  const embeddedIndexJson = embeddedIndex ? JSON.stringify(embeddedIndex) : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -478,6 +520,35 @@ export function renderHtmlReport(report: CompareReport): string {
       </div>
     </div>
   </div>
+  <script id="embedded-manifest-index" type="application/json">${escHtml(embeddedIndexJson)}</script>
+  <script>
+    (function() {
+      var el = document.getElementById("embedded-manifest-index");
+      if (!el) return;
+      var raw = el.textContent || "";
+      var idx;
+      try { idx = JSON.parse(raw); } catch (e) { return; }
+      if (!idx || !Array.isArray(idx.items)) return;
+      var map = new Map();
+      for (var i = 0; i < idx.items.length; i++) {
+        var it = idx.items[i];
+        if (it && it.manifest_key && it.rel_path) map.set(String(it.manifest_key), String(it.rel_path));
+      }
+      var links = document.querySelectorAll("a[data-manifest-key]");
+      for (var j = 0; j < links.length; j++) {
+        var a = links[j];
+        var key = a.getAttribute("data-manifest-key");
+        if (!key) continue;
+        var href = map.get(key);
+        if (href) {
+          a.setAttribute("href", href);
+        } else {
+          a.classList.add("muted");
+          a.removeAttribute("href");
+        }
+      }
+    })();
+  </script>
 </body>
 </html>`;
 }

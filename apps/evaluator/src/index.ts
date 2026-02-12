@@ -12,9 +12,16 @@ import {
   type SecuritySignal,
   type QualityFlags,
   type SignalSeverity,
-  type EvidenceRef,
 } from "./htmlReport";
 import { renderCaseDiffHtml, type AgentResponse as ReplayAgentResponse } from "./replayDiff";
+import { createHash } from "node:crypto";
+import {
+  manifestItemForRunnerFailureArtifact,
+  manifestItemForCaseResponse,
+  manifestItemForFinalOutput,
+  manifestKeyFor,
+} from "./manifest";
+import type { Manifest, ManifestItem, ThinIndex } from "./manifest";
 
 type Version = "baseline" | "new";
 
@@ -43,8 +50,10 @@ type ProposedAction = {
   params: Record<string, unknown>;
   risk_level?: "low" | "medium" | "high";
   risk_tags?: string[];
-  evidence_refs?: EvidenceRef[];
+  evidence_refs?: ActionEvidenceRef[];
 };
+
+type ActionEvidenceRef = { kind: "tool_result"; call_id: string } | { kind: "retrieval_doc"; id: string };
 
 type FinalOutput = { content_type: "text" | "json"; content: unknown };
 
@@ -658,6 +667,12 @@ function safeBasename(p: string): string {
   return base.replace(/[^\w.\-]+/g, "_");
 }
 
+function sha256Hex(data: string | Uint8Array): string {
+  const h = createHash("sha256");
+  h.update(data);
+  return h.digest("hex");
+}
+
 async function copyFileU8(srcAbs: string, destAbs: string): Promise<void> {
   const buf = await readFile(srcAbs);
   const u8 = new Uint8Array(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
@@ -827,6 +842,33 @@ function extractUrls(text: string): string[] {
   return out.slice(0, 20);
 }
 
+function isPrivateOrLocalhost(urlStr: string): boolean {
+  try {
+    const u = new URL(urlStr);
+    const host = u.hostname.toLowerCase();
+
+    if (host === "localhost" || host === "127.0.0.1" || host === "::1") return true;
+
+    const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (!m) return false;
+
+    const a = Number(m[1]);
+    const b = Number(m[2]);
+    if (![a, b].every((n) => Number.isFinite(n) && n >= 0 && n <= 255)) return false;
+
+    if (a === 10) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function isUntrustedUrlInput(urlStr: string): boolean {
+  return !isPrivateOrLocalhost(urlStr);
+}
+
 function hasSecretMarkers(text: string): boolean {
   const secretMarkers = [
     /api[_-]?key/i,
@@ -877,10 +919,14 @@ function computeSecuritySide(resp: AgentResponse): { signals: SecuritySignal[]; 
   const finalText = stringifyOutput(resp.final_output);
   const rf = resp.runner_failure;
 
-  const evidenceFinal: EvidenceRef[] = [{ kind: "final_output" }];
-  const evidenceRunner: EvidenceRef[] = rf ? [{ kind: "runner_failure" }] : [];
+  const evidenceFinal: SecuritySignal["evidence_refs"] = [
+    { kind: "final_output", manifest_key: manifestKeyFor({ caseId: resp.case_id, version: resp.version, kind: "final_output" }) },
+  ];
+  const evidenceRunner: SecuritySignal["evidence_refs"] = rf
+    ? [{ kind: "runner_failure", manifest_key: manifestKeyFor({ caseId: resp.case_id, version: resp.version, kind: "runner_failure_summary" }) }]
+    : [];
 
-  const urls = extractUrls(finalText);
+  const urls = extractUrls(finalText).filter(isUntrustedUrlInput);
   if (urls.length) {
     signals.push({
       kind: "untrusted_url_input",
@@ -933,7 +979,7 @@ function computeSecuritySide(resp: AgentResponse): { signals: SecuritySignal[]; 
       confidence: "medium",
       title: "Unsafe tool parameters detected",
       details: { notes: `Detected ${unsafeParams} suspicious tool params occurrences`, fields: ["params"] },
-      evidence_refs: Array.isArray(resp.proposed_actions) ? [{ kind: "final_output" }] : evidenceFinal,
+      evidence_refs: evidenceFinal,
     });
   }
 
@@ -948,7 +994,7 @@ function computeSecuritySide(resp: AgentResponse): { signals: SecuritySignal[]; 
         confidence: "high",
         title: "Prompt-injection markers detected in retrieval query",
         details: { notes: q.slice(0, 200) },
-        evidence_refs: [{ kind: "final_output" }],
+        evidence_refs: evidenceFinal,
       });
       break;
     }
@@ -1159,6 +1205,8 @@ async function main(): Promise<void> {
   const baselineRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "baseline", srcAbs: path.join(baselineDirAbs, "run.json") });
   const newRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "new", srcAbs: path.join(newDirAbs, "run.json") });
 
+  const manifestItems: ManifestItem[] = [];
+
   for (const c of cases) {
     const bEval = baselineEval.find((x) => x.case_id === c.id);
     const nEval = newEval.find((x) => x.case_id === c.id);
@@ -1239,6 +1287,20 @@ async function main(): Promise<void> {
         });
         if (rel) artifactLinks.baseline_failure_meta_href = rel;
       }
+      if (baseRf) {
+        const bodyRel = artifactLinks.baseline_failure_body_href;
+        const metaRel = artifactLinks.baseline_failure_meta_href;
+        manifestItems.push(
+          ...manifestItemForRunnerFailureArtifact({
+            caseId: c.id,
+            version: "baseline",
+            ...(bodyRel ? { bodyRel } : {}),
+            ...(metaRel ? { metaRel } : {}),
+          })
+        );
+        if (bodyRel) artifactLinks.baseline_failure_body_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_body" });
+        if (metaRel) artifactLinks.baseline_failure_meta_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_meta" });
+      }
     }
 
     if (newResp) {
@@ -1263,6 +1325,20 @@ async function main(): Promise<void> {
         });
         if (rel) artifactLinks.new_failure_meta_href = rel;
       }
+      if (newRf) {
+        const bodyRel = artifactLinks.new_failure_body_href;
+        const metaRel = artifactLinks.new_failure_meta_href;
+        manifestItems.push(
+          ...manifestItemForRunnerFailureArtifact({
+            caseId: c.id,
+            version: "new",
+            ...(bodyRel ? { bodyRel } : {}),
+            ...(metaRel ? { metaRel } : {}),
+          })
+        );
+        if (bodyRel) artifactLinks.new_failure_body_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_body" });
+        if (metaRel) artifactLinks.new_failure_meta_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_meta" });
+      }
     }
 
     const baseCaseSrc = path.join(baselineDirAbs, `${c.id}.json`);
@@ -1274,10 +1350,70 @@ async function main(): Promise<void> {
     if (baseCaseHref) artifactLinks.baseline_case_response_href = baseCaseHref;
     if (newCaseHref) artifactLinks.new_case_response_href = newCaseHref;
 
+    if (baseCaseHref) manifestItems.push(manifestItemForCaseResponse({ caseId: c.id, version: "baseline", rel_path: baseCaseHref }));
+    if (newCaseHref) manifestItems.push(manifestItemForCaseResponse({ caseId: c.id, version: "new", rel_path: newCaseHref }));
+
+    if (baseCaseHref) artifactLinks.baseline_case_response_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "case_response" });
+    if (newCaseHref) artifactLinks.new_case_response_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "case_response" });
+
     const trace: TraceIntegrity = {
       baseline: baseResp ? computeTraceIntegritySide(baseResp, c.expected) : missingTraceSide("missing_response"),
       new: newResp ? computeTraceIntegritySide(newResp, c.expected) : missingTraceSide("missing_response"),
     };
+
+    const finalOutputDir = path.join(reportDirAbs, "assets", "final_output", c.id);
+    await ensureDir(finalOutputDir);
+    if (baseResp) {
+      const baseFinal = path.join(finalOutputDir, "baseline.json");
+      await writeFile(baseFinal, JSON.stringify(baseResp.final_output ?? {}, null, 2), "utf-8");
+      const rel = normRel(reportDirAbs, baseFinal);
+      manifestItems.push(
+        manifestItemForFinalOutput({
+          caseId: c.id,
+          version: "baseline",
+          rel_path: rel,
+          media_type: "application/json",
+        })
+      );
+    }
+    if (newResp) {
+      const newFinal = path.join(finalOutputDir, "new.json");
+      await writeFile(newFinal, JSON.stringify(newResp.final_output ?? {}, null, 2), "utf-8");
+      const rel = normRel(reportDirAbs, newFinal);
+      manifestItems.push(
+        manifestItemForFinalOutput({
+          caseId: c.id,
+          version: "new",
+          rel_path: rel,
+          media_type: "application/json",
+        })
+      );
+    }
+
+    if (baseResp?.runner_failure) {
+      const rfDir = path.join(reportDirAbs, "assets", "runner_failure_summary", c.id);
+      await ensureDir(rfDir);
+      const baseSum = path.join(rfDir, "baseline.json");
+      await writeFile(baseSum, JSON.stringify(baseResp.runner_failure, null, 2), "utf-8");
+      const rel = normRel(reportDirAbs, baseSum);
+      manifestItems.push({
+        manifest_key: manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_summary" }),
+        rel_path: rel,
+        media_type: "application/json",
+      });
+    }
+    if (newResp?.runner_failure) {
+      const rfDir = path.join(reportDirAbs, "assets", "runner_failure_summary", c.id);
+      await ensureDir(rfDir);
+      const newSum = path.join(rfDir, "new.json");
+      await writeFile(newSum, JSON.stringify(newResp.runner_failure, null, 2), "utf-8");
+      const rel = normRel(reportDirAbs, newSum);
+      manifestItems.push({
+        manifest_key: manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_summary" }),
+        rel_path: rel,
+        media_type: "application/json",
+      });
+    }
 
     const baselineSecurity = baseResp ? computeSecuritySide(baseResp) : { signals: [], requires_gate_recommendation: false };
     const newSecurity = newResp ? computeSecuritySide(newResp) : { signals: [], requires_gate_recommendation: false };
@@ -1409,8 +1545,8 @@ async function main(): Promise<void> {
 
   const quality_flags = await computeQualityFlags(reportDirAbs, qualityEntries);
 
-  const report: CompareReport = {
-    contract_version: 3,
+  const report: CompareReport & { embedded_manifest_index?: ThinIndex } = {
+    contract_version: 5,
     report_id: reportId,
     baseline_dir: normRel(projectRoot, baselineDirAbs),
     new_dir: normRel(projectRoot, newDirAbs),
@@ -1441,6 +1577,23 @@ async function main(): Promise<void> {
 
   await writeFile(path.join(reportDirAbs, "compare-report.json"), JSON.stringify(report, null, 2), "utf-8");
 
+  const manifest: Manifest = {
+    manifest_version: "v1",
+    generated_at: Date.now(),
+    items: manifestItems,
+  };
+  const manifestJson = JSON.stringify(manifest, null, 2);
+  const manifestRel = "artifacts/manifest.json";
+  await ensureDir(path.join(reportDirAbs, "artifacts"));
+  await writeFile(path.join(reportDirAbs, manifestRel), manifestJson, "utf-8");
+
+  const thinIndex: ThinIndex = {
+    manifest_version: "v1",
+    generated_at: manifest.generated_at,
+    source_manifest_sha256: sha256Hex(manifestJson),
+    items: manifest.items.map((it) => ({ manifest_key: it.manifest_key, rel_path: it.rel_path, media_type: it.media_type })),
+  };
+
   for (const it of items) {
     const b = baselineById[it.case_id];
     const n = newById[it.case_id];
@@ -1470,6 +1623,8 @@ async function main(): Promise<void> {
     await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
   }
 
+
+  report.embedded_manifest_index = thinIndex;
 
   const html = renderHtmlReport(report);
   await writeFile(path.join(reportDirAbs, "report.html"), html, "utf-8");
