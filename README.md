@@ -53,8 +53,9 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
 - `case-<case_id>.html` — per-case replay diff (**required for humans**)
 - `compare-report.json` — machine report (**source of truth for CI gating**)
 - `assets/` — copies of referenced payload evidence
+- `artifacts/manifest.json` — evidence manifest (canonical mapping)
 
-### Report Contract v3 SHOULD (to remain fully self-contained)
+### Report Contract v5 SHOULD (to remain fully self-contained)
 
 - include `baseline/` and `new/` local raw copies **whenever any raw-evidence href is present**:
   - `baseline_case_response_href`
@@ -62,8 +63,9 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
   - `baseline_run_meta_href`
   - `new_run_meta_href`
 - include `repro/` when `compare-report.json.repro` is present (recommended for CI/incident reports)
+- embed a thin manifest index in `report.html` for zero-click evidence links
 
-### Portability rules (Report Contract v3)
+### Portability rules (Report Contract v5)
 
 - All **href** values stored in `compare-report.json` are **relative to the report directory** and must resolve **inside** it.
 - href values must contain:
@@ -72,7 +74,13 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
   - no `://` schemes
 - Note: the `://` restriction applies to **href fields**. URLs may still appear as data in `security.signals[].details.urls`.
 - `baseline_dir` / `new_dir` / `cases_path` are **informational only** and must **not** be used to resolve links.
-- `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `tool/docs/report-contract-v3.md`).
+- `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `tool/docs/report-contract-v5.md`).
+
+### Evidence links (Report Contract v5)
+
+- Evidence references in JSON use `manifest_key` (no raw paths).
+- HTML links are derived from `manifest_key` using a mapping derived from `artifacts/manifest.json`.
+- `report.html` embeds a thin index for zero-click link resolution.
 
 ---
 
@@ -80,7 +88,7 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
 
 Each case in `compare-report.json.items[]` includes:
 
-- `contract_version`: `3` (top-level, MUST)
+- `contract_version`: `5` (top-level, MUST)
 - `case_status`: `executed | skipped | filtered_out` (coverage transparency; Stage 1 requires one item per case)
 - `data_availability`: `{ baseline, new }` with status + optional reason_code/details (MUST)
 - `risk_level`: `low | medium | high`
@@ -100,9 +108,9 @@ For v1-shape compatibility, the per-version boolean fields:
 Stage 1 summary MUST include:
 
 - `summary.data_coverage` (coverage transparency)
-- `contract_version: 3`
+- `contract_version: 5`
 
-Optional (recommended in v3):
+Optional (recommended in v5):
 
 - `items[].failure_summary` (dashboard-friendly failure summary)
 
@@ -167,7 +175,7 @@ Produces:
 
 `apps/evaluator/reports/latest/assets/`
 
-Recommended in v3 reports (when enabled):
+Recommended in v5 reports (when enabled):
 
 `apps/evaluator/reports/latest/baseline/`
 
@@ -184,8 +192,8 @@ Runner outputs (run.json, per-case artifacts, failure artifacts, assets), standa
 tool/docs/report-contract-v2.md — Report Contract v2
 Portable evidence pack rules (href resolution, self-contained assets), CI gating fields (risk_level, risk_tags, gate_recommendation), compatibility behavior, and quality_flags truth tests.
 
-tool/docs/report-contract-v3.md — Report Contract v3 (Stage 1)
-Adds explicit case execution status (case_status), richer data availability (reason_code, details), stricter coverage semantics (no silent omissions, including skipped/filtered-out representation), and optional per-item failure_summary for dashboards.
+tool/docs/report-contract-v5.md — Report Contract v5 (Stage 1)
+Adds manifest_key-based evidence references, embedded thin index for zero-click links, stricter offline rules, and preserves v3 coverage/gating fields.
 
 Agent contract (HTTP API)
 Runner calls the agent endpoint:
@@ -273,7 +281,7 @@ Evaluator outputs:
 
 `apps/evaluator/reports/<reportId>/assets/`
 
-Recommended in v3 reports:
+Recommended in v5 reports:
 
 `baseline/` and `new/` (local raw copies referenced by hrefs)
 
@@ -384,7 +392,7 @@ Per-case replay diff:
 
 renderCaseDiffHtml(...) in apps/evaluator/src/replayDiff.ts
 
-Risk/gate fields (v3):
+Risk/gate fields (v5):
 
 risk_level, risk_tags, gate_recommendation computed per case
 
