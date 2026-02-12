@@ -401,6 +401,7 @@ Rules (MUST):
 items[] MUST include one item per case in the compared set even when case_status != executed.
 If case_status != executed, this includes skipped and filtered_out.
 When case_status != executed, the item MUST still be emitted and MUST still include data_availability, trace_integrity, security, risk_level, risk_tags, gate_recommendation, and artifacts (artifacts may be partial or empty where not applicable).
+When case_status != executed, data_availability.<version>.status="missing" SHOULD be interpreted as "not produced for this run" (and not as a pipeline failure). The semantics are controlled by case_status and case_status_reason.
 
 4.6.2 case_id validity (MUST)
 case_id MUST be a non-empty string.

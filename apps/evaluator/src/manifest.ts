@@ -2,8 +2,8 @@ export type ManifestItem = {
   manifest_key: string;
   rel_path: string;
   media_type: string;
+  bytes?: number;
   sha256?: string;
-  size_bytes?: number;
 };
 
 export type Manifest = {

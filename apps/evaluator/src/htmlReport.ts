@@ -83,6 +83,12 @@ export type CompareReport = {
 
     root_cause_breakdown: Record<string, number>;
 
+    quality: {
+      transfer_class: "internal_only" | "transferable";
+      redaction_status: "none" | "applied";
+      redaction_preset_id?: string;
+    };
+
     security: {
       total_cases: number;
       cases_with_signals_new: number;

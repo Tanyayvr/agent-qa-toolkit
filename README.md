@@ -82,6 +82,12 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
 - HTML links are derived from `manifest_key` using a mapping derived from `artifacts/manifest.json`.
 - `report.html` embeds a thin index for zero-click link resolution.
 
+### Redaction and bounded memory (Report Contract v5)
+
+- If redaction is applied, summary includes `summary.quality.redaction_status` and optional `summary.quality.redaction_preset_id`.
+- When `redaction_status=applied`, a `artifacts/redaction-summary.json` file is included.
+- Manifest items SHOULD include `bytes` and `media_type` so viewers/validators can stay bounded-memory.
+
 ---
 
 ## CI gating model (Stage 1)

@@ -673,6 +673,16 @@ function sha256Hex(data: string | Uint8Array): string {
   return h.digest("hex");
 }
 
+async function fileBytesForRel(reportDir: string, rel: string | undefined): Promise<number | undefined> {
+  if (!rel) return undefined;
+  try {
+    const st = await stat(path.resolve(reportDir, rel));
+    return st.isFile() ? st.size : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function copyFileU8(srcAbs: string, destAbs: string): Promise<void> {
   const buf = await readFile(srcAbs);
   const u8 = new Uint8Array(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
@@ -1205,6 +1215,9 @@ async function main(): Promise<void> {
   const baselineRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "baseline", srcAbs: path.join(baselineDirAbs, "run.json") });
   const newRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "new", srcAbs: path.join(newDirAbs, "run.json") });
 
+  const redactionStatus = process.env.REDACTION_STATUS === "applied" ? "applied" : "none";
+  const redactionPresetId = process.env.REDACTION_PRESET_ID;
+
   const manifestItems: ManifestItem[] = [];
 
   for (const c of cases) {
@@ -1290,14 +1303,16 @@ async function main(): Promise<void> {
       if (baseRf) {
         const bodyRel = artifactLinks.baseline_failure_body_href;
         const metaRel = artifactLinks.baseline_failure_meta_href;
-        manifestItems.push(
-          ...manifestItemForRunnerFailureArtifact({
-            caseId: c.id,
-            version: "baseline",
-            ...(bodyRel ? { bodyRel } : {}),
-            ...(metaRel ? { metaRel } : {}),
-          })
-        );
+        const items = manifestItemForRunnerFailureArtifact({
+          caseId: c.id,
+          version: "baseline",
+          ...(bodyRel ? { bodyRel } : {}),
+          ...(metaRel ? { metaRel } : {}),
+        });
+        for (const it of items) {
+          const bytes = await fileBytesForRel(reportDirAbs, it.rel_path);
+          manifestItems.push({ ...it, ...(bytes !== undefined ? { bytes } : {}) });
+        }
         if (bodyRel) artifactLinks.baseline_failure_body_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_body" });
         if (metaRel) artifactLinks.baseline_failure_meta_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_meta" });
       }
@@ -1328,14 +1343,16 @@ async function main(): Promise<void> {
       if (newRf) {
         const bodyRel = artifactLinks.new_failure_body_href;
         const metaRel = artifactLinks.new_failure_meta_href;
-        manifestItems.push(
-          ...manifestItemForRunnerFailureArtifact({
-            caseId: c.id,
-            version: "new",
-            ...(bodyRel ? { bodyRel } : {}),
-            ...(metaRel ? { metaRel } : {}),
-          })
-        );
+        const items = manifestItemForRunnerFailureArtifact({
+          caseId: c.id,
+          version: "new",
+          ...(bodyRel ? { bodyRel } : {}),
+          ...(metaRel ? { metaRel } : {}),
+        });
+        for (const it of items) {
+          const bytes = await fileBytesForRel(reportDirAbs, it.rel_path);
+          manifestItems.push({ ...it, ...(bytes !== undefined ? { bytes } : {}) });
+        }
         if (bodyRel) artifactLinks.new_failure_body_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_body" });
         if (metaRel) artifactLinks.new_failure_meta_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_meta" });
       }
@@ -1350,8 +1367,20 @@ async function main(): Promise<void> {
     if (baseCaseHref) artifactLinks.baseline_case_response_href = baseCaseHref;
     if (newCaseHref) artifactLinks.new_case_response_href = newCaseHref;
 
-    if (baseCaseHref) manifestItems.push(manifestItemForCaseResponse({ caseId: c.id, version: "baseline", rel_path: baseCaseHref }));
-    if (newCaseHref) manifestItems.push(manifestItemForCaseResponse({ caseId: c.id, version: "new", rel_path: newCaseHref }));
+    if (baseCaseHref) {
+      const bytes = await fileBytesForRel(reportDirAbs, baseCaseHref);
+      manifestItems.push({
+        ...manifestItemForCaseResponse({ caseId: c.id, version: "baseline", rel_path: baseCaseHref }),
+        ...(bytes !== undefined ? { bytes } : {}),
+      });
+    }
+    if (newCaseHref) {
+      const bytes = await fileBytesForRel(reportDirAbs, newCaseHref);
+      manifestItems.push({
+        ...manifestItemForCaseResponse({ caseId: c.id, version: "new", rel_path: newCaseHref }),
+        ...(bytes !== undefined ? { bytes } : {}),
+      });
+    }
 
     if (baseCaseHref) artifactLinks.baseline_case_response_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "case_response" });
     if (newCaseHref) artifactLinks.new_case_response_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "case_response" });
@@ -1367,27 +1396,29 @@ async function main(): Promise<void> {
       const baseFinal = path.join(finalOutputDir, "baseline.json");
       await writeFile(baseFinal, JSON.stringify(baseResp.final_output ?? {}, null, 2), "utf-8");
       const rel = normRel(reportDirAbs, baseFinal);
-      manifestItems.push(
-        manifestItemForFinalOutput({
-          caseId: c.id,
-          version: "baseline",
-          rel_path: rel,
-          media_type: "application/json",
-        })
-      );
+      const bytes = await fileBytesForRel(reportDirAbs, rel);
+      const item = manifestItemForFinalOutput({
+        caseId: c.id,
+        version: "baseline",
+        rel_path: rel,
+        media_type: "application/json",
+      });
+      if (bytes !== undefined) item.bytes = bytes;
+      manifestItems.push(item);
     }
     if (newResp) {
       const newFinal = path.join(finalOutputDir, "new.json");
       await writeFile(newFinal, JSON.stringify(newResp.final_output ?? {}, null, 2), "utf-8");
       const rel = normRel(reportDirAbs, newFinal);
-      manifestItems.push(
-        manifestItemForFinalOutput({
-          caseId: c.id,
-          version: "new",
-          rel_path: rel,
-          media_type: "application/json",
-        })
-      );
+      const bytes = await fileBytesForRel(reportDirAbs, rel);
+      const item = manifestItemForFinalOutput({
+        caseId: c.id,
+        version: "new",
+        rel_path: rel,
+        media_type: "application/json",
+      });
+      if (bytes !== undefined) item.bytes = bytes;
+      manifestItems.push(item);
     }
 
     if (baseResp?.runner_failure) {
@@ -1396,11 +1427,14 @@ async function main(): Promise<void> {
       const baseSum = path.join(rfDir, "baseline.json");
       await writeFile(baseSum, JSON.stringify(baseResp.runner_failure, null, 2), "utf-8");
       const rel = normRel(reportDirAbs, baseSum);
-      manifestItems.push({
+      const bytes = await fileBytesForRel(reportDirAbs, rel);
+      const item: ManifestItem = {
         manifest_key: manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_summary" }),
         rel_path: rel,
         media_type: "application/json",
-      });
+      };
+      if (bytes !== undefined) item.bytes = bytes;
+      manifestItems.push(item);
     }
     if (newResp?.runner_failure) {
       const rfDir = path.join(reportDirAbs, "assets", "runner_failure_summary", c.id);
@@ -1408,11 +1442,14 @@ async function main(): Promise<void> {
       const newSum = path.join(rfDir, "new.json");
       await writeFile(newSum, JSON.stringify(newResp.runner_failure, null, 2), "utf-8");
       const rel = normRel(reportDirAbs, newSum);
-      manifestItems.push({
+      const bytes = await fileBytesForRel(reportDirAbs, rel);
+      const item: ManifestItem = {
         manifest_key: manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_summary" }),
         rel_path: rel,
         media_type: "application/json",
-      });
+      };
+      if (bytes !== undefined) item.bytes = bytes;
+      manifestItems.push(item);
     }
 
     const baselineSecurity = baseResp ? computeSecuritySide(baseResp) : { signals: [], requires_gate_recommendation: false };
@@ -1557,6 +1594,11 @@ async function main(): Promise<void> {
       regressions,
       improvements,
       root_cause_breakdown: breakdown,
+      quality: {
+        transfer_class: "internal_only",
+        redaction_status: redactionStatus,
+        ...(redactionStatus === "applied" && redactionPresetId ? { redaction_preset_id: redactionPresetId } : {}),
+      },
       security: {
         total_cases,
         cases_with_signals_new,
@@ -1586,6 +1628,25 @@ async function main(): Promise<void> {
   const manifestRel = "artifacts/manifest.json";
   await ensureDir(path.join(reportDirAbs, "artifacts"));
   await writeFile(path.join(reportDirAbs, manifestRel), manifestJson, "utf-8");
+
+  if (redactionStatus === "applied") {
+    const redactionSummary = {
+      preset_id: redactionPresetId ?? "unknown",
+      categories_targeted: [],
+      actions: [],
+      touched: [],
+      warnings: ["Redaction is best-effort; not a guarantee of complete removal."],
+    };
+    const redactionRel = "artifacts/redaction-summary.json";
+    await writeFile(path.join(reportDirAbs, redactionRel), JSON.stringify(redactionSummary, null, 2), "utf-8");
+    const bytes = await fileBytesForRel(reportDirAbs, redactionRel);
+    manifestItems.push({
+      manifest_key: "redaction/summary",
+      rel_path: redactionRel,
+      media_type: "application/json",
+      ...(bytes !== undefined ? { bytes } : {}),
+    });
+  }
 
   const thinIndex: ThinIndex = {
     manifest_version: "v1",
