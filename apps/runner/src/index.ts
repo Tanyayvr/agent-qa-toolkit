@@ -987,6 +987,9 @@ async function main(): Promise<void> {
   console.log("maxBodyBytes:", cfg.maxBodyBytes);
   console.log("redactionPreset:", cfg.redactionPreset);
   console.log("keepRaw:", cfg.keepRaw);
+  if (cfg.keepRaw) {
+    console.warn("WARNING: --keepRaw enabled. Raw responses will be stored under _raw/ and are NOT sanitized.");
+  }
 
   if (cfg.dryRun) {
     for (const c of selectedCases) console.log("Case:", c.id);

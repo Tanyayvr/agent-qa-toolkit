@@ -80,6 +80,9 @@ Evaluator supports `--strictPortability` to fail builds when portability violati
 **Redaction enforcement:**  
 Evaluator supports `--strictRedaction` to fail builds if redaction is applied but unredacted markers remain.
 
+**Raw retention:**  
+Runner supports `--keepRaw` to store unsanitized responses under `_raw/`. This is opt-in and should be avoided for transferable packs.
+
 ## Category Details
 
 ### 1. Architecture and Boundaries

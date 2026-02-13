@@ -10,6 +10,7 @@
 |---|---------|---------------|---------------------|--------|
 | 1 | **Redaction / masking** | `runner/src/sanitize.ts` | ✅ Production (when enabled) | Runner sanitizes artifacts when `--redactionPreset` is set |
 | 2 | **Redaction metadata** | `runner` → `run.json`, `evaluator` reads it | ✅ Production | `redaction_applied` + `redaction_preset` are machine-proven from runner metadata |
+| 2a | **Raw retention** | `runner` (`--keepRaw`) | ✅ Production (opt-in) | Raw responses stored under `_raw/` only when explicitly enabled |
 | 3 | **Failure simulation** (500, timeout, drop, invalid JSON) | `demo-agent/index.ts`: hardcoded case handlers | ✅ Runner handles genuinely | Demo-agent *generates* failures, but runner's `fetchWithTimeout()`, `isTransientFailure()`, `saveBodyStreamed()` handle them in production code |
 | 4 | **Matrix test cases** (net/data/size scenarios) | `demo-agent/index.ts`: `handleMatrixCase()` | N/A — test fixtures | Test fixtures for exercising runner/evaluator behavior, not expected for real agents |
 | 5 | **Security signal detection** (PII/secret/prompt injection) | `evaluator/core.ts`: `hasSecretMarkers()`, `hasPiiMarkers()`, `computeSecuritySide()` | ✅ Production | Evaluator scans agent responses with regex. Real detection, not demo |
