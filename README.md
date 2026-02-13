@@ -444,7 +444,7 @@ Runner redaction (production)
 npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable
 
-# Keep raw (unsanitized) copies under apps/runner/runs/_raw/ (explicit opt-in)
+# Keep raw (unsanitized) copies under apps/runner/runs/_raw/ (explicit opt-in; avoid for transferable packs)
 npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable --keepRaw
 ```
