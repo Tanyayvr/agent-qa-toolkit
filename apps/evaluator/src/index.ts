@@ -59,6 +59,7 @@ Optional:
   --outDir          Output directory for reports (default: apps/evaluator/reports/<reportId>)
   --reportId        Report id (default: random UUID)
   --transferClass   Transfer classification: internal_only (default) or transferable
+  --strictPortability  Fail if portability violations are detected
   --help, -h        Show this help
 `.trim();
 
@@ -116,6 +117,10 @@ function getArg(name: string): string | null {
   const val = ARGV[idx + 1];
   if (!val || val.startsWith("--")) return null;
   return val;
+}
+
+function getFlag(name: string): boolean {
+  return ARGV.includes(name);
 }
 
 function resolveFromRoot(projectRoot: string, p: string): string {
@@ -397,13 +402,16 @@ async function main(): Promise<void> {
     return;
   }
 
-  assertNoUnknownOptions(new Set(["--cases", "--baselineDir", "--newDir", "--outDir", "--reportId", "--transferClass", "--help", "-h"]));
+  assertNoUnknownOptions(
+    new Set(["--cases", "--baselineDir", "--newDir", "--outDir", "--reportId", "--transferClass", "--strictPortability", "--help", "-h"])
+  );
   assertHasValue("--cases");
   assertHasValue("--baselineDir");
   assertHasValue("--newDir");
   assertHasValue("--outDir");
   assertHasValue("--reportId");
   assertHasValue("--transferClass");
+  assertHasValue("--strictPortability");
 
   const casesArg = getArg("--cases");
   const baselineArg = getArg("--baselineDir");
@@ -860,6 +868,9 @@ async function main(): Promise<void> {
   }
 
   const quality_flags = await computeQualityFlags(reportDirAbs, qualityEntries);
+  if (getFlag("--strictPortability") && !quality_flags.portable_paths) {
+    throw new CliUsageError(`Portability violations detected. See quality_flags.path_violations in compare-report.json.\n\n${HELP_TEXT}`);
+  }
 
   const report: CompareReport & { embedded_manifest_index?: ThinIndex } = {
     contract_version: 5,
