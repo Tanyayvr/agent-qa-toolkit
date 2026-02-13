@@ -20,6 +20,7 @@ import {
   manifestKeyFor,
 } from "./manifest";
 import type { Manifest, ManifestItem, ThinIndex } from "./manifest";
+import { findUnredactedMarkers } from "./redactionCheck";
 
 import type {
   Version,
@@ -134,21 +135,12 @@ function normRel(fromDir: string, absPath: string): string {
   return rel.length ? rel : ".";
 }
 
-function findUnredactedMarkers(text: string, preset: "internal_only" | "transferable" | null | undefined): string[] {
-  const markers: Array<{ name: string; re: RegExp }> = [
-    { name: "email", re: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i },
-    { name: "customer_id", re: /\bCUST-\d+\b/ },
-    { name: "ticket_id", re: /\bT-\d+\b/ },
-    { name: "message_id", re: /\bMSG-\d+\b/ },
-  ];
-  if (preset === "transferable") {
-    markers.push({ name: "token", re: /\b(sk|api|token|secret)[-_]?[a-z0-9]{8,}\b/i });
-  }
-  const hits: string[] = [];
-  for (const m of markers) {
-    if (m.re.test(text)) hits.push(m.name);
-  }
-  return hits;
+function findUnredactedMarkersSafe(
+  text: string,
+  preset: "internal_only" | "transferable" | null | undefined
+): string[] {
+  if (!preset) return [];
+  return findUnredactedMarkers(text, preset);
 }
 
 async function ensureDir(p: string): Promise<void> {
@@ -543,7 +535,7 @@ async function main(): Promise<void> {
     ];
     for (const resp of allResponses) {
       const text = JSON.stringify(resp);
-      const hits = findUnredactedMarkers(text, preset);
+      const hits = findUnredactedMarkersSafe(text, preset);
       if (hits.length) {
         redactionViolations += 1;
         if (redactionSamples.length < 20) {
