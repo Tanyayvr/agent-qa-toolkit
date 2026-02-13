@@ -438,6 +438,17 @@ npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --concurrency 4 --iterations 5 --redactionPreset transferable
 ```
 
+Runner redaction (production)
+```bash
+# Sanitized artifacts only (default; no raw copies)
+npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
+  --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable
+
+# Keep raw (unsanitized) copies under apps/runner/runs/_raw/ (explicit opt-in)
+npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
+  --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable --keepRaw
+```
+
 Matrix tests (network/data/size/structure)
 ```bash
 npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/matrix.json \

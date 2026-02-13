@@ -31,6 +31,7 @@ type RunnerConfig = {
   onlyCaseIds: string[] | null;
   dryRun: boolean;
   redactionPreset: RedactionPreset;
+  keepRaw: boolean;
 
   timeoutMs: number;
   retries: number;
@@ -79,6 +80,7 @@ Artifacts / memory limits:
   --maxBodyBytes            Max bytes to write/read for a response body (default: 2000000)
   --noSaveFullBodyOnError   Do not write full error bodies to disk (default: save enabled)
   --redactionPreset         none | internal_only | transferable (default: none)
+  --keepRaw                 Keep raw (unsanitized) responses in _raw/ when redaction is enabled
 
   --help, -h                Show this help
 
@@ -879,6 +881,7 @@ async function main(): Promise<void> {
       "--maxBodyBytes",
       "--noSaveFullBodyOnError",
       "--redactionPreset",
+      "--keepRaw",
       "--help",
       "-h"
     ])
@@ -898,6 +901,8 @@ async function main(): Promise<void> {
   assertHasValue("--maxBodyBytes");
   assertHasValue("--redactionPreset");
 
+  const keepRaw = getFlag("--keepRaw");
+
   const redactionPresetRaw = getArg("--redactionPreset");
   if (redactionPresetRaw && redactionPresetRaw !== "none" && redactionPresetRaw !== "internal_only" && redactionPresetRaw !== "transferable") {
     throw new CliUsageError(`Invalid --redactionPreset value: ${redactionPresetRaw}. Must be "none", "internal_only", or "transferable".\n\n${HELP_TEXT}`);
@@ -913,6 +918,7 @@ async function main(): Promise<void> {
     onlyCaseIds: parseOnlyCaseIds(),
     dryRun: getFlag("--dryRun"),
     redactionPreset,
+    keepRaw,
 
     timeoutMs: parseIntFlag("--timeoutMs", 15000),
     retries: parseIntFlag("--retries", 2),
@@ -938,7 +944,8 @@ async function main(): Promise<void> {
 
   await ensureDir(baselineDir);
   await ensureDir(newDir);
-  if (cfg.redactionPreset !== "none") {
+  const useRaw = cfg.redactionPreset !== "none" && cfg.keepRaw;
+  if (useRaw) {
     await ensureDir(baselineRawDir);
     await ensureDir(newRawDir);
   }
@@ -952,6 +959,7 @@ async function main(): Promise<void> {
     versions: ["baseline", "new"] as const,
     redaction_applied: cfg.redactionPreset !== "none",
     redaction_preset: cfg.redactionPreset,
+    redaction_keep_raw: useRaw,
     runner: {
       timeout_ms: cfg.timeoutMs,
       retries: cfg.retries,
@@ -960,7 +968,8 @@ async function main(): Promise<void> {
       body_snippet_bytes: cfg.bodySnippetBytes,
       max_body_bytes: cfg.maxBodyBytes,
       save_full_body_on_error: cfg.saveFullBodyOnError,
-      redaction_preset: cfg.redactionPreset
+      redaction_preset: cfg.redactionPreset,
+      keep_raw: useRaw
     }
   };
 
@@ -977,6 +986,7 @@ async function main(): Promise<void> {
   console.log("concurrency:", cfg.concurrency);
   console.log("maxBodyBytes:", cfg.maxBodyBytes);
   console.log("redactionPreset:", cfg.redactionPreset);
+  console.log("keepRaw:", cfg.keepRaw);
 
   if (cfg.dryRun) {
     for (const c of selectedCases) console.log("Case:", c.id);
@@ -995,14 +1005,14 @@ async function main(): Promise<void> {
     const baselineResp = await runOneCaseWithReliability(cfg, c, "baseline");
     const baselineSanitized = sanitizeValue(baselineResp, cfg.redactionPreset);
     await writeFile(path.join(baselineDir, `${c.id}.json`), JSON.stringify(baselineSanitized, null, 2), "utf-8");
-    if (cfg.redactionPreset !== "none") {
+    if (useRaw) {
       await writeFile(path.join(baselineRawDir, `${c.id}.json`), JSON.stringify(baselineResp, null, 2), "utf-8");
     }
 
     const newResp = await runOneCaseWithReliability(cfg, c, "new");
     const newSanitized = sanitizeValue(newResp, cfg.redactionPreset);
     await writeFile(path.join(newDir, `${c.id}.json`), JSON.stringify(newSanitized, null, 2), "utf-8");
-    if (cfg.redactionPreset !== "none") {
+    if (useRaw) {
       await writeFile(path.join(newRawDir, `${c.id}.json`), JSON.stringify(newResp, null, 2), "utf-8");
     }
 
