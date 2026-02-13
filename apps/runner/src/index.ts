@@ -5,8 +5,8 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { TextDecoder } from "node:util";
 import type { ReadableStream } from "node:stream/web";
-
-type Version = "baseline" | "new";
+import type { FetchFailureClass, NetErrorKind, RunnerFailureArtifact, Version } from "shared-types";
+import { sanitizeValue, type RedactionPreset } from "./sanitize";
 
 type CaseFileItem = {
   id: string;
@@ -30,6 +30,7 @@ type RunnerConfig = {
   runId: string;
   onlyCaseIds: string[] | null;
   dryRun: boolean;
+  redactionPreset: RedactionPreset;
 
   timeoutMs: number;
   retries: number;
@@ -40,47 +41,6 @@ type RunnerConfig = {
 
   maxBodyBytes: number;
   saveFullBodyOnError: boolean;
-};
-
-type FetchFailureClass = "http_error" | "timeout" | "network_error" | "invalid_json";
-
-type NetErrorKind =
-  | "dns"
-  | "tls"
-  | "conn_refused"
-  | "conn_reset"
-  | "socket_hang_up"
-  | "proxy"
-  | "abort"
-  | "unknown";
-
-type RunnerFailureArtifact = {
-  type: "runner_fetch_failure";
-  class: FetchFailureClass;
-  net_error_kind?: NetErrorKind;
-  is_transient?: boolean;
-
-  case_id: string;
-  version: Version;
-  url: string;
-  attempt: number;
-  timeout_ms: number;
-  latency_ms: number;
-
-  status?: number;
-  status_text?: string;
-  http_is_transient?: boolean;
-
-  error_name?: string;
-  error_message?: string;
-
-  body_snippet?: string;
-
-  full_body_saved_to?: string;
-  full_body_meta_saved_to?: string;
-  body_truncated?: boolean;
-  body_bytes_written?: number;
-  max_body_bytes?: number;
 };
 
 type MinimalAgentResponseOnFailure = {
@@ -118,6 +78,7 @@ Artifacts / memory limits:
   --bodySnippetBytes        Error body snippet size in bytes (default: 4000)
   --maxBodyBytes            Max bytes to write/read for a response body (default: 2000000)
   --noSaveFullBodyOnError   Do not write full error bodies to disk (default: save enabled)
+  --redactionPreset         none | internal_only | transferable (default: none)
 
   --help, -h                Show this help
 
@@ -917,6 +878,7 @@ async function main(): Promise<void> {
       "--bodySnippetBytes",
       "--maxBodyBytes",
       "--noSaveFullBodyOnError",
+      "--redactionPreset",
       "--help",
       "-h"
     ])
@@ -934,6 +896,13 @@ async function main(): Promise<void> {
   assertHasValue("--concurrency");
   assertHasValue("--bodySnippetBytes");
   assertHasValue("--maxBodyBytes");
+  assertHasValue("--redactionPreset");
+
+  const redactionPresetRaw = getArg("--redactionPreset");
+  if (redactionPresetRaw && redactionPresetRaw !== "none" && redactionPresetRaw !== "internal_only" && redactionPresetRaw !== "transferable") {
+    throw new CliUsageError(`Invalid --redactionPreset value: ${redactionPresetRaw}. Must be "none", "internal_only", or "transferable".\n\n${HELP_TEXT}`);
+  }
+  const redactionPreset: RedactionPreset = (redactionPresetRaw ?? "none") as RedactionPreset;
 
   const cfg: RunnerConfig = {
     repoRoot,
@@ -943,6 +912,7 @@ async function main(): Promise<void> {
     runId: getArg("--runId") ?? randomUUID(),
     onlyCaseIds: parseOnlyCaseIds(),
     dryRun: getFlag("--dryRun"),
+    redactionPreset,
 
     timeoutMs: parseIntFlag("--timeoutMs", 15000),
     retries: parseIntFlag("--retries", 2),
@@ -962,9 +932,16 @@ async function main(): Promise<void> {
 
   const baselineDir = path.join(cfg.outDir, "baseline", cfg.runId);
   const newDir = path.join(cfg.outDir, "new", cfg.runId);
+  const rawDir = path.join(cfg.outDir, "_raw");
+  const baselineRawDir = path.join(rawDir, "baseline", cfg.runId);
+  const newRawDir = path.join(rawDir, "new", cfg.runId);
 
   await ensureDir(baselineDir);
   await ensureDir(newDir);
+  if (cfg.redactionPreset !== "none") {
+    await ensureDir(baselineRawDir);
+    await ensureDir(newRawDir);
+  }
 
   const runMeta = {
     run_id: cfg.runId,
@@ -973,6 +950,8 @@ async function main(): Promise<void> {
     selected_case_ids: selectedCases.map((c) => c.id),
     started_at: Date.now(),
     versions: ["baseline", "new"] as const,
+    redaction_applied: cfg.redactionPreset !== "none",
+    redaction_preset: cfg.redactionPreset,
     runner: {
       timeout_ms: cfg.timeoutMs,
       retries: cfg.retries,
@@ -980,7 +959,8 @@ async function main(): Promise<void> {
       concurrency: cfg.concurrency,
       body_snippet_bytes: cfg.bodySnippetBytes,
       max_body_bytes: cfg.maxBodyBytes,
-      save_full_body_on_error: cfg.saveFullBodyOnError
+      save_full_body_on_error: cfg.saveFullBodyOnError,
+      redaction_preset: cfg.redactionPreset
     }
   };
 
@@ -996,6 +976,7 @@ async function main(): Promise<void> {
   console.log("retries:", cfg.retries);
   console.log("concurrency:", cfg.concurrency);
   console.log("maxBodyBytes:", cfg.maxBodyBytes);
+  console.log("redactionPreset:", cfg.redactionPreset);
 
   if (cfg.dryRun) {
     for (const c of selectedCases) console.log("Case:", c.id);
@@ -1012,10 +993,18 @@ async function main(): Promise<void> {
     console.log("Case:", c.id);
 
     const baselineResp = await runOneCaseWithReliability(cfg, c, "baseline");
-    await writeFile(path.join(baselineDir, `${c.id}.json`), JSON.stringify(baselineResp, null, 2), "utf-8");
+    const baselineSanitized = sanitizeValue(baselineResp, cfg.redactionPreset);
+    await writeFile(path.join(baselineDir, `${c.id}.json`), JSON.stringify(baselineSanitized, null, 2), "utf-8");
+    if (cfg.redactionPreset !== "none") {
+      await writeFile(path.join(baselineRawDir, `${c.id}.json`), JSON.stringify(baselineResp, null, 2), "utf-8");
+    }
 
     const newResp = await runOneCaseWithReliability(cfg, c, "new");
-    await writeFile(path.join(newDir, `${c.id}.json`), JSON.stringify(newResp, null, 2), "utf-8");
+    const newSanitized = sanitizeValue(newResp, cfg.redactionPreset);
+    await writeFile(path.join(newDir, `${c.id}.json`), JSON.stringify(newSanitized, null, 2), "utf-8");
+    if (cfg.redactionPreset !== "none") {
+      await writeFile(path.join(newRawDir, `${c.id}.json`), JSON.stringify(newResp, null, 2), "utf-8");
+    }
 
     return true;
   });

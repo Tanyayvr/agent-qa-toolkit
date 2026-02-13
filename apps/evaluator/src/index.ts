@@ -466,8 +466,36 @@ async function main(): Promise<void> {
   const baselineRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "baseline", srcAbs: path.join(baselineDirAbs, "run.json") });
   const newRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "new", srcAbs: path.join(newDirAbs, "run.json") });
 
-  const redactionStatus = process.env.REDACTION_STATUS === "applied" ? "applied" : "none";
-  const redactionPresetId = process.env.REDACTION_PRESET_ID;
+  const redactionWarnings: string[] = [];
+  const baselineApplied = baselineRun.meta.redaction_applied === true;
+  const newApplied = newRun.meta.redaction_applied === true;
+  const baselinePreset = typeof baselineRun.meta.redaction_preset === "string" ? String(baselineRun.meta.redaction_preset) : null;
+  const newPreset = typeof newRun.meta.redaction_preset === "string" ? String(newRun.meta.redaction_preset) : null;
+
+  let redactionStatus: "none" | "applied" = "none";
+  let redactionPresetId: string | undefined;
+
+  if (baselineApplied || newApplied) {
+    if (baselineApplied && newApplied) {
+      redactionStatus = "applied";
+      if (baselinePreset && newPreset && baselinePreset !== newPreset) {
+        redactionWarnings.push(`redaction_preset mismatch between baseline (${baselinePreset}) and new (${newPreset}).`);
+        redactionPresetId = baselinePreset;
+      } else {
+        redactionPresetId = baselinePreset ?? newPreset ?? undefined;
+      }
+    } else {
+      redactionWarnings.push("redaction_applied mismatch between baseline and new.");
+      redactionStatus = "none";
+    }
+  } else {
+    // Backward-compatible fallback for older runner outputs.
+    redactionStatus = process.env.REDACTION_STATUS === "applied" ? "applied" : "none";
+    redactionPresetId = process.env.REDACTION_PRESET_ID ?? undefined;
+    if (process.env.REDACTION_STATUS || process.env.REDACTION_PRESET_ID) {
+      redactionWarnings.push("redaction status derived from env vars (runner metadata missing).");
+    }
+  }
 
   const manifestItems: ManifestItem[] = [];
 
@@ -886,7 +914,10 @@ async function main(): Promise<void> {
       categories_targeted: [],
       actions: [],
       touched: [],
-      warnings: ["Redaction is best-effort; not a guarantee of complete removal."],
+      warnings: [
+        "Redaction is best-effort; not a guarantee of complete removal.",
+        ...redactionWarnings,
+      ],
     };
     const redactionRel = "artifacts/redaction-summary.json";
     await writeFile(path.join(reportDirAbs, redactionRel), JSON.stringify(redactionSummary, null, 2), "utf-8");
