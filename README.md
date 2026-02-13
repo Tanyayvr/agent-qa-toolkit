@@ -438,6 +438,15 @@ npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --concurrency 4 --iterations 5 --redactionPreset transferable
 ```
 
+Matrix tests (network/data/size/structure)
+```bash
+npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/matrix.json \
+  --concurrency 4 --iterations 3 \
+  --redactionPreset transferable \
+  --allowFail matrix_net_http_500_small,matrix_net_http_500_large,matrix_net_timeout,matrix_net_drop,matrix_net_partial,matrix_data_empty_body,matrix_data_invalid_json,matrix_data_large_json_5mb \
+  --outJson /tmp/matrix.json --outCsv /tmp/matrix.csv
+```
+
 Demo-agent supported case_ids (baseline and new)
 - fmt_001
 - fmt_002

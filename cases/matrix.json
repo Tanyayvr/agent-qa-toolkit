@@ -1,0 +1,86 @@
+[
+  {
+    "id": "matrix_net_http_500_small",
+    "title": "Network: HTTP 500 with small body",
+    "input": { "user": "Trigger HTTP 500 (small body)" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "network", "http_500"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "matrix_net_http_500_large",
+    "title": "Network: HTTP 500 with large body (truncation)",
+    "input": { "user": "Trigger HTTP 500 (large body)" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "network", "http_500", "large_body"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "matrix_net_timeout",
+    "title": "Network: timeout",
+    "input": { "user": "Trigger timeout (stall response)" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "network", "timeout"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "matrix_net_drop",
+    "title": "Network: connection drop",
+    "input": { "user": "Trigger socket drop" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "network", "drop"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "matrix_net_partial",
+    "title": "Network: partial response then drop",
+    "input": { "user": "Trigger partial response then drop" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "network", "partial"], "severity": "high", "kind": "transport_failure" }
+  },
+  {
+    "id": "matrix_data_empty_body",
+    "title": "Data: empty body with 200 OK",
+    "input": { "user": "Return empty body" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "empty_body"], "severity": "high", "kind": "data_failure" }
+  },
+  {
+    "id": "matrix_data_invalid_json",
+    "title": "Data: invalid JSON payload",
+    "input": { "user": "Return invalid JSON" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "invalid_json"], "severity": "high", "kind": "data_failure" }
+  },
+  {
+    "id": "matrix_data_wrong_types",
+    "title": "Data: wrong types for fields",
+    "input": { "user": "Return wrong types" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "wrong_types"], "severity": "medium", "kind": "data_failure" }
+  },
+  {
+    "id": "matrix_data_missing_fields",
+    "title": "Data: missing required fields",
+    "input": { "user": "Return minimal fields only" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "missing_fields"], "severity": "medium", "kind": "data_failure" }
+  },
+  {
+    "id": "matrix_data_extra_fields",
+    "title": "Data: extra fields present",
+    "input": { "user": "Return extra fields" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "extra_fields"], "severity": "low", "kind": "data_variation" }
+  },
+  {
+    "id": "matrix_data_large_json_1mb",
+    "title": "Data: large JSON body (~1MB)",
+    "input": { "user": "Return large JSON payload (1MB)" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "large", "1mb"], "severity": "low", "kind": "data_variation" }
+  },
+  {
+    "id": "matrix_data_large_json_5mb",
+    "title": "Data: large JSON body (~5MB, triggers truncation)",
+    "input": { "user": "Return large JSON payload (5MB)" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "large", "5mb"], "severity": "high", "kind": "data_failure" }
+  }
+]

@@ -61,6 +61,152 @@ function applyRedaction<T>(value: T, preset: RedactionPreset): T {
   return value;
 }
 
+function sendJson(res: Response, payload: unknown, preset: RedactionPreset): void {
+  const sanitized = applyRedaction(payload, preset);
+  res.json(sanitized);
+}
+
+function sendText(res: Response, text: string, preset: RedactionPreset): void {
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.send(maskString(text, preset));
+}
+
+function bigString(bytes: number, seed = "X"): string {
+  const chunk = seed.repeat(1024);
+  const repeats = Math.ceil(bytes / chunk.length);
+  const s = Array.from({ length: repeats }, () => chunk).join("");
+  return s.slice(0, bytes);
+}
+
+async function handleMatrixCase(caseId: string, version: "baseline" | "new", res: Response, preset: RedactionPreset) {
+  if (!caseId.startsWith("matrix_")) return false;
+
+  switch (caseId) {
+    case "matrix_net_http_500_small": {
+      res.status(500);
+      sendText(res, "demo-agent forced 500\nref=token_abc12345\nemail=test@example.com\n", preset);
+      return true;
+    }
+    case "matrix_net_http_500_large": {
+      res.status(500);
+      const body = `demo-agent forced 500\nref=token_abc12345\n` + bigString(3_200_000);
+      sendText(res, body, preset);
+      return true;
+    }
+    case "matrix_net_timeout": {
+      await sleep(20000);
+      sendJson(res, { ok: true, note: "should not be reached under runner timeout" }, preset);
+      return true;
+    }
+    case "matrix_net_drop": {
+      const sock = res.req?.socket;
+      try {
+        sock?.destroy(new Error("demo-agent forced socket destroy"));
+      } catch {
+        try {
+          sock?.destroy();
+        } catch {
+          // ignore
+        }
+      }
+      return true;
+    }
+    case "matrix_net_partial": {
+      res.status(200);
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.write('{"partial": "data", "note": ');
+      const sock = res.req?.socket;
+      try {
+        sock?.destroy(new Error("demo-agent forced partial response"));
+      } catch {
+        try {
+          sock?.destroy();
+        } catch {
+          // ignore
+        }
+      }
+      return true;
+    }
+    case "matrix_data_empty_body": {
+      res.status(200).end();
+      return true;
+    }
+    case "matrix_data_invalid_json": {
+      res.status(200);
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.send('{"bad": ,,,}');
+      return true;
+    }
+    case "matrix_data_wrong_types": {
+      sendJson(
+        res,
+        {
+          case_id: caseId,
+          version,
+          workflow_id: 123,
+          proposed_actions: "not-an-array",
+          final_output: "oops",
+          events: "bad"
+        },
+        preset
+      );
+      return true;
+    }
+    case "matrix_data_missing_fields": {
+      sendJson(res, { case_id: caseId, version }, preset);
+      return true;
+    }
+    case "matrix_data_extra_fields": {
+      sendJson(
+        res,
+        {
+          case_id: caseId,
+          version,
+          workflow_id: "matrix_v1",
+          proposed_actions: [],
+          final_output: { content_type: "text", content: "ok" },
+          events: [],
+          extra_field: { note: "extra payload field" }
+        },
+        preset
+      );
+      return true;
+    }
+    case "matrix_data_large_json_1mb": {
+      sendJson(
+        res,
+        {
+          case_id: caseId,
+          version,
+          workflow_id: "matrix_v1",
+          proposed_actions: [],
+          final_output: { content_type: "text", content: `email=test@example.com\n${bigString(1_000_000)}` },
+          events: []
+        },
+        preset
+      );
+      return true;
+    }
+    case "matrix_data_large_json_5mb": {
+      sendJson(
+        res,
+        {
+          case_id: caseId,
+          version,
+          workflow_id: "matrix_v1",
+          proposed_actions: [],
+          final_output: { content_type: "text", content: `token_abcd1234\n${bigString(5_000_000)}` },
+          events: []
+        },
+        preset
+      );
+      return true;
+    }
+    default:
+      return false;
+  }
+}
+
 /**
  * Special cases to force real runner-level failures (Stage 1 benchmark):
  * - fetch_http_500_001: baseline ok, new returns 500 with large-ish body
@@ -173,6 +319,10 @@ app.post("/run-case", async (req: Request, res: Response) => {
     return;
   }
 
+  if (await handleMatrixCase(caseId, version, res, redactionPreset)) {
+    return;
+  }
+
   const resp = RESPONSES[version]?.[caseId];
 
   if (!resp) {
@@ -184,8 +334,7 @@ app.post("/run-case", async (req: Request, res: Response) => {
     return;
   }
 
-  const sanitized = applyRedaction(resp, redactionPreset);
-  res.json(sanitized);
+  sendJson(res, resp, redactionPreset);
 });
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8787;

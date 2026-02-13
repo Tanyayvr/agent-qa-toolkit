@@ -174,6 +174,7 @@ async function main() {
     timeoutMs,
     allowFail: [...allowFailSet],
     redactionPreset: redactionPreset || null,
+    redactionEnabled: Boolean(redactionPreset),
     stats: { all: statsAll, baseline: statsBaseline, new: statsNew },
   };
 

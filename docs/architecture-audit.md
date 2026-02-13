@@ -68,6 +68,12 @@ Evaluator `main()` iterates all cases from `readCases()` and pushes one item per
 
 ---
 
+**Matrix coverage (demo-agent + `cases/matrix.json`):**  
+Network failures (500/timeout/drop/partial), data shape errors (invalid JSON, empty body, missing fields, wrong types, extra fields), and large payloads (1MB/5MB) are supported in the demo-agent for systematic validation.  
+Note: `loadtest` validates transport-level success only (HTTP status + timing). It does not parse JSON or validate schemas.
+
+---
+
 ## Category Details
 
 ### 1. Architecture and Boundaries
@@ -113,7 +119,8 @@ Evaluator `main()` iterates all cases from `readCases()` and pushes one item per
 | Secret markers detected in output | `evaluator/core.ts`: `hasSecretMarkers()` | Regex-based pattern matching, not sanitization |
 | PII markers detected in output | `evaluator/core.ts`: `hasPiiMarkers()` | Same — detection only |
 | Prompt injection markers detected | `evaluator/core.ts`: `computeSecuritySide()` | Detection, triggers signal |
-| Redaction transparency modeled in contract | `evaluator/index.ts`: reads `REDACTION_STATUS` env, writes `redaction-summary.json` with `preset_id` + `timestamp` | **No payload transformation occurs.** Contract supports redaction metadata fields; whether actual sanitization is applied depends on upstream implementation (not implemented in this repo) |
+| Redaction transparency modeled in contract | `evaluator/index.ts`: reads `REDACTION_STATUS` env, writes `redaction-summary.json` with `preset_id` + `timestamp` | **Metadata only in evaluator.** Does not sanitize payloads. |
+| Demo redaction (payload masking) | `demo-agent/index.ts`: `x-redaction-preset` header / `DEMO_REDACTION_PRESET` env | Demo-only masking for emails, `CUST-*`, `T-*`, `MSG-*`, token-like strings. Not used by runner/evaluator in production paths. |
 | Transfer classification CLI flag | `evaluator/index.ts`: `--transferClass` (internal_only / transferable) | Written to `summary.quality.transfer_class` |
 | npm audit | `npm audit` currently reports `found 0 vulnerabilities`. Root `package.json` contains `overrides.qs: "6.14.2"` (npm v8+ feature) to pin qs outside advisory GHSA-w7fw-mjwx-w883. Prior to this override, audit reported 1 low-severity vulnerability. Verify: `cat package.json \| grep -A2 overrides` and `npm audit` (run as separate commands) |
 | Lockfile | `package-lock.json` present for deterministic `npm ci` |
