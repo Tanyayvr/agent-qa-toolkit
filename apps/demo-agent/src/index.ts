@@ -23,6 +23,44 @@ function safeVersion(v: unknown): "baseline" | "new" | null {
   return null;
 }
 
+type RedactionPreset = "none" | "internal_only" | "transferable";
+
+function normalizeRedactionPreset(v: unknown): RedactionPreset {
+  if (v === "internal_only" || v === "transferable") return v;
+  return "none";
+}
+
+function maskString(input: string, preset: RedactionPreset): string {
+  if (preset === "none") return input;
+  let s = input;
+  s = s.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[redacted_email]");
+  s = s.replace(/\bCUST-\d+\b/g, "CUST-REDACTED");
+  s = s.replace(/\bT-\d+\b/g, "T-REDACTED");
+  s = s.replace(/\bMSG-\d+\b/g, "MSG-REDACTED");
+  if (preset === "transferable") {
+    s = s.replace(/\b(sk|api|token|secret)[-_]?[a-z0-9]{8,}\b/gi, "[redacted_token]");
+  }
+  return s;
+}
+
+function applyRedaction<T>(value: T, preset: RedactionPreset): T {
+  if (preset === "none") return value;
+  if (typeof value === "string") {
+    return maskString(value, preset) as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => applyRedaction(v, preset)) as T;
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = applyRedaction(v, preset);
+    }
+    return out as T;
+  }
+  return value;
+}
+
 /**
  * Special cases to force real runner-level failures (Stage 1 benchmark):
  * - fetch_http_500_001: baseline ok, new returns 500 with large-ish body
@@ -34,6 +72,9 @@ app.post("/run-case", async (req: Request, res: Response) => {
 
   const caseId = safeCaseId(body.case_id);
   const version = safeVersion((body as Record<string, unknown>).version);
+  const redactionPreset = normalizeRedactionPreset(
+    req.header("x-redaction-preset") ?? process.env.DEMO_REDACTION_PRESET
+  );
 
   if (!caseId || !version) {
     res.status(400).json({
@@ -143,7 +184,8 @@ app.post("/run-case", async (req: Request, res: Response) => {
     return;
   }
 
-  res.json(resp);
+  const sanitized = applyRedaction(resp, redactionPreset);
+  res.json(sanitized);
 });
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8787;

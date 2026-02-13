@@ -432,6 +432,10 @@ npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/cases.json \
 npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --concurrency 8 --iterations 20 \
   --allowFail fetch_http_500_001,fetch_timeout_001,fetch_network_drop_001,fetch_invalid_json_001
+
+# Verify redaction mode (demo-agent) during load test:
+npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/cases.json \
+  --concurrency 4 --iterations 5 --redactionPreset transferable
 ```
 
 Demo-agent supported case_ids (baseline and new)
@@ -451,3 +455,8 @@ Transport failure cases (expected to fail on new)
 - fetch_invalid_json_001
 - fetch_timeout_001
 - fetch_network_drop_001
+
+Redaction in demo-agent
+- Use `DEMO_REDACTION_PRESET=internal_only|transferable` or request header `x-redaction-preset`.
+- Response payloads are masked (emails, `CUST-####`, `T-####`, `MSG-####`, and token-like strings).
+- This is demo-only behavior for validating redaction flows.

@@ -6,6 +6,7 @@
 //   ts-node src/load-test.ts --baseUrl http://localhost:8787 --cases cases/cases.json --concurrency 8 --iterations 50
 //   ts-node src/load-test.ts --outJson /tmp/load.json --outCsv /tmp/load.csv
 //   ts-node src/load-test.ts --allowFail fetch_http_500_001,fetch_timeout_001,fetch_network_drop_001
+//   ts-node src/load-test.ts --redactionPreset transferable
 //
 // Notes:
 // - Does not mutate anything, only POSTs to /run-case.
@@ -113,6 +114,7 @@ async function main() {
   const outCsv = getArg("--outCsv");
   const allowFailRaw = getArg("--allowFail", "") ?? "";
   const allowFailSet = new Set(allowFailRaw.split(",").map((s) => s.trim()).filter(Boolean));
+  const redactionPreset = getArg("--redactionPreset", "") ?? "";
 
   const raw = await readFile(path.resolve(casesPath), "utf-8");
   const cases = parseCases(raw);
@@ -131,7 +133,14 @@ async function main() {
           try {
             const res = await fetchWithTimeout(
               `${baseUrl}/run-case`,
-              { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(reqBody) },
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(redactionPreset ? { "x-redaction-preset": redactionPreset } : {}),
+                },
+                body: JSON.stringify(reqBody),
+              },
               timeoutMs
             );
             const ms = Date.now() - started;
@@ -164,6 +173,7 @@ async function main() {
     concurrency,
     timeoutMs,
     allowFail: [...allowFailSet],
+    redactionPreset: redactionPreset || null,
     stats: { all: statsAll, baseline: statsBaseline, new: statsNew },
   };
 
