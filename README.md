@@ -31,6 +31,34 @@ This toolkit is **local-first and self-hosted**:
 
 This reduces compliance scope: data does not leave your environment unless you export it.
 
+See formal policy: `docs/self-hosted.md`
+
+---
+
+## UI & Integration (chosen: full UI + max integration)
+
+**UI (full):**
+- Filters/search
+- Sticky summary + better visual hierarchy
+- Baseline vs new comparison in one view
+- Improved evidence/trace visibility
+
+**Integration options:**
+
+### A) File‑based (current)
+- Share `reports/<id>` as zip/tar.
+- Fully offline and enterprise‑friendly.
+
+### B) HTTP API (next step)
+- Runner uploads bundle to a customer‑owned endpoint.
+- Viewer fetches bundles from customer storage.
+- Requires customer‑managed auth and storage.
+
+### C) CI‑native
+- Runner/Evaluator in CI.
+- Artifacts stored in CI storage.
+- Viewer opens artifacts with no vendor access.
+
 ---
 
 ## Stages (Stage 1–3)

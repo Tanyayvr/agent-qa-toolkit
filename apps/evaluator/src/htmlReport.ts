@@ -190,6 +190,18 @@ function badge(text: string, tone: "ok" | "bad" | "mid" = "mid"): string {
   return `<span class="badge ${cls}">${escHtml(text)}</span>`;
 }
 
+function riskBadge(level: "low" | "medium" | "high"): string {
+  if (level === "high") return badge("high", "bad");
+  if (level === "medium") return badge("medium", "mid");
+  return badge("low", "ok");
+}
+
+function gateBadge(g: "none" | "require_approval" | "block"): string {
+  if (g === "block") return badge("block", "bad");
+  if (g === "require_approval") return badge("approve", "mid");
+  return badge("none", "ok");
+}
+
 function linkIfPresent(href: string | undefined, label: string): string {
   if (!href) return "";
   return `<a href="${escHtml(href)}" target="_blank" rel="noopener noreferrer">${escHtml(label)}</a>`;
@@ -287,28 +299,6 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
     .join("");
 
   const q = report.quality_flags;
-  const qBlock = `
-<div class="card" style="margin-top:14px;">
-  <div style="font-size:16px;font-weight:900;">Quality flags</div>
-  <div class="kpi" style="margin-top:10px;">
-    <div class="k"><div class="v">${escHtml(String(q.self_contained))}</div><div class="l">self_contained</div></div>
-    <div class="k"><div class="v">${escHtml(String(q.portable_paths))}</div><div class="l">portable_paths</div></div>
-    <div class="k"><div class="v">${escHtml(String(q.missing_assets_count))}</div><div class="l">missing_assets_count</div></div>
-    <div class="k"><div class="v">${escHtml(String(q.path_violations_count))}</div><div class="l">path_violations_count</div></div>
-  </div>
-  <div class="muted" style="margin-top:10px;">
-    ${q.missing_assets.length
-      ? `missing_assets: ${escHtml(q.missing_assets.slice(0, 6).join(" · "))}${q.missing_assets.length > 6 ? " …" : ""}`
-      : "missing_assets: —"
-    }
-  </div>
-  <div class="muted" style="margin-top:6px;">
-    ${q.path_violations.length
-      ? `path_violations: ${escHtml(q.path_violations.slice(0, 6).join(" · "))}${q.path_violations.length > 6 ? " …" : ""}`
-      : "path_violations: —"
-    }
-  </div>
-</div>`.trim();
 
   const sec = s.security;
   const secBlock = `
@@ -390,18 +380,20 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       const preventable = it.preventable_by_policy ? badge("preventable", "mid") : `<span class="muted">—</span>`;
 
       return `
-<tr>
+<tr data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}">
   <td>
-    <div style="font-weight:700;">${titleLink}</div>
+    <div class="caseTitle">${titleLink}</div>
     <div class="muted">${escHtml(it.title || "")}</div>
+    <div class="caseMeta">
+      ${riskBadge(it.risk_level)}
+      ${gateBadge(it.gate_recommendation)}
+      <span class="metaChip">${escHtml(it.case_status)}</span>
+    </div>
   </td>
-  <td><code>${escHtml(it.case_status)}</code></td>
   <td>${base}</td>
   <td>${neu}</td>
   <td>${rootCell(it.baseline_root)}</td>
   <td>${rootCell(it.new_root)}</td>
-  <td><code>${escHtml(it.risk_level)}</code></td>
-  <td><code>${escHtml(it.gate_recommendation)}</code></td>
   <td>${preventable}</td>
   <td>${rulesCell(it.recommended_policy_rules)}</td>
   <td>${traceCell(it.trace_integrity)}</td>
@@ -424,15 +416,25 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escHtml(`Evaluator report · ${report.report_id}`)}</title>
 <style>
-  :root { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-  body { margin:0; background:#0b0d10; color:#e8eaed; }
+  :root {
+    font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", ui-sans-serif, system-ui;
+    color-scheme: dark;
+  }
+  body {
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #1b2a3a 0%, transparent 55%),
+      radial-gradient(900px 600px at 90% -20%, #2d1f32 0%, transparent 55%),
+      #0b0d10;
+    color:#e8eaed;
+  }
   a { color:#8ab4f8; text-decoration:none; }
   a:hover { text-decoration:underline; }
-  .wrap { max-width: 1400px; margin: 0 auto; padding: 18px; }
-  .h1 { font-size: 22px; font-weight: 900; margin: 0 0 6px 0; }
+  .wrap { max-width: 1500px; margin: 0 auto; padding: 24px; }
+  .h1 { font-size: 26px; font-weight: 900; margin: 0 0 6px 0; letter-spacing: -0.02em; }
   .muted { color:#9aa4b2; font-size: 13px; }
-  .grid { display:grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-top: 14px; }
-  .card { background:#0f1217; border:1px solid #232836; border-radius: 14px; padding: 12px; }
+  .grid { display:grid; grid-template-columns: 300px 1fr; gap: 16px; margin-top: 16px; }
+  .card { background:#0f1217; border:1px solid #232836; border-radius: 16px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
   .kpi { display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
   .k { background:#0b0d10; border:1px solid #232836; border-radius: 12px; padding: 10px; min-width: 140px; }
   .k .v { font-size: 18px; font-weight: 900; }
@@ -447,64 +449,133 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .table th { text-align:left; color:#cbd5e1; font-weight:800; }
   .wrapRules { display:flex; flex-wrap:wrap; gap:6px; }
   .rule { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
-  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+  .hero { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 4px 10px; font-size: 12px; color:#cbd5e1; }
+  .side { position: sticky; top: 16px; align-self: start; }
+  .filters input, .filters select { width:100%; background:#0b0d10; border:1px solid #232836; color:#e8eaed; border-radius: 10px; padding: 8px; margin-top: 8px; }
+  .caseTitle { font-weight: 800; font-size: 14px; }
+  .caseMeta { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .metaChip { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } .side { position: static; } }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="h1">Evaluator report</div>
-    <div class="muted">
-      contract_version: <code>${escHtml(String(report.contract_version))}</code> ·
-      report_id: <code>${escHtml(report.report_id)}</code> ·
+    <div class="hero">
+      <div>
+        <div class="h1">Evaluator report</div>
+        <div class="muted">
+          contract_version: <code>${escHtml(String(report.contract_version))}</code> ·
+          report_id: <code>${escHtml(report.report_id)}</code>
+        </div>
+      </div>
+      <div class="chips">
+        <span class="chip">transfer: ${escHtml(s.quality.transfer_class)}</span>
+        <span class="chip">redaction: ${escHtml(s.quality.redaction_status)}${s.quality.redaction_preset_id ? ` (${escHtml(s.quality.redaction_preset_id)})` : ""}</span>
+      </div>
+    </div>
+    <div class="muted" style="margin-top:6px;">
       baseline_dir: <code>${escHtml(report.baseline_dir)}</code> ·
       new_dir: <code>${escHtml(report.new_dir)}</code> ·
       cases: <code>${escHtml(report.cases_path)}</code>
     </div>
 
-    ${qBlock}
-    ${secBlock}
-
     <div class="grid">
+      <div class="side">
+        <div class="card">
+          <div style="font-size:16px;font-weight:900;">Summary</div>
+          <div class="kpi">
+            <div class="k"><div class="v">${escHtml(String(s.baseline_pass))}</div><div class="l">baseline pass</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.new_pass))}</div><div class="l">new pass</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.regressions))}</div><div class="l">regressions</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.improvements))}</div><div class="l">improvements</div></div>
+          </div>
+
+          <div style="margin-top:14px; font-size:16px; font-weight:900;">Risk</div>
+          <div class="kpi">
+            <div class="k"><div class="v">${escHtml(String(s.risk_summary.low))}</div><div class="l">risk low</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.risk_summary.medium))}</div><div class="l">risk medium</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.risk_summary.high))}</div><div class="l">risk high</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.cases_requiring_approval))}</div><div class="l">require approval</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.cases_block_recommended))}</div><div class="l">block recommended</div></div>
+          </div>
+
+          <div style="margin-top:14px; font-size:16px; font-weight:900;">Data coverage</div>
+          <div class="kpi">
+            <div class="k"><div class="v">${escHtml(String(s.data_coverage.total_cases))}</div><div class="l">total_cases</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.data_coverage.items_emitted))}</div><div class="l">items_emitted</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.data_coverage.missing_baseline_artifacts))}</div><div class="l">missing baseline</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.data_coverage.missing_new_artifacts))}</div><div class="l">missing new</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.data_coverage.broken_baseline_artifacts))}</div><div class="l">broken baseline</div></div>
+            <div class="k"><div class="v">${escHtml(String(s.data_coverage.broken_new_artifacts))}</div><div class="l">broken new</div></div>
+          </div>
+
+          <div style="margin-top:14px; font-size:16px; font-weight:900;">Quality flags</div>
+          <div class="kpi" style="margin-top:10px;">
+            <div class="k"><div class="v">${escHtml(String(q.self_contained))}</div><div class="l">self_contained</div></div>
+            <div class="k"><div class="v">${escHtml(String(q.portable_paths))}</div><div class="l">portable_paths</div></div>
+            <div class="k"><div class="v">${escHtml(String(q.missing_assets_count))}</div><div class="l">missing_assets_count</div></div>
+            <div class="k"><div class="v">${escHtml(String(q.path_violations_count))}</div><div class="l">path_violations_count</div></div>
+          </div>
+          <div class="muted" style="margin-top:10px;">
+            ${q.missing_assets.length
+              ? `missing_assets: ${escHtml(q.missing_assets.slice(0, 6).join(" · "))}${q.missing_assets.length > 6 ? " …" : ""}`
+              : "missing_assets: —"
+            }
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            ${q.path_violations.length
+              ? `path_violations: ${escHtml(q.path_violations.slice(0, 6).join(" · "))}${q.path_violations.length > 6 ? " …" : ""}`
+              : "path_violations: —"
+            }
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div style="font-size:16px;font-weight:900;">Filters</div>
+          <div class="filters">
+            <input id="filterText" type="text" placeholder="Search case id or title" />
+            <select id="filterRisk">
+              <option value="">Risk: all</option>
+              <option value="low">Risk: low</option>
+              <option value="medium">Risk: medium</option>
+              <option value="high">Risk: high</option>
+            </select>
+            <select id="filterGate">
+              <option value="">Gate: all</option>
+              <option value="none">Gate: none</option>
+              <option value="require_approval">Gate: require approval</option>
+              <option value="block">Gate: block</option>
+            </select>
+            <select id="filterStatus">
+              <option value="">Status: all</option>
+              <option value="executed">Status: executed</option>
+              <option value="filtered_out">Status: filtered_out</option>
+              <option value="skipped">Status: skipped</option>
+            </select>
+          </div>
+        </div>
+        ${secBlock}
+      </div>
+
       <div class="card">
-        <div style="font-size:16px;font-weight:900;">Summary</div>
+        <div style="font-size:16px;font-weight:900;">Cases</div>
+        <div class="muted" style="margin-top:6px;">Tip: click case id to open replay diff</div>
         <div class="kpi">
           <div class="k"><div class="v">${escHtml(String(s.baseline_pass))}</div><div class="l">baseline pass</div></div>
           <div class="k"><div class="v">${escHtml(String(s.new_pass))}</div><div class="l">new pass</div></div>
           <div class="k"><div class="v">${escHtml(String(s.regressions))}</div><div class="l">regressions</div></div>
           <div class="k"><div class="v">${escHtml(String(s.improvements))}</div><div class="l">improvements</div></div>
         </div>
-
-        <div style="margin-top:14px; font-size:16px; font-weight:900;">Risk summary</div>
-        <div class="kpi">
-          <div class="k"><div class="v">${escHtml(String(s.risk_summary.low))}</div><div class="l">risk low</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.risk_summary.medium))}</div><div class="l">risk medium</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.risk_summary.high))}</div><div class="l">risk high</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.cases_requiring_approval))}</div><div class="l">require approval</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.cases_block_recommended))}</div><div class="l">block recommended</div></div>
-        </div>
-
-        <div style="margin-top:14px; font-size:16px; font-weight:900;">Data coverage</div>
-        <div class="kpi">
-          <div class="k"><div class="v">${escHtml(String(s.data_coverage.total_cases))}</div><div class="l">total_cases</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.data_coverage.items_emitted))}</div><div class="l">items_emitted</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.data_coverage.missing_baseline_artifacts))}</div><div class="l">missing baseline</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.data_coverage.missing_new_artifacts))}</div><div class="l">missing new</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.data_coverage.broken_baseline_artifacts))}</div><div class="l">broken baseline</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.data_coverage.broken_new_artifacts))}</div><div class="l">broken new</div></div>
-        </div>
-
-        <div style="margin-top:14px; font-size:16px; font-weight:900;">Cases</div>
         <table class="table">
           <thead>
             <tr>
               <th>case</th>
-              <th>status</th>
               <th>baseline</th>
               <th>new</th>
               <th>baseline_root</th>
               <th>new_root</th>
-              <th>risk</th>
-              <th>gate</th>
               <th>preventable</th>
               <th>policy_rules</th>
               <th>trace</th>
@@ -516,7 +587,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         </table>
       </div>
 
-      <div class="card">
+      <div class="card" style="margin-top:16px;">
         <div style="font-size:16px;font-weight:900;">Root cause breakdown (new)</div>
         ${breakdownRows
       ? `<table class="table"><thead><tr><th>root_cause</th><th>count</th></tr></thead><tbody>${breakdownRows}</tbody></table>`
@@ -555,6 +626,40 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           a.removeAttribute("href");
         }
       }
+
+      var filterText = document.getElementById("filterText");
+      var filterRisk = document.getElementById("filterRisk");
+      var filterGate = document.getElementById("filterGate");
+      var filterStatus = document.getElementById("filterStatus");
+      var rows = document.querySelectorAll("tbody tr[data-case]");
+
+      function applyFilters() {
+        var text = (filterText && filterText.value || "").toLowerCase();
+        var risk = filterRisk && filterRisk.value || "";
+        var gate = filterGate && filterGate.value || "";
+        var status = filterStatus && filterStatus.value || "";
+
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          var caseId = (r.getAttribute("data-case") || "").toLowerCase();
+          var title = r.querySelector(".muted") ? r.querySelector(".muted").textContent.toLowerCase() : "";
+          var rRisk = r.getAttribute("data-risk") || "";
+          var rGate = r.getAttribute("data-gate") || "";
+          var rStatus = r.getAttribute("data-status") || "";
+
+          var ok = true;
+          if (text && !(caseId.includes(text) || title.includes(text))) ok = false;
+          if (risk && rRisk !== risk) ok = false;
+          if (gate && rGate !== gate) ok = false;
+          if (status && rStatus !== status) ok = false;
+          r.style.display = ok ? "" : "none";
+        }
+      }
+
+      if (filterText) filterText.addEventListener("input", applyFilters);
+      if (filterRisk) filterRisk.addEventListener("change", applyFilters);
+      if (filterGate) filterGate.addEventListener("change", applyFilters);
+      if (filterStatus) filterStatus.addEventListener("change", applyFilters);
     })();
   </script>
 </body>
