@@ -5,6 +5,244 @@ type Version = "baseline" | "new";
 
 export const RESPONSES: Record<Version, Record<string, AgentCaseResponse>> = {
   baseline: {
+    fmt_001: {
+      case_id: "fmt_001",
+      version: "baseline",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [
+        {
+          action_id: "a0",
+          action_type: "create_ticket",
+          tool_name: "create_ticket",
+          target: { type: "ticket" },
+          params: {
+            customer_id: "CUST-1001",
+            summary: "App crashes on login",
+            priority: "high",
+          },
+          risk_level: "medium",
+          evidence_refs: [],
+        },
+      ],
+      final_output: {
+        content_type: "json",
+        content: {
+          action: "create_ticket",
+          customer_id: "CUST-1001",
+          summary: "App crashes on login",
+          priority: "high",
+        },
+      },
+      events: [
+        {
+          type: "tool_call",
+          ts: 1738043950000,
+          call_id: "c0",
+          action_id: "a0",
+          tool: "create_ticket",
+          args: {
+            customer_id: "CUST-1001",
+            summary: "App crashes on login",
+            priority: "high",
+          },
+        },
+        {
+          type: "tool_result",
+          ts: 1738043950200,
+          call_id: "c0",
+          action_id: "a0",
+          status: "ok",
+          latency_ms: 200,
+          payload_summary: { ticket_id: "T-1001" },
+        },
+        {
+          type: "final_output",
+          ts: 1738043950300,
+          content_type: "json",
+          content: {
+            action: "create_ticket",
+            customer_id: "CUST-1001",
+            summary: "App crashes on login",
+            priority: "high",
+          },
+        },
+      ],
+    },
+    fmt_003: {
+      case_id: "fmt_003",
+      version: "baseline",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [
+        {
+          action_id: "a11",
+          action_type: "send_email",
+          tool_name: "send_email",
+          target: { type: "email" },
+          params: {
+            to: "customer@example.com",
+            subject: "Apology for the delay",
+          },
+          risk_level: "low",
+          evidence_refs: [],
+        },
+      ],
+      final_output: {
+        content_type: "json",
+        content: {
+          action: "send_email",
+          to: "customer@example.com",
+          subject: "Apology for the delay",
+          body: "We apologize for the delay and are working to resolve your issue.",
+        },
+      },
+      events: [
+        {
+          type: "tool_call",
+          ts: 1738044120000,
+          call_id: "c11",
+          action_id: "a11",
+          tool: "send_email",
+          args: {
+            to: "customer@example.com",
+            subject: "Apology for the delay",
+            body: "We apologize for the delay and are working to resolve your issue.",
+          },
+        },
+        {
+          type: "tool_result",
+          ts: 1738044120200,
+          call_id: "c11",
+          action_id: "a11",
+          status: "ok",
+          latency_ms: 180,
+          payload_summary: { message_id: "MSG-3001" },
+        },
+        {
+          type: "final_output",
+          ts: 1738044120300,
+          content_type: "json",
+          content: {
+            action: "send_email",
+            to: "customer@example.com",
+            subject: "Apology for the delay",
+            body: "We apologize for the delay and are working to resolve your issue.",
+          },
+        },
+      ],
+    },
+    tool_002: {
+      case_id: "tool_002",
+      version: "baseline",
+      workflow_id: "kb_answering_v1",
+      proposed_actions: [
+        {
+          action_id: "a30",
+          action_type: "search_kb",
+          tool_name: "search_kb",
+          params: { query: "reset password steps" },
+          risk_level: "low",
+          evidence_refs: [{ kind: "retrieval_doc", id: "kb_reset_password_v1" }],
+        },
+      ],
+      final_output: {
+        content_type: "text",
+        content: "To reset your password, go to Settings -> Security -> Reset Password.",
+      },
+      events: [
+        {
+          type: "retrieval",
+          ts: 1738044250100,
+          query: "reset password steps",
+          doc_ids: ["kb_reset_password_v1"],
+          snippets_hashes: ["k2a1"],
+        },
+        {
+          type: "final_output",
+          ts: 1738044250300,
+          content_type: "text",
+          content: "To reset your password, go to Settings -> Security -> Reset Password.",
+        },
+      ],
+    },
+    tool_004: {
+      case_id: "tool_004",
+      version: "baseline",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [
+        {
+          action_id: "a80",
+          action_type: "update_ticket_status",
+          tool_name: "update_ticket_status",
+          target: { type: "ticket", id: "T-2010" },
+          params: { ticket_id: "T-2010", status: "pending" },
+          risk_level: "medium",
+          evidence_refs: [{ kind: "tool_result", call_id: "c80" }],
+        },
+      ],
+      final_output: {
+        content_type: "text",
+        content: "Ticket T-2010 moved to pending.",
+      },
+      events: [
+        {
+          type: "tool_call",
+          ts: 1738044500100,
+          call_id: "c80",
+          action_id: "a80",
+          tool: "update_ticket_status",
+          args: { ticket_id: "T-2010", status: "pending" },
+        },
+        {
+          type: "tool_result",
+          ts: 1738044500300,
+          call_id: "c80",
+          action_id: "a80",
+          status: "ok",
+          latency_ms: 220,
+          payload_summary: { ticket_id: "T-2010", status: "pending" },
+        },
+        {
+          type: "final_output",
+          ts: 1738044500400,
+          content_type: "text",
+          content: "Ticket T-2010 moved to pending.",
+        },
+      ],
+    },
+    data_002: {
+      case_id: "data_002",
+      version: "baseline",
+      workflow_id: "kb_answering_v1",
+      proposed_actions: [
+        {
+          action_id: "a21",
+          action_type: "answer_question",
+          tool_name: "none",
+          params: { topic: "sla_support_v2" },
+          risk_level: "low",
+          evidence_refs: [{ kind: "retrieval_doc", id: "sla_support_v2" }],
+        },
+      ],
+      final_output: {
+        content_type: "text",
+        content: "Priority High tickets have a guaranteed first response time within 1 hour.",
+      },
+      events: [
+        {
+          type: "retrieval",
+          ts: 1738044260100,
+          query: "priority high first response time",
+          doc_ids: ["sla_support_v2"],
+          snippets_hashes: ["s3p9"],
+        },
+        {
+          type: "final_output",
+          ts: 1738044260300,
+          content_type: "text",
+          content: "Priority High tickets have a guaranteed first response time within 1 hour.",
+        },
+      ],
+    },
     tool_001: {
       case_id: "tool_001",
       version: "baseline",
@@ -274,7 +512,7 @@ export const RESPONSES: Record<Version, Record<string, AgentCaseResponse>> = {
         },
         {
           type: "tool_call",
-          ts: 1738044300100,
+          ts: 1738044300300,
           call_id: "c50",
           action_id: "a50",
           tool: "create_ticket",
@@ -366,6 +604,244 @@ export const RESPONSES: Record<Version, Record<string, AgentCaseResponse>> = {
   },
 
   new: {
+    fmt_001: {
+      case_id: "fmt_001",
+      version: "new",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [
+        {
+          action_id: "a0",
+          action_type: "create_ticket",
+          tool_name: "create_ticket",
+          target: { type: "ticket" },
+          params: {
+            customer_id: "CUST-1001",
+            summary: "App crashes on login",
+            priority: "high",
+          },
+          risk_level: "medium",
+          evidence_refs: [],
+        },
+      ],
+      final_output: {
+        content_type: "json",
+        content: {
+          action: "create_ticket",
+          customer_id: "CUST-1001",
+          summary: "App crashes on login",
+          priority: "high",
+        },
+      },
+      events: [
+        {
+          type: "tool_call",
+          ts: 1738043951000,
+          call_id: "c0",
+          action_id: "a0",
+          tool: "create_ticket",
+          args: {
+            customer_id: "CUST-1001",
+            summary: "App crashes on login",
+            priority: "high",
+          },
+        },
+        {
+          type: "tool_result",
+          ts: 1738043951200,
+          call_id: "c0",
+          action_id: "a0",
+          status: "ok",
+          latency_ms: 190,
+          payload_summary: { ticket_id: "T-1001" },
+        },
+        {
+          type: "final_output",
+          ts: 1738043951300,
+          content_type: "json",
+          content: {
+            action: "create_ticket",
+            customer_id: "CUST-1001",
+            summary: "App crashes on login",
+            priority: "high",
+          },
+        },
+      ],
+    },
+    fmt_003: {
+      case_id: "fmt_003",
+      version: "new",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [
+        {
+          action_id: "a11",
+          action_type: "send_email",
+          tool_name: "send_email",
+          target: { type: "email" },
+          params: {
+            to: "customer@example.com",
+            subject: "Apology for the delay",
+          },
+          risk_level: "low",
+          evidence_refs: [],
+        },
+      ],
+      final_output: {
+        content_type: "json",
+        content: {
+          action: "send_email",
+          to: "customer@example.com",
+          subject: "Apology for the delay",
+          body: "We apologize for the delay and are working to resolve your issue.",
+        },
+      },
+      events: [
+        {
+          type: "tool_call",
+          ts: 1738044121000,
+          call_id: "c11",
+          action_id: "a11",
+          tool: "send_email",
+          args: {
+            to: "customer@example.com",
+            subject: "Apology for the delay",
+            body: "We apologize for the delay and are working to resolve your issue.",
+          },
+        },
+        {
+          type: "tool_result",
+          ts: 1738044121200,
+          call_id: "c11",
+          action_id: "a11",
+          status: "ok",
+          latency_ms: 170,
+          payload_summary: { message_id: "MSG-3002" },
+        },
+        {
+          type: "final_output",
+          ts: 1738044121300,
+          content_type: "json",
+          content: {
+            action: "send_email",
+            to: "customer@example.com",
+            subject: "Apology for the delay",
+            body: "We apologize for the delay and are working to resolve your issue.",
+          },
+        },
+      ],
+    },
+    tool_002: {
+      case_id: "tool_002",
+      version: "new",
+      workflow_id: "kb_answering_v1",
+      proposed_actions: [
+        {
+          action_id: "a30",
+          action_type: "search_kb",
+          tool_name: "search_kb",
+          params: { query: "reset password steps" },
+          risk_level: "low",
+          evidence_refs: [{ kind: "retrieval_doc", id: "kb_reset_password_v1" }],
+        },
+      ],
+      final_output: {
+        content_type: "text",
+        content: "To reset your password, go to Settings -> Security -> Reset Password.",
+      },
+      events: [
+        {
+          type: "retrieval",
+          ts: 1738044251100,
+          query: "reset password steps",
+          doc_ids: ["kb_reset_password_v1"],
+          snippets_hashes: ["k2a1"],
+        },
+        {
+          type: "final_output",
+          ts: 1738044251300,
+          content_type: "text",
+          content: "To reset your password, go to Settings -> Security -> Reset Password.",
+        },
+      ],
+    },
+    tool_004: {
+      case_id: "tool_004",
+      version: "new",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [
+        {
+          action_id: "a80",
+          action_type: "update_ticket_status",
+          tool_name: "update_ticket_status",
+          target: { type: "ticket", id: "T-2010" },
+          params: { ticket_id: "T-2010", status: "pending" },
+          risk_level: "medium",
+          evidence_refs: [{ kind: "tool_result", call_id: "c80" }],
+        },
+      ],
+      final_output: {
+        content_type: "text",
+        content: "Ticket T-2010 moved to pending.",
+      },
+      events: [
+        {
+          type: "tool_call",
+          ts: 1738044501100,
+          call_id: "c80",
+          action_id: "a80",
+          tool: "update_ticket_status",
+          args: { ticket_id: "T-2010", status: "pending" },
+        },
+        {
+          type: "tool_result",
+          ts: 1738044501300,
+          call_id: "c80",
+          action_id: "a80",
+          status: "ok",
+          latency_ms: 210,
+          payload_summary: { ticket_id: "T-2010", status: "pending" },
+        },
+        {
+          type: "final_output",
+          ts: 1738044501400,
+          content_type: "text",
+          content: "Ticket T-2010 moved to pending.",
+        },
+      ],
+    },
+    data_002: {
+      case_id: "data_002",
+      version: "new",
+      workflow_id: "kb_answering_v1",
+      proposed_actions: [
+        {
+          action_id: "a21",
+          action_type: "answer_question",
+          tool_name: "none",
+          params: { topic: "sla_support_v2" },
+          risk_level: "low",
+          evidence_refs: [{ kind: "retrieval_doc", id: "sla_support_v2" }],
+        },
+      ],
+      final_output: {
+        content_type: "text",
+        content: "Priority High tickets have a guaranteed first response time within 1 hour.",
+      },
+      events: [
+        {
+          type: "retrieval",
+          ts: 1738044261100,
+          query: "priority high first response time",
+          doc_ids: ["sla_support_v2"],
+          snippets_hashes: ["s3p9"],
+        },
+        {
+          type: "final_output",
+          ts: 1738044261300,
+          content_type: "text",
+          content: "Priority High tickets have a guaranteed first response time within 1 hour.",
+        },
+      ],
+    },
     tool_001: {
       case_id: "tool_001",
       version: "new",

@@ -289,7 +289,7 @@ async function readBodySnippet(res: Response, maxBytes: number): Promise<string>
   let truncated = false;
 
   try {
-    for (;;) {
+    for (; ;) {
       const { value, done } = await reader.read();
       if (done) break;
       if (!value) continue;
@@ -321,14 +321,14 @@ async function readBodySnippet(res: Response, maxBytes: number): Promise<string>
     chunks.length === 0
       ? new Uint8Array(0)
       : (() => {
-          const out = new Uint8Array(total);
-          let off = 0;
-          for (const c0 of chunks) {
-            out.set(c0, off);
-            off += c0.byteLength;
-          }
-          return out;
-        })();
+        const out = new Uint8Array(total);
+        let off = 0;
+        for (const c0 of chunks) {
+          out.set(c0, off);
+          off += c0.byteLength;
+        }
+        return out;
+      })();
 
   return snippetFromBytes(merged, maxBytes);
 }
@@ -402,7 +402,7 @@ async function saveBodyStreamed(
   const reader = body.getReader();
 
   try {
-    for (;;) {
+    for (; ;) {
       const { value, done } = await reader.read();
       if (done) break;
       if (!value) continue;
@@ -447,15 +447,15 @@ async function saveBodyStreamed(
     snippetChunks.length === 0
       ? new Uint8Array(0)
       : (() => {
-          const total = snippetChunks.reduce((s, c) => s + c.byteLength, 0);
-          const out = new Uint8Array(total);
-          let off = 0;
-          for (const c of snippetChunks) {
-            out.set(c, off);
-            off += c.byteLength;
-          }
-          return out;
-        })();
+        const total = snippetChunks.reduce((s, c) => s + c.byteLength, 0);
+        const out = new Uint8Array(total);
+        let off = 0;
+        for (const c of snippetChunks) {
+          out.set(c, off);
+          off += c.byteLength;
+        }
+        return out;
+      })();
 
   const meta = {
     kind: "runner_body_capture",
@@ -638,7 +638,7 @@ async function runOneCaseWithReliability(cfg: RunnerConfig, c: CaseFileItem, ver
       let truncated = false;
 
       try {
-        for (;;) {
+        for (; ;) {
           const { value, done } = await reader.read();
           if (done) break;
           if (!value) continue;
@@ -670,14 +670,14 @@ async function runOneCaseWithReliability(cfg: RunnerConfig, c: CaseFileItem, ver
         chunks.length === 0
           ? new Uint8Array(0)
           : (() => {
-              const out = new Uint8Array(total);
-              let off = 0;
-              for (const c0 of chunks) {
-                out.set(c0, off);
-                off += c0.byteLength;
-              }
-              return out;
-            })();
+            const out = new Uint8Array(total);
+            let off = 0;
+            for (const c0 of chunks) {
+              out.set(c0, off);
+              off += c0.byteLength;
+            }
+            return out;
+          })();
 
       const dec = new TextDecoder("utf-8", { fatal: false });
       const text = dec.decode(merged);
@@ -739,10 +739,6 @@ async function runOneCaseWithReliability(cfg: RunnerConfig, c: CaseFileItem, ver
           bodyRel ? `full_body_saved_to=${bodyRel}` : `full_body_saved_to=disabled`,
           metaRel ? `full_body_meta_saved_to=${metaRel}` : `full_body_meta_saved_to=disabled`
         ].join("\n");
-
-        if (attempt <= cfg.retries) {
-          return mkFailureResponse(artifact, msg);
-        }
 
         return mkFailureResponse(artifact, msg);
       }
@@ -875,7 +871,7 @@ async function runWithConcurrency<T, R>(items: T[], concurrency: number, fn: (it
   let nextIdx = 0;
 
   async function worker(): Promise<void> {
-    for (;;) {
+    for (; ;) {
       const idx = nextIdx;
       nextIdx += 1;
       if (idx >= items.length) return;

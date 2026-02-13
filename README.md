@@ -35,6 +35,7 @@ Monorepo (npm workspaces):
 - `apps/demo-agent` — demo HTTP agent with deterministic baseline/new responses
 - `apps/runner` — CLI that executes cases against the agent and writes run artifacts
 - `apps/evaluator` — CLI that evaluates artifacts, assigns RCA, computes risk/gates, and generates HTML reports
+- `packages/shared-types` — canonical contract types shared across all apps (runtime-0: types only, zero dependencies)
 
 Quality bar (benchmark mode):
 
@@ -329,7 +330,7 @@ npm --workspace evaluator run dev -- --help
 Common usage:
 
 ```bash
-npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest
+npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest --transferClass internal_only
 ```
 Exit codes:
 
@@ -378,9 +379,9 @@ must_not_include
 evidence_required_for_actions
 
 Where to extend (assertions, RCA, risk/gates)
-Evaluator core:
+Evaluator core logic (pure, testable):
 
-apps/evaluator/src/index.ts
+`apps/evaluator/src/core.ts`
 
 Key extension points:
 
@@ -389,6 +390,10 @@ assertions built in evaluateOne(...)
 RCA selection in chooseRootCause(...)
 
 policy mapping in mapPolicyRules(...)
+
+Evaluator CLI/IO orchestration:
+
+`apps/evaluator/src/index.ts`
 
 Report HTML:
 
@@ -417,3 +422,32 @@ Reports:
 `apps/evaluator/reports/latest/case-*.html`
 
 `apps/evaluator/reports/latest/compare-report.json`
+
+Load testing (offline, local agent)
+```bash
+npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/cases.json \
+  --concurrency 8 --iterations 50 --outJson /tmp/load.json --outCsv /tmp/load.csv
+
+# Classify expected-fail cases so only real failures cause exit 1:
+npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/cases.json \
+  --concurrency 8 --iterations 20 \
+  --allowFail fetch_http_500_001,fetch_timeout_001,fetch_network_drop_001,fetch_invalid_json_001
+```
+
+Demo-agent supported case_ids (baseline and new)
+- fmt_001
+- fmt_002
+- fmt_003
+- tool_001
+- tool_002
+- tool_003
+- tool_004
+- data_001
+- data_002
+- fail_001
+
+Transport failure cases (expected to fail on new)
+- fetch_http_500_001
+- fetch_invalid_json_001
+- fetch_timeout_001
+- fetch_network_drop_001

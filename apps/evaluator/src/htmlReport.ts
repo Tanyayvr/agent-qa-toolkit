@@ -9,17 +9,17 @@ export type EvidenceRef = {
 
 export type SecuritySignal = {
   kind:
-    | "untrusted_url_input"
-    | "token_exfil_indicator"
-    | "policy_tampering"
-    | "unexpected_outbound"
-    | "high_risk_action"
-    | "permission_change"
-    | "secret_in_output"
-    | "pii_in_output"
-    | "prompt_injection_marker"
-    | "runner_failure_detected"
-    | "unknown";
+  | "untrusted_url_input"
+  | "token_exfil_indicator"
+  | "policy_tampering"
+  | "unexpected_outbound"
+  | "high_risk_action"
+  | "permission_change"
+  | "secret_in_output"
+  | "pii_in_output"
+  | "prompt_injection_marker"
+  | "runner_failure_detected"
+  | "unknown";
   severity: SignalSeverity;
   confidence: SignalConfidence;
   title: string;
@@ -179,6 +179,12 @@ function escHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/** Escape a JSON string for safe embedding in <script type="application/json">.
+ *  Only escapes sequences that would prematurely close the script tag. */
+function scriptSafeJson(json: string): string {
+  return json.replace(/<\/(script)/gi, "<\\/$1").replace(/<!--/g, "<\\!--");
+}
+
 function badge(text: string, tone: "ok" | "bad" | "mid" = "mid"): string {
   const cls = tone === "ok" ? "b-ok" : tone === "bad" ? "b-bad" : "b-mid";
   return `<span class="badge ${cls}">${escHtml(text)}</span>`;
@@ -265,11 +271,10 @@ function securityCell(p: SecurityPack): string {
 <div>
   <div><span class="muted">baseline:</span> ${badge(`sec: ${bLabel}`, bTone as "ok" | "bad" | "mid")}</div>
   <div style="margin-top:6px;"><span class="muted">new:</span> ${badge(`sec: ${nLabel}`, nTone as "ok" | "bad" | "mid")}</div>
-  ${
-    p.new.requires_gate_recommendation
+  ${p.new.requires_gate_recommendation
       ? `<div class="muted" style="margin-top:6px;">${badge("gate: recommended", "bad")}</div>`
       : ""
-  }
+    }
 </div>`.trim();
 }
 
@@ -292,17 +297,15 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
     <div class="k"><div class="v">${escHtml(String(q.path_violations_count))}</div><div class="l">path_violations_count</div></div>
   </div>
   <div class="muted" style="margin-top:10px;">
-    ${
-      q.missing_assets.length
-        ? `missing_assets: ${escHtml(q.missing_assets.slice(0, 6).join(" · "))}${q.missing_assets.length > 6 ? " …" : ""}`
-        : "missing_assets: —"
+    ${q.missing_assets.length
+      ? `missing_assets: ${escHtml(q.missing_assets.slice(0, 6).join(" · "))}${q.missing_assets.length > 6 ? " …" : ""}`
+      : "missing_assets: —"
     }
   </div>
   <div class="muted" style="margin-top:6px;">
-    ${
-      q.path_violations.length
-        ? `path_violations: ${escHtml(q.path_violations.slice(0, 6).join(" · "))}${q.path_violations.length > 6 ? " …" : ""}`
-        : "path_violations: —"
+    ${q.path_violations.length
+      ? `path_violations: ${escHtml(q.path_violations.slice(0, 6).join(" · "))}${q.path_violations.length > 6 ? " …" : ""}`
+      : "path_violations: —"
     }
   </div>
 </div>`.trim();
@@ -515,18 +518,17 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
       <div class="card">
         <div style="font-size:16px;font-weight:900;">Root cause breakdown (new)</div>
-        ${
-          breakdownRows
-            ? `<table class="table"><thead><tr><th>root_cause</th><th>count</th></tr></thead><tbody>${breakdownRows}</tbody></table>`
-            : `<div class="muted" style="margin-top:10px;">No failures / no breakdown</div>`
-        }
+        ${breakdownRows
+      ? `<table class="table"><thead><tr><th>root_cause</th><th>count</th></tr></thead><tbody>${breakdownRows}</tbody></table>`
+      : `<div class="muted" style="margin-top:10px;">No failures / no breakdown</div>`
+    }
         <div class="muted" style="margin-top:10px;">
           This report directory is self-contained (assets are copied into <code>assets/</code>).
         </div>
       </div>
     </div>
   </div>
-  <script id="embedded-manifest-index" type="application/json">${escHtml(embeddedIndexJson)}</script>
+  <script id="embedded-manifest-index" type="application/json">${scriptSafeJson(embeddedIndexJson)}</script>
   <script>
     (function() {
       var el = document.getElementById("embedded-manifest-index");
