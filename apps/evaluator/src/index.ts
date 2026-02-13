@@ -60,6 +60,7 @@ Optional:
   --reportId        Report id (default: random UUID)
   --transferClass   Transfer classification: internal_only (default) or transferable
   --strictPortability  Fail if portability violations are detected
+  --strictRedaction    Fail if redaction is applied but sensitive markers remain
   --help, -h        Show this help
 `.trim();
 
@@ -131,6 +132,23 @@ function resolveFromRoot(projectRoot: string, p: string): string {
 function normRel(fromDir: string, absPath: string): string {
   const rel = path.relative(fromDir, absPath).split(path.sep).join("/");
   return rel.length ? rel : ".";
+}
+
+function findUnredactedMarkers(text: string, preset: "internal_only" | "transferable" | null | undefined): string[] {
+  const markers: Array<{ name: string; re: RegExp }> = [
+    { name: "email", re: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i },
+    { name: "customer_id", re: /\bCUST-\d+\b/ },
+    { name: "ticket_id", re: /\bT-\d+\b/ },
+    { name: "message_id", re: /\bMSG-\d+\b/ },
+  ];
+  if (preset === "transferable") {
+    markers.push({ name: "token", re: /\b(sk|api|token|secret)[-_]?[a-z0-9]{8,}\b/i });
+  }
+  const hits: string[] = [];
+  for (const m of markers) {
+    if (m.re.test(text)) hits.push(m.name);
+  }
+  return hits;
 }
 
 async function ensureDir(p: string): Promise<void> {
@@ -403,7 +421,18 @@ async function main(): Promise<void> {
   }
 
   assertNoUnknownOptions(
-    new Set(["--cases", "--baselineDir", "--newDir", "--outDir", "--reportId", "--transferClass", "--strictPortability", "--help", "-h"])
+    new Set([
+      "--cases",
+      "--baselineDir",
+      "--newDir",
+      "--outDir",
+      "--reportId",
+      "--transferClass",
+      "--strictPortability",
+      "--strictRedaction",
+      "--help",
+      "-h",
+    ])
   );
   assertHasValue("--cases");
   assertHasValue("--baselineDir");
@@ -501,6 +530,34 @@ async function main(): Promise<void> {
     redactionPresetId = process.env.REDACTION_PRESET_ID ?? undefined;
     if (process.env.REDACTION_STATUS || process.env.REDACTION_PRESET_ID) {
       redactionWarnings.push("redaction status derived from env vars (runner metadata missing).");
+    }
+  }
+
+  let redactionViolations = 0;
+  const redactionSamples: string[] = [];
+  if (redactionStatus === "applied") {
+    const preset = redactionPresetId === "transferable" ? "transferable" : "internal_only";
+    const allResponses = [
+      ...Object.values(baselineById),
+      ...Object.values(newById),
+    ];
+    for (const resp of allResponses) {
+      const text = JSON.stringify(resp);
+      const hits = findUnredactedMarkers(text, preset);
+      if (hits.length) {
+        redactionViolations += 1;
+        if (redactionSamples.length < 20) {
+          redactionSamples.push(`${resp.case_id} (${hits.join(",")})`);
+        }
+      }
+    }
+    if (redactionViolations > 0) {
+      redactionWarnings.push(
+        `redaction_check_failed: ${redactionViolations} case(s) contain unredacted markers. samples: ${redactionSamples.join("; ")}`
+      );
+      if (getFlag("--strictRedaction")) {
+        throw new CliUsageError(`Redaction check failed. See redaction-summary.json warnings.\n\n${HELP_TEXT}`);
+      }
     }
   }
 

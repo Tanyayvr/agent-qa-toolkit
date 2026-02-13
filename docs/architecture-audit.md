@@ -74,6 +74,12 @@ Note: `loadtest` validates transport-level success only (HTTP status + timing). 
 
 ---
 
+**Portability enforcement:**  
+Evaluator supports `--strictPortability` to fail builds when portability violations are detected (`quality_flags.portable_paths=false`).
+
+**Redaction enforcement:**  
+Evaluator supports `--strictRedaction` to fail builds if redaction is applied but unredacted markers remain.
+
 ## Category Details
 
 ### 1. Architecture and Boundaries

@@ -76,8 +76,8 @@ This is **correctly split**:
 
 | Priority | Fix | Effort |
 |----------|-----|--------|
-| **P1** | Add tests for runner redaction (spot-check masking in artifacts) | Medium |
-| **P2** | Evaluator: option to fail on portability violations (`--strictPortability`) | Small — add exit(1) on `portable_paths === false` |
-| **P2** | Evaluator: verify redaction claim by scanning artifacts for known PII patterns | Medium — cross-check redaction claim against `hasPiiMarkers()` |
-| **P2** | Evaluator: option to fail on portability violations (`--strictPortability`) | Small — add exit(1) on `portable_paths === false` |
-| **P2** | Evaluator: verify `REDACTION_STATUS` claim by scanning artifacts for known PII patterns | Medium — cross-check redaction claim against `hasPiiMarkers()` |
+| ~~**P0**~~ | ~~Runner imports from `shared-types`~~ | **Done** |
+| ~~**P0**~~ | ~~Redaction in runner pipeline (variant B)~~ | **Done** — `runner/src/sanitize.ts` |
+| ~~**P1**~~ | ~~Add tests for runner redaction~~ | **Done** — `runner/src/sanitize.test.ts` |
+| ~~**P2**~~ | ~~Evaluator `--strictPortability`~~ | **Done** — `evaluator/src/index.ts` |
+| **P2** | Evaluator: verify redaction claim by scanning artifacts for known PII patterns | **Done** — `--strictRedaction` safety gate + warnings in redaction summary |

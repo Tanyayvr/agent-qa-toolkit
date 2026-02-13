@@ -447,6 +447,28 @@ npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/matrix.json \
   --outJson /tmp/matrix.json --outCsv /tmp/matrix.csv
 ```
 
+Strict portability checks (fail on violations)
+```bash
+npm -w evaluator run dev -- --cases cases/cases.json \
+  --baselineDir apps/runner/runs/baseline/latest \
+  --newDir apps/runner/runs/new/latest \
+  --outDir apps/evaluator/reports/latest \
+  --reportId latest \
+  --transferClass internal_only \
+  --strictPortability
+```
+
+Strict redaction checks (fail if markers remain after redaction)
+```bash
+npm -w evaluator run dev -- --cases cases/cases.json \
+  --baselineDir apps/runner/runs/baseline/redaction_test \
+  --newDir apps/runner/runs/new/redaction_test \
+  --outDir apps/evaluator/reports/redaction_test \
+  --reportId redaction_test \
+  --transferClass internal_only \
+  --strictRedaction
+```
+
 Demo-agent supported case_ids (baseline and new)
 - fmt_001
 - fmt_002
