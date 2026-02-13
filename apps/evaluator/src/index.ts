@@ -411,7 +411,6 @@ async function main(): Promise<void> {
   assertHasValue("--outDir");
   assertHasValue("--reportId");
   assertHasValue("--transferClass");
-  assertHasValue("--strictPortability");
 
   const casesArg = getArg("--cases");
   const baselineArg = getArg("--baselineDir");
