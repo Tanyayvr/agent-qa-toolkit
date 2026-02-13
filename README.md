@@ -20,6 +20,19 @@ You get:
 
 ---
 
+## Data handling (Self-hosted only)
+
+This toolkit is **local-first and self-hosted**:
+
+- No SaaS backend.
+- No user accounts, no payments, no external storage.
+- All artifacts are written to **local disk** and remain under your control.
+- You decide if/where to share bundles (zip/CI artifacts), and you own retention.
+
+This reduces compliance scope: data does not leave your environment unless you export it.
+
+---
+
 ## Stages (Stage 1–3)
 
 - **Stage 1 (MUST):** Portable report directory + evidence links + CI gating truth (this repo ships this now).
