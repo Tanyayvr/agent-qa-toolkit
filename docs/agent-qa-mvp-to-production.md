@@ -62,7 +62,7 @@
 - критерий: doc опубликован + ссылка в README
  - файл: `docs/agent-integration-contract.md`
 
-### Checkpoint 2.5 — Agent Adapter SDK (Python/TS)
+### Checkpoint 2.5 — Agent Adapter SDK (Python/TS) (DONE)
 - минимальный SDK/adapter для реальных агентов
 - поддержка: raw HTTP, LangChain/CrewAI (минимум один адаптер)
 - критерий: агент можно поднять через SDK и прогнать `cases/cases.json`

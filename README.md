@@ -281,6 +281,16 @@ POST /run-case
 
 Formal spec: `docs/agent-integration-contract.md`
 
+Agent SDKs:
+- TypeScript: `packages/agent-sdk` (createRunCaseServer, wrapSimpleAgent)
+- Python (stdlib demo): `scripts/agent-sdk-python/agent_sdk.py`
+
+TypeScript quick start (no build):
+
+```bash
+npx ts-node scripts/agent-sdk-ts-example.ts
+```
+
 Request body:
 
 ```json

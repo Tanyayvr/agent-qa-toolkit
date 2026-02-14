@@ -84,3 +84,52 @@ Optional but recommended:
 - If your agent does not execute tools, omit `proposed_actions` and `events`.
 - The evaluator reads response JSON directly from runner artifacts; ensure it is valid JSON.
 
+---
+
+## SDK Quick Start (TypeScript)
+
+```ts
+import { createRunCaseServer, wrapSimpleAgent } from "agent-sdk";
+
+const agent = async ({ user, context }) => {
+  return {
+    workflow_id: "my_agent_v1",
+    final_output: { content_type: "text", content: `ok: ${user}` },
+    events: [],
+  };
+};
+
+createRunCaseServer({
+  port: 8787,
+  handler: wrapSimpleAgent(agent),
+});
+```
+
+Run locally (TypeScript, no build step):
+
+```bash
+npx ts-node scripts/agent-sdk-ts-example.ts
+```
+
+## SDK Quick Start (Python, stdlib)
+
+```py
+from agent_sdk import AgentAdapter  # from scripts/agent-sdk-python/agent_sdk.py (PYTHONPATH)
+
+def handler(req):
+    return {
+        "case_id": req.get("case_id"),
+        "version": req.get("version"),
+        "final_output": {"content_type": "text", "content": "ok"},
+        "events": []
+    }
+
+AgentAdapter(handler).serve(port=8787)
+```
+
+Run directly:
+
+```bash
+PYTHONPATH=scripts/agent-sdk-python python3 -c "from agent_sdk import AgentAdapter; AgentAdapter(lambda req: {'case_id': req.get('case_id'), 'version': req.get('version'), 'final_output': {'content_type': 'text', 'content': 'ok'}, 'events': []}).serve(port=8787)"
+python3 scripts/agent-sdk-python/agent_sdk.py
+```
