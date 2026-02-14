@@ -46,7 +46,7 @@
 - зафиксировать текущую версию и отчёты (correctness + robustness)
 - критерий: отчёт открывается, `summary_by_suite` заполнен
 
-### Checkpoint 1 — CI/E2E
+### Checkpoint 1 — CI/E2E (DONE)
 - добавить интеграционные прогоны `demo:correctness` и `demo:robustness`
 - критерий: CI зелёный, отчёт валиден
 
