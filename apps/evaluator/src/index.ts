@@ -62,6 +62,7 @@ Optional:
   --transferClass   Transfer classification: internal_only (default) or transferable
   --strictPortability  Fail if portability violations are detected
   --strictRedaction    Fail if redaction is applied but sensitive markers remain
+  --warnBodyBytes      Warn when case response JSON exceeds this size (default: 1000000)
   --help, -h        Show this help
 `.trim();
 
@@ -123,6 +124,14 @@ function getArg(name: string): string | null {
 
 function getFlag(name: string): boolean {
   return ARGV.includes(name);
+}
+
+function parseIntFlag(name: string, def: number): number {
+  const raw = getArg(name);
+  if (raw === null) return def;
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n)) throw new CliUsageError(`Invalid integer for ${name}: ${raw}\n\n${HELP_TEXT}`);
+  return n;
 }
 
 function resolveFromRoot(projectRoot: string, p: string): string {
@@ -375,6 +384,7 @@ async function computeQualityFlags(
 ): Promise<QualityFlags> {
   const missing_assets: string[] = [];
   const path_violations: string[] = [];
+  const large_payloads: string[] = [];
 
   for (const e of entries) {
     if (!e.value) continue;
@@ -387,7 +397,9 @@ async function computeQualityFlags(
     if (e.check_exists) {
       const abs = path.resolve(reportDir, e.value);
       const ok = await fileExistsAbs(abs);
-      if (!ok) missing_assets.push(`${e.field}=${e.value}`);
+      if (!ok) {
+        missing_assets.push(`${e.field}=${e.value}`);
+      }
     }
   }
 
@@ -399,8 +411,10 @@ async function computeQualityFlags(
     portable_paths,
     missing_assets_count: missing_assets.length,
     path_violations_count: path_violations.length,
+    large_payloads_count: large_payloads.length,
     missing_assets,
     path_violations,
+    large_payloads,
   };
 }
 
@@ -422,6 +436,7 @@ async function main(): Promise<void> {
       "--transferClass",
       "--strictPortability",
       "--strictRedaction",
+      "--warnBodyBytes",
       "--help",
       "-h",
     ])
@@ -450,6 +465,7 @@ async function main(): Promise<void> {
     throw new CliUsageError(`Invalid --transferClass value: ${transferClassArg}. Must be "internal_only" or "transferable".\n\n${HELP_TEXT}`);
   }
   const transferClass: "internal_only" | "transferable" = transferClassArg;
+  const warnBodyBytes = Math.max(0, parseIntFlag("--warnBodyBytes", 1_000_000));
 
   const reportId = getArg("--reportId") ?? randomUUID();
   const outDirArg = getArg("--outDir") ?? path.join("apps", "evaluator", "reports", reportId);
@@ -916,6 +932,27 @@ async function main(): Promise<void> {
   }
 
   const quality_flags = await computeQualityFlags(reportDirAbs, qualityEntries);
+  if (warnBodyBytes > 0) {
+    const largePayloads: string[] = [];
+    const pushIfLarge = async (side: "baseline" | "new", caseId: string) => {
+      const dirAbs = side === "baseline" ? baselineDirAbs : newDirAbs;
+      const abs = path.join(dirAbs, `${caseId}.json`);
+      try {
+        const st = await stat(abs);
+        if (st.isFile() && st.size > warnBodyBytes) {
+          largePayloads.push(`${side}/${caseId}.json (${st.size} bytes)`);
+        }
+      } catch {
+        // ignore missing files here (covered by availability)
+      }
+    };
+    for (const c of cases) {
+      await pushIfLarge("baseline", c.id);
+      await pushIfLarge("new", c.id);
+    }
+    quality_flags.large_payloads = largePayloads;
+    quality_flags.large_payloads_count = largePayloads.length;
+  }
   if (getFlag("--strictPortability") && !quality_flags.portable_paths) {
     throw new CliUsageError(`Portability violations detected. See quality_flags.path_violations in compare-report.json.\n\n${HELP_TEXT}`);
   }

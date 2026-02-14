@@ -521,6 +521,17 @@ npm -w evaluator run dev -- --cases cases/cases.json \
   --strictRedaction
 ```
 
+Large payload warnings (default 1,000,000 bytes)
+```bash
+npm -w evaluator run dev -- --cases cases/cases.json \
+  --baselineDir apps/runner/runs/baseline/latest \
+  --newDir apps/runner/runs/new/latest \
+  --outDir apps/evaluator/reports/latest \
+  --reportId latest \
+  --transferClass internal_only \
+  --warnBodyBytes 1000000
+```
+
 Demo-agent supported case_ids (baseline and new)
 - fmt_001
 - fmt_002

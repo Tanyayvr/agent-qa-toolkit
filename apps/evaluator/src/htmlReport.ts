@@ -59,8 +59,10 @@ export type QualityFlags = {
   portable_paths: boolean;
   missing_assets_count: number;
   path_violations_count: number;
+  large_payloads_count: number;
   missing_assets: string[];
   path_violations: string[];
+  large_payloads: string[];
 };
 
 export type CompareReport = {
@@ -517,6 +519,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             <div class="k"><div class="v">${escHtml(String(q.portable_paths))}</div><div class="l">portable_paths</div></div>
             <div class="k"><div class="v">${escHtml(String(q.missing_assets_count))}</div><div class="l">missing_assets_count</div></div>
             <div class="k"><div class="v">${escHtml(String(q.path_violations_count))}</div><div class="l">path_violations_count</div></div>
+            <div class="k"><div class="v">${escHtml(String(q.large_payloads_count))}</div><div class="l">large_payloads</div></div>
           </div>
           <div class="muted" style="margin-top:10px;">
             ${q.missing_assets.length
@@ -528,6 +531,12 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             ${q.path_violations.length
               ? `path_violations: ${escHtml(q.path_violations.slice(0, 6).join(" · "))}${q.path_violations.length > 6 ? " …" : ""}`
               : "path_violations: —"
+            }
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            ${q.large_payloads.length
+              ? `large_payloads: ${escHtml(q.large_payloads.slice(0, 4).join(" · "))}${q.large_payloads.length > 4 ? " …" : ""}`
+              : "large_payloads: —"
             }
           </div>
         </div>
