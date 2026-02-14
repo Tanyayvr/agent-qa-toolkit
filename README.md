@@ -279,6 +279,8 @@ Runner calls the agent endpoint:
 
 POST /run-case
 
+Formal spec: `docs/agent-integration-contract.md`
+
 Request body:
 
 ```json

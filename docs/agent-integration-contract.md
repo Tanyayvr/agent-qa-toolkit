@@ -1,0 +1,86 @@
+# Agent Integration Contract (/run-case)
+
+This document defines the minimal HTTP contract required for a real agent to integrate with the toolkit.
+
+---
+
+## Endpoint
+
+```
+POST /run-case
+Content-Type: application/json
+```
+
+Optional headers:
+- `x-redaction-preset`: `none | internal_only | transferable` (demo-agent uses this; real agents may ignore)
+
+---
+
+## Request schema (minimal)
+
+```json
+{
+  "case_id": "tool_001",
+  "version": "baseline",
+  "input": {
+    "user": "Create a ticket for customer CUST-1234",
+    "context": { "any": "json" }
+  }
+}
+```
+
+Fields:
+- `case_id` (string, required)
+- `version` (string, required): `baseline | new`
+- `input.user` (string, required)
+- `input.context` (object, optional)
+
+---
+
+## Response schema (minimal)
+
+```json
+{
+  "case_id": "tool_001",
+  "version": "baseline",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a1",
+      "action_type": "create_ticket",
+      "tool_name": "create_ticket",
+      "params": { "customer_id": "CUST-1234", "summary": "..." },
+      "risk_level": "low",
+      "risk_tags": ["customer_support"],
+      "evidence_refs": [{ "kind": "tool_result", "call_id": "c1" }]
+    }
+  ],
+  "final_output": {
+    "content_type": "json",
+    "content": { "action": "create_ticket", "ticket_id": "T-1234" }
+  },
+  "events": [
+    { "type": "tool_call", "ts": 1738044000123, "call_id": "c1", "tool": "create_ticket", "args": { "customer_id": "CUST-1234" } },
+    { "type": "tool_result", "ts": 1738044000456, "call_id": "c1", "status": "ok", "latency_ms": 333, "payload_summary": { "ticket_id": "T-1234" } },
+    { "type": "final_output", "ts": 1738044001300, "content_type": "json", "content": { "action": "create_ticket", "ticket_id": "T-1234" } }
+  ]
+}
+```
+
+Required response fields:
+- `case_id` (string)
+- `version` (string): `baseline | new`
+- `final_output` (object): `{ content_type: "text|json", content: any }`
+
+Optional but recommended:
+- `workflow_id` (string)
+- `proposed_actions` (array)
+- `events` (array; used for tool trace integrity + security signals)
+
+---
+
+## Notes
+- The toolkit is tolerant to missing `events`, but correctness checks (tool_sequence, tool_required, evidence_required) rely on it.
+- If your agent does not execute tools, omit `proposed_actions` and `events`.
+- The evaluator reads response JSON directly from runner artifacts; ensure it is valid JSON.
+

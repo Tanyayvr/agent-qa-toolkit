@@ -60,6 +60,7 @@
 ### Checkpoint 2 — Integration Contract
 - документ `/run-case` (schema + примеры)
 - критерий: doc опубликован + ссылка в README
+ - файл: `docs/agent-integration-contract.md`
 
 ### Checkpoint 2.5 — Agent Adapter SDK (Python/TS)
 - минимальный SDK/adapter для реальных агентов
