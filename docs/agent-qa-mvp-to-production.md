@@ -79,7 +79,7 @@
 - новый preset (например `transferable_extended`)
 - критерий: unit-тесты зелёные, не ломает matrix suite
 
-### Checkpoint 5 — Self‑Hosted Packaging
+### Checkpoint 5 — Self‑Hosted Packaging (DONE)
 - Docker‑compose или Helm chart
 - air‑gapped режим (без внешних вызовов)
 - критерий: полный пайплайн поднимается одной командой

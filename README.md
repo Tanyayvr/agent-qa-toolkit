@@ -32,6 +32,7 @@ This toolkit is **local-first and self-hosted**:
 This reduces compliance scope: data does not leave your environment unless you export it.
 
 See formal policy: `docs/self-hosted.md`
+Deployment: `docs/self-hosted-deploy.md`
 
 ---
 

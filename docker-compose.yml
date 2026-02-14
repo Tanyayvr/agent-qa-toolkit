@@ -1,0 +1,64 @@
+services:
+  demo-agent:
+    build: .
+    command: ["npm", "-w", "demo-agent", "run", "dev"]
+    ports:
+      - "8787:8787"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8787/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  runner:
+    build: .
+    depends_on:
+      demo-agent:
+        condition: service_healthy
+    command:
+      [
+        "npm",
+        "-w",
+        "runner",
+        "run",
+        "dev",
+        "--",
+        "--baseUrl",
+        "http://demo-agent:8787",
+        "--cases",
+        "cases/all.json",
+        "--outDir",
+        "/app/apps/runner/runs",
+        "--runId",
+        "latest"
+      ]
+    volumes:
+      - ./apps/runner/runs:/app/apps/runner/runs
+
+  evaluator:
+    build: .
+    depends_on:
+      runner:
+        condition: service_completed_successfully
+    command:
+      [
+        "npm",
+        "-w",
+        "evaluator",
+        "run",
+        "dev",
+        "--",
+        "--cases",
+        "cases/all.json",
+        "--baselineDir",
+        "/app/apps/runner/runs/baseline/latest",
+        "--newDir",
+        "/app/apps/runner/runs/new/latest",
+        "--outDir",
+        "/app/apps/evaluator/reports/latest",
+        "--reportId",
+        "latest"
+      ]
+    volumes:
+      - ./apps/runner/runs:/app/apps/runner/runs
+      - ./apps/evaluator/reports:/app/apps/evaluator/reports

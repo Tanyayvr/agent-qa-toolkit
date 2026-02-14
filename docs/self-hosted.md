@@ -8,6 +8,8 @@ It does not require a vendor-hosted backend, cloud storage, or third‑party pro
 
 **All processing, storage, and distribution of report artifacts occur inside the customer’s environment.**
 
+Deployment guide: `docs/self-hosted-deploy.md`
+
 ## 2. Data Handling Statement
 
 - The vendor **does not receive, store, or process** customer data.

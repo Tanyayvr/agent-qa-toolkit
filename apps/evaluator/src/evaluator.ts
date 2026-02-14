@@ -1056,6 +1056,41 @@ export async function runEvaluator(): Promise<void> {
     if (it.data_availability.new.status === "broken") data_coverage.broken_new_artifacts += 1;
   }
 
+  for (const it of items) {
+    const b = baselineById[it.case_id];
+    const n = newById[it.case_id];
+
+    if (!b || !n) {
+      const caseHtml = renderMissingCaseHtml(it.case_id, { baseline: !b, new: !n });
+      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
+      continue;
+    }
+
+    const baseReplay = toReplayResponse(b);
+    const newReplay = toReplayResponse(n);
+
+    const brf = (baseReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
+    if (brf && typeof brf === "object") {
+      if (typeof it.artifacts.baseline_failure_body_href === "string") brf.full_body_saved_to = it.artifacts.baseline_failure_body_href;
+      if (typeof it.artifacts.baseline_failure_meta_href === "string") brf.full_body_meta_saved_to = it.artifacts.baseline_failure_meta_href;
+    }
+
+    const nrf = (newReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
+    if (nrf && typeof nrf === "object") {
+      if (typeof it.artifacts.new_failure_body_href === "string") nrf.full_body_saved_to = it.artifacts.new_failure_body_href;
+      if (typeof it.artifacts.new_failure_meta_href === "string") nrf.full_body_meta_saved_to = it.artifacts.new_failure_meta_href;
+    }
+
+    try {
+      const caseHtml = renderCaseDiffHtml(it.case_id, baseReplay, newReplay);
+      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
+    } catch (e) {
+      const note = e instanceof Error ? e.message : String(e);
+      const fallback = renderMissingCaseHtml(it.case_id, { baseline: false, new: false }, `render_error: ${note}`);
+      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), fallback, "utf-8");
+    }
+  }
+
   const qualityEntries: Array<{ field: string; value: string; check_exists: boolean }> = [];
   qualityEntries.push({ field: "baseline_dir", value: normRel(projectRoot, baselineDirAbs), check_exists: false });
   qualityEntries.push({ field: "new_dir", value: normRel(projectRoot, newDirAbs), check_exists: false });
@@ -1185,42 +1220,6 @@ export async function runEvaluator(): Promise<void> {
     source_manifest_sha256: sha256Hex(manifestJson),
     items: manifest.items.map((it) => ({ manifest_key: it.manifest_key, rel_path: it.rel_path, media_type: it.media_type })),
   };
-
-  for (const it of items) {
-    const b = baselineById[it.case_id];
-    const n = newById[it.case_id];
-
-    if (!b || !n) {
-      const caseHtml = renderMissingCaseHtml(it.case_id, { baseline: !b, new: !n });
-      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
-      continue;
-    }
-
-    const baseReplay = toReplayResponse(b);
-    const newReplay = toReplayResponse(n);
-
-    const brf = (baseReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
-    if (brf && typeof brf === "object") {
-      if (typeof it.artifacts.baseline_failure_body_href === "string") brf.full_body_saved_to = it.artifacts.baseline_failure_body_href;
-      if (typeof it.artifacts.baseline_failure_meta_href === "string") brf.full_body_meta_saved_to = it.artifacts.baseline_failure_meta_href;
-    }
-
-    const nrf = (newReplay as unknown as { runner_failure?: Record<string, unknown> }).runner_failure;
-    if (nrf && typeof nrf === "object") {
-      if (typeof it.artifacts.new_failure_body_href === "string") nrf.full_body_saved_to = it.artifacts.new_failure_body_href;
-      if (typeof it.artifacts.new_failure_meta_href === "string") nrf.full_body_meta_saved_to = it.artifacts.new_failure_meta_href;
-    }
-
-    try {
-      const caseHtml = renderCaseDiffHtml(it.case_id, baseReplay, newReplay);
-      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
-    } catch (e) {
-      const note = e instanceof Error ? e.message : String(e);
-      const fallback = renderMissingCaseHtml(it.case_id, { baseline: false, new: false }, `render_error: ${note}`);
-      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), fallback, "utf-8");
-    }
-  }
-
 
   report.embedded_manifest_index = thinIndex;
 
