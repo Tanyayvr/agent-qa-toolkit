@@ -79,7 +79,7 @@ Artifacts / memory limits:
   --bodySnippetBytes        Error body snippet size in bytes (default: 4000)
   --maxBodyBytes            Max bytes to write/read for a response body (default: 2000000)
   --noSaveFullBodyOnError   Do not write full error bodies to disk (default: save enabled)
-  --redactionPreset         none | internal_only | transferable (default: none)
+  --redactionPreset         none | internal_only | transferable | transferable_extended (default: none)
   --keepRaw                 Keep raw (unsanitized) responses in _raw/ when redaction is enabled
 
   --help, -h                Show this help
@@ -916,8 +916,8 @@ export async function runRunner(): Promise<void> {
   const keepRaw = getFlag("--keepRaw");
 
   const redactionPresetRaw = getArg("--redactionPreset");
-  if (redactionPresetRaw && redactionPresetRaw !== "none" && redactionPresetRaw !== "internal_only" && redactionPresetRaw !== "transferable") {
-    throw new CliUsageError(`Invalid --redactionPreset value: ${redactionPresetRaw}. Must be "none", "internal_only", or "transferable".\n\n${HELP_TEXT}`);
+  if (redactionPresetRaw && redactionPresetRaw !== "none" && redactionPresetRaw !== "internal_only" && redactionPresetRaw !== "transferable" && redactionPresetRaw !== "transferable_extended") {
+    throw new CliUsageError(`Invalid --redactionPreset value: ${redactionPresetRaw}. Must be "none", "internal_only", "transferable", or "transferable_extended".\n\n${HELP_TEXT}`);
   }
   const redactionPreset: RedactionPreset = (redactionPresetRaw ?? "none") as RedactionPreset;
 

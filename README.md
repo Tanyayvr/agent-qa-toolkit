@@ -534,6 +534,10 @@ Runner redaction (production)
 npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable
 
+# Extended redaction preset (phone/IP/JWT/CC patterns)
+npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
+  --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable_extended
+
 # Keep raw (unsanitized) copies under apps/runner/runs/_raw/ (explicit opt-in; avoid for transferable packs)
 npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable --keepRaw

@@ -2,7 +2,7 @@
 //
 // Redaction verification helpers used by evaluator strictRedaction gate.
 
-export type RedactionPreset = "internal_only" | "transferable";
+export type RedactionPreset = "internal_only" | "transferable" | "transferable_extended";
 
 export function findUnredactedMarkers(text: string, preset: RedactionPreset): string[] {
   const markers: Array<{ name: string; re: RegExp }> = [
@@ -11,8 +11,14 @@ export function findUnredactedMarkers(text: string, preset: RedactionPreset): st
     { name: "ticket_id", re: /\bT-\d+\b/ },
     { name: "message_id", re: /\bMSG-\d+\b/ },
   ];
-  if (preset === "transferable") {
+  if (preset === "transferable" || preset === "transferable_extended") {
     markers.push({ name: "token", re: /\b(sk|api|token|secret)[-_]?[a-z0-9]{8,}\b/i });
+  }
+  if (preset === "transferable_extended") {
+    markers.push({ name: "ip", re: /\b\d{1,3}(?:\.\d{1,3}){3}\b/ });
+    markers.push({ name: "phone", re: /(?:\+?\d[\d\s().-]{7,}\d)/ });
+    markers.push({ name: "credit_card", re: /\b(?:\d[ -]*?){13,19}\b/ });
+    markers.push({ name: "jwt", re: /\beyJ[a-zA-Z0-9_-]+?\.[a-zA-Z0-9_-]+?\.[a-zA-Z0-9_-]+?\b/ });
   }
   const hits: string[] = [];
   for (const m of markers) {

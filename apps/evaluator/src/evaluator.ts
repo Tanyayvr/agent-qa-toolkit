@@ -676,7 +676,11 @@ export async function runEvaluator(): Promise<void> {
   let redactionViolations = 0;
   const redactionSamples: string[] = [];
   if (redactionStatus === "applied") {
-    const preset = redactionPresetId === "transferable" ? "transferable" : "internal_only";
+    const preset = redactionPresetId === "transferable_extended"
+      ? "transferable_extended"
+      : redactionPresetId === "transferable"
+        ? "transferable"
+        : "internal_only";
     const allResponses = [
       ...Object.values(baselineById),
       ...Object.values(newById),

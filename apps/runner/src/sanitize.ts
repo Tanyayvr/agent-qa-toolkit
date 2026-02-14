@@ -2,7 +2,7 @@
 //
 // Minimal redaction utilities for runner artifacts.
 
-export type RedactionPreset = "none" | "internal_only" | "transferable";
+export type RedactionPreset = "none" | "internal_only" | "transferable" | "transferable_extended";
 
 function maskString(input: string, preset: RedactionPreset): string {
   if (preset === "none") return input;
@@ -11,8 +11,14 @@ function maskString(input: string, preset: RedactionPreset): string {
   s = s.replace(/\bCUST-\d+\b/g, "CUST-REDACTED");
   s = s.replace(/\bT-\d+\b/g, "T-REDACTED");
   s = s.replace(/\bMSG-\d+\b/g, "MSG-REDACTED");
-  if (preset === "transferable") {
+  if (preset === "transferable" || preset === "transferable_extended") {
     s = s.replace(/\b(sk|api|token|secret)[-_]?[a-z0-9]{8,}\b/gi, "[redacted_token]");
+  }
+  if (preset === "transferable_extended") {
+    s = s.replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g, "[redacted_ip]");
+    s = s.replace(/\b(?:\d[ -]*?){13,19}\b/g, "[redacted_cc]");
+    s = s.replace(/\beyJ[a-zA-Z0-9_-]+?\.[a-zA-Z0-9_-]+?\.[a-zA-Z0-9_-]+?\b/g, "[redacted_jwt]");
+    s = s.replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[redacted_phone]");
   }
   return s;
 }

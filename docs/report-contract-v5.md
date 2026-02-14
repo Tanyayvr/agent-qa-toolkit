@@ -120,6 +120,8 @@ If redaction_status=applied, artifacts/redaction-summary.json MUST exist with:
 
 Redaction MUST update manifest hashes (manifest is the integrity source).
 
+Redaction preset IDs are implementation-defined strings (e.g., `internal_only`, `transferable`, `transferable_extended`).
+
 5. compare-report.json (v5)
 Top-level shape:
 {

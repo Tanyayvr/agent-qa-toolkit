@@ -14,4 +14,10 @@ describe("findUnredactedMarkers", () => {
     expect(findUnredactedMarkers(text, "internal_only")).toEqual([]);
     expect(findUnredactedMarkers(text, "transferable")).toEqual(["token"]);
   });
+
+  it("detects extended markers for transferable_extended", () => {
+    const text = "ip 10.1.2.3 phone +1 415 555 1212 cc 4111-1111-1111-1111 jwt eyJaaa.bbb.ccc";
+    const hits = findUnredactedMarkers(text, "transferable_extended");
+    expect(hits).toEqual(expect.arrayContaining(["ip", "phone", "credit_card", "jwt"]));
+  });
 });

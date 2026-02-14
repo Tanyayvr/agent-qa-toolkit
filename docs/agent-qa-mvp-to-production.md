@@ -74,7 +74,7 @@
 - разнести `runner/index.ts` и `evaluator/index.ts` на модули
 - критерий: старое поведение сохраняется + новый интерфейс подключаем
 
-### Checkpoint 4 — Extended Redaction
+### Checkpoint 4 — Extended Redaction (DONE)
 - добавить расширенные паттерны (phone/IP/JWT/CC)
 - новый preset (например `transferable_extended`)
 - критерий: unit-тесты зелёные, не ломает matrix suite

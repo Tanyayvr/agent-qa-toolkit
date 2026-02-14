@@ -24,6 +24,22 @@ describe("sanitizeValue", () => {
     });
   });
 
+  it("redacts extended markers for transferable_extended", () => {
+    const input = {
+      ip: "192.168.1.10",
+      phone: "+1 (415) 555-1212",
+      cc: "4111 1111 1111 1111",
+      jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWEifQ.sgn1234567890",
+    };
+    const out = sanitizeValue(input, "transferable_extended");
+    expect(out).toEqual({
+      ip: "[redacted_ip]",
+      phone: "[redacted_phone]",
+      cc: "[redacted_cc]",
+      jwt: "[redacted_jwt]",
+    });
+  });
+
   it("preserves values when preset is none", () => {
     const input = { email: "u@x.com", id: "CUST-1", token: "token_aaaabbbb" };
     const out = sanitizeValue(input, "none");

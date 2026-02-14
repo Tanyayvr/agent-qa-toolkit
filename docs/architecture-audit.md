@@ -83,6 +83,7 @@ Evaluator supports `--strictPortability` to fail builds when portability violati
 
 **Redaction enforcement:**  
 Evaluator supports `--strictRedaction` to fail builds if redaction is applied but unredacted markers remain.
+Runner supports extended redaction via `--redactionPreset transferable_extended` (IP/phone/CC/JWT patterns).
 
 **E2E pipeline check:**  
 `npm run demo:e2e` runs correctness + robustness suites back-to-back (lint/typecheck once). Useful as a CI health gate for the pipeline.
