@@ -101,7 +101,8 @@ function fmtJson(v: unknown): string {
   }
 }
 
-function fmtFinal(out: FinalOutput): string {
+function fmtFinal(out: FinalOutput | undefined | null): string {
+  if (!out || typeof out !== "object" || !("content_type" in out)) return "";
   if (out.content_type === "text") return String(out.content ?? "");
   return fmtJson(out.content ?? {});
 }
