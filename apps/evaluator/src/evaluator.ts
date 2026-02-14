@@ -269,7 +269,7 @@ function escHtml(s: string): string {
 
 function findUnredactedMarkersSafe(
   text: string,
-  preset: "internal_only" | "transferable" | null | undefined
+  preset: "internal_only" | "transferable" | "transferable_extended" | null | undefined
 ): string[] {
   if (!preset) return [];
   return findUnredactedMarkers(text, preset);
