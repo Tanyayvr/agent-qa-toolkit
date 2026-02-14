@@ -2,8 +2,31 @@
 import { spawn } from "node:child_process";
 
 const ROOT = process.cwd();
-const BASE_URL = "http://localhost:8787";
-const HEALTH_URL = `${BASE_URL}/health`;
+
+function getArg(name) {
+  const idx = process.argv.indexOf(name);
+  if (idx === -1) return null;
+  const val = process.argv[idx + 1];
+  if (!val || val.startsWith("--")) return null;
+  return val;
+}
+
+function hasFlag(name) {
+  return process.argv.includes(name);
+}
+
+const suite = getArg("--suite");
+const casesFile = getArg("--cases") || (suite === "robustness" ? "cases/matrix.json" : "cases/cases.json");
+const baseUrl = getArg("--baseUrl") || "http://localhost:8787";
+const reportId = getArg("--reportId") || (suite ? `${suite}_latest` : "latest");
+const onlyList = getArg("--only");
+const skipAudit = hasFlag("--skipAudit") || process.env.SKIP_AUDIT === "1";
+const skipLint = hasFlag("--skipLint") || process.env.SKIP_LINT === "1";
+const skipTypecheck = hasFlag("--skipTypecheck") || process.env.SKIP_TYPECHECK === "1";
+
+const HEALTH_URL = `${baseUrl}/health`;
+const baseUrlObj = new URL(baseUrl);
+const basePort = baseUrlObj.port ? Number(baseUrlObj.port) : (baseUrlObj.protocol === "https:" ? 443 : 80);
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -40,9 +63,11 @@ function run(cmd, args, label) {
 }
 
 async function main() {
-  await run("npm", ["run", "lint"], "lint");
-  await run("npm", ["run", "typecheck"], "typecheck");
-  await run("npm", ["run", "audit"], "audit");
+  if (!skipLint) await run("npm", ["run", "lint"], "lint");
+  if (!skipTypecheck) await run("npm", ["run", "typecheck"], "typecheck");
+  if (!skipAudit) {
+    await run("npm", ["run", "audit"], "audit");
+  }
 
   let agent = null;
 
@@ -52,7 +77,7 @@ async function main() {
     agent = spawn("npm", ["-w", "demo-agent", "run", "dev"], {
       stdio: "inherit",
       cwd: ROOT,
-      env: process.env
+      env: { ...process.env, PORT: String(basePort) }
     });
     await waitForHealth();
   }
@@ -69,15 +94,14 @@ async function main() {
         "--repoRoot",
         ROOT,
         "--baseUrl",
-        BASE_URL,
+        baseUrl,
         "--cases",
-        "cases/cases.json",
-        "--only",
-        "tool_001,fmt_002,data_001,fail_001,tool_003,fetch_http_500_001,fetch_invalid_json_001,fetch_timeout_001,fetch_network_drop_001",
+        casesFile,
+        ...(onlyList ? ["--only", onlyList] : []),
         "--outDir",
         "apps/runner/runs",
         "--runId",
-        "latest"
+        reportId
       ],
       "runner"
     );
@@ -91,20 +115,20 @@ async function main() {
         "dev",
         "--",
         "--cases",
-        "cases/cases.json",
+        casesFile,
         "--baselineDir",
-        "apps/runner/runs/baseline/latest",
+        `apps/runner/runs/baseline/${reportId}`,
         "--newDir",
-        "apps/runner/runs/new/latest",
+        `apps/runner/runs/new/${reportId}`,
         "--outDir",
-        "apps/evaluator/reports/latest",
+        `apps/evaluator/reports/${reportId}`,
         "--reportId",
-        "latest"
+        reportId
       ],
       "evaluator"
     );
 
-    console.log("Demo finished: apps/evaluator/reports/latest/report.html");
+    console.log(`Demo finished: apps/evaluator/reports/${reportId}/report.html`);
   } finally {
     if (agent) {
       agent.kill("SIGTERM");

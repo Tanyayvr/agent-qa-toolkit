@@ -130,6 +130,7 @@ Top-level shape:
   "cases_path": "...",
   "repro": { "bundle_manifest_href": "...", "how_to_reproduce_href": "..." },
   "summary": { ... },
+  "summary_by_suite": { "correctness": { ... }, "robustness": { ... } },
   "quality_flags": { ... },
   "items": [ ... ]
 }
@@ -148,6 +149,7 @@ Quality flags (recommended fields):
 Each item includes:
 - case_id (non-empty)
 - title
+- suite (optional, e.g. "correctness" | "robustness")
 - case_status: executed | skipped | filtered_out
 - case_status_reason (optional)
 - data_availability (baseline/new status + reason_code/details)

@@ -41,6 +41,7 @@ export type Expected = {
 export type Case = {
     id: string;
     title: string;
+    suite?: string;
     input: { user: string; context?: unknown };
     expected: Expected;
 };

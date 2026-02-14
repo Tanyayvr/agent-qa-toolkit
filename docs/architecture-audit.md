@@ -68,8 +68,12 @@ Evaluator `main()` iterates all cases from `readCases()` and pushes one item per
 
 ---
 
+**Suites (correctness vs robustness):**  
+Cases now support `suite` to separate semantic correctness checks from robustness/transport checks.  
+`cases/cases.json` is `suite=correctness`, `cases/matrix.json` is `suite=robustness`, and `cases/all.json` combines both with `summary_by_suite` emitted in the report.
+
 **Matrix coverage (demo-agent + `cases/matrix.json`):**  
-Network failures (500/timeout/drop/partial), data shape errors (invalid JSON, empty body, missing fields, wrong types, extra fields), and large payloads (1MB/5MB) are supported in the demo-agent for systematic validation.  
+Network failures (500/timeout/drop/partial), data shape errors (invalid JSON, empty body, missing fields, wrong types, extra fields), and large payloads (1MB/5MB + huge string) are supported in the demo-agent for systematic validation.  
 Note: `loadtest` validates transport-level success only (HTTP status + timing). It does not parse JSON or validate schemas.
 
 ---
@@ -79,6 +83,9 @@ Evaluator supports `--strictPortability` to fail builds when portability violati
 
 **Redaction enforcement:**  
 Evaluator supports `--strictRedaction` to fail builds if redaction is applied but unredacted markers remain.
+
+**E2E pipeline check:**  
+`npm run demo:e2e` runs correctness + robustness suites back-to-back (lint/typecheck once). Useful as a CI health gate for the pipeline.
 
 **Raw retention:**  
 Runner supports `--keepRaw` to store unsanitized responses under `_raw/`. This is opt-in and should be avoided for transferable packs.

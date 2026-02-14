@@ -15,7 +15,10 @@
     "loadtest": "ts-node apps/runner/src/load-test.ts",
     "test": "vitest run",
     "audit": "npm audit",
-    "demo": "node scripts/demo.mjs"
+    "demo": "node scripts/demo.mjs",
+    "demo:correctness": "node scripts/demo.mjs --suite correctness",
+    "demo:robustness": "node scripts/demo.mjs --suite robustness",
+    "demo:e2e": "node scripts/demo-e2e.mjs"
   },
   "overrides": {
     "qs": "6.14.2"

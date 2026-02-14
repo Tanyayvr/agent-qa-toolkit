@@ -54,6 +54,7 @@ This is **correctly split**:
 - These are **test fixtures** for exercising runner/evaluator behavior under network/data edge cases
 - Not expected for real agents — against a real agent, these case IDs would return 404
 - Runner and evaluator process them normally as any other case
+- These cases are tagged `suite=robustness` and appear under `summary_by_suite` in the report
 
 **No pipeline gap** — this is by design. Documentation should state: matrix cases are demo-agent test fixtures.
 

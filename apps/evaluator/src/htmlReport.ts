@@ -115,11 +115,40 @@ export type CompareReport = {
     };
   };
 
+  summary_by_suite?: Record<string, {
+    baseline_pass: number;
+    new_pass: number;
+    regressions: number;
+    improvements: number;
+    root_cause_breakdown: Record<string, number>;
+    security: {
+      total_cases: number;
+      cases_with_signals_new: number;
+      cases_with_signals_baseline: number;
+      signal_counts_new: Record<SignalSeverity, number>;
+      signal_counts_baseline: Record<SignalSeverity, number>;
+      top_signal_kinds_new: string[];
+      top_signal_kinds_baseline: string[];
+    };
+    risk_summary: { low: number; medium: number; high: number };
+    cases_requiring_approval: number;
+    cases_block_recommended: number;
+    data_coverage: {
+      total_cases: number;
+      items_emitted: number;
+      missing_baseline_artifacts: number;
+      missing_new_artifacts: number;
+      broken_baseline_artifacts: number;
+      broken_new_artifacts: number;
+    };
+  }>;
+
   quality_flags: QualityFlags;
 
   items: Array<{
     case_id: string;
     title: string;
+    suite?: string;
 
     data_availability: {
       baseline: { status: "present" | "missing" | "broken"; reason?: string; reason_code?: string; details?: Record<string, unknown> };
@@ -202,6 +231,10 @@ function gateBadge(g: "none" | "require_approval" | "block"): string {
   if (g === "block") return badge("block", "bad");
   if (g === "require_approval") return badge("approve", "mid");
   return badge("none", "ok");
+}
+
+function failureBadge(): string {
+  return badge("runner_failure", "bad");
 }
 
 function linkIfPresent(href: string | undefined, label: string): string {
@@ -302,6 +335,42 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
   const q = report.quality_flags;
 
+  const suiteSummaries = report.summary_by_suite ?? {};
+  const suiteEntries = Object.entries(suiteSummaries);
+  const suiteBlocks = suiteEntries
+    .map(([suite, ss]) => {
+      return `
+<div class="card" style="margin-top:12px;">
+  <div style="font-size:14px;font-weight:900;">Suite: ${escHtml(suite)}</div>
+  <div class="kpi" style="margin-top:10px;">
+    <div class="k"><div class="v">${escHtml(String(ss.baseline_pass))}</div><div class="l">baseline pass</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.new_pass))}</div><div class="l">new pass</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.regressions))}</div><div class="l">regressions</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.improvements))}</div><div class="l">improvements</div></div>
+  </div>
+  <div class="kpi" style="margin-top:10px;">
+    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.low))}</div><div class="l">risk low</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.medium))}</div><div class="l">risk medium</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.high))}</div><div class="l">risk high</div></div>
+  </div>
+  <div class="kpi" style="margin-top:10px;">
+    <div class="k"><div class="v">${escHtml(String(ss.cases_requiring_approval))}</div><div class="l">require approval</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.cases_block_recommended))}</div><div class="l">block recommended</div></div>
+  </div>
+  <div class="kpi" style="margin-top:10px;">
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.missing_baseline_artifacts))}</div><div class="l">missing baseline</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.missing_new_artifacts))}</div><div class="l">missing new</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_baseline_artifacts))}</div><div class="l">broken baseline</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_new_artifacts))}</div><div class="l">broken new</div></div>
+  </div>
+</div>`;
+    })
+    .join("");
+
+  const suiteOptions = suiteEntries
+    .map(([suite]) => `<option value="${escHtml(suite)}">Suite: ${escHtml(suite)}</option>`)
+    .join("");
+
   const sec = s.security;
   const secBlock = `
 <div class="card" style="margin-top:14px;">
@@ -335,6 +404,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
   const rows = report.items
     .map((it) => {
+      const suite = it.suite ?? "default";
       const base = it.baseline_pass ? badge("PASS", "ok") : badge("FAIL", "bad");
       const neu = it.new_pass ? badge("PASS", "ok") : badge("FAIL", "bad");
 
@@ -381,8 +451,9 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
       const preventable = it.preventable_by_policy ? badge("preventable", "mid") : `<span class="muted">—</span>`;
 
+      const hasFailure = Boolean(it.failure_summary?.baseline || it.failure_summary?.new);
       return `
-<tr data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}">
+<tr data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}">
   <td>
     <div class="caseTitle">${titleLink}</div>
     <div class="muted">${escHtml(it.title || "")}</div>
@@ -390,6 +461,8 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       ${riskBadge(it.risk_level)}
       ${gateBadge(it.gate_recommendation)}
       <span class="metaChip">${escHtml(it.case_status)}</span>
+      <span class="metaChip">${escHtml(suite)}</span>
+      ${hasFailure ? failureBadge() : ""}
     </div>
   </td>
   <td>${base}</td>
@@ -484,9 +557,9 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
     </div>
 
     <div class="grid">
-      <div class="side">
-        <div class="card">
-          <div style="font-size:16px;font-weight:900;">Summary</div>
+    <div class="side">
+      <div class="card">
+        <div style="font-size:16px;font-weight:900;">Summary</div>
           <div class="kpi">
             <div class="k"><div class="v">${escHtml(String(s.baseline_pass))}</div><div class="l">baseline pass</div></div>
             <div class="k"><div class="v">${escHtml(String(s.new_pass))}</div><div class="l">new pass</div></div>
@@ -541,10 +614,16 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           </div>
         </div>
 
+        ${suiteBlocks}
+
         <div class="card" style="margin-top:16px;">
           <div style="font-size:16px;font-weight:900;">Filters</div>
           <div class="filters">
             <input id="filterText" type="text" placeholder="Search case id or title" />
+            <select id="filterSuite">
+              <option value="">Suite: all</option>
+              ${suiteOptions}
+            </select>
             <select id="filterRisk">
               <option value="">Risk: all</option>
               <option value="low">Risk: low</option>
@@ -637,6 +716,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       }
 
       var filterText = document.getElementById("filterText");
+      var filterSuite = document.getElementById("filterSuite");
       var filterRisk = document.getElementById("filterRisk");
       var filterGate = document.getElementById("filterGate");
       var filterStatus = document.getElementById("filterStatus");
@@ -644,6 +724,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
       function applyFilters() {
         var text = (filterText && filterText.value || "").toLowerCase();
+        var suite = filterSuite && filterSuite.value || "";
         var risk = filterRisk && filterRisk.value || "";
         var gate = filterGate && filterGate.value || "";
         var status = filterStatus && filterStatus.value || "";
@@ -655,9 +736,11 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           var rRisk = r.getAttribute("data-risk") || "";
           var rGate = r.getAttribute("data-gate") || "";
           var rStatus = r.getAttribute("data-status") || "";
+          var rSuite = r.getAttribute("data-suite") || "";
 
           var ok = true;
           if (text && !(caseId.includes(text) || title.includes(text))) ok = false;
+          if (suite && rSuite !== suite) ok = false;
           if (risk && rRisk !== risk) ok = false;
           if (gate && rGate !== gate) ok = false;
           if (status && rStatus !== status) ok = false;
@@ -666,6 +749,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       }
 
       if (filterText) filterText.addEventListener("input", applyFilters);
+      if (filterSuite) filterSuite.addEventListener("change", applyFilters);
       if (filterRisk) filterRisk.addEventListener("change", applyFilters);
       if (filterGate) filterGate.addEventListener("change", applyFilters);
       if (filterStatus) filterStatus.addEventListener("change", applyFilters);

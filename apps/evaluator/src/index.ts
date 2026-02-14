@@ -139,9 +139,131 @@ function resolveFromRoot(projectRoot: string, p: string): string {
   return path.resolve(projectRoot, p);
 }
 
+type SuiteSummary = {
+  baseline_pass: number;
+  new_pass: number;
+  regressions: number;
+  improvements: number;
+  root_cause_breakdown: Record<string, number>;
+  security: {
+    total_cases: number;
+    cases_with_signals_new: number;
+    cases_with_signals_baseline: number;
+    signal_counts_new: Record<"low" | "medium" | "high" | "critical", number>;
+    signal_counts_baseline: Record<"low" | "medium" | "high" | "critical", number>;
+    top_signal_kinds_new: string[];
+    top_signal_kinds_baseline: string[];
+  };
+  risk_summary: { low: number; medium: number; high: number };
+  cases_requiring_approval: number;
+  cases_block_recommended: number;
+  data_coverage: {
+    total_cases: number;
+    items_emitted: number;
+    missing_baseline_artifacts: number;
+    missing_new_artifacts: number;
+    broken_baseline_artifacts: number;
+    broken_new_artifacts: number;
+  };
+};
+
+function initSuiteSummary(): SuiteSummary {
+  return {
+    baseline_pass: 0,
+    new_pass: 0,
+    regressions: 0,
+    improvements: 0,
+    root_cause_breakdown: {},
+    security: {
+      total_cases: 0,
+      cases_with_signals_new: 0,
+      cases_with_signals_baseline: 0,
+      signal_counts_new: severityCountsInit(),
+      signal_counts_baseline: severityCountsInit(),
+      top_signal_kinds_new: [],
+      top_signal_kinds_baseline: [],
+    },
+    risk_summary: { low: 0, medium: 0, high: 0 },
+    cases_requiring_approval: 0,
+    cases_block_recommended: 0,
+    data_coverage: {
+      total_cases: 0,
+      items_emitted: 0,
+      missing_baseline_artifacts: 0,
+      missing_new_artifacts: 0,
+      broken_baseline_artifacts: 0,
+      broken_new_artifacts: 0,
+    },
+  };
+}
+
+function computeSummaryBySuite(items: CompareReport["items"]): Record<string, SuiteSummary> {
+  const suites: Record<string, SuiteSummary & { _baselineSignals: SecuritySignal[]; _newSignals: SecuritySignal[] }> = {};
+
+  for (const it of items) {
+    const suite = it.suite ?? "default";
+    if (!suites[suite]) {
+      suites[suite] = { ...initSuiteSummary(), _baselineSignals: [], _newSignals: [] };
+    }
+    const s = suites[suite]!;
+    s.security.total_cases += 1;
+    s.data_coverage.total_cases += 1;
+    s.data_coverage.items_emitted += 1;
+
+    if (it.baseline_pass) s.baseline_pass += 1;
+    if (it.new_pass) s.new_pass += 1;
+    if (it.baseline_pass && !it.new_pass) s.regressions += 1;
+    if (!it.baseline_pass && it.new_pass) s.improvements += 1;
+
+    if (it.data_availability.baseline.status === "missing") s.data_coverage.missing_baseline_artifacts += 1;
+    if (it.data_availability.baseline.status === "broken") s.data_coverage.broken_baseline_artifacts += 1;
+    if (it.data_availability.new.status === "missing") s.data_coverage.missing_new_artifacts += 1;
+    if (it.data_availability.new.status === "broken") s.data_coverage.broken_new_artifacts += 1;
+
+    s.risk_summary[it.risk_level] += 1;
+    if (it.gate_recommendation === "require_approval") s.cases_requiring_approval += 1;
+    if (it.gate_recommendation === "block") s.cases_block_recommended += 1;
+
+    if (!it.new_pass && it.new_root) {
+      s.root_cause_breakdown[it.new_root] = (s.root_cause_breakdown[it.new_root] ?? 0) + 1;
+    }
+
+    const bSigs = it.security.baseline.signals;
+    const nSigs = it.security.new.signals;
+    if (bSigs.length) s.security.cases_with_signals_baseline += 1;
+    if (nSigs.length) s.security.cases_with_signals_new += 1;
+    for (const sig of bSigs) {
+      bumpCounts(s.security.signal_counts_baseline, sig.severity);
+      s._baselineSignals.push(sig);
+    }
+    for (const sig of nSigs) {
+      bumpCounts(s.security.signal_counts_new, sig.severity);
+      s._newSignals.push(sig);
+    }
+  }
+
+  const out: Record<string, SuiteSummary> = {};
+  for (const [suite, s] of Object.entries(suites)) {
+    const { _baselineSignals, _newSignals, ...rest } = s;
+    rest.security.top_signal_kinds_baseline = topKinds(_baselineSignals);
+    rest.security.top_signal_kinds_new = topKinds(_newSignals);
+    out[suite] = rest;
+  }
+  return out;
+}
+
 function normRel(fromDir: string, absPath: string): string {
   const rel = path.relative(fromDir, absPath).split(path.sep).join("/");
   return rel.length ? rel : ".";
+}
+
+function escHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function findUnredactedMarkersSafe(
@@ -156,7 +278,7 @@ async function ensureDir(p: string): Promise<void> {
   await mkdir(p, { recursive: true });
 }
 
-function renderMissingCaseHtml(caseId: string, missing: { baseline: boolean; new: boolean }): string {
+function renderMissingCaseHtml(caseId: string, missing: { baseline: boolean; new: boolean }, note?: string): string {
   const title = `Replay diff · ${caseId}`;
   const msg = [
     missing.baseline ? "baseline response missing" : "",
@@ -164,6 +286,7 @@ function renderMissingCaseHtml(caseId: string, missing: { baseline: boolean; new
   ]
     .filter(Boolean)
     .join(" · ");
+  const noteBlock = note ? `<div class="muted" style="margin-top:6px;">${escHtml(note)}</div>` : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -188,6 +311,7 @@ function renderMissingCaseHtml(caseId: string, missing: { baseline: boolean; new
     <div class="card" style="margin-top:12px;">
       <div style="font-weight:700;">Missing response</div>
       <div class="muted" style="margin-top:6px;">${msg || "unknown"}</div>
+      ${noteBlock}
     </div>
     <div style="margin-top:12px;"><a href="report.html">Back to report</a></div>
   </div>
@@ -203,9 +327,11 @@ async function readCases(casesPath: string): Promise<Case[]> {
   return arr.map((x) => {
     const obj = x as Record<string, unknown>;
     const input = (obj.input ?? {}) as Record<string, unknown>;
+    const suite = typeof obj.suite === "string" && obj.suite.length ? obj.suite : undefined;
     return {
       id: String(obj.id),
       title: String(obj.title ?? ""),
+      ...(suite ? { suite } : {}),
       input: { user: String(input.user ?? ""), context: input.context },
       expected: (obj.expected ?? {}) as Expected,
     };
@@ -506,6 +632,10 @@ async function main(): Promise<void> {
   const breakdown: Record<string, number> = {};
 
   const items: CompareReport["items"] = [];
+  const suiteById = new Map<string, string>();
+  for (const c of cases) {
+    suiteById.set(c.id, c.suite ?? "default");
+  }
 
   const baselineRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "baseline", srcAbs: path.join(baselineDirAbs, "run.json") });
   const newRunHref = await copyRunMetaJson({ reportDir: reportDirAbs, version: "new", srcAbs: path.join(newDirAbs, "run.json") });
@@ -828,9 +958,11 @@ async function main(): Promise<void> {
     if (fsNew) failureSummary.new = fsNew;
     const hasFailureSummary = Boolean(failureSummary.baseline || failureSummary.new);
 
+    const suite = suiteById.get(c.id);
     const item: CompareReport["items"][number] = {
       case_id: c.id,
       title: c.title,
+      ...(suite ? { suite } : {}),
       data_availability: { baseline: baselineAvail, new: newAvail },
       case_status: caseStatus,
       baseline_pass: baselinePassFlag,
@@ -957,6 +1089,8 @@ async function main(): Promise<void> {
     throw new CliUsageError(`Portability violations detected. See quality_flags.path_violations in compare-report.json.\n\n${HELP_TEXT}`);
   }
 
+  const summary_by_suite = computeSummaryBySuite(items);
+
   const report: CompareReport & { embedded_manifest_index?: ThinIndex } = {
     contract_version: 5,
     report_id: reportId,
@@ -988,6 +1122,7 @@ async function main(): Promise<void> {
       cases_block_recommended,
       data_coverage,
     },
+    summary_by_suite,
     quality_flags,
     items,
   };
@@ -1058,8 +1193,14 @@ async function main(): Promise<void> {
       if (typeof it.artifacts.new_failure_meta_href === "string") nrf.full_body_meta_saved_to = it.artifacts.new_failure_meta_href;
     }
 
-    const caseHtml = renderCaseDiffHtml(it.case_id, baseReplay, newReplay);
-    await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
+    try {
+      const caseHtml = renderCaseDiffHtml(it.case_id, baseReplay, newReplay);
+      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), caseHtml, "utf-8");
+    } catch (e) {
+      const note = e instanceof Error ? e.message : String(e);
+      const fallback = renderMissingCaseHtml(it.case_id, { baseline: false, new: false }, `render_error: ${note}`);
+      await writeFile(path.join(reportDirAbs, `case-${it.case_id}.html`), fallback, "utf-8");
+    }
   }
 
 

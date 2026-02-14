@@ -219,6 +219,31 @@ Produces:
 
 `apps/evaluator/reports/latest/compare-report.json`
 
+Suite-specific demo runs:
+
+```bash
+npm run demo:correctness
+npm run demo:robustness
+```
+
+These write reports to:
+
+`apps/evaluator/reports/correctness_latest/`
+
+`apps/evaluator/reports/robustness_latest/`
+
+E2E demo (runs correctness + robustness, lint/typecheck once):
+
+```bash
+npm run demo:e2e
+```
+
+Note: if `npm audit` is blocked by network policy, run with `--skipAudit`:
+
+```bash
+node scripts/demo.mjs --suite correctness --skipAudit
+```
+
 `apps/evaluator/reports/latest/case-<id>.html`
 
 `apps/evaluator/reports/latest/assets/`
@@ -385,6 +410,8 @@ Adding or editing test cases
 Cases live in:
 
 `cases/cases.json`
+`cases/matrix.json` (robustness / edge cases)
+`cases/all.json` (combined correctness + robustness; each case has `suite`)
 
 Format: JSON array of case objects:
 
@@ -393,6 +420,7 @@ Format: JSON array of case objects:
   {
     "id": "tool_001",
     "title": "Must use get_customer before creating ticket",
+    "suite": "correctness",
     "input": { "user": "..." },
     "expected": {
       "tool_sequence": ["get_customer", "create_ticket"],
@@ -401,6 +429,9 @@ Format: JSON array of case objects:
   }
 ]
 ```
+Notes:
+- `suite` is optional. Use it to group cases in the report (e.g. `correctness` vs `robustness`).
+  For combined runs, use `cases/all.json` so both suites appear in one report.
 expected supports (Stage 1):
 
 action_required
