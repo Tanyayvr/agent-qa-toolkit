@@ -90,6 +90,9 @@ Evaluator supports `--strictRedaction` to fail builds if redaction is applied bu
 **Toolkit tests:**  
 `npm run test:toolkit` validates report schema shape, gate expectations for known cases, and portability (hrefs resolve, assets exist).
 
+**Security plugins:**  
+Evaluator now exposes a `SecurityScanner` interface (`apps/evaluator/src/securityScanner.ts`) to allow sidecar scanners (Presidio/TruffleHog) to append signals without replacing core regex checks.
+
 **Raw retention:**  
 Runner supports `--keepRaw` to store unsanitized responses under `_raw/`. This is opt-in and should be avoided for transferable packs.
 

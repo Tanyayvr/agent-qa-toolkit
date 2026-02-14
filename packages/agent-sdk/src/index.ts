@@ -102,10 +102,10 @@ export function wrapSimpleAgent(agent: SimpleAgent): RunCaseHandler {
     return {
       case_id: req.case_id,
       version: req.version,
-      workflow_id: out.workflow_id,
-      proposed_actions: out.proposed_actions,
-      events: out.events,
       final_output: out.final_output,
+      ...(out.workflow_id ? { workflow_id: out.workflow_id } : {}),
+      ...(out.proposed_actions ? { proposed_actions: out.proposed_actions } : {}),
+      ...(out.events ? { events: out.events } : {}),
     };
   };
 }

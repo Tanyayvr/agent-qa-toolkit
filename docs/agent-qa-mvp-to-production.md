@@ -67,7 +67,7 @@
 - поддержка: raw HTTP, LangChain/CrewAI (минимум один адаптер)
 - критерий: агент можно поднять через SDK и прогнать `cases/cases.json`
 
-### Checkpoint 3 — Security Plugins + Refactor (together)
+### Checkpoint 3 — Security Plugins + Refactor (together) (DONE)
 - интерфейс `SecurityScanner`
 - regex остаётся default
 - подготовка под sidecar scanners (Presidio, TruffleHog)
