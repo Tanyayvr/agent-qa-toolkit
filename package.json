@@ -18,7 +18,8 @@
     "demo": "node scripts/demo.mjs",
     "demo:correctness": "node scripts/demo.mjs --suite correctness",
     "demo:robustness": "node scripts/demo.mjs --suite robustness",
-    "demo:e2e": "node scripts/demo-e2e.mjs"
+    "demo:e2e": "node scripts/demo-e2e.mjs",
+    "test:toolkit": "node scripts/toolkit-tests.mjs"
   },
   "overrides": {
     "qs": "6.14.2"

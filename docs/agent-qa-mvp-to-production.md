@@ -50,11 +50,12 @@
 - добавить интеграционные прогоны `demo:correctness` и `demo:robustness`
 - критерий: CI зелёный, отчёт валиден
 
-### Checkpoint 1.5 — Toolkit Tests (E2E + Contract + Portability)
+### Checkpoint 1.5 — Toolkit Tests (E2E + Contract + Portability) (DONE)
 - E2E test: runner → demo-agent → evaluator → validate compare-report.json schema
 - Contract test: gate_recommendation == expected for fixed cases
 - Portability test: report dir копируется в /tmp, HTML открывается, ссылки работают
 - критерий: 3 теста проходят в CI
+ - команда: `npm run test:toolkit`
 
 ### Checkpoint 2 — Integration Contract
 - документ `/run-case` (schema + примеры)

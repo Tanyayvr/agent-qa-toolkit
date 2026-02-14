@@ -87,6 +87,9 @@ Evaluator supports `--strictRedaction` to fail builds if redaction is applied bu
 **E2E pipeline check:**  
 `npm run demo:e2e` runs correctness + robustness suites back-to-back (lint/typecheck once). Useful as a CI health gate for the pipeline.
 
+**Toolkit tests:**  
+`npm run test:toolkit` validates report schema shape, gate expectations for known cases, and portability (hrefs resolve, assets exist).
+
 **Raw retention:**  
 Runner supports `--keepRaw` to store unsanitized responses under `_raw/`. This is opt-in and should be avoided for transferable packs.
 

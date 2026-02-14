@@ -238,6 +238,12 @@ E2E demo (runs correctness + robustness, lint/typecheck once):
 npm run demo:e2e
 ```
 
+Toolkit tests (E2E + contract + portability checks):
+
+```bash
+npm run test:toolkit
+```
+
 Note: if `npm audit` is blocked by network policy, run with `--skipAudit`:
 
 ```bash
