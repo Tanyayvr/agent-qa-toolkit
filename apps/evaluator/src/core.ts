@@ -140,7 +140,8 @@ export function extractToolResultsWithToolName(events: RunEvent[]): ToolResultWi
     return out;
 }
 
-export function stringifyOutput(out: FinalOutput): string {
+export function stringifyOutput(out: FinalOutput | undefined | null): string {
+    if (!out || typeof out !== "object" || !("content_type" in out)) return "";
     if (out.content_type === "text") return String(out.content ?? "");
     try {
         return JSON.stringify(out.content ?? {}, null, 2);
