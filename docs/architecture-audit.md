@@ -83,6 +83,9 @@ Evaluator supports `--strictRedaction` to fail builds if redaction is applied bu
 **Raw retention:**  
 Runner supports `--keepRaw` to store unsanitized responses under `_raw/`. This is opt-in and should be avoided for transferable packs.
 
+**Large payload warnings:**  
+Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case responses in `quality_flags.large_payloads`.
+
 ## Category Details
 
 ### 1. Architecture and Boundaries

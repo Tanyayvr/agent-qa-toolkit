@@ -499,6 +499,8 @@ npm run loadtest -- --baseUrl http://localhost:8787 --cases cases/matrix.json \
   --outJson /tmp/matrix.json --outCsv /tmp/matrix.csv
 ```
 
+Note: `cases/matrix.json` includes `matrix_data_huge_string_900k` to validate large-but-valid payloads.
+
 Strict portability checks (fail on violations)
 ```bash
 npm -w evaluator run dev -- --cases cases/cases.json \

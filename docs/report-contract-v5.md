@@ -134,6 +134,16 @@ Top-level shape:
   "items": [ ... ]
 }
 
+Quality flags (recommended fields):
+- self_contained: boolean
+- portable_paths: boolean
+- missing_assets_count: number
+- path_violations_count: number
+- large_payloads_count: number (case response files exceeding warnBodyBytes)
+- missing_assets: string[]
+- path_violations: string[]
+- large_payloads: string[] (e.g., "baseline/case_1.json (1200345 bytes)")
+
 6. Items (MUST)
 Each item includes:
 - case_id (non-empty)

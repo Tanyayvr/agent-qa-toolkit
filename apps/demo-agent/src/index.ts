@@ -202,6 +202,21 @@ async function handleMatrixCase(caseId: string, version: "baseline" | "new", res
       );
       return true;
     }
+    case "matrix_data_huge_string_900k": {
+      sendJson(
+        res,
+        {
+          case_id: caseId,
+          version,
+          workflow_id: "matrix_v1",
+          proposed_actions: [],
+          final_output: { content_type: "text", content: bigString(900_000, "X") },
+          events: []
+        },
+        preset
+      );
+      return true;
+    }
     default:
       return false;
   }

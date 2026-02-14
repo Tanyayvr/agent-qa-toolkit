@@ -83,4 +83,12 @@
     "expected": {},
     "metadata": { "tags": ["matrix", "data", "large", "5mb"], "severity": "high", "kind": "data_failure" }
   }
+  ,
+  {
+    "id": "matrix_data_huge_string_900k",
+    "title": "Data: huge string payload (~900KB, valid JSON)",
+    "input": { "user": "Return huge string within valid JSON" },
+    "expected": {},
+    "metadata": { "tags": ["matrix", "data", "large", "string"], "severity": "medium", "kind": "data_variation" }
+  }
 ]
