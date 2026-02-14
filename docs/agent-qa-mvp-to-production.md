@@ -92,7 +92,7 @@
 - автоудаление reports старше N дней
 - критерий: retention работает в тесте
 
-### Checkpoint 6c — RBAC (после multi-user)
+### Checkpoint 6c — RBAC (deferred until multi-user)
 - локальные роли/permissions
 - критерий: доступ к reports ограничен по ролям
 
