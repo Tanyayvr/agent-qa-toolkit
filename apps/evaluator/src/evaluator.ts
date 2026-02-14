@@ -1,6 +1,6 @@
 //tool/apps/evaluator/src/index.ts
 import path from "node:path";
-import { mkdir, readFile, writeFile, stat, appendFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, stat, appendFile, rm, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import Ajv from "ajv";
 import {
@@ -64,6 +64,7 @@ Optional:
   --strictPortability  Fail if portability violations are detected
   --strictRedaction    Fail if redaction is applied but sensitive markers remain
   --warnBodyBytes      Warn when case response JSON exceeds this size (default: 1000000)
+  --retentionDays      Delete report directories older than N days (default: 0 = disabled)
   --help, -h        Show this help
 `.trim();
 
@@ -575,6 +576,7 @@ export async function runEvaluator(): Promise<void> {
       "--strictPortability",
       "--strictRedaction",
       "--warnBodyBytes",
+      "--retentionDays",
       "--help",
       "-h",
     ])
@@ -585,6 +587,7 @@ export async function runEvaluator(): Promise<void> {
   assertHasValue("--outDir");
   assertHasValue("--reportId");
   assertHasValue("--transferClass");
+  assertHasValue("--retentionDays");
 
   const casesArg = getArg("--cases");
   const baselineArg = getArg("--baselineDir");
@@ -604,6 +607,7 @@ export async function runEvaluator(): Promise<void> {
   }
   const transferClass: "internal_only" | "transferable" = transferClassArg;
   const warnBodyBytes = Math.max(0, parseIntFlag("--warnBodyBytes", 1_000_000));
+  const retentionDays = Math.max(0, parseIntFlag("--retentionDays", 0));
 
   const reportId = getArg("--reportId") ?? randomUUID();
   const outDirArg = getArg("--outDir") ?? path.join("apps", "evaluator", "reports", reportId);
@@ -621,6 +625,7 @@ export async function runEvaluator(): Promise<void> {
     out_dir: normRel(projectRoot, reportDirAbs),
     transfer_class: transferClass,
     warn_body_bytes: warnBodyBytes,
+    retention_days: retentionDays,
   });
 
   const cases = await readCases(casesPathAbs);
@@ -1257,4 +1262,30 @@ export async function runEvaluator(): Promise<void> {
     items_count: items.length,
     report_dir: normRel(projectRoot, reportDirAbs),
   });
+
+  if (retentionDays > 0) {
+    await cleanupOldReports(path.dirname(reportDirAbs), retentionDays);
+  }
+}
+
+async function cleanupOldReports(baseDir: string, retentionDays: number): Promise<void> {
+  const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  let names: string[] = [];
+  try {
+    names = await readdir(baseDir);
+  } catch {
+    return;
+  }
+  for (const name of names) {
+    const p = path.join(baseDir, name);
+    try {
+      const st = await stat(p);
+      if (st.isDirectory() && st.mtimeMs < cutoff) {
+        await rm(p, { recursive: true, force: true });
+        await appendAuditLog({ component: "evaluator", event: "retention_delete", path: p });
+      }
+    } catch {
+      // ignore
+    }
+  }
 }

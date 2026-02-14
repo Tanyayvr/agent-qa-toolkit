@@ -63,7 +63,7 @@ Evaluator `main()` iterates all cases from `readCases()` and pushes one item per
 | Progress bar / ETA | Not found. Runner prints per-case progress via `console.log` in `runner/index.ts` |
 | Rate limiting (runner → agent) | Not found |
 | Circuit breaker | Not found |
-| Cleanup / TTL for old reports | Not found |
+| Cleanup / TTL for old reports | Runner/Evaluator support `--retentionDays` (opt-in) |
 | Structured JSON logging | Not found. All output is `console.log` plain text |
 
 ---

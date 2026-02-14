@@ -88,7 +88,7 @@
 - append-only log (JSON/SQLite)
 - критерий: все run/eval actions логируются
 
-### Checkpoint 6b — TTL / Retention
+### Checkpoint 6b — TTL / Retention (DONE)
 - автоудаление reports старше N дней
 - критерий: retention работает в тесте
 

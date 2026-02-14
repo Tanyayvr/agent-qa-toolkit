@@ -267,6 +267,9 @@ Audit log (optional):
 
 Set `AUDIT_LOG_PATH=/path/to/audit.jsonl` to append JSONL audit events for runner/evaluator start/finish.
 
+Retention (optional):
+- `--retentionDays N` on runner/evaluator deletes run/report dirs older than N days.
+
 Contracts (documentation)
 This repo defines versioned, stable contracts used for CI gating, integrations, and evidence portability.
 
@@ -542,6 +545,10 @@ npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.jso
 # Extended redaction preset (phone/IP/JWT/CC patterns)
 npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
   --outDir apps/runner/runs --runId redaction_test --redactionPreset transferable_extended
+
+# Optional retention: delete runs older than N days
+npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \
+  --outDir apps/runner/runs --runId redaction_test --retentionDays 7
 
 # Keep raw (unsanitized) copies under apps/runner/runs/_raw/ (explicit opt-in; avoid for transferable packs)
 npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json \

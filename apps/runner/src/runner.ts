@@ -1,5 +1,5 @@
 //tool/apps/runner/src/index.ts
-import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, appendFile, rm, stat, readdir } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -42,6 +42,7 @@ type RunnerConfig = {
 
   maxBodyBytes: number;
   saveFullBodyOnError: boolean;
+  retentionDays: number;
 };
 
 type MinimalAgentResponseOnFailure = {
@@ -81,6 +82,7 @@ Artifacts / memory limits:
   --noSaveFullBodyOnError   Do not write full error bodies to disk (default: save enabled)
   --redactionPreset         none | internal_only | transferable | transferable_extended (default: none)
   --keepRaw                 Keep raw (unsanitized) responses in _raw/ when redaction is enabled
+  --retentionDays           Delete run directories older than N days (default: 0 = disabled)
 
   --help, -h                Show this help
 
@@ -905,6 +907,7 @@ export async function runRunner(): Promise<void> {
       "--noSaveFullBodyOnError",
       "--redactionPreset",
       "--keepRaw",
+      "--retentionDays",
       "--help",
       "-h"
     ])
@@ -923,6 +926,7 @@ export async function runRunner(): Promise<void> {
   assertHasValue("--bodySnippetBytes");
   assertHasValue("--maxBodyBytes");
   assertHasValue("--redactionPreset");
+  assertHasValue("--retentionDays");
 
   const keepRaw = getFlag("--keepRaw");
 
@@ -950,7 +954,8 @@ export async function runRunner(): Promise<void> {
 
     bodySnippetBytes: parseIntFlag("--bodySnippetBytes", 4000),
     maxBodyBytes: parseIntFlag("--maxBodyBytes", 2000000),
-    saveFullBodyOnError: !getFlag("--noSaveFullBodyOnError")
+    saveFullBodyOnError: !getFlag("--noSaveFullBodyOnError"),
+    retentionDays: Math.max(0, parseIntFlag("--retentionDays", 0))
   };
 
   const raw = await readFile(cfg.casesPath, "utf-8");
@@ -992,7 +997,8 @@ export async function runRunner(): Promise<void> {
       max_body_bytes: cfg.maxBodyBytes,
       save_full_body_on_error: cfg.saveFullBodyOnError,
       redaction_preset: cfg.redactionPreset,
-      keep_raw: useRaw
+      keep_raw: useRaw,
+      retention_days: cfg.retentionDays
     }
   };
 
@@ -1007,6 +1013,7 @@ export async function runRunner(): Promise<void> {
     selected_case_ids: selectedCases.map((c) => c.id),
     redaction_preset: cfg.redactionPreset,
     keep_raw: cfg.keepRaw,
+    retention_days: cfg.retentionDays,
   });
   console.log("repoRoot:", fmtRel(cfg.repoRoot));
   console.log("baseUrl:", cfg.baseUrl);
@@ -1021,6 +1028,7 @@ export async function runRunner(): Promise<void> {
   console.log("maxBodyBytes:", cfg.maxBodyBytes);
   console.log("redactionPreset:", cfg.redactionPreset);
   console.log("keepRaw:", cfg.keepRaw);
+  console.log("retentionDays:", cfg.retentionDays);
   if (cfg.keepRaw) {
     console.warn("WARNING: --keepRaw enabled. Raw responses will be stored under _raw/ and are NOT sanitized.");
   }
@@ -1042,6 +1050,9 @@ export async function runRunner(): Promise<void> {
       cases_count: selectedCases.length,
       dry_run: true,
     });
+    if (cfg.retentionDays > 0) {
+      await cleanupOldRuns(cfg.outDir, cfg.retentionDays, "runner");
+    }
     return;
   }
 
@@ -1081,4 +1092,32 @@ export async function runRunner(): Promise<void> {
     cases_count: selectedCases.length,
     dry_run: false,
   });
+  if (cfg.retentionDays > 0) {
+    await cleanupOldRuns(cfg.outDir, cfg.retentionDays, "runner");
+  }
+}
+
+async function cleanupOldRuns(baseDir: string, retentionDays: number, component: "runner" | "evaluator"): Promise<void> {
+  const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  for (const sub of ["baseline", "new", "_raw"]) {
+    const dir = path.join(baseDir, sub);
+    let names: string[] = [];
+    try {
+      names = await readdir(dir);
+    } catch {
+      continue;
+    }
+    for (const name of names) {
+      const p = path.join(dir, name);
+      try {
+        const st = await stat(p);
+        if (st.isDirectory() && st.mtimeMs < cutoff) {
+          await rm(p, { recursive: true, force: true });
+          await appendAuditLog({ component, event: "retention_delete", path: p });
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
 }
