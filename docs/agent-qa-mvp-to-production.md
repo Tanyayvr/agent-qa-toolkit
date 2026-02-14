@@ -84,7 +84,7 @@
 - air‑gapped режим (без внешних вызовов)
 - критерий: полный пайплайн поднимается одной командой
 
-### Checkpoint 6a — Audit Log
+### Checkpoint 6a — Audit Log (DONE)
 - append-only log (JSON/SQLite)
 - критерий: все run/eval actions логируются
 

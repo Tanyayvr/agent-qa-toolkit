@@ -94,6 +94,9 @@ Runner supports extended redaction via `--redactionPreset transferable_extended`
 **Security plugins:**  
 Evaluator now exposes a `SecurityScanner` interface (`apps/evaluator/src/securityScanner.ts`) to allow sidecar scanners (Presidio/TruffleHog) to append signals without replacing core regex checks.
 
+**Audit log:**  
+Runner and evaluator append audit events to a JSONL file when `AUDIT_LOG_PATH` is set (start/finish, run/report ids).
+
 **Raw retention:**  
 Runner supports `--keepRaw` to store unsanitized responses under `_raw/`. This is opt-in and should be avoided for transferable packs.
 

@@ -263,6 +263,10 @@ Recommended in v5 reports (when enabled):
 
 `apps/evaluator/reports/latest/repro/` (when compare-report.json.repro exists)
 
+Audit log (optional):
+
+Set `AUDIT_LOG_PATH=/path/to/audit.jsonl` to append JSONL audit events for runner/evaluator start/finish.
+
 Contracts (documentation)
 This repo defines versioned, stable contracts used for CI gating, integrations, and evidence portability.
 

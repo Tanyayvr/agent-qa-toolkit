@@ -1,5 +1,5 @@
 //tool/apps/runner/src/index.ts
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -95,12 +95,23 @@ Examples:
 `.trim();
 
 const ARGV = normalizeArgv(process.argv);
+const AUDIT_LOG_ENV = process.env.AUDIT_LOG_PATH;
 
 class CliUsageError extends Error {
   public readonly exitCode = 2;
   constructor(message: string) {
     super(message);
     this.name = "CliUsageError";
+  }
+}
+
+async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
+  if (!AUDIT_LOG_ENV) return;
+  const line = JSON.stringify({ ts: Date.now(), ...entry }) + "\n";
+  try {
+    await appendFile(AUDIT_LOG_ENV, line, "utf-8");
+  } catch {
+    // audit logging must not fail the run
   }
 }
 
@@ -986,6 +997,17 @@ export async function runRunner(): Promise<void> {
   };
 
   console.log("Runner started");
+  await appendAuditLog({
+    component: "runner",
+    event: "start",
+    run_id: cfg.runId,
+    base_url: cfg.baseUrl,
+    cases_path: rel(cfg.casesPath),
+    out_dir: rel(cfg.outDir),
+    selected_case_ids: selectedCases.map((c) => c.id),
+    redaction_preset: cfg.redactionPreset,
+    keep_raw: cfg.keepRaw,
+  });
   console.log("repoRoot:", fmtRel(cfg.repoRoot));
   console.log("baseUrl:", cfg.baseUrl);
   console.log("cases:", selectedCases.length);
@@ -1011,6 +1033,15 @@ export async function runRunner(): Promise<void> {
     console.log("Runner finished");
     console.log("baseline:", fmtRel(baselineDir));
     console.log("new:", fmtRel(newDir));
+    await appendAuditLog({
+      component: "runner",
+      event: "finish",
+      run_id: cfg.runId,
+      baseline_dir: rel(baselineDir),
+      new_dir: rel(newDir),
+      cases_count: selectedCases.length,
+      dry_run: true,
+    });
     return;
   }
 
@@ -1041,4 +1072,13 @@ export async function runRunner(): Promise<void> {
   console.log("Runner finished");
   console.log("baseline:", fmtRel(baselineDir));
   console.log("new:", fmtRel(newDir));
+  await appendAuditLog({
+    component: "runner",
+    event: "finish",
+    run_id: cfg.runId,
+    baseline_dir: rel(baselineDir),
+    new_dir: rel(newDir),
+    cases_count: selectedCases.length,
+    dry_run: false,
+  });
 }

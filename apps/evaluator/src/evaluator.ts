@@ -1,6 +1,6 @@
 //tool/apps/evaluator/src/index.ts
 import path from "node:path";
-import { mkdir, readFile, writeFile, stat } from "node:fs/promises";
+import { mkdir, readFile, writeFile, stat, appendFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import Ajv from "ajv";
 import {
@@ -68,12 +68,23 @@ Optional:
 `.trim();
 
 const ARGV = normalizeArgv(process.argv);
+const AUDIT_LOG_ENV = process.env.AUDIT_LOG_PATH;
 
 class CliUsageError extends Error {
   public readonly exitCode = 2;
   constructor(message: string) {
     super(message);
     this.name = "CliUsageError";
+  }
+}
+
+async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
+  if (!AUDIT_LOG_ENV) return;
+  const line = JSON.stringify({ ts: Date.now(), ...entry }) + "\n";
+  try {
+    await appendFile(AUDIT_LOG_ENV, line, "utf-8");
+  } catch {
+    // audit logging must not fail the run
   }
 }
 
@@ -600,6 +611,17 @@ export async function runEvaluator(): Promise<void> {
 
   await ensureDir(reportDirAbs);
   await ensureDir(path.join(reportDirAbs, "assets"));
+  await appendAuditLog({
+    component: "evaluator",
+    event: "start",
+    report_id: reportId,
+    cases_path: normRel(projectRoot, casesPathAbs),
+    baseline_dir: normRel(projectRoot, baselineDirAbs),
+    new_dir: normRel(projectRoot, newDirAbs),
+    out_dir: normRel(projectRoot, reportDirAbs),
+    transfer_class: transferClass,
+    warn_body_bytes: warnBodyBytes,
+  });
 
   const cases = await readCases(casesPathAbs);
   const baselineRun = await readRunDir(baselineDirAbs);
@@ -1228,4 +1250,11 @@ export async function runEvaluator(): Promise<void> {
 
   console.log(`html report: ${normRel(projectRoot, path.join(reportDirAbs, "report.html"))}`);
   console.log(`compare report: ${normRel(projectRoot, path.join(reportDirAbs, "compare-report.json"))}`);
+  await appendAuditLog({
+    component: "evaluator",
+    event: "finish",
+    report_id: reportId,
+    items_count: items.length,
+    report_dir: normRel(projectRoot, reportDirAbs),
+  });
 }
