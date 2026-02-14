@@ -308,8 +308,20 @@ async function writeStreamOnceDrain(stream: ReturnType<typeof createWriteStream>
   const ok = stream.write(chunk);
   if (ok) return;
   await new Promise<void>((resolve, reject) => {
-    stream.once("drain", () => resolve());
-    stream.once("error", (e) => reject(e));
+    const onDrain = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = (e: Error) => {
+      cleanup();
+      reject(e);
+    };
+    const cleanup = () => {
+      stream.off("drain", onDrain);
+      stream.off("error", onError);
+    };
+    stream.on("drain", onDrain);
+    stream.on("error", onError);
   });
 }
 
