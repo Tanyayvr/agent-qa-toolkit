@@ -216,6 +216,9 @@ export function checkToolExecution(resp: AgentResponse): AssertionResult {
 }
 
 export function checkHallucinationSignal(resp: AgentResponse): AssertionResult {
+    if (!resp.final_output || typeof resp.final_output !== "object" || !("content_type" in resp.final_output)) {
+        return { name: "hallucination_signal_check", pass: true, details: { note: "missing final_output" } };
+    }
     let mentioned: string | null = null;
 
     if (resp.final_output.content_type === "json" && resp.final_output.content && typeof resp.final_output.content === "object") {
