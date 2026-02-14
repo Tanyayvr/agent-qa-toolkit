@@ -74,20 +74,24 @@ export type DataAvailabilitySide = {
 /*  Event helpers                                                      */
 /* ------------------------------------------------------------------ */
 
-export function toolCalls(events: RunEvent[]): ToolCallEvent[] {
-    return events.filter((e): e is ToolCallEvent => e.type === "tool_call");
+function asEvents(events: RunEvent[] | undefined | null): RunEvent[] {
+    return Array.isArray(events) ? events : [];
 }
 
-export function toolResults(events: RunEvent[]): ToolResultEvent[] {
-    return events.filter((e): e is ToolResultEvent => e.type === "tool_result");
+export function toolCalls(events: RunEvent[] | undefined | null): ToolCallEvent[] {
+    return asEvents(events).filter((e): e is ToolCallEvent => e.type === "tool_call");
 }
 
-export function retrievalEvents(events: RunEvent[]): RetrievalEvent[] {
-    return events.filter((e): e is RetrievalEvent => e.type === "retrieval");
+export function toolResults(events: RunEvent[] | undefined | null): ToolResultEvent[] {
+    return asEvents(events).filter((e): e is ToolResultEvent => e.type === "tool_result");
 }
 
-export function finalOutputEvents(events: RunEvent[]): FinalOutputEvent[] {
-    return events.filter((e): e is FinalOutputEvent => e.type === "final_output");
+export function retrievalEvents(events: RunEvent[] | undefined | null): RetrievalEvent[] {
+    return asEvents(events).filter((e): e is RetrievalEvent => e.type === "retrieval");
+}
+
+export function finalOutputEvents(events: RunEvent[] | undefined | null): FinalOutputEvent[] {
+    return asEvents(events).filter((e): e is FinalOutputEvent => e.type === "final_output");
 }
 
 export function extractToolCallNames(events: RunEvent[]): string[] {
