@@ -3,6 +3,14 @@
 This toolkit can optionally emit a compliance mapping block in `compare-report.json`.
 It is intended for enterprise reporting (ISO 42001 / NIST AI RMF).
 
+## Load from file (recommended)
+
+Evaluator CLI:
+
+```bash
+npm --workspace evaluator run dev -- --complianceProfile docs/compliance-profile.example.json
+```
+
 ## compare-report.json (optional)
 
 ```json

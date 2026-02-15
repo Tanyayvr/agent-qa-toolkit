@@ -78,6 +78,7 @@ Optional:
   --warnBodyBytes      Warn when case response JSON exceeds this size (default: 1000000)
   --retentionDays      Delete report directories older than N days (default: 0 = disabled)
   --environment     JSON file with environment metadata (agent_id, model, prompt_version, tools_version)
+  --complianceProfile  JSON file with compliance mapping
   --help, -h        Show this help
 `.trim();
 
@@ -602,6 +603,7 @@ export async function runEvaluator(): Promise<void> {
       "--warnBodyBytes",
       "--retentionDays",
       "--environment",
+      "--complianceProfile",
       "--help",
       "-h",
     ])
@@ -627,7 +629,9 @@ export async function runEvaluator(): Promise<void> {
   const newDirAbs = resolveFromRoot(projectRoot, newArg);
 
   const envFile = getArg("--environment");
+  const complianceFile = getArg("--complianceProfile");
   let environment: { agent_id?: string; model?: string; prompt_version?: string; tools_version?: string } | undefined;
+  let complianceMapping: Array<{ framework: string; clause: string; title?: string; evidence?: string[] }> | undefined;
   if (envFile) {
     try {
       const raw = await readFile(resolveFromRoot(projectRoot, envFile), "utf-8");
@@ -655,6 +659,22 @@ export async function runEvaluator(): Promise<void> {
       if (prompt_version) envObj.prompt_version = prompt_version;
       if (tools_version) envObj.tools_version = tools_version;
       environment = envObj;
+    }
+  }
+
+  if (complianceFile) {
+    try {
+      const raw = await readFile(resolveFromRoot(projectRoot, complianceFile), "utf-8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        complianceMapping = parsed;
+      } else if (parsed && Array.isArray(parsed.compliance_mapping)) {
+        complianceMapping = parsed.compliance_mapping;
+      } else {
+        throw new Error("invalid compliance mapping");
+      }
+    } catch {
+      throw new CliUsageError(`Invalid --complianceProfile JSON file: ${complianceFile}\n\n${HELP_TEXT}`);
     }
   }
 
@@ -1276,20 +1296,7 @@ export async function runEvaluator(): Promise<void> {
     },
     summary_by_suite,
     quality_flags,
-    compliance_mapping: [
-      {
-        framework: "ISO_42001",
-        clause: "9.2",
-        title: "Monitoring, measurement, analysis",
-        evidence: ["summary", "items", "quality_flags"],
-      },
-      {
-        framework: "NIST_AI_RMF",
-        clause: "GOVERN-1.1",
-        title: "AI risk management strategy",
-        evidence: ["gate_recommendation", "risk_level", "risk_tags"],
-      },
-    ],
+    ...(complianceMapping ? { compliance_mapping: complianceMapping } : {}),
     items,
   };
 

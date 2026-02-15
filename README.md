@@ -111,6 +111,7 @@ Manifest integrity:
 
 Compliance mapping (optional):
 - `docs/compliance-mapping.md`
+- `docs/compliance-profile.example.json` (example mapping file)
 
 ### Report Contract v5 SHOULD (to remain fully self-contained)
 
