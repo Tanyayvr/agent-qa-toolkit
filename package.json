@@ -21,7 +21,9 @@
     "demo:e2e": "node scripts/demo-e2e.mjs",
     "test:toolkit": "node scripts/toolkit-tests.mjs",
     "pvip:pack": "node scripts/pvip-pack.mjs --reportDir apps/evaluator/reports/latest",
-    "pvip:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest"
+    "pvip:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest",
+    "pvip:verify:strict": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --strict",
+    "pvip:verify:json": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --json"
   },
   "overrides": {
     "qs": "6.14.2"

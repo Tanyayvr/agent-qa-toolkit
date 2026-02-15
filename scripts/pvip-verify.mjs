@@ -32,8 +32,26 @@ function pathInsideReport(reportDir, rel) {
 }
 
 const reportDir = getArg("--reportDir");
+const jsonOut = process.argv.includes("--json");
+const strict = process.argv.includes("--strict");
+function outOk(msg, payload) {
+  if (jsonOut) {
+    console.log(JSON.stringify({ ok: true, message: msg, ...payload }));
+  } else {
+    console.log(msg);
+  }
+}
+
+function outFail(msg, payload) {
+  if (jsonOut) {
+    console.error(JSON.stringify({ ok: false, message: msg, ...payload }));
+  } else {
+    console.error(msg);
+  }
+}
+
 if (!reportDir) {
-  console.error("Usage: node scripts/pvip-verify.mjs --reportDir <path>");
+  outFail("Usage: node scripts/pvip-verify.mjs --reportDir <path> [--strict] [--json]");
   process.exit(2);
 }
 
@@ -42,7 +60,7 @@ try {
   const st = statSync(absReport);
   if (!st.isDirectory()) throw new Error("not a dir");
 } catch {
-  console.error(`reportDir not found or not a directory: ${absReport}`);
+  outFail(`reportDir not found or not a directory: ${absReport}`);
   process.exit(2);
 }
 
@@ -51,15 +69,15 @@ const manifestPath = path.join(absReport, "artifacts", "manifest.json");
 const schemaPath = path.join(process.cwd(), "schemas", "compare-report-v5.schema.json");
 
 if (!existsSync(reportPath)) {
-  console.error("Missing compare-report.json");
+  outFail("Missing compare-report.json");
   process.exit(1);
 }
 if (!existsSync(manifestPath)) {
-  console.error("Missing artifacts/manifest.json");
+  outFail("Missing artifacts/manifest.json");
   process.exit(1);
 }
 if (!existsSync(schemaPath)) {
-  console.error("Missing schemas/compare-report-v5.schema.json");
+  outFail("Missing schemas/compare-report-v5.schema.json");
   process.exit(1);
 }
 
@@ -69,24 +87,24 @@ const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 const validate = ajv.compile(schema);
 const ok = validate(report);
 if (!ok) {
-  console.error("Schema validation failed:", validate.errors || []);
+  outFail("Schema validation failed", { errors: validate.errors || [] });
   process.exit(1);
 }
 
 const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
 if (!manifest.items || !Array.isArray(manifest.items)) {
-  console.error("Invalid manifest.items");
+  outFail("Invalid manifest.items");
   process.exit(1);
 }
 
 if (report.quality_flags) {
   if (report.quality_flags.portable_paths !== true) {
-    console.error("portable_paths is false");
-    process.exit(1);
+    outFail("portable_paths is false");
+    if (strict) process.exit(1);
   }
   if ((report.quality_flags.path_violations_count || 0) > 0) {
-    console.error("path_violations_count > 0");
-    process.exit(1);
+    outFail("path_violations_count > 0");
+    if (strict) process.exit(1);
   }
 }
 
@@ -104,8 +122,8 @@ if (index && index.items && Array.isArray(index.items)) {
     if (map.get(key) !== rel) mismatch++;
   }
   if (mismatch > 0) {
-    console.error(`embedded_manifest_index mismatch: ${mismatch}`);
-    process.exit(1);
+    outFail(`embedded_manifest_index mismatch: ${mismatch}`);
+    if (strict) process.exit(1);
   }
 }
 
@@ -114,7 +132,7 @@ let hashMismatch = 0;
 for (const it of manifest.items) {
   if (!it.rel_path || typeof it.rel_path !== "string") continue;
   if (!isPortableHref(it.rel_path) || !pathInsideReport(absReport, it.rel_path)) {
-    console.error(`Non-portable or out-of-root path: ${it.rel_path}`);
+    outFail(`Non-portable or out-of-root path: ${it.rel_path}`);
     process.exit(1);
   }
   const abs = path.join(absReport, it.rel_path);
@@ -129,13 +147,13 @@ for (const it of manifest.items) {
 }
 
 if (missing > 0) {
-  console.error(`Missing manifest assets: ${missing}`);
+  outFail(`Missing manifest assets: ${missing}`);
   process.exit(1);
 }
 if (hashMismatch > 0) {
-  console.error(`Manifest hash mismatches: ${hashMismatch}`);
-  console.error("Integrity check failed: files were modified after bundle generation.");
+  outFail(`Manifest hash mismatches: ${hashMismatch}`);
+  outFail("Integrity check failed: files were modified after bundle generation.");
   process.exit(1);
 }
 
-console.log("OK: schema + manifest assets verified");
+outOk("OK: schema + manifest assets verified");

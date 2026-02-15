@@ -241,6 +241,13 @@ npm run pvip:pack
 npm run pvip:verify
 ```
 
+Strict/JSON verify:
+
+```bash
+npm run pvip:verify:strict
+npm run pvip:verify:json
+```
+
 `apps/evaluator/reports/latest/compare-report.json`
 
 Suite-specific demo runs:
