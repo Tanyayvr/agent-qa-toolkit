@@ -754,7 +754,7 @@ export async function runEvaluator(): Promise<void> {
     }
   }
 
-  const manifestItems: ManifestItem[] = [];
+  let manifestItems: ManifestItem[] = [];
 
   for (const c of cases) {
     const bEval = baselineEval.find((x) => x.case_id === c.id);
@@ -1258,16 +1258,17 @@ export async function runEvaluator(): Promise<void> {
     });
   }
 
-  for (let i = 0; i < manifestItems.length; i++) {
-    const it = manifestItems[i];
+  const enriched: ManifestItem[] = [];
+  for (const it of manifestItems) {
     const bytes = await fileBytesForRel(reportDirAbs, it.rel_path);
     const sha256 = await fileSha256ForRel(reportDirAbs, it.rel_path);
-    manifestItems[i] = {
+    enriched.push({
       ...it,
       ...(bytes !== undefined ? { bytes } : {}),
       ...(sha256 ? { sha256 } : {}),
-    };
+    });
   }
+  manifestItems = enriched;
 
   const manifest: Manifest = {
     manifest_version: "v1",
