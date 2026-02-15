@@ -99,6 +99,24 @@ Usage is tracked locally in `usage.json`:
 - `runs_this_month`
 - `month` (UTC)
 
+Example `usage.json`:
+
+```json
+{
+  "license_id": "LIC-2026-0001",
+  "started_at": 1771192000000,
+  "last_run_at": 1771195000000,
+  "month": "2026-02",
+  "runs_this_month": 12,
+  "runs_total": 12
+}
+```
+
+Resetting usage:
+
+- delete `usage.json` to reset counters
+- **note:** this does not change license expiry or signature
+
 ## Failure Modes
 
 - Missing signature → error
