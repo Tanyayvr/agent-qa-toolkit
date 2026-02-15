@@ -37,13 +37,13 @@ CI: `docs/ci.md`
 
 ---
 
-## UI & Integration (chosen: full UI + max integration)
+## UI & Integration
 
-**UI (full):**
-- Filters/search
-- Sticky summary + better visual hierarchy
+**UI (current):**
+- Filters/search + suite filters
 - Baseline vs new comparison in one view
-- Improved evidence/trace visibility
+- Evidence/trace visibility
+- Regression/improvement row highlights
 
 **Integration options:**
 
@@ -132,7 +132,7 @@ Compliance mapping (optional):
   - no `://` schemes
 - Note: the `://` restriction applies to **href fields**. URLs may still appear as data in `security.signals[].details.urls`.
 - `baseline_dir` / `new_dir` / `cases_path` are **informational only** and must **not** be used to resolve links.
-- `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `tool/docs/report-contract-v5.md`).
+- `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `docs/report-contract-v5.md`).
 
 ### Evidence links (Report Contract v5)
 
@@ -153,7 +153,7 @@ Compliance mapping (optional):
 Each case in `compare-report.json.items[]` includes:
 
 - `contract_version`: `5` (top-level, MUST)
-- `case_status`: `executed | skipped | filtered_out` (coverage transparency; Stage 1 requires one item per case)
+- `case_status`: `executed | filtered_out | missing` (coverage transparency; Stage 1 requires one item per case)
 - `data_availability`: `{ baseline, new }` with status + optional reason_code/details (MUST)
 - `risk_level`: `low | medium | high`
 - `risk_tags`: `string[]` (may include security signal kinds and/or operational tags)
@@ -332,13 +332,13 @@ Retention (optional):
 Contracts (documentation)
 This repo defines versioned, stable contracts used for CI gating, integrations, and evidence portability.
 
-tool/docs/agent-artifact-contract-v1.md — Agent Artifact Contract v1
+docs/agent-artifact-contract-v1.md — Agent Artifact Contract v1
 Runner outputs (run.json, per-case artifacts, failure artifacts, assets), standardized failure classes, full-body preservation.
 
-tool/docs/report-contract-v2.md — Report Contract v2
+docs/report-contract-v2.md — Report Contract v2
 Portable evidence pack rules (href resolution, self-contained assets), CI gating fields (risk_level, risk_tags, gate_recommendation), compatibility behavior, and quality_flags truth tests.
 
-tool/docs/report-contract-v5.md — Report Contract v5 (Stage 1)
+docs/report-contract-v5.md — Report Contract v5 (Stage 1)
 Adds manifest_key-based evidence references, embedded thin index for zero-click links, stricter offline rules, and preserves v3 coverage/gating fields.
 
 Agent contract (HTTP API)
