@@ -189,6 +189,15 @@ Optional (recommended in v5):
 
 ---
 
+## AEPF Spec
+
+The report format is published as **AEPF (Agent Evidence Pack Format)**:
+
+- Spec: `docs/aepf-spec-v1.md`
+- Schema: `schemas/compare-report-v5.schema.json`
+
+---
+
 ## Quickstart (3 commands)
 
 From repo root:

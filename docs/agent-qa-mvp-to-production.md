@@ -100,6 +100,12 @@
 - улучшение UX, но без онлайновых зависимостей
 - критерий: HTML открывается <2s, фильтры/поиск работают offline
 
+### Next Release (Self‑Hosted, market‑driven)
+- AEPF spec v1 published as a standalone format (docs + schema)
+- adapters: Promptfoo/DeepEval → AEPF (minimal converters)
+- shared case library (seeded, offline‑syncable)
+- GitHub Action for CI gate (`agent‑qa/gate`)
+
 ---
 
 ## 5. SaaS Future (appendix, not planned)
