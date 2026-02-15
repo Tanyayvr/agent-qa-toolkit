@@ -97,6 +97,33 @@ if (!manifest.items || !Array.isArray(manifest.items)) {
   process.exit(1);
 }
 
+function collectHrefFields(reportObj) {
+  const out = [];
+  const stack = [reportObj];
+  while (stack.length) {
+    const cur = stack.pop();
+    if (!cur || typeof cur !== "object") continue;
+    if (Array.isArray(cur)) {
+      for (const v of cur) stack.push(v);
+      continue;
+    }
+    for (const [k, v] of Object.entries(cur)) {
+      if (k.endsWith("_href") && typeof v === "string") out.push(v);
+      else if (k.endsWith("_path") && typeof v === "string") out.push(v);
+      else if (v && typeof v === "object") stack.push(v);
+    }
+  }
+  return out;
+}
+
+const hrefs = collectHrefFields(report);
+for (const href of hrefs) {
+  if (!isPortableHref(href) || !pathInsideReport(absReport, href)) {
+    outFail(`Non-portable or out-of-root href in report: ${href}`);
+    process.exit(1);
+  }
+}
+
 if (report.quality_flags) {
   if (report.quality_flags.portable_paths !== true) {
     outFail("portable_paths is false");
