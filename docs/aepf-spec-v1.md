@@ -67,6 +67,60 @@ Schema:
 | `large_payloads_count` | cases exceeding `warnBodyBytes` |
 | `large_payloads` | list of large payload paths |
 
+### `items[]` (per‑case summary)
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `case_id` | ✅ | Case identifier |
+| `title` | ✅ | Human‑readable title |
+| `suite` | ◻️ | Case suite (`correctness`, `robustness`, etc.) |
+| `case_status` | ✅ | `executed` / `filtered_out` / `missing` |
+| `baseline_pass` / `new_pass` | ✅ | Pass/fail for each side |
+| `baseline_root` / `new_root` | ✅ | Root cause codes |
+| `preventable` | ◻️ | Whether failure was preventable |
+| `policy_rules` | ◻️ | Policy rule IDs that fired |
+| `risk_level` | ✅ | `low|medium|high|critical` |
+| `gate_recommendation` | ✅ | `none|require_approval|block` |
+| `assertions[]` | ◻️ | Assertion results per case |
+| `security_signals[]` | ◻️ | Security signals detected |
+| `artifacts` | ✅ | References to assets (manifest keys) |
+| `data_availability` | ✅ | Availability status for baseline/new |
+
+### `assertions[]` (per‑case)
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | ✅ | Assertion name (`tool_required`, `json_schema`, etc.) |
+| `pass` | ✅ | Whether assertion passed |
+| `details` | ◻️ | Additional diagnostic info |
+
+### `security_signals[]`
+
+Core signal kinds:
+
+- `untrusted_url_input`
+- `high_risk_action`
+- `secret_in_output`
+- `pii_in_output`
+- `prompt_injection_marker`
+- `runner_failure_detected`
+- `unknown`
+
+Extended signal kinds (optional):
+
+- `token_exfil_indicator`
+- `policy_tampering`
+- `unexpected_outbound`
+- `permission_change`
+- `data_exfiltration`
+- `hallucination_in_output`
+- `excessive_permissions`
+- `unsafe_code_execution`
+- `bias_detected`
+- `compliance_violation`
+- `model_refusal`
+- `context_poisoning`
+
 ## `artifacts/manifest.json` (Canonical)
 
 The manifest is the **single source of truth** for evidence integrity.
