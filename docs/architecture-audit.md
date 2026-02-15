@@ -116,6 +116,8 @@ Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case resp
 
 **Status**: compare-report schema validation added in `schemas/compare-report-v5.schema.json` and enforced in `scripts/toolkit-tests.mjs`.
 
+**Status**: packaging and offline verification added via `scripts/pvip-pack.mjs` and `scripts/pvip-verify.mjs`.
+
 ### 2. Bounded Memory
 
 | What | Where |

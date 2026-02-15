@@ -229,6 +229,13 @@ Produces:
 
 `apps/evaluator/reports/latest/report.html`
 
+Pack & verify:
+
+```bash
+npm run pvip:pack
+npm run pvip:verify
+```
+
 `apps/evaluator/reports/latest/compare-report.json`
 
 Suite-specific demo runs:

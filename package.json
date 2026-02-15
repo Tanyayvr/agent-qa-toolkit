@@ -19,7 +19,9 @@
     "demo:correctness": "node scripts/demo.mjs --suite correctness",
     "demo:robustness": "node scripts/demo.mjs --suite robustness",
     "demo:e2e": "node scripts/demo-e2e.mjs",
-    "test:toolkit": "node scripts/toolkit-tests.mjs"
+    "test:toolkit": "node scripts/toolkit-tests.mjs",
+    "pvip:pack": "node scripts/pvip-pack.mjs --reportDir apps/evaluator/reports/latest",
+    "pvip:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest"
   },
   "overrides": {
     "qs": "6.14.2"
