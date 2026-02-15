@@ -57,6 +57,10 @@ node scripts/license-verify.mjs docs/license-example-monthly.json
 export AQ_LICENSE_PUBLIC_KEY=<base64-der-spki>
 export AQ_LICENSE_PATH=.license/license.json
 npm -w runner run dev -- --license .license/license.json ...
+
+# 5) Enforce license for evaluator
+export AQ_LICENSE_REQUIRED=1
+npm -w evaluator run dev -- --license .license/license.json ...
 ```
 
 ---
