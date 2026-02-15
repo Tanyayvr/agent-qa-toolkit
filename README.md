@@ -39,6 +39,26 @@ Licensing (optional, offline): `docs/license.md`
 Keygen/sign helpers: `scripts/license-keygen.mjs`, `scripts/license-sign.mjs`
 Verify helper: `scripts/license-verify.mjs`
 
+License quickstart:
+
+```bash
+# 1) Generate keypair (vendor)
+node scripts/license-keygen.mjs
+
+# 2) Sign license.json (vendor)
+export AQ_LICENSE_PRIVATE_KEY=<base64-der-pkcs8>
+node scripts/license-sign.mjs docs/license-example-monthly.json
+
+# 3) Verify license (customer)
+export AQ_LICENSE_PUBLIC_KEY=<base64-der-spki>
+node scripts/license-verify.mjs docs/license-example-monthly.json
+
+# 4) Run with license
+export AQ_LICENSE_PUBLIC_KEY=<base64-der-spki>
+export AQ_LICENSE_PATH=.license/license.json
+npm -w runner run dev -- --license .license/license.json ...
+```
+
 ---
 
 ## UI & Integration
