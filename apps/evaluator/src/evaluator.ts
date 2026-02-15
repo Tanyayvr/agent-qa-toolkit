@@ -649,7 +649,12 @@ export async function runEvaluator(): Promise<void> {
     const prompt_version = process.env.PROMPT_VERSION;
     const tools_version = process.env.TOOLS_VERSION;
     if (agent_id || model || prompt_version || tools_version) {
-      environment = { agent_id, model, prompt_version, tools_version };
+      const envObj: { agent_id?: string; model?: string; prompt_version?: string; tools_version?: string } = {};
+      if (agent_id) envObj.agent_id = agent_id;
+      if (model) envObj.model = model;
+      if (prompt_version) envObj.prompt_version = prompt_version;
+      if (tools_version) envObj.tools_version = tools_version;
+      environment = envObj;
     }
   }
 
