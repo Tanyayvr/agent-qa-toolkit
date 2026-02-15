@@ -173,6 +173,7 @@ export type CompareReport = {
     risk_level: "low" | "medium" | "high";
     risk_tags: string[];
     gate_recommendation: "none" | "require_approval" | "block";
+    case_ts?: number;
 
     failure_summary?: {
       baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number };
@@ -468,7 +469,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             : "";
       const diffKind = it.baseline_pass === it.new_pass ? "same" : it.baseline_pass ? "regression" : "improvement";
       return `
-<tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}" data-diff="${diffKind}">
+<tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}" data-diff="${diffKind}" data-ts="${escHtml(String(it.case_ts ?? ""))}">
   <td>
     <div class="caseTitle">${titleLink}</div>
     <div class="muted">${escHtml(it.title || "")}</div>
@@ -607,6 +608,15 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             <option value="regression">regression</option>
             <option value="improvement">improvement</option>
             <option value="same">same</option>
+          </select>
+          <select id="filterSort">
+            <option value="case_id">Sort: case_id</option>
+            <option value="risk">Sort: risk</option>
+            <option value="gate">Sort: gate</option>
+            <option value="diff">Sort: diff</option>
+            <option value="suite">Sort: suite</option>
+            <option value="time_desc">Sort: time (newest)</option>
+            <option value="time_asc">Sort: time (oldest)</option>
           </select>
           <select id="filterRisk">
             <option value="">Risk: all</option>
@@ -764,12 +774,14 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var filterText = document.getElementById("filterText");
       var filterSuite = document.getElementById("filterSuite");
       var filterDiff = document.getElementById("filterDiff");
+      var filterSort = document.getElementById("filterSort");
       var filterRisk = document.getElementById("filterRisk");
       var filterGate = document.getElementById("filterGate");
       var filterStatus = document.getElementById("filterStatus");
       var copyFilterLink = document.getElementById("copyFilterLink");
       var resetFilters = document.getElementById("resetFilters");
       var filterCount = document.getElementById("filterCount");
+      var body = document.querySelector("tbody");
       var rows = document.querySelectorAll("tbody tr[data-case]");
 
       function getFilters() {
@@ -777,6 +789,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           text: filterText && filterText.value || "",
           suite: filterSuite && filterSuite.value || "",
           diff: filterDiff && filterDiff.value || "",
+          sort: filterSort && filterSort.value || "case_id",
           risk: filterRisk && filterRisk.value || "",
           gate: filterGate && filterGate.value || "",
           status: filterStatus && filterStatus.value || ""
@@ -788,6 +801,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         if (filterText) filterText.value = f.text || "";
         if (filterSuite) filterSuite.value = f.suite || "";
         if (filterDiff) filterDiff.value = f.diff || "";
+        if (filterSort) filterSort.value = f.sort || "case_id";
         if (filterRisk) filterRisk.value = f.risk || "";
         if (filterGate) filterGate.value = f.gate || "";
         if (filterStatus) filterStatus.value = f.status || "";
@@ -802,6 +816,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           text: params.get("text") || "",
           suite: params.get("suite") || "",
           diff: params.get("diff") || "",
+          sort: params.get("sort") || "case_id",
           risk: params.get("risk") || "",
           gate: params.get("gate") || "",
           status: params.get("status") || ""
@@ -813,6 +828,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         if (f.text) params.set("text", f.text);
         if (f.suite) params.set("suite", f.suite);
         if (f.diff) params.set("diff", f.diff);
+        if (f.sort && f.sort !== "case_id") params.set("sort", f.sort);
         if (f.risk) params.set("risk", f.risk);
         if (f.gate) params.set("gate", f.gate);
         if (f.status) params.set("status", f.status);
@@ -820,11 +836,53 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         window.location.hash = next ? "?" + next : "";
       }
 
+      function sortRows(f) {
+        if (!body) return;
+        var arr = Array.prototype.slice.call(rows);
+        var orderRisk = { low: 0, medium: 1, high: 2 };
+        var orderGate = { none: 0, require_approval: 1, block: 2 };
+        var orderDiff = { regression: 0, improvement: 1, same: 2 };
+        arr.sort(function (a, b) {
+          var aCase = a.getAttribute("data-case") || "";
+          var bCase = b.getAttribute("data-case") || "";
+          var aSuite = a.getAttribute("data-suite") || "";
+          var bSuite = b.getAttribute("data-suite") || "";
+          var aRisk = a.getAttribute("data-risk") || "";
+          var bRisk = b.getAttribute("data-risk") || "";
+          var aGate = a.getAttribute("data-gate") || "";
+          var bGate = b.getAttribute("data-gate") || "";
+          var aDiff = a.getAttribute("data-diff") || "";
+          var bDiff = b.getAttribute("data-diff") || "";
+          var aTs = Number(a.getAttribute("data-ts") || 0);
+          var bTs = Number(b.getAttribute("data-ts") || 0);
+          switch (f.sort) {
+            case "risk":
+              return (orderRisk[aRisk] ?? 9) - (orderRisk[bRisk] ?? 9) || aCase.localeCompare(bCase);
+            case "gate":
+              return (orderGate[aGate] ?? 9) - (orderGate[bGate] ?? 9) || aCase.localeCompare(bCase);
+            case "diff":
+              return (orderDiff[aDiff] ?? 9) - (orderDiff[bDiff] ?? 9) || aCase.localeCompare(bCase);
+            case "suite":
+              return aSuite.localeCompare(bSuite) || aCase.localeCompare(bCase);
+            case "time_desc":
+              return bTs - aTs || aCase.localeCompare(bCase);
+            case "time_asc":
+              return aTs - bTs || aCase.localeCompare(bCase);
+            default:
+              return aCase.localeCompare(bCase);
+          }
+        });
+        for (var i = 0; i < arr.length; i++) {
+          body.appendChild(arr[i]);
+        }
+      }
+
       function applyFilters() {
         var f = getFilters();
         var text = (f.text || "").toLowerCase();
         var suite = f.suite || "";
         var diff = f.diff || "";
+        sortRows(f);
         var risk = f.risk || "";
         var gate = f.gate || "";
         var status = f.status || "";
@@ -862,6 +920,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       if (filterText) filterText.addEventListener("input", applyFilters);
       if (filterSuite) filterSuite.addEventListener("change", applyFilters);
       if (filterDiff) filterDiff.addEventListener("change", applyFilters);
+      if (filterSort) filterSort.addEventListener("change", applyFilters);
       if (filterRisk) filterRisk.addEventListener("change", applyFilters);
       if (filterGate) filterGate.addEventListener("change", applyFilters);
       if (filterStatus) filterStatus.addEventListener("change", applyFilters);
@@ -903,8 +962,8 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
       if (resetFilters) {
         resetFilters.addEventListener("click", function () {
-          setFilters({ text: "", suite: "", diff: "", risk: "", gate: "", status: "" });
-          updateHash({ text: "", suite: "", diff: "", risk: "", gate: "", status: "" });
+          setFilters({ text: "", suite: "", diff: "", sort: "case_id", risk: "", gate: "", status: "" });
+          updateHash({ text: "", suite: "", diff: "", sort: "case_id", risk: "", gate: "", status: "" });
           applyFilters();
         });
       }

@@ -28,6 +28,17 @@ import type {
   AgentResponse,
 } from "shared-types";
 
+function extractCaseTs(resp?: AgentResponse): number | undefined {
+  const ev = resp?.events;
+  if (!Array.isArray(ev) || ev.length === 0) return undefined;
+  let ts: number | undefined;
+  for (const e of ev) {
+    const t = (e as { ts?: number }).ts;
+    if (typeof t === "number" && (ts === undefined || t < ts)) ts = t;
+  }
+  return ts;
+}
+
 import {
   evaluateOne,
   mapPolicyRules,
@@ -1004,6 +1015,12 @@ export async function runEvaluator(): Promise<void> {
     const hasFailureSummary = Boolean(failureSummary.baseline || failureSummary.new);
 
     const suite = suiteById.get(c.id);
+    const baseTs = extractCaseTs(baseResp);
+    const newTs = extractCaseTs(newResp);
+    const caseTs =
+      baseTs !== undefined && newTs !== undefined
+        ? Math.min(baseTs, newTs)
+        : baseTs ?? newTs;
     const item: CompareReport["items"][number] = {
       case_id: c.id,
       title: c.title,
@@ -1021,6 +1038,7 @@ export async function runEvaluator(): Promise<void> {
       risk_tags: riskTags,
       gate_recommendation: gateRecommendation,
     };
+    if (caseTs !== undefined) item.case_ts = caseTs;
     if (caseStatusReason) item.case_status_reason = caseStatusReason;
     if (hasFailureSummary) item.failure_summary = failureSummary;
 
