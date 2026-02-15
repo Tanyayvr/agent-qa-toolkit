@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PVIP Compare Report v5",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "contract_version",
+    "report_id",
+    "baseline_dir",
+    "new_dir",
+    "cases_path",
+    "summary",
+    "quality_flags",
+    "items"
+  ],
+  "properties": {
+    "contract_version": { "const": 5 },
+    "report_id": { "type": "string" },
+    "baseline_dir": { "type": "string" },
+    "new_dir": { "type": "string" },
+    "cases_path": { "type": "string" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "baseline_pass",
+        "new_pass",
+        "regressions",
+        "improvements",
+        "quality",
+        "security",
+        "risk_summary",
+        "cases_requiring_approval",
+        "cases_block_recommended",
+        "data_coverage"
+      ],
+      "properties": {
+        "baseline_pass": { "type": "integer" },
+        "new_pass": { "type": "integer" },
+        "regressions": { "type": "integer" },
+        "improvements": { "type": "integer" },
+        "root_cause_breakdown": { "type": "object", "additionalProperties": true },
+        "quality": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["transfer_class", "redaction_status"],
+          "properties": {
+            "transfer_class": { "enum": ["internal_only", "transferable"] },
+            "redaction_status": { "enum": ["none", "applied"] },
+            "redaction_preset_id": { "type": "string" }
+          }
+        },
+        "security": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "total_cases",
+            "cases_with_signals_new",
+            "cases_with_signals_baseline",
+            "signal_counts_new",
+            "signal_counts_baseline",
+            "top_signal_kinds_new",
+            "top_signal_kinds_baseline"
+          ],
+          "properties": {
+            "total_cases": { "type": "integer" },
+            "cases_with_signals_new": { "type": "integer" },
+            "cases_with_signals_baseline": { "type": "integer" },
+            "signal_counts_new": { "type": "object", "additionalProperties": { "type": "integer" } },
+            "signal_counts_baseline": { "type": "object", "additionalProperties": { "type": "integer" } },
+            "top_signal_kinds_new": { "type": "array", "items": { "type": "string" } },
+            "top_signal_kinds_baseline": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "risk_summary": {
+          "type": "object",
+          "required": ["low", "medium", "high"],
+          "properties": {
+            "low": { "type": "integer" },
+            "medium": { "type": "integer" },
+            "high": { "type": "integer" }
+          }
+        },
+        "cases_requiring_approval": { "type": "integer" },
+        "cases_block_recommended": { "type": "integer" },
+        "data_coverage": {
+          "type": "object",
+          "required": [
+            "total_cases",
+            "items_emitted",
+            "missing_baseline_artifacts",
+            "missing_new_artifacts",
+            "broken_baseline_artifacts",
+            "broken_new_artifacts"
+          ],
+          "properties": {
+            "total_cases": { "type": "integer" },
+            "items_emitted": { "type": "integer" },
+            "missing_baseline_artifacts": { "type": "integer" },
+            "missing_new_artifacts": { "type": "integer" },
+            "broken_baseline_artifacts": { "type": "integer" },
+            "broken_new_artifacts": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "quality_flags": {
+      "type": "object",
+      "required": [
+        "self_contained",
+        "portable_paths",
+        "missing_assets_count",
+        "path_violations_count",
+        "large_payloads_count",
+        "missing_assets",
+        "path_violations",
+        "large_payloads"
+      ],
+      "properties": {
+        "self_contained": { "type": "boolean" },
+        "portable_paths": { "type": "boolean" },
+        "missing_assets_count": { "type": "integer" },
+        "path_violations_count": { "type": "integer" },
+        "large_payloads_count": { "type": "integer" },
+        "missing_assets": { "type": "array", "items": { "type": "string" } },
+        "path_violations": { "type": "array", "items": { "type": "string" } },
+        "large_payloads": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "case_id",
+          "title",
+          "case_status",
+          "baseline_pass",
+          "new_pass",
+          "data_availability",
+          "artifacts",
+          "trace_integrity",
+          "security",
+          "risk_level",
+          "gate_recommendation"
+        ],
+        "properties": {
+          "case_id": { "type": "string" },
+          "title": { "type": "string" },
+          "suite": { "type": "string" },
+          "case_status": { "enum": ["executed", "skipped", "filtered_out"] },
+          "baseline_pass": { "type": "boolean" },
+          "new_pass": { "type": "boolean" },
+          "case_ts": { "type": "number" },
+          "data_availability": {
+            "type": "object",
+            "required": ["baseline", "new"],
+            "properties": {
+              "baseline": {
+                "type": "object",
+                "required": ["status"],
+                "properties": { "status": { "enum": ["present", "missing", "broken"] } }
+              },
+              "new": {
+                "type": "object",
+                "required": ["status"],
+                "properties": { "status": { "enum": ["present", "missing", "broken"] } }
+              }
+            }
+          },
+          "risk_level": { "enum": ["low", "medium", "high"] },
+          "gate_recommendation": { "enum": ["none", "require_approval", "block"] },
+          "artifacts": {
+            "type": "object",
+            "required": ["replay_diff_href"],
+            "properties": {
+              "replay_diff_href": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

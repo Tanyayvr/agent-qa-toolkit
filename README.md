@@ -98,6 +98,10 @@ Evaluator produces a **self-contained report directory** (copyable anywhere) tha
 - `assets/` — copies of referenced payload evidence
 - `artifacts/manifest.json` — evidence manifest (canonical mapping)
 
+Report schema:
+- `schemas/compare-report-v5.schema.json`
+- validated in `npm run test:toolkit`
+
 ### Report Contract v5 SHOULD (to remain fully self-contained)
 
 - include `baseline/` and `new/` local raw copies **whenever any raw-evidence href is present**:
@@ -146,6 +150,13 @@ Each case in `compare-report.json.items[]` includes:
 
 **CI gating reads only:** `compare-report.json.items[].gate_recommendation`  
 Everything else is supporting evidence for humans and RCA.
+
+## Policy rules (recommended_policy_rules)
+Derived from root cause + evidence:
+- `Rule1` → wrong_tool_choice
+- `Rule2` → missing_required_data / missing_case
+- `Rule3` → format_violation / hallucination_signal
+- `Rule4` → evidence failed or hallucination_signal / missing_required_data
 
 For v1-shape compatibility, the per-version boolean fields:
 

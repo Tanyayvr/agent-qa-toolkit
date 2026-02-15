@@ -114,7 +114,7 @@ Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case resp
 | Exit code contract: 0 success, 1 runtime, 2 usage | `runner/index.ts`: `CliUsageError.exitCode = 2`, `process.exit(1)` in catch. Same pattern in `evaluator/index.ts` |
 | Contract versioning in output | `evaluator/index.ts`: `contract_version: 5`, `manifest_version: "v1"` |
 
-**Gap**: evaluator reads runner output via `readFile` + `JSON.parse` without schema validation. If runner output format changes, evaluator may silently produce wrong results.
+**Status**: compare-report schema validation added in `schemas/compare-report-v5.schema.json` and enforced in `scripts/toolkit-tests.mjs`.
 
 ### 2. Bounded Memory
 

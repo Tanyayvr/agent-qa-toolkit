@@ -2,6 +2,7 @@
 import { spawn } from "node:child_process";
 import { readFileSync, existsSync, cpSync, rmSync, mkdirSync } from "node:fs";
 import path from "node:path";
+import Ajv from "ajv";
 
 const ROOT = process.cwd();
 
@@ -48,7 +49,17 @@ function loadReport(relPath) {
   return JSON.parse(raw);
 }
 
+function validateAgainstSchema(report) {
+  const schemaPath = path.join(ROOT, "schemas", "compare-report-v5.schema.json");
+  const schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
+  const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
+  const validate = ajv.compile(schema);
+  const ok = validate(report);
+  assert(ok, `schema validation failed: ${JSON.stringify(validate.errors || [])}`);
+}
+
 function validateReport(report, reportDir) {
+  validateAgainstSchema(report);
   assert(report.contract_version === 5, "contract_version must be 5");
   assert(typeof report.report_id === "string", "report_id must be string");
   assert(Array.isArray(report.items), "items must be array");

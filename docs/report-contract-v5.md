@@ -137,6 +137,9 @@ Top-level shape:
   "items": [ ... ]
 }
 
+Schema file:
+- schemas/compare-report-v5.schema.json (validated in scripts/toolkit-tests.mjs)
+
 Quality flags (recommended fields):
 - self_contained: boolean
 - portable_paths: boolean
