@@ -629,6 +629,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           <button class="btn" id="copyFilterLink">Copy filter link</button>
           <div class="muted" id="filterCount"></div>
         </div>
+        <div class="muted" style="margin-top:6px;">Filters are encoded in the URL hash for shareable links.</div>
       </div>
 
       <div class="card">
@@ -697,12 +698,6 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       <div class="card">
         <div style="font-size:16px;font-weight:900;">Cases</div>
         <div class="muted" style="margin-top:6px;">Tip: click case id to open replay diff</div>
-        <div class="kpi">
-          <div class="k"><div class="v">${escHtml(String(s.baseline_pass))}</div><div class="l">baseline pass</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.new_pass))}</div><div class="l">new pass</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.regressions))}</div><div class="l">regressions</div></div>
-          <div class="k"><div class="v">${escHtml(String(s.improvements))}</div><div class="l">improvements</div></div>
-        </div>
         <table class="table">
           <thead>
             <tr>
@@ -740,25 +735,26 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var el = document.getElementById("embedded-manifest-index");
       if (!el) return;
       var raw = el.textContent || "";
-      var idx;
-      try { idx = JSON.parse(raw); } catch (e) { return; }
-      if (!idx || !Array.isArray(idx.items)) return;
-      var map = new Map();
-      for (var i = 0; i < idx.items.length; i++) {
-        var it = idx.items[i];
-        if (it && it.manifest_key && it.rel_path) map.set(String(it.manifest_key), String(it.rel_path));
-      }
-      var links = document.querySelectorAll("a[data-manifest-key]");
-      for (var j = 0; j < links.length; j++) {
-        var a = links[j];
-        var key = a.getAttribute("data-manifest-key");
-        if (!key) continue;
-        var href = map.get(key);
-        if (href) {
-          a.setAttribute("href", href);
-        } else {
-          a.classList.add("muted");
-          a.removeAttribute("href");
+      var idx = null;
+      try { idx = JSON.parse(raw); } catch (e) { idx = null; }
+      if (idx && Array.isArray(idx.items)) {
+        var map = new Map();
+        for (var i = 0; i < idx.items.length; i++) {
+          var it = idx.items[i];
+          if (it && it.manifest_key && it.rel_path) map.set(String(it.manifest_key), String(it.rel_path));
+        }
+        var links = document.querySelectorAll("a[data-manifest-key]");
+        for (var j = 0; j < links.length; j++) {
+          var a = links[j];
+          var key = a.getAttribute("data-manifest-key");
+          if (!key) continue;
+          var href = map.get(key);
+          if (href) {
+            a.setAttribute("href", href);
+          } else {
+            a.classList.add("muted");
+            a.removeAttribute("href");
+          }
         }
       }
 
