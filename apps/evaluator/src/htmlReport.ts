@@ -548,6 +548,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .tab.active { background:#111827; border-color:#3b82f6; color:#dbeafe; }
   .savedRow { display:flex; gap:8px; align-items:center; margin-top:8px; }
   .savedRow .muted { font-size:12px; }
+  .note { color:#9aa4b2; font-size:12px; margin-top:6px; }
   .wrapRules { display:flex; flex-wrap:wrap; gap:6px; }
   .rule { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
   .hero { display:flex; align-items:center; justify-content:space-between; gap:12px; }
@@ -590,6 +591,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           <button class="btn tab suiteBtn" data-suite="">all</button>
           ${suiteQuick}
         </div>
+        ${suiteEntries.length <= 1 ? `<div class="note">Only one suite present in this report.</div>` : ""}
       </div>
 
       <div class="card" style="margin-bottom:16px;">
@@ -627,6 +629,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         </div>
         <div class="savedRow">
           <button class="btn" id="copyFilterLink">Copy filter link</button>
+          <button class="btn" id="resetFilters">Reset</button>
           <div class="muted" id="filterCount"></div>
         </div>
         <div class="muted" style="margin-top:6px;">Filters are encoded in the URL hash for shareable links.</div>
@@ -765,6 +768,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var filterGate = document.getElementById("filterGate");
       var filterStatus = document.getElementById("filterStatus");
       var copyFilterLink = document.getElementById("copyFilterLink");
+      var resetFilters = document.getElementById("resetFilters");
       var filterCount = document.getElementById("filterCount");
       var rows = document.querySelectorAll("tbody tr[data-case]");
 
@@ -894,6 +898,14 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           } else {
             window.prompt("Copy filter link:", link);
           }
+        });
+      }
+
+      if (resetFilters) {
+        resetFilters.addEventListener("click", function () {
+          setFilters({ text: "", suite: "", diff: "", risk: "", gate: "", status: "" });
+          updateHash({ text: "", suite: "", diff: "", risk: "", gate: "", status: "" });
+          applyFilters();
         });
       }
 
