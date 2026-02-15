@@ -338,6 +338,26 @@
     "suite": "robustness"
   },
   {
+    "id": "improve_001",
+    "title": "Improvement case: verified fix message must appear",
+    "input": {
+      "user": "Provide a short status update after applying the fix."
+    },
+    "expected": {
+      "must_include": [
+        "Verified fix"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "improvement"
+      ],
+      "severity": "low",
+      "kind": "text_agent"
+    },
+    "suite": "correctness"
+  },
+  {
     "id": "fetch_http_500_001",
     "title": "Runner fetch failure: HTTP 500 with JSON body",
     "input": {

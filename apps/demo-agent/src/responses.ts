@@ -601,6 +601,24 @@ export const RESPONSES: Record<Version, Record<string, AgentCaseResponse>> = {
         },
       ],
     },
+    improve_001: {
+      case_id: "improve_001",
+      version: "baseline",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [],
+      final_output: {
+        content_type: "text",
+        content: "Draft response prepared. Awaiting verification.",
+      },
+      events: [
+        {
+          type: "final_output",
+          ts: 1738044500000,
+          content_type: "text",
+          content: "Draft response prepared. Awaiting verification.",
+        },
+      ],
+    },
   },
 
   new: {
@@ -1158,6 +1176,24 @@ export const RESPONSES: Record<Version, Record<string, AgentCaseResponse>> = {
           ts: 1738044410500,
           content_type: "text",
           content: "Incident logged. Created incident ticket T-9999 for the checkout outage.",
+        },
+      ],
+    },
+    improve_001: {
+      case_id: "improve_001",
+      version: "new",
+      workflow_id: "support_ticketing_v1",
+      proposed_actions: [],
+      final_output: {
+        content_type: "text",
+        content: "Verified fix applied. Customer notified.",
+      },
+      events: [
+        {
+          type: "final_output",
+          ts: 1738044500500,
+          content_type: "text",
+          content: "Verified fix applied. Customer notified.",
         },
       ],
     },

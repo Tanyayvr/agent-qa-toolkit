@@ -579,6 +579,49 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
     <div class="grid">
     <div class="side">
+      <div class="card" style="margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:900;">Suite quick filters</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+          <button class="btn suiteBtn" data-suite="">all</button>
+          ${suiteQuick}
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:900;">Filters</div>
+        <div class="filters">
+          <input id="filterText" type="text" placeholder="Search case id or title" />
+          <select id="filterSuite">
+            <option value="">Suite: all</option>
+            ${suiteOptions}
+          </select>
+          <select id="filterDiff">
+            <option value="">Diff: all</option>
+            <option value="regression">regression</option>
+            <option value="improvement">improvement</option>
+            <option value="same">same</option>
+          </select>
+          <select id="filterRisk">
+            <option value="">Risk: all</option>
+            <option value="low">Risk: low</option>
+            <option value="medium">Risk: medium</option>
+            <option value="high">Risk: high</option>
+          </select>
+          <select id="filterGate">
+            <option value="">Gate: all</option>
+            <option value="none">Gate: none</option>
+            <option value="require_approval">Gate: require approval</option>
+            <option value="block">Gate: block</option>
+          </select>
+          <select id="filterStatus">
+            <option value="">Status: all</option>
+            <option value="executed">Status: executed</option>
+            <option value="filtered_out">Status: filtered_out</option>
+            <option value="skipped">Status: skipped</option>
+          </select>
+        </div>
+      </div>
+
       <div class="card">
         <div style="font-size:16px;font-weight:900;">Summary</div>
           <div class="kpi">
@@ -639,49 +682,6 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         </div>
 
         ${suiteBlocks}
-
-        <div class="card" style="margin-top:16px;">
-          <div style="font-size:16px;font-weight:900;">Suite quick filters</div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-            <button class="btn suiteBtn" data-suite="">all</button>
-            ${suiteQuick}
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:16px;">
-          <div style="font-size:16px;font-weight:900;">Filters</div>
-          <div class="filters">
-            <input id="filterText" type="text" placeholder="Search case id or title" />
-            <select id="filterSuite">
-              <option value="">Suite: all</option>
-              ${suiteOptions}
-            </select>
-            <select id="filterDiff">
-              <option value="">Diff: all</option>
-              <option value="regression">regression</option>
-              <option value="improvement">improvement</option>
-              <option value="same">same</option>
-            </select>
-            <select id="filterRisk">
-              <option value="">Risk: all</option>
-              <option value="low">Risk: low</option>
-              <option value="medium">Risk: medium</option>
-              <option value="high">Risk: high</option>
-            </select>
-            <select id="filterGate">
-              <option value="">Gate: all</option>
-              <option value="none">Gate: none</option>
-              <option value="require_approval">Gate: require approval</option>
-              <option value="block">Gate: block</option>
-            </select>
-            <select id="filterStatus">
-              <option value="">Status: all</option>
-              <option value="executed">Status: executed</option>
-              <option value="filtered_out">Status: filtered_out</option>
-              <option value="skipped">Status: skipped</option>
-            </select>
-          </div>
-        </div>
         ${secBlock}
       </div>
 
