@@ -28,7 +28,7 @@ try {
   process.exit(2);
 }
 
-const defaultOut = `${absReport.replace(/\\/+$/, "")}.tar.gz`;
+const defaultOut = `${absReport.replace(/\/+$/, "")}.tar.gz`;
 const out = path.resolve(outPath || defaultOut);
 const parent = path.dirname(absReport);
 const name = path.basename(absReport);
