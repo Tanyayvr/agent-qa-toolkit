@@ -97,6 +97,15 @@ if (!manifest.items || !Array.isArray(manifest.items)) {
   process.exit(1);
 }
 
+if (report.embedded_manifest_index && report.embedded_manifest_index.source_manifest_sha256) {
+  const manifestRaw = readFileSync(manifestPath);
+  const hash = createHash("sha256").update(manifestRaw).digest("hex");
+  if (hash !== report.embedded_manifest_index.source_manifest_sha256) {
+    outFail("embedded_manifest_index.source_manifest_sha256 mismatch");
+    if (strict) process.exit(1);
+  }
+}
+
 function collectHrefFields(reportObj) {
   const out = [];
   const stack = [reportObj];
@@ -156,6 +165,8 @@ if (index && index.items && Array.isArray(index.items)) {
 
 let missing = 0;
 let hashMismatch = 0;
+let sizeMismatch = 0;
+let missingHash = 0;
 for (const it of manifest.items) {
   if (!it.rel_path || typeof it.rel_path !== "string") continue;
   if (!isPortableHref(it.rel_path) || !pathInsideReport(absReport, it.rel_path)) {
@@ -166,6 +177,15 @@ for (const it of manifest.items) {
   if (!existsSync(abs)) {
     missing++;
     continue;
+  }
+  if (!it.sha256) missingHash++;
+  if (typeof it.bytes === "number") {
+    try {
+      const st = statSync(abs);
+      if (st.isFile() && st.size !== it.bytes) sizeMismatch++;
+    } catch {
+      // ignore
+    }
   }
   if (it.sha256) {
     const h = sha256File(abs);
@@ -181,6 +201,14 @@ if (hashMismatch > 0) {
   outFail(`Manifest hash mismatches: ${hashMismatch}`);
   outFail("Integrity check failed: files were modified after bundle generation.");
   process.exit(1);
+}
+if (missingHash > 0) {
+  outFail(`Manifest items missing sha256: ${missingHash}`);
+  if (strict) process.exit(1);
+}
+if (sizeMismatch > 0) {
+  outFail(`Manifest size mismatches: ${sizeMismatch}`);
+  if (strict) process.exit(1);
 }
 
 outOk("OK: schema + manifest assets verified");

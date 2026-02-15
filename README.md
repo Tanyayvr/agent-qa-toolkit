@@ -107,6 +107,7 @@ Manifest integrity:
 - manifest items include `sha256` for offline verification
 - `pvip:verify` enforces portable paths, in-bundle hrefs, and embedded-index consistency
 - `pvip:verify` scans *_href/*_path fields in compare-report.json for portable paths
+- `pvip:verify --strict` also enforces manifest size/hash consistency
 
 ### Report Contract v5 SHOULD (to remain fully self-contained)
 

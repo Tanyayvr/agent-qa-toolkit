@@ -121,6 +121,7 @@ Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case resp
 **Status**: manifest item hashes (`sha256`) added in evaluator for offline integrity checks.
 **Status**: pvip-verify enforces portable paths, in-bundle hrefs, and embedded-index consistency.
 **Status**: pvip-verify scans *_href/*_path fields in compare-report.json.
+**Status**: strict verify enforces manifest size/hash consistency.
 **Status**: CI integration examples added (`docs/ci.md`).
 
 ### 2. Bounded Memory
