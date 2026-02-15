@@ -339,6 +339,10 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   const suiteEntries = Object.entries(suiteSummaries);
   const suiteBlocks = suiteEntries
     .map(([suite, ss]) => {
+      const suiteNote =
+        suite === "robustness"
+          ? `<div class="muted" style="margin-top:8px;">Robustness has no correctness assertions. PASS means the pipeline completed without fatal errors.</div>`
+          : "";
       return `
 <div class="card" style="margin-top:12px;">
   <div style="font-size:14px;font-weight:900;">Suite: ${escHtml(suite)}</div>
@@ -363,6 +367,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
     <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_baseline_artifacts))}</div><div class="l">broken baseline</div></div>
     <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_new_artifacts))}</div><div class="l">broken new</div></div>
   </div>
+  ${suiteNote}
 </div>`;
     })
     .join("");
@@ -452,8 +457,14 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       const preventable = it.preventable_by_policy ? badge("preventable", "mid") : `<span class="muted">—</span>`;
 
       const hasFailure = Boolean(it.failure_summary?.baseline || it.failure_summary?.new);
+      const rowClass =
+        it.baseline_pass && !it.new_pass
+          ? "row-regression"
+          : !it.baseline_pass && it.new_pass
+            ? "row-improvement"
+            : "";
       return `
-<tr data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}">
+<tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}">
   <td>
     <div class="caseTitle">${titleLink}</div>
     <div class="muted">${escHtml(it.title || "")}</div>
@@ -462,6 +473,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       ${gateBadge(it.gate_recommendation)}
       <span class="metaChip">${escHtml(it.case_status)}</span>
       <span class="metaChip">${escHtml(suite)}</span>
+      ${suite === "robustness" ? `<span class="metaChip">no assertions</span>` : ""}
       ${hasFailure ? failureBadge() : ""}
     </div>
   </td>
@@ -508,7 +520,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .wrap { max-width: 1500px; margin: 0 auto; padding: 24px; }
   .h1 { font-size: 26px; font-weight: 900; margin: 0 0 6px 0; letter-spacing: -0.02em; }
   .muted { color:#9aa4b2; font-size: 13px; }
-  .grid { display:grid; grid-template-columns: 300px 1fr; gap: 16px; margin-top: 16px; }
+  .grid { display:grid; grid-template-columns: 320px 1fr; gap: 16px; margin-top: 16px; }
   .card { background:#0f1217; border:1px solid #232836; border-radius: 16px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
   .kpi { display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
   .k { background:#0b0d10; border:1px solid #232836; border-radius: 12px; padding: 10px; min-width: 140px; }
@@ -522,6 +534,9 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .table { width:100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
   .table th, .table td { border-top:1px solid #232836; padding: 10px; vertical-align: top; }
   .table th { text-align:left; color:#cbd5e1; font-weight:800; }
+  .table tr:hover td { background:#0b0f16; }
+  .row-regression td:first-child { border-left: 3px solid #c2410c; padding-left: 7px; }
+  .row-improvement td:first-child { border-left: 3px solid #16a34a; padding-left: 7px; }
   .wrapRules { display:flex; flex-wrap:wrap; gap:6px; }
   .rule { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
   .hero { display:flex; align-items:center; justify-content:space-between; gap:12px; }

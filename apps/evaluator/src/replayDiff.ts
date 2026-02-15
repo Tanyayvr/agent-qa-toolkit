@@ -397,7 +397,8 @@ function renderToolTimeline(events: RunEvent[] | undefined): string {
 }
 
 function renderOneSide(title: string, resp: AgentResponse): string {
-  const finalText = truncateText(normalizePortablePathsInText(fmtFinal(resp.final_output)), 2200).text;
+  const rawFinal = truncateText(normalizePortablePathsInText(fmtFinal(resp.final_output)), 2200).text;
+  const finalText = rawFinal ? rawFinal : "—";
   const wf = resp.workflow_id
     ? `<div><b>workflow_id</b>: <code>${escHtml(resp.workflow_id)}</code></div>`
     : `<div class="muted">workflow_id: (none)</div>`;
