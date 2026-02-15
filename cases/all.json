@@ -662,5 +662,23 @@
       "kind": "data_variation"
     },
     "suite": "robustness"
+  },
+  {
+    "id": "matrix_trace_diff_001",
+    "title": "Trace: baseline has events, new missing events",
+    "input": {
+      "user": "Return identical output but drop events in new."
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "trace",
+        "events"
+      ],
+      "severity": "low",
+      "kind": "trace_variation"
+    },
+    "suite": "robustness"
   }
 ]

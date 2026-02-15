@@ -547,7 +547,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .tab { border-radius: 999px; padding: 6px 12px; font-size:12px; font-weight:700; letter-spacing:0.01em; }
   .tab.active { background:#111827; border-color:#3b82f6; color:#dbeafe; }
   .savedRow { display:flex; gap:8px; align-items:center; margin-top:8px; }
-  .savedRow select { flex:1; }
+  .savedRow .muted { font-size:12px; }
   .wrapRules { display:flex; flex-wrap:wrap; gap:6px; }
   .rule { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
   .hero { display:flex; align-items:center; justify-content:space-between; gap:12px; }
@@ -626,11 +626,8 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           </select>
         </div>
         <div class="savedRow">
-          <select id="savedFilters">
-            <option value="">Saved filters</option>
-          </select>
-          <button class="btn" id="saveFilter">Save</button>
-          <button class="btn" id="deleteFilter">Delete</button>
+          <button class="btn" id="copyFilterLink">Copy filter link</button>
+          <div class="muted" id="filterCount"></div>
         </div>
       </div>
 
@@ -771,9 +768,8 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var filterRisk = document.getElementById("filterRisk");
       var filterGate = document.getElementById("filterGate");
       var filterStatus = document.getElementById("filterStatus");
-      var savedFilters = document.getElementById("savedFilters");
-      var saveFilter = document.getElementById("saveFilter");
-      var deleteFilter = document.getElementById("deleteFilter");
+      var copyFilterLink = document.getElementById("copyFilterLink");
+      var filterCount = document.getElementById("filterCount");
       var rows = document.querySelectorAll("tbody tr[data-case]");
 
       function getFilters() {
@@ -797,6 +793,33 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         if (filterStatus) filterStatus.value = f.status || "";
       }
 
+      function parseHash() {
+        var raw = window.location.hash || "";
+        if (!raw || raw.length < 2) return null;
+        var qs = raw.startsWith("#?") ? raw.slice(2) : raw.slice(1);
+        var params = new URLSearchParams(qs);
+        return {
+          text: params.get("text") || "",
+          suite: params.get("suite") || "",
+          diff: params.get("diff") || "",
+          risk: params.get("risk") || "",
+          gate: params.get("gate") || "",
+          status: params.get("status") || ""
+        };
+      }
+
+      function updateHash(f) {
+        var params = new URLSearchParams();
+        if (f.text) params.set("text", f.text);
+        if (f.suite) params.set("suite", f.suite);
+        if (f.diff) params.set("diff", f.diff);
+        if (f.risk) params.set("risk", f.risk);
+        if (f.gate) params.set("gate", f.gate);
+        if (f.status) params.set("status", f.status);
+        var next = params.toString();
+        window.location.hash = next ? "?" + next : "";
+      }
+
       function applyFilters() {
         var f = getFilters();
         var text = (f.text || "").toLowerCase();
@@ -806,6 +829,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         var gate = f.gate || "";
         var status = f.status || "";
 
+        var visible = 0;
         for (var i = 0; i < rows.length; i++) {
           var r = rows[i];
           var caseId = (r.getAttribute("data-case") || "").toLowerCase();
@@ -824,7 +848,15 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           if (gate && rGate !== gate) ok = false;
           if (status && rStatus !== status) ok = false;
           r.style.display = ok ? "" : "none";
+          if (ok) visible++;
         }
+
+        if (filterCount) {
+          filterCount.textContent = "Showing " + visible + " / " + rows.length;
+        }
+
+        updateHash(f);
+        updateTabActive();
       }
 
       if (filterText) filterText.addEventListener("input", applyFilters);
@@ -842,75 +874,36 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             var value = btn && btn.getAttribute("data-suite");
             filterSuite.value = value || "";
             applyFilters();
-            for (var t = 0; t < suiteButtons.length; t++) {
-              suiteButtons[t].classList.remove("active");
-            }
-            if (btn) btn.classList.add("active");
           });
         }
       }
 
-      function loadSaved() {
-        if (!savedFilters) return;
-        var raw = localStorage.getItem("pvip_saved_filters");
-        var arr = [];
-        try { arr = raw ? JSON.parse(raw) : []; } catch (e) { arr = []; }
-        savedFilters.innerHTML = "<option value=\"\">Saved filters</option>";
-        for (var i = 0; i < arr.length; i++) {
-          var opt = document.createElement("option");
-          opt.value = arr[i].name;
-          opt.textContent = arr[i].name;
-          savedFilters.appendChild(opt);
+      function updateTabActive() {
+        var suite = filterSuite && filterSuite.value || "";
+        for (var t = 0; t < suiteButtons.length; t++) {
+          var btn = suiteButtons[t];
+          var value = btn.getAttribute("data-suite") || "";
+          if (value === suite) btn.classList.add("active");
+          else btn.classList.remove("active");
         }
-        return arr;
       }
 
-      function saveCurrent(name) {
-        var arr = loadSaved() || [];
-        var filtered = arr.filter(function (x) { return x.name !== name; });
-        filtered.push({ name: name, filters: getFilters() });
-        localStorage.setItem("pvip_saved_filters", JSON.stringify(filtered));
-        loadSaved();
-      }
-
-      function deleteCurrent(name) {
-        var arr = loadSaved() || [];
-        var filtered = arr.filter(function (x) { return x.name !== name; });
-        localStorage.setItem("pvip_saved_filters", JSON.stringify(filtered));
-        loadSaved();
-      }
-
-      loadSaved();
-
-      if (saveFilter) {
-        saveFilter.addEventListener("click", function () {
-          var name = window.prompt("Save filter as:");
-          if (!name) return;
-          saveCurrent(String(name));
-        });
-      }
-
-      if (deleteFilter) {
-        deleteFilter.addEventListener("click", function () {
-          if (!savedFilters || !savedFilters.value) return;
-          deleteCurrent(savedFilters.value);
-        });
-      }
-
-      if (savedFilters) {
-        savedFilters.addEventListener("change", function () {
-          var name = savedFilters.value;
-          if (!name) return;
-          var arr = loadSaved() || [];
-          for (var i = 0; i < arr.length; i++) {
-            if (arr[i].name === name) {
-              setFilters(arr[i].filters);
-              applyFilters();
-              break;
-            }
+      if (copyFilterLink) {
+        copyFilterLink.addEventListener("click", function () {
+          var link = window.location.href;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link);
+            copyFilterLink.textContent = "Copied";
+            setTimeout(function () { copyFilterLink.textContent = "Copy filter link"; }, 1200);
+          } else {
+            window.prompt("Copy filter link:", link);
           }
         });
       }
+
+      var fromHash = parseHash();
+      if (fromHash) setFilters(fromHash);
+      applyFilters();
     })();
   </script>
 </body>

@@ -217,6 +217,46 @@ async function handleMatrixCase(caseId: string, version: "baseline" | "new", res
       );
       return true;
     }
+    case "matrix_trace_diff_001": {
+      const withEvents = [
+        {
+          type: "tool_call",
+          ts: Date.now(),
+          call_id: "c1",
+          action_id: "a1",
+          tool: "lookup_customer",
+          args: { customer_id: "CUST-TRACE" }
+        },
+        {
+          type: "tool_result",
+          ts: Date.now() + 5,
+          call_id: "c1",
+          action_id: "a1",
+          status: "ok",
+          latency_ms: 5,
+          payload_summary: { customer_id: "CUST-TRACE" }
+        },
+        {
+          type: "final_output",
+          ts: Date.now() + 10,
+          content_type: "text",
+          content: "Trace diff case"
+        }
+      ];
+      sendJson(
+        res,
+        {
+          case_id: caseId,
+          version,
+          workflow_id: "matrix_v1",
+          proposed_actions: [],
+          final_output: { content_type: "text", content: "Trace diff case" },
+          events: version === "baseline" ? withEvents : []
+        },
+        preset
+      );
+      return true;
+    }
     default:
       return false;
   }
