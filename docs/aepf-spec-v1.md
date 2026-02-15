@@ -39,6 +39,34 @@ Schema:
 
 - `schemas/compare-report-v5.schema.json`
 
+### `compare-report.json` field table (summary)
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `contract_version` | ✅ | Report contract version (v5) |
+| `report_id` | ✅ | Report identifier |
+| `meta` | ✅ | Toolkit + spec version + timestamp + run_id |
+| `baseline_dir` | ✅ | Baseline run directory |
+| `new_dir` | ✅ | New run directory |
+| `cases` | ✅ | Cases file used |
+| `summary` | ✅ | Global counts (pass/fail, risk, coverage) |
+| `summary_by_suite` | ✅ | Per‑suite rollups |
+| `items[]` | ✅ | Per‑case results |
+| `environment` | ◻️ | Agent/model/prompt/tools metadata |
+| `compliance_mapping` | ◻️ | ISO/NIST mapping to evidence |
+| `quality_flags` | ◻️ | Portability, redaction, large payloads |
+
+### `quality_flags` (recommended fields)
+
+| Field | Description |
+|-------|-------------|
+| `self_contained` | bundle is offline‑safe |
+| `portable_paths` | no absolute/escape paths |
+| `path_violations_count` | count of path violations |
+| `missing_assets_count` | missing referenced assets |
+| `large_payloads_count` | cases exceeding `warnBodyBytes` |
+| `large_payloads` | list of large payload paths |
+
 ## `artifacts/manifest.json` (Canonical)
 
 The manifest is the **single source of truth** for evidence integrity.
