@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "product": "agent-qa-toolkit",
+  "license_id": "LIC-2026-0001",
+  "customer": "Example Corp",
+  "issued_at": 1771192000000,
+  "expires_at": 1773870400000,
+  "type": "monthly",
+  "limits": {
+    "max_runs_per_month": 500
+  }
+}

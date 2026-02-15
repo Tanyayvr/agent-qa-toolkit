@@ -27,6 +27,7 @@
 - [ ] `--strictPortability` and `--strictRedaction` flags documented
 - [ ] `compliance_mapping` present in reports (if profile provided)
 - [ ] No secrets committed (manual spot‑check)
+- [ ] License flow documented (keygen + sign + usage)
 
 ## Release Hygiene
 - [ ] `CHANGELOG.md` updated (if used)

@@ -40,6 +40,26 @@ Place these files together (recommended: `.license/`):
 - `type: "monthly"` → uses `limits.max_runs_per_month`
 - `type: "pack"` → uses `limits.max_runs_total`
 
+Examples:
+
+- `docs/license-example-monthly.json`
+- `docs/license-example-pack.json`
+
+## Key Generation & Signing
+
+Generate a keypair:
+
+```bash
+node scripts/license-keygen.mjs
+```
+
+Sign a license file:
+
+```bash
+export AQ_LICENSE_PRIVATE_KEY=<base64-der-pkcs8>
+node scripts/license-sign.mjs docs/license-example-monthly.json
+```
+
 ## Runtime Flags
 
 Provide a license path either via CLI or env:
