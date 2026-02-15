@@ -196,7 +196,7 @@ export type CompareReport = {
       new: { status: "present" | "missing" | "broken"; reason?: string; reason_code?: string; details?: Record<string, unknown> };
     };
 
-    case_status: "executed" | "skipped" | "filtered_out";
+    case_status: "executed" | "missing" | "filtered_out";
     case_status_reason?: string;
 
     baseline_pass: boolean;
@@ -597,8 +597,11 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .tabRow { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
   .tab { border-radius: 999px; padding: 6px 12px; font-size:12px; font-weight:700; letter-spacing:0.01em; }
   .tab.active { background:#111827; border-color:#3b82f6; color:#dbeafe; }
-  .savedRow { display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .savedRow { display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; }
   .savedRow .muted { font-size:12px; }
+  .savedList { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+  .savedItem { display:flex; gap:8px; align-items:center; }
+  .savedItem .name { font-size:12px; color:#c5c7cc; }
   .note { color:#9aa4b2; font-size:12px; margin-top:6px; }
   .wrapRules { display:flex; flex-wrap:wrap; gap:6px; }
   .rule { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
@@ -689,14 +692,16 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             <option value="">Status: all</option>
             <option value="executed">Status: executed</option>
             <option value="filtered_out">Status: filtered_out</option>
-            <option value="skipped">Status: skipped</option>
+            <option value="missing">Status: missing</option>
           </select>
         </div>
         <div class="savedRow">
+          <button class="btn" id="saveFilters">Save</button>
           <button class="btn" id="copyFilterLink">Copy filter link</button>
           <button class="btn" id="resetFilters">Reset</button>
           <div class="muted" id="filterCount"></div>
         </div>
+        <div class="savedList" id="savedFilters"></div>
         <div class="muted" style="margin-top:6px;">Filters are encoded in the URL hash for shareable links.</div>
       </div>
 
@@ -858,6 +863,8 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var filterStatus = document.getElementById("filterStatus");
       var copyFilterLink = document.getElementById("copyFilterLink");
       var resetFilters = document.getElementById("resetFilters");
+      var saveFilters = document.getElementById("saveFilters");
+      var savedFilters = document.getElementById("savedFilters");
       var filterCount = document.getElementById("filterCount");
       var body = document.querySelector("tbody");
       var rows = document.querySelectorAll("tbody tr[data-case]");
@@ -912,6 +919,56 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         if (f.status) params.set("status", f.status);
         var next = params.toString();
         window.location.hash = next ? "?" + next : "";
+      }
+
+      function loadSavedFilters() {
+        if (!savedFilters) return;
+        savedFilters.innerHTML = "";
+        var raw = null;
+        try { raw = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { raw = null; }
+        if (!raw) {
+          var empty = document.createElement("div");
+          empty.className = "muted";
+          empty.textContent = "No saved filters (localStorage may be blocked).";
+          savedFilters.appendChild(empty);
+          return;
+        }
+        var list = [];
+        try { list = JSON.parse(raw) || []; } catch (e) { list = []; }
+        if (!Array.isArray(list) || list.length === 0) {
+          var empty2 = document.createElement("div");
+          empty2.className = "muted";
+          empty2.textContent = "No saved filters.";
+          savedFilters.appendChild(empty2);
+          return;
+        }
+        list.forEach(function(it, idx) {
+          var row = document.createElement("div");
+          row.className = "savedItem";
+          var btn = document.createElement("button");
+          btn.className = "btn";
+          btn.textContent = it.name || ("Filter " + (idx + 1));
+          btn.onclick = function() {
+            setFilters(it.filters || {});
+            applyFilters();
+          };
+          var del = document.createElement("button");
+          del.className = "btn";
+          del.textContent = "Remove";
+          del.onclick = function() {
+            var next = list.slice();
+            next.splice(idx, 1);
+            try { window.localStorage.setItem("pvip_saved_filters", JSON.stringify(next)); } catch (e) {}
+            loadSavedFilters();
+          };
+          var name = document.createElement("div");
+          name.className = "name";
+          name.textContent = it.name || "";
+          row.appendChild(btn);
+          row.appendChild(del);
+          row.appendChild(name);
+          savedFilters.appendChild(row);
+        });
       }
 
       function sortRows(f) {
@@ -1038,6 +1095,21 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         });
       }
 
+      if (saveFilters) {
+        saveFilters.addEventListener("click", function () {
+          var name = window.prompt("Save filters as:") || "";
+          var f = getFilters();
+          var raw = null;
+          try { raw = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { raw = null; }
+          var list = [];
+          try { list = raw ? JSON.parse(raw) : []; } catch (e) { list = []; }
+          if (!Array.isArray(list)) list = [];
+          list.push({ name: name.trim() || ("Filter " + (list.length + 1)), filters: f });
+          try { window.localStorage.setItem("pvip_saved_filters", JSON.stringify(list)); } catch (e) {}
+          loadSavedFilters();
+        });
+      }
+
       if (resetFilters) {
         resetFilters.addEventListener("click", function () {
           setFilters({ text: "", suite: "", diff: "", sort: "case_id", risk: "", gate: "", status: "" });
@@ -1049,6 +1121,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var fromHash = parseHash();
       if (fromHash) setFilters(fromHash);
       applyFilters();
+      loadSavedFilters();
     })();
   </script>
 </body>
