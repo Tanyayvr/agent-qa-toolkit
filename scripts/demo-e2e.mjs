@@ -36,8 +36,9 @@ async function main() {
   if (!skipAudit) await run("npm", ["run", "audit"], "audit");
 
   const common = ["scripts/demo.mjs", "--baseUrl", baseUrl, "--skipAudit", "--skipLint", "--skipTypecheck"];
-  await run("node", [...common, "--suite", "correctness"], "demo:correctness");
-  await run("node", [...common, "--suite", "robustness"], "demo:robustness");
+  await run("node", [...common, "--suite", "correctness", "--reportId", "correctness_latest"], "demo:correctness");
+  await run("node", [...common, "--suite", "robustness", "--reportId", "robustness_latest"], "demo:robustness");
+  await run("node", [...common, "--cases", "cases/all.json", "--reportId", "latest"], "demo:latest");
 }
 
 main().catch((err) => {
