@@ -249,6 +249,18 @@ npm run pvip:pack
 npm run pvip:verify
 ```
 
+Add environment metadata (optional):
+
+```bash
+npm -w evaluator run dev -- \
+  --cases cases/all.json \
+  --baselineDir apps/runner/runs/baseline/latest \
+  --newDir apps/runner/runs/new/latest \
+  --outDir apps/evaluator/reports/latest \
+  --reportId latest \
+  --environment docs/environment.example.json
+```
+
 Strict/JSON verify:
 
 ```bash
