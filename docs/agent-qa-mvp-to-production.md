@@ -42,7 +42,7 @@
 ## 4. Пошаговый план (Self‑Hosted Only)
 Принцип: чекпойнты дают самостоятельную ценность, каждый имеет DoD (Definition of Done).
 
-### Checkpoint 0 — Freeze MVP
+### Checkpoint 0 — Freeze MVP (DONE)
 - зафиксировать текущую версию и отчёты (correctness + robustness)
 - критерий: отчёт открывается, `summary_by_suite` заполнен
 
@@ -57,7 +57,7 @@
 - критерий: 3 теста проходят в CI
  - команда: `npm run test:toolkit`
 
-### Checkpoint 2 — Integration Contract
+### Checkpoint 2 — Integration Contract (DONE)
 - документ `/run-case` (schema + примеры)
 - критерий: doc опубликован + ссылка в README
  - файл: `docs/agent-integration-contract.md`
