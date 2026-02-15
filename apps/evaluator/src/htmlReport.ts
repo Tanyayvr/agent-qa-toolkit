@@ -375,6 +375,9 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   const suiteOptions = suiteEntries
     .map(([suite]) => `<option value="${escHtml(suite)}">Suite: ${escHtml(suite)}</option>`)
     .join("");
+  const suiteQuick = suiteEntries
+    .map(([suite]) => `<button class="btn suiteBtn" data-suite="${escHtml(suite)}">${escHtml(suite)}</button>`)
+    .join("");
 
   const sec = s.security;
   const secBlock = `
@@ -463,8 +466,9 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           : !it.baseline_pass && it.new_pass
             ? "row-improvement"
             : "";
+      const diffKind = it.baseline_pass === it.new_pass ? "same" : it.baseline_pass ? "regression" : "improvement";
       return `
-<tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}">
+<tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}" data-diff="${diffKind}">
   <td>
     <div class="caseTitle">${titleLink}</div>
     <div class="muted">${escHtml(it.title || "")}</div>
@@ -537,6 +541,8 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .table tr:hover td { background:#0b0f16; }
   .row-regression td:first-child { border-left: 3px solid #c2410c; padding-left: 7px; }
   .row-improvement td:first-child { border-left: 3px solid #16a34a; padding-left: 7px; }
+  .btn { background:#0b0d10; border:1px solid #232836; color:#cbd5e1; border-radius: 999px; padding: 4px 10px; font-size:12px; cursor:pointer; }
+  .btn:hover { border-color:#2b3a55; color:#e8eaed; }
   .wrapRules { display:flex; flex-wrap:wrap; gap:6px; }
   .rule { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
   .hero { display:flex; align-items:center; justify-content:space-between; gap:12px; }
@@ -580,6 +586,9 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             <div class="k"><div class="v">${escHtml(String(s.new_pass))}</div><div class="l">new pass</div></div>
             <div class="k"><div class="v">${escHtml(String(s.regressions))}</div><div class="l">regressions</div></div>
             <div class="k"><div class="v">${escHtml(String(s.improvements))}</div><div class="l">improvements</div></div>
+          </div>
+          <div class="muted" style="margin-top:8px;">
+            suites: ${suiteEntries.length ? escHtml(suiteEntries.map(([name]) => name).join(", ")) : "—"}
           </div>
 
           <div style="margin-top:14px; font-size:16px; font-weight:900;">Risk</div>
@@ -632,12 +641,26 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
         ${suiteBlocks}
 
         <div class="card" style="margin-top:16px;">
+          <div style="font-size:16px;font-weight:900;">Suite quick filters</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+            <button class="btn suiteBtn" data-suite="">all</button>
+            ${suiteQuick}
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
           <div style="font-size:16px;font-weight:900;">Filters</div>
           <div class="filters">
             <input id="filterText" type="text" placeholder="Search case id or title" />
             <select id="filterSuite">
               <option value="">Suite: all</option>
               ${suiteOptions}
+            </select>
+            <select id="filterDiff">
+              <option value="">Diff: all</option>
+              <option value="regression">regression</option>
+              <option value="improvement">improvement</option>
+              <option value="same">same</option>
             </select>
             <select id="filterRisk">
               <option value="">Risk: all</option>
@@ -732,6 +755,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
       var filterText = document.getElementById("filterText");
       var filterSuite = document.getElementById("filterSuite");
+      var filterDiff = document.getElementById("filterDiff");
       var filterRisk = document.getElementById("filterRisk");
       var filterGate = document.getElementById("filterGate");
       var filterStatus = document.getElementById("filterStatus");
@@ -740,6 +764,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       function applyFilters() {
         var text = (filterText && filterText.value || "").toLowerCase();
         var suite = filterSuite && filterSuite.value || "";
+        var diff = filterDiff && filterDiff.value || "";
         var risk = filterRisk && filterRisk.value || "";
         var gate = filterGate && filterGate.value || "";
         var status = filterStatus && filterStatus.value || "";
@@ -752,10 +777,12 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           var rGate = r.getAttribute("data-gate") || "";
           var rStatus = r.getAttribute("data-status") || "";
           var rSuite = r.getAttribute("data-suite") || "";
+          var rDiff = r.getAttribute("data-diff") || "";
 
           var ok = true;
           if (text && !(caseId.includes(text) || title.includes(text))) ok = false;
           if (suite && rSuite !== suite) ok = false;
+          if (diff && rDiff !== diff) ok = false;
           if (risk && rRisk !== risk) ok = false;
           if (gate && rGate !== gate) ok = false;
           if (status && rStatus !== status) ok = false;
@@ -765,9 +792,22 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
 
       if (filterText) filterText.addEventListener("input", applyFilters);
       if (filterSuite) filterSuite.addEventListener("change", applyFilters);
+      if (filterDiff) filterDiff.addEventListener("change", applyFilters);
       if (filterRisk) filterRisk.addEventListener("change", applyFilters);
       if (filterGate) filterGate.addEventListener("change", applyFilters);
       if (filterStatus) filterStatus.addEventListener("change", applyFilters);
+
+      var suiteButtons = document.querySelectorAll(".suiteBtn");
+      if (suiteButtons && filterSuite) {
+        for (var k = 0; k < suiteButtons.length; k++) {
+          suiteButtons[k].addEventListener("click", function (e) {
+            var btn = e.currentTarget;
+            var value = btn && btn.getAttribute("data-suite");
+            filterSuite.value = value || "";
+            applyFilters();
+          });
+        }
+      }
     })();
   </script>
 </body>
