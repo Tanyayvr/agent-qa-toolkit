@@ -86,6 +86,24 @@ Schema:
 | `artifacts` | ✅ | References to assets (manifest keys) |
 | `data_availability` | ✅ | Availability status for baseline/new |
 
+### `artifacts` (per‑case)
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `baseline` | ✅ | Baseline artifact refs (by kind) |
+| `new` | ✅ | New artifact refs (by kind) |
+| `baseline_manifest_key` | ◻️ | Manifest key for baseline case bundle |
+| `new_manifest_key` | ◻️ | Manifest key for new case bundle |
+
+### `data_availability` (per‑case)
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `baseline.status` | ✅ | `present` / `missing` |
+| `new.status` | ✅ | `present` / `missing` |
+| `baseline.reason_code` | ◻️ | reason for missing (e.g. `excluded_by_filter`) |
+| `new.reason_code` | ◻️ | reason for missing |
+
 ### `assertions[]` (per‑case)
 
 | Field | Required | Description |
@@ -120,6 +138,49 @@ Extended signal kinds (optional):
 - `compliance_violation`
 - `model_refusal`
 - `context_poisoning`
+
+## Minimal Example (fragment)
+
+```json
+{
+  "contract_version": 5,
+  "report_id": "latest",
+  "meta": {
+    "toolkit_version": "1.4.0",
+    "spec_version": "aepf-v1",
+    "generated_at": 1771192614571,
+    "run_id": "latest"
+  },
+  "summary": { "baseline_pass": 13, "new_pass": 8, "regressions": 5 },
+  "summary_by_suite": { "correctness": { "baseline_pass": 9 } },
+  "items": [
+    {
+      "case_id": "fmt_002",
+      "title": "Return JSON: update_ticket_status payload",
+      "suite": "correctness",
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": false,
+      "risk_level": "low",
+      "gate_recommendation": "require_approval",
+      "assertions": [{ "name": "json_schema", "pass": false }],
+      "artifacts": {
+        "baseline": { "body": "baseline/fmt_002.json" },
+        "new": { "body": "new/fmt_002.json" }
+      },
+      "data_availability": {
+        "baseline": { "status": "present" },
+        "new": { "status": "present" }
+      }
+    }
+  ]
+}
+```
+
+## Compatibility
+
+- New fields are additive (schema is forward‑compatible).
+- Validators must ignore unknown fields.
 
 ## `artifacts/manifest.json` (Canonical)
 
