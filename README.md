@@ -104,6 +104,7 @@ Report schema:
 
 Manifest integrity:
 - manifest items include `sha256` for offline verification
+- `pvip:verify` enforces portable paths, in-bundle hrefs, and embedded-index consistency
 
 ### Report Contract v5 SHOULD (to remain fully self-contained)
 

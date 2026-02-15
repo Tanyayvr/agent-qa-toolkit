@@ -200,6 +200,8 @@ export type CompareReport = {
       new_run_meta_href?: string;
     };
   }>;
+
+  embedded_manifest_index?: unknown;
 };
 
 function escHtml(s: string): string {
