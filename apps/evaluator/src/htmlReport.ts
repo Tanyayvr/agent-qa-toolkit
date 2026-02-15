@@ -376,7 +376,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
     .map(([suite]) => `<option value="${escHtml(suite)}">Suite: ${escHtml(suite)}</option>`)
     .join("");
   const suiteQuick = suiteEntries
-    .map(([suite]) => `<button class="btn suiteBtn" data-suite="${escHtml(suite)}">${escHtml(suite)}</button>`)
+    .map(([suite]) => `<button class="btn tab suiteBtn" data-suite="${escHtml(suite)}">${escHtml(suite)}</button>`)
     .join("");
 
   const sec = s.security;
@@ -543,6 +543,11 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .row-improvement td:first-child { border-left: 3px solid #16a34a; padding-left: 7px; }
   .btn { background:#0b0d10; border:1px solid #232836; color:#cbd5e1; border-radius: 999px; padding: 4px 10px; font-size:12px; cursor:pointer; }
   .btn:hover { border-color:#2b3a55; color:#e8eaed; }
+  .tabRow { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .tab { border-radius: 999px; padding: 6px 12px; font-size:12px; font-weight:700; letter-spacing:0.01em; }
+  .tab.active { background:#111827; border-color:#3b82f6; color:#dbeafe; }
+  .savedRow { display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .savedRow select { flex:1; }
   .wrapRules { display:flex; flex-wrap:wrap; gap:6px; }
   .rule { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
   .hero { display:flex; align-items:center; justify-content:space-between; gap:12px; }
@@ -580,9 +585,9 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
     <div class="grid">
     <div class="side">
       <div class="card" style="margin-bottom:16px;">
-        <div style="font-size:16px;font-weight:900;">Suite quick filters</div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-          <button class="btn suiteBtn" data-suite="">all</button>
+        <div style="font-size:16px;font-weight:900;">Suites</div>
+        <div class="tabRow">
+          <button class="btn tab suiteBtn" data-suite="">all</button>
           ${suiteQuick}
         </div>
       </div>
@@ -619,6 +624,13 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             <option value="filtered_out">Status: filtered_out</option>
             <option value="skipped">Status: skipped</option>
           </select>
+        </div>
+        <div class="savedRow">
+          <select id="savedFilters">
+            <option value="">Saved filters</option>
+          </select>
+          <button class="btn" id="saveFilter">Save</button>
+          <button class="btn" id="deleteFilter">Delete</button>
         </div>
       </div>
 
@@ -759,15 +771,40 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var filterRisk = document.getElementById("filterRisk");
       var filterGate = document.getElementById("filterGate");
       var filterStatus = document.getElementById("filterStatus");
+      var savedFilters = document.getElementById("savedFilters");
+      var saveFilter = document.getElementById("saveFilter");
+      var deleteFilter = document.getElementById("deleteFilter");
       var rows = document.querySelectorAll("tbody tr[data-case]");
 
+      function getFilters() {
+        return {
+          text: filterText && filterText.value || "",
+          suite: filterSuite && filterSuite.value || "",
+          diff: filterDiff && filterDiff.value || "",
+          risk: filterRisk && filterRisk.value || "",
+          gate: filterGate && filterGate.value || "",
+          status: filterStatus && filterStatus.value || ""
+        };
+      }
+
+      function setFilters(f) {
+        if (!f) return;
+        if (filterText) filterText.value = f.text || "";
+        if (filterSuite) filterSuite.value = f.suite || "";
+        if (filterDiff) filterDiff.value = f.diff || "";
+        if (filterRisk) filterRisk.value = f.risk || "";
+        if (filterGate) filterGate.value = f.gate || "";
+        if (filterStatus) filterStatus.value = f.status || "";
+      }
+
       function applyFilters() {
-        var text = (filterText && filterText.value || "").toLowerCase();
-        var suite = filterSuite && filterSuite.value || "";
-        var diff = filterDiff && filterDiff.value || "";
-        var risk = filterRisk && filterRisk.value || "";
-        var gate = filterGate && filterGate.value || "";
-        var status = filterStatus && filterStatus.value || "";
+        var f = getFilters();
+        var text = (f.text || "").toLowerCase();
+        var suite = f.suite || "";
+        var diff = f.diff || "";
+        var risk = f.risk || "";
+        var gate = f.gate || "";
+        var status = f.status || "";
 
         for (var i = 0; i < rows.length; i++) {
           var r = rows[i];
@@ -805,8 +842,74 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             var value = btn && btn.getAttribute("data-suite");
             filterSuite.value = value || "";
             applyFilters();
+            for (var t = 0; t < suiteButtons.length; t++) {
+              suiteButtons[t].classList.remove("active");
+            }
+            if (btn) btn.classList.add("active");
           });
         }
+      }
+
+      function loadSaved() {
+        if (!savedFilters) return;
+        var raw = localStorage.getItem("pvip_saved_filters");
+        var arr = [];
+        try { arr = raw ? JSON.parse(raw) : []; } catch (e) { arr = []; }
+        savedFilters.innerHTML = "<option value=\"\">Saved filters</option>";
+        for (var i = 0; i < arr.length; i++) {
+          var opt = document.createElement("option");
+          opt.value = arr[i].name;
+          opt.textContent = arr[i].name;
+          savedFilters.appendChild(opt);
+        }
+        return arr;
+      }
+
+      function saveCurrent(name) {
+        var arr = loadSaved() || [];
+        var filtered = arr.filter(function (x) { return x.name !== name; });
+        filtered.push({ name: name, filters: getFilters() });
+        localStorage.setItem("pvip_saved_filters", JSON.stringify(filtered));
+        loadSaved();
+      }
+
+      function deleteCurrent(name) {
+        var arr = loadSaved() || [];
+        var filtered = arr.filter(function (x) { return x.name !== name; });
+        localStorage.setItem("pvip_saved_filters", JSON.stringify(filtered));
+        loadSaved();
+      }
+
+      loadSaved();
+
+      if (saveFilter) {
+        saveFilter.addEventListener("click", function () {
+          var name = window.prompt("Save filter as:");
+          if (!name) return;
+          saveCurrent(String(name));
+        });
+      }
+
+      if (deleteFilter) {
+        deleteFilter.addEventListener("click", function () {
+          if (!savedFilters || !savedFilters.value) return;
+          deleteCurrent(savedFilters.value);
+        });
+      }
+
+      if (savedFilters) {
+        savedFilters.addEventListener("change", function () {
+          var name = savedFilters.value;
+          if (!name) return;
+          var arr = loadSaved() || [];
+          for (var i = 0; i < arr.length; i++) {
+            if (arr[i].name === name) {
+              setFilters(arr[i].filters);
+              applyFilters();
+              break;
+            }
+          }
+        });
       }
     })();
   </script>
