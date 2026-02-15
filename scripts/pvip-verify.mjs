@@ -134,6 +134,7 @@ if (missing > 0) {
 }
 if (hashMismatch > 0) {
   console.error(`Manifest hash mismatches: ${hashMismatch}`);
+  console.error("Integrity check failed: files were modified after bundle generation.");
   process.exit(1);
 }
 
