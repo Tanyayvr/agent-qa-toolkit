@@ -102,6 +102,9 @@ Report schema:
 - `schemas/compare-report-v5.schema.json`
 - validated in `npm run test:toolkit`
 
+Manifest integrity:
+- manifest items include `sha256` for offline verification
+
 ### Report Contract v5 SHOULD (to remain fully self-contained)
 
 - include `baseline/` and `new/` local raw copies **whenever any raw-evidence href is present**:

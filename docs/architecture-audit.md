@@ -118,6 +118,8 @@ Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case resp
 
 **Status**: packaging and offline verification added via `scripts/pvip-pack.mjs` and `scripts/pvip-verify.mjs`.
 
+**Status**: manifest item hashes (`sha256`) added in evaluator for offline integrity checks.
+
 ### 2. Bounded Memory
 
 | What | Where |

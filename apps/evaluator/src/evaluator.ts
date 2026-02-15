@@ -434,6 +434,17 @@ function sha256Hex(data: string | Uint8Array): string {
   return h.digest("hex");
 }
 
+async function fileSha256ForRel(reportDir: string, rel: string | undefined): Promise<string | undefined> {
+  if (!rel) return undefined;
+  try {
+    const buf = await readFile(path.resolve(reportDir, rel));
+    const u8 = new Uint8Array(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
+    return sha256Hex(u8);
+  } catch {
+    return undefined;
+  }
+}
+
 async function fileBytesForRel(reportDir: string, rel: string | undefined): Promise<number | undefined> {
   if (!rel) return undefined;
   try {
@@ -1227,16 +1238,6 @@ export async function runEvaluator(): Promise<void> {
 
   await writeFile(path.join(reportDirAbs, "compare-report.json"), JSON.stringify(report, null, 2), "utf-8");
 
-  const manifest: Manifest = {
-    manifest_version: "v1",
-    generated_at: Date.now(),
-    items: manifestItems,
-  };
-  const manifestJson = JSON.stringify(manifest, null, 2);
-  const manifestRel = "artifacts/manifest.json";
-  await ensureDir(path.join(reportDirAbs, "artifacts"));
-  await writeFile(path.join(reportDirAbs, manifestRel), manifestJson, "utf-8");
-
   if (redactionStatus === "applied") {
     const redactionSummary = {
       preset_id: redactionPresetId ?? "unknown",
@@ -1250,14 +1251,33 @@ export async function runEvaluator(): Promise<void> {
     };
     const redactionRel = "artifacts/redaction-summary.json";
     await writeFile(path.join(reportDirAbs, redactionRel), JSON.stringify(redactionSummary, null, 2), "utf-8");
-    const bytes = await fileBytesForRel(reportDirAbs, redactionRel);
     manifestItems.push({
       manifest_key: "redaction/summary",
       rel_path: redactionRel,
       media_type: "application/json",
-      ...(bytes !== undefined ? { bytes } : {}),
     });
   }
+
+  for (let i = 0; i < manifestItems.length; i++) {
+    const it = manifestItems[i];
+    const bytes = await fileBytesForRel(reportDirAbs, it.rel_path);
+    const sha256 = await fileSha256ForRel(reportDirAbs, it.rel_path);
+    manifestItems[i] = {
+      ...it,
+      ...(bytes !== undefined ? { bytes } : {}),
+      ...(sha256 ? { sha256 } : {}),
+    };
+  }
+
+  const manifest: Manifest = {
+    manifest_version: "v1",
+    generated_at: Date.now(),
+    items: manifestItems,
+  };
+  const manifestJson = JSON.stringify(manifest, null, 2);
+  const manifestRel = "artifacts/manifest.json";
+  await ensureDir(path.join(reportDirAbs, "artifacts"));
+  await writeFile(path.join(reportDirAbs, manifestRel), manifestJson, "utf-8");
 
   const thinIndex: ThinIndex = {
     manifest_version: "v1",

@@ -166,6 +166,8 @@ Each item includes:
 
 Evidence refs in JSON MUST be represented by manifest_key (no raw paths).
 
+Manifest items SHOULD include `sha256` for offline integrity verification.
+
 7. Evidence refs (MUST)
 Evidence references in compare-report.json MUST use:
 {
