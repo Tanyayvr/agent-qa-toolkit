@@ -154,6 +154,7 @@ Each case in `compare-report.json.items[]` includes:
 - `risk_level`: `low | medium | high`
 - `risk_tags`: `string[]` (may include security signal kinds and/or operational tags)
 - `gate_recommendation`: `none | require_approval | block` (**single CI truth**)
+- `assertions[]` (optional; includes name/pass/details)
 
 **CI gating reads only:** `compare-report.json.items[].gate_recommendation`  
 Everything else is supporting evidence for humans and RCA.
@@ -176,6 +177,7 @@ Stage 1 summary MUST include:
 
 - `summary.data_coverage` (coverage transparency)
 - `contract_version: 5`
+- `meta` (toolkit_version, spec_version, generated_at, run_id)
 
 Optional (recommended in v5):
 

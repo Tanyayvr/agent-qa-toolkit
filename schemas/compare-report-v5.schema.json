@@ -6,6 +6,7 @@
   "required": [
     "contract_version",
     "report_id",
+    "meta",
     "baseline_dir",
     "new_dir",
     "cases_path",
@@ -16,6 +17,26 @@
   "properties": {
     "contract_version": { "const": 5 },
     "report_id": { "type": "string" },
+    "meta": {
+      "type": "object",
+      "required": ["toolkit_version", "spec_version", "generated_at", "run_id"],
+      "properties": {
+        "toolkit_version": { "type": "string" },
+        "spec_version": { "type": "string" },
+        "generated_at": { "type": "number" },
+        "run_id": { "type": "string" }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "agent_id": { "type": "string" },
+        "model": { "type": "string" },
+        "prompt_version": { "type": "string" },
+        "tools_version": { "type": "string" }
+      }
+    },
     "baseline_dir": { "type": "string" },
     "new_dir": { "type": "string" },
     "cases_path": { "type": "string" },
@@ -154,6 +175,18 @@
           "baseline_pass": { "type": "boolean" },
           "new_pass": { "type": "boolean" },
           "case_ts": { "type": "number" },
+          "assertions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "pass"],
+              "properties": {
+                "name": { "type": "string" },
+                "pass": { "type": "boolean" },
+                "details": { "type": "object" }
+              }
+            }
+          },
           "data_availability": {
             "type": "object",
             "required": ["baseline", "new"],

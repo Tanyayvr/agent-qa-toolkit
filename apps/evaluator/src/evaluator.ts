@@ -22,6 +22,7 @@ import {
 import type { Manifest, ManifestItem, ThinIndex } from "./manifest";
 import { findUnredactedMarkers } from "./redactionCheck";
 import { runSecurityScanners, type SecurityScanner } from "./securityScanner";
+import { TOOLKIT_VERSION } from "./version";
 
 import type {
   Version,
@@ -76,6 +77,7 @@ Optional:
   --strictRedaction    Fail if redaction is applied but sensitive markers remain
   --warnBodyBytes      Warn when case response JSON exceeds this size (default: 1000000)
   --retentionDays      Delete report directories older than N days (default: 0 = disabled)
+  --environment     JSON file with environment metadata (agent_id, model, prompt_version, tools_version)
   --help, -h        Show this help
 `.trim();
 
@@ -599,6 +601,7 @@ export async function runEvaluator(): Promise<void> {
       "--strictRedaction",
       "--warnBodyBytes",
       "--retentionDays",
+      "--environment",
       "--help",
       "-h",
     ])
@@ -622,6 +625,33 @@ export async function runEvaluator(): Promise<void> {
   const casesPathAbs = resolveFromRoot(projectRoot, casesArg);
   const baselineDirAbs = resolveFromRoot(projectRoot, baselineArg);
   const newDirAbs = resolveFromRoot(projectRoot, newArg);
+
+  const envFile = getArg("--environment");
+  let environment: { agent_id?: string; model?: string; prompt_version?: string; tools_version?: string } | undefined;
+  if (envFile) {
+    try {
+      const raw = await readFile(resolveFromRoot(projectRoot, envFile), "utf-8");
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        environment = {
+          agent_id: parsed.agent_id,
+          model: parsed.model,
+          prompt_version: parsed.prompt_version,
+          tools_version: parsed.tools_version,
+        };
+      }
+    } catch {
+      throw new CliUsageError(`Invalid --environment JSON file: ${envFile}\n\n${HELP_TEXT}`);
+    }
+  } else {
+    const agent_id = process.env.AGENT_ID;
+    const model = process.env.AGENT_MODEL;
+    const prompt_version = process.env.PROMPT_VERSION;
+    const tools_version = process.env.TOOLS_VERSION;
+    if (agent_id || model || prompt_version || tools_version) {
+      environment = { agent_id, model, prompt_version, tools_version };
+    }
+  }
 
   const transferClassArg = getArg("--transferClass") ?? "internal_only";
   if (transferClassArg !== "internal_only" && transferClassArg !== "transferable") {
@@ -1049,6 +1079,7 @@ export async function runEvaluator(): Promise<void> {
       risk_tags: riskTags,
       gate_recommendation: gateRecommendation,
     };
+    if (nEval?.assertions?.length) item.assertions = nEval.assertions;
     if (caseTs !== undefined) item.case_ts = caseTs;
     if (caseStatusReason) item.case_status_reason = caseStatusReason;
     if (hasFailureSummary) item.failure_summary = failureSummary;
@@ -1203,6 +1234,13 @@ export async function runEvaluator(): Promise<void> {
   const report: CompareReport & { embedded_manifest_index?: ThinIndex } = {
     contract_version: 5,
     report_id: reportId,
+    meta: {
+      toolkit_version: TOOLKIT_VERSION,
+      spec_version: "aepf-v1",
+      generated_at: Date.now(),
+      run_id: reportId,
+    },
+    ...(environment ? { environment } : {}),
     baseline_dir: normRel(projectRoot, baselineDirAbs),
     new_dir: normRel(projectRoot, newDirAbs),
     cases_path: normRel(projectRoot, casesPathAbs),

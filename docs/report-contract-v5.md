@@ -127,6 +127,8 @@ Top-level shape:
 {
   "contract_version": 5,
   "report_id": "...",
+  "meta": { "toolkit_version": "...", "spec_version": "...", "generated_at": 0, "run_id": "..." },
+  "environment": { "agent_id": "...", "model": "...", "prompt_version": "...", "tools_version": "..." },
   "baseline_dir": "...",
   "new_dir": "...",
   "cases_path": "...",
@@ -159,6 +161,7 @@ Each item includes:
 - case_status_reason (optional)
 - data_availability (baseline/new status + reason_code/details)
 - baseline_pass, new_pass
+- assertions[] (optional; includes name/pass/details)
 - trace_integrity, security
 - risk_level, risk_tags, gate_recommendation
 - artifacts (hrefs + manifest keys)

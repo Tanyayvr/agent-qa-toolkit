@@ -7,19 +7,31 @@ export type EvidenceRef = {
   manifest_key: string;
 };
 
-export type SecuritySignal = {
-  kind:
+export type CoreSignalKind =
   | "untrusted_url_input"
-  | "token_exfil_indicator"
-  | "policy_tampering"
-  | "unexpected_outbound"
   | "high_risk_action"
-  | "permission_change"
   | "secret_in_output"
   | "pii_in_output"
   | "prompt_injection_marker"
   | "runner_failure_detected"
   | "unknown";
+
+export type ExtendedSignalKind =
+  | "token_exfil_indicator"
+  | "policy_tampering"
+  | "unexpected_outbound"
+  | "permission_change"
+  | "data_exfiltration"
+  | "hallucination_in_output"
+  | "excessive_permissions"
+  | "unsafe_code_execution"
+  | "bias_detected"
+  | "compliance_violation"
+  | "model_refusal"
+  | "context_poisoning";
+
+export type SecuritySignal = {
+  kind: CoreSignalKind | ExtendedSignalKind;
   severity: SignalSeverity;
   confidence: SignalConfidence;
   title: string;
@@ -65,9 +77,31 @@ export type QualityFlags = {
   large_payloads: string[];
 };
 
+export type ReportMeta = {
+  toolkit_version: string;
+  spec_version: string;
+  generated_at: number;
+  run_id: string;
+};
+
+export type EnvironmentContext = {
+  agent_id?: string;
+  model?: string;
+  prompt_version?: string;
+  tools_version?: string;
+};
+
+export type ItemAssertion = {
+  name: string;
+  pass: boolean;
+  details?: Record<string, unknown>;
+};
+
 export type CompareReport = {
   contract_version: 5;
   report_id: string;
+  meta: ReportMeta;
+  environment?: EnvironmentContext;
   baseline_dir: string;
   new_dir: string;
   cases_path: string;
@@ -174,6 +208,7 @@ export type CompareReport = {
     risk_tags: string[];
     gate_recommendation: "none" | "require_approval" | "block";
     case_ts?: number;
+    assertions?: ItemAssertion[];
 
     failure_summary?: {
       baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number };
@@ -470,6 +505,11 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             ? "row-improvement"
             : "";
       const diffKind = it.baseline_pass === it.new_pass ? "same" : it.baseline_pass ? "regression" : "improvement";
+      const assertions = it.assertions ?? [];
+      const failedAssertions = assertions.filter((a) => a.pass === false).map((a) => a.name);
+      const assertionChip = assertions.length
+        ? `<span class="metaChip" title="${escHtml(failedAssertions.join(", "))}">assertions: ${assertions.length} (fail: ${failedAssertions.length})</span>`
+        : "";
       return `
 <tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}" data-diff="${diffKind}" data-ts="${escHtml(String(it.case_ts ?? ""))}">
   <td>
@@ -481,6 +521,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       <span class="metaChip">${escHtml(it.case_status)}</span>
       <span class="metaChip">${escHtml(suite)}</span>
       ${suite === "robustness" ? `<span class="metaChip">no assertions</span>` : ""}
+      ${assertionChip}
       ${hasFailure ? failureBadge() : ""}
     </div>
   </td>
@@ -574,6 +615,11 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           contract_version: <code>${escHtml(String(report.contract_version))}</code> ·
           report_id: <code>${escHtml(report.report_id)}</code>
         </div>
+        <div class="muted" style="margin-top:4px;">
+          toolkit: <code>${escHtml(report.meta.toolkit_version)}</code> ·
+          spec: <code>${escHtml(report.meta.spec_version)}</code> ·
+          generated: <code>${escHtml(new Date(report.meta.generated_at).toISOString())}</code>
+        </div>
       </div>
       <div class="chips">
         <span class="chip">transfer: ${escHtml(s.quality.transfer_class)}</span>
@@ -658,6 +704,18 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           <div class="muted" style="margin-top:8px;">
             suites: ${suiteEntries.length ? escHtml(suiteEntries.map(([name]) => name).join(", ")) : "—"}
           </div>
+
+          ${
+            report.environment
+              ? `<div style="margin-top:14px; font-size:16px; font-weight:900;">Environment</div>
+          <div class="muted" style="margin-top:6px;">
+            agent: ${escHtml(report.environment.agent_id || "—")} · model: ${escHtml(report.environment.model || "—")}
+          </div>
+          <div class="muted" style="margin-top:4px;">
+            prompt: ${escHtml(report.environment.prompt_version || "—")} · tools: ${escHtml(report.environment.tools_version || "—")}
+          </div>`
+              : ""
+          }
 
           <div style="margin-top:14px; font-size:16px; font-weight:900;">Risk</div>
           <div class="kpi">
