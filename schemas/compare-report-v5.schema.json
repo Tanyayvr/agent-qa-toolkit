@@ -148,6 +148,19 @@
         "large_payloads": { "type": "array", "items": { "type": "string" } }
       }
     },
+    "compliance_mapping": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["framework", "clause"],
+        "properties": {
+          "framework": { "type": "string" },
+          "clause": { "type": "string" },
+          "title": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
     "items": {
       "type": "array",
       "minItems": 1,

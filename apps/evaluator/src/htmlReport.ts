@@ -179,6 +179,13 @@ export type CompareReport = {
 
   quality_flags: QualityFlags;
 
+  compliance_mapping?: Array<{
+    framework: string;
+    clause: string;
+    title?: string;
+    evidence?: string[];
+  }>;
+
   items: Array<{
     case_id: string;
     title: string;
@@ -713,6 +720,17 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
           </div>
           <div class="muted" style="margin-top:4px;">
             prompt: ${escHtml(report.environment.prompt_version || "—")} · tools: ${escHtml(report.environment.tools_version || "—")}
+          </div>`
+              : ""
+          }
+
+          ${
+            report.compliance_mapping && report.compliance_mapping.length
+              ? `<div style="margin-top:14px; font-size:16px; font-weight:900;">Compliance</div>
+          <div class="muted" style="margin-top:6px;">
+            ${report.compliance_mapping
+              .map((c) => `${escHtml(c.framework)} ${escHtml(c.clause)}${c.title ? ` — ${escHtml(c.title)}` : ""}`)
+              .join("<br/>")}
           </div>`
               : ""
           }

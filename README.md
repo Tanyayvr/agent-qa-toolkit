@@ -109,6 +109,9 @@ Manifest integrity:
 - `pvip:verify` scans *_href/*_path fields in compare-report.json for portable paths
 - `pvip:verify --strict` also enforces manifest size/hash consistency
 
+Compliance mapping (optional):
+- `docs/compliance-mapping.md`
+
 ### Report Contract v5 SHOULD (to remain fully self-contained)
 
 - include `baseline/` and `new/` local raw copies **whenever any raw-evidence href is present**:

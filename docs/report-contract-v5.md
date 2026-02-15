@@ -136,6 +136,7 @@ Top-level shape:
   "summary": { ... },
   "summary_by_suite": { "correctness": { ... }, "robustness": { ... } },
   "quality_flags": { ... },
+  "compliance_mapping": [ ... ],
   "items": [ ... ]
 }
 

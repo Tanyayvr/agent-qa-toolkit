@@ -123,6 +123,7 @@ Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case resp
 **Status**: pvip-verify scans *_href/*_path fields in compare-report.json.
 **Status**: strict verify enforces manifest size/hash consistency.
 **Status**: compare-report now includes meta + environment + assertions for audit provenance.
+**Status**: optional compliance_mapping added (ISO 42001 / NIST AI RMF).
 **Status**: CI integration examples added (`docs/ci.md`).
 
 ### 2. Bounded Memory

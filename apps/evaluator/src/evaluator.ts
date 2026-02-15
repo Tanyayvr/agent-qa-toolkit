@@ -1276,6 +1276,20 @@ export async function runEvaluator(): Promise<void> {
     },
     summary_by_suite,
     quality_flags,
+    compliance_mapping: [
+      {
+        framework: "ISO_42001",
+        clause: "9.2",
+        title: "Monitoring, measurement, analysis",
+        evidence: ["summary", "items", "quality_flags"],
+      },
+      {
+        framework: "NIST_AI_RMF",
+        clause: "GOVERN-1.1",
+        title: "AI risk management strategy",
+        evidence: ["gate_recommendation", "risk_level", "risk_tags"],
+      },
+    ],
     items,
   };
 
