@@ -60,6 +60,13 @@ export AQ_LICENSE_PRIVATE_KEY=<base64-der-pkcs8>
 node scripts/license-sign.mjs docs/license-example-monthly.json
 ```
 
+Verify a license file:
+
+```bash
+export AQ_LICENSE_PUBLIC_KEY=<base64-der-spki>
+node scripts/license-verify.mjs docs/license-example-monthly.json
+```
+
 ## Runtime Flags
 
 Provide a license path either via CLI or env:

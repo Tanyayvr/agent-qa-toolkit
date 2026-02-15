@@ -37,6 +37,7 @@ CI: `docs/ci.md`
 
 Licensing (optional, offline): `docs/license.md`
 Keygen/sign helpers: `scripts/license-keygen.mjs`, `scripts/license-sign.mjs`
+Verify helper: `scripts/license-verify.mjs`
 
 ---
 
