@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { TextDecoder } from "node:util";
 import type { ReadableStream } from "node:stream/web";
 import type { FetchFailureClass, NetErrorKind, RunnerFailureArtifact, Version } from "shared-types";
+import { consumeRunOrThrow } from "aq-license";
 import { sanitizeValue, type RedactionPreset } from "./sanitize";
 
 type CaseFileItem = {
@@ -83,6 +84,7 @@ Artifacts / memory limits:
   --redactionPreset         none | internal_only | transferable | transferable_extended (default: none)
   --keepRaw                 Keep raw (unsanitized) responses in _raw/ when redaction is enabled
   --retentionDays           Delete run directories older than N days (default: 0 = disabled)
+  --license                Path to license.json (optional, for self-hosted licensing)
 
   --help, -h                Show this help
 
@@ -908,6 +910,7 @@ export async function runRunner(): Promise<void> {
       "--redactionPreset",
       "--keepRaw",
       "--retentionDays",
+      "--license",
       "--help",
       "-h"
     ])
@@ -927,6 +930,7 @@ export async function runRunner(): Promise<void> {
   assertHasValue("--maxBodyBytes");
   assertHasValue("--redactionPreset");
   assertHasValue("--retentionDays");
+  assertHasValue("--license");
 
   const keepRaw = getFlag("--keepRaw");
 
@@ -957,6 +961,9 @@ export async function runRunner(): Promise<void> {
     saveFullBodyOnError: !getFlag("--noSaveFullBodyOnError"),
     retentionDays: Math.max(0, parseIntFlag("--retentionDays", 0))
   };
+
+  const licensePath = getArg("--license") ?? process.env.AQ_LICENSE_PATH ?? null;
+  await consumeRunOrThrow({ licensePath, publicKeyB64: process.env.AQ_LICENSE_PUBLIC_KEY ?? null });
 
   const raw = await readFile(cfg.casesPath, "utf-8");
   const cases = parseCasesJson(raw);

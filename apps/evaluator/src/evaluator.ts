@@ -23,6 +23,7 @@ import type { Manifest, ManifestItem, ThinIndex } from "./manifest";
 import { findUnredactedMarkers } from "./redactionCheck";
 import { runSecurityScanners, type SecurityScanner } from "./securityScanner";
 import { TOOLKIT_VERSION } from "./version";
+import { checkLicenseOnly } from "aq-license";
 
 import type {
   Version,
@@ -79,6 +80,7 @@ Optional:
   --retentionDays      Delete report directories older than N days (default: 0 = disabled)
   --environment     JSON file with environment metadata (agent_id, model, prompt_version, tools_version)
   --complianceProfile  JSON file with compliance mapping
+  --license         Path to license.json (optional, for self-hosted licensing)
   --help, -h        Show this help
 `.trim();
 
@@ -604,6 +606,7 @@ export async function runEvaluator(): Promise<void> {
       "--retentionDays",
       "--environment",
       "--complianceProfile",
+      "--license",
       "--help",
       "-h",
     ])
@@ -615,6 +618,7 @@ export async function runEvaluator(): Promise<void> {
   assertHasValue("--reportId");
   assertHasValue("--transferClass");
   assertHasValue("--retentionDays");
+  assertHasValue("--license");
 
   const casesArg = getArg("--cases");
   const baselineArg = getArg("--baselineDir");
@@ -623,6 +627,9 @@ export async function runEvaluator(): Promise<void> {
   if (!casesArg || !baselineArg || !newArg) {
     throw new CliUsageError(`Missing required arguments.\n\n${HELP_TEXT}`);
   }
+
+  const licensePath = getArg("--license") ?? process.env.AQ_LICENSE_PATH ?? null;
+  await checkLicenseOnly({ licensePath, publicKeyB64: process.env.AQ_LICENSE_PUBLIC_KEY ?? null });
 
   const casesPathAbs = resolveFromRoot(projectRoot, casesArg);
   const baselineDirAbs = resolveFromRoot(projectRoot, baselineArg);

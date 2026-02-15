@@ -35,6 +35,8 @@ See formal policy: `docs/self-hosted.md`
 Deployment: `docs/self-hosted-deploy.md`
 CI: `docs/ci.md`
 
+Licensing (optional, offline): `docs/license.md`
+
 ---
 
 ## UI & Integration

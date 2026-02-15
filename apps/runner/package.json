@@ -12,7 +12,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "shared-types": "*"
+    "shared-types": "*",
+    "aq-license": "*"
   },
   "devDependencies": {
     "@types/node": "20.11.30",
