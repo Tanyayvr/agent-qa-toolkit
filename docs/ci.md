@@ -20,6 +20,9 @@ jobs:
       - run: npm ci
       - run: npm run demo:e2e -- --baseUrl http://localhost:8788
       - run: npm run pvip:verify
+      - run: |
+          export AQ_LICENSE_PUBLIC_KEY=${{ secrets.AQ_LICENSE_PUBLIC_KEY }}
+          npm run pvip:verify:strict -- --reportDir apps/evaluator/reports/latest
 ```
 
 ## GitLab CI
@@ -35,4 +38,6 @@ agent_qa:
     - npm ci
     - npm run demo:e2e -- --baseUrl http://localhost:8788
     - npm run pvip:verify
+    - export AQ_LICENSE_PUBLIC_KEY=$AQ_LICENSE_PUBLIC_KEY
+    - npm run pvip:verify:strict -- --reportDir apps/evaluator/reports/latest
 ```

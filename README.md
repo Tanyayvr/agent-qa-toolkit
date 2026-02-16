@@ -111,6 +111,8 @@ Monorepo (npm workspaces):
 - `apps/evaluator` — CLI that evaluates artifacts, assigns RCA, computes risk/gates, and generates HTML reports
 - `packages/shared-types` — canonical contract types shared across all apps (runtime-0: types only, zero dependencies)
 
+Note: `apps/demo-agent` is a **synthetic demo agent** with seeded data (PII-like strings) to validate redaction and security signals. It is not intended for production use.
+
 Quality bar (benchmark mode):
 
 - ESLint v9 flat config
@@ -138,6 +140,15 @@ Manifest integrity:
 - manifest items include `sha256` for offline verification
 - `pvip:verify` enforces portable paths, in-bundle hrefs, and embedded-index consistency
 - `pvip:verify` scans *_href/*_path fields in compare-report.json for portable paths
+
+Manifest signing (optional):
+```bash
+export AQ_LICENSE_PRIVATE_KEY=<base64-der-pkcs8>
+npm run manifest:sign -- apps/evaluator/reports/latest
+
+export AQ_LICENSE_PUBLIC_KEY=<base64-der-spki>
+npm run pvip:verify:strict -- --reportDir apps/evaluator/reports/latest
+```
 - `pvip:verify --strict` also enforces manifest size/hash consistency
 
 Compliance mapping (optional):
@@ -366,6 +377,10 @@ Recommended in v5 reports (when enabled):
 Audit log (optional):
 
 Set `AUDIT_LOG_PATH=/path/to/audit.jsonl` to append JSONL audit events for runner/evaluator start/finish.
+Example:
+```bash
+AUDIT_LOG_PATH=/tmp/audit.jsonl npm -w runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json --runId latest
+```
 
 Retention (optional):
 - `--retentionDays N` on runner/evaluator deletes run/report dirs older than N days.

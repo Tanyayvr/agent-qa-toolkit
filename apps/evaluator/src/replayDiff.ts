@@ -101,6 +101,11 @@ function fmtJson(v: unknown): string {
   }
 }
 
+function fmtJsonTruncated(v: unknown, maxChars: number): { text: string; truncated: boolean; totalChars: number } {
+  const raw = fmtJson(v);
+  return truncateText(raw, maxChars);
+}
+
 function fmtFinal(out: FinalOutput | undefined | null): string {
   if (!out || typeof out !== "object" || !("content_type" in out)) return "";
   if (out.content_type === "text") return String(out.content ?? "");
@@ -341,16 +346,17 @@ function renderToolTimeline(events: RunEvent[] | undefined): string {
   const callRows = toolCalls
     .map((c) => {
       const ts = fmtTs(c.ts);
-      return `<tr><td>${escHtml(ts)}</td><td><code>${escHtml(c.call_id)}</code></td><td><code>${escHtml(c.tool)}</code></td><td><pre class="pre sm">${escHtml(fmtJson(c.args))}</pre></td></tr>`;
+      const args = fmtJsonTruncated(c.args, 1200);
+      return `<tr><td>${escHtml(ts)}</td><td><code>${escHtml(c.call_id)}</code></td><td><code>${escHtml(c.tool)}</code></td><td><pre class="pre sm">${escHtml(args.text)}${args.truncated ? "\\n… [truncated]" : ""}</pre></td></tr>`;
     })
     .join("");
 
   const resRows = toolResults
     .map((r) => {
       const ts = fmtTs(r.ts);
-      const payload = r.payload_summary !== undefined ? fmtJson(r.payload_summary) : "";
+      const payloadInfo = r.payload_summary !== undefined ? fmtJsonTruncated(r.payload_summary, 1200) : { text: "", truncated: false, totalChars: 0 };
       const latency = r.latency_ms !== undefined ? String(r.latency_ms) : "";
-      return `<tr><td>${escHtml(ts)}</td><td><code>${escHtml(r.call_id)}</code></td><td>${escHtml(r.status)}</td><td>${escHtml(latency)}</td><td><pre class="pre sm">${escHtml(payload)}</pre></td></tr>`;
+      return `<tr><td>${escHtml(ts)}</td><td><code>${escHtml(r.call_id)}</code></td><td>${escHtml(r.status)}</td><td>${escHtml(latency)}</td><td><pre class="pre sm">${escHtml(payloadInfo.text)}${payloadInfo.truncated ? "\\n… [truncated]" : ""}</pre></td></tr>`;
     })
     .join("");
 
@@ -397,8 +403,8 @@ function renderToolTimeline(events: RunEvent[] | undefined): string {
 }
 
 function renderOneSide(title: string, resp: AgentResponse): string {
-  const rawFinal = truncateText(normalizePortablePathsInText(fmtFinal(resp.final_output)), 2200).text;
-  const finalText = rawFinal ? rawFinal : "—";
+  const finalInfo = truncateText(normalizePortablePathsInText(fmtFinal(resp.final_output)), 2200);
+  const finalText = finalInfo.text ? finalInfo.text : "—";
   const wf = resp.workflow_id
     ? `<div><b>workflow_id</b>: <code>${escHtml(resp.workflow_id)}</code></div>`
     : `<div class="muted">workflow_id: (none)</div>`;
@@ -409,7 +415,7 @@ function renderOneSide(title: string, resp: AgentResponse): string {
   ${wf}
 
   <div class="mt12 h3">Final output</div>
-  <pre class="pre">${escHtml(finalText)}</pre>
+  <pre class="pre">${escHtml(finalText)}${finalInfo.truncated ? "\n… [truncated]" : ""}</pre>
 
   <div class="mt12 h3">Proposed actions</div>
   ${renderActions(resp.proposed_actions)}

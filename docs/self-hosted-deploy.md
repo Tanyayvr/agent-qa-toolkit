@@ -35,3 +35,12 @@ When finished:
 - `demo-agent` is a fixture. Replace it with a real agent service when integrating.
 - The compose file uses `cases/all.json` to run correctness + robustness suites.
 - The Dockerfile includes `dev` and `prod` targets. Compose uses `dev` (ts-node). For production packaging, build `prod`.
+
+---
+
+## Production hardening (recommended)
+- Put the evaluator HTML behind an internal reverse proxy (Caddy/Nginx) with TLS.
+- Store secrets in an env manager (Vault / AWS SSM / Docker secrets).
+- Limit resources (CPU/RAM) per service.
+- Mount data volumes on encrypted disks if required by policy.
+- Disable demo-agent in production; use only your real agent service.

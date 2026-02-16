@@ -196,6 +196,7 @@ If href and manifest mapping disagree, the manifest mapping wins and the href MU
 9. Compatibility
 Unknown fields MUST be ignored by consumers within a known contract version.
 Producers MUST omit undefined fields.
+Note: schema is forward‑compatible (`additionalProperties: true`). CI should still validate via `pvip:verify` to catch accidental drift.
 
 10. Minimal compliance checklist
 - contract_version == 5

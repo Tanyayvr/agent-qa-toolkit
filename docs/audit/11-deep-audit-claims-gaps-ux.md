@@ -12,11 +12,12 @@
 - Добавлены SBOM (`scripts/sbom.mjs`) и подпись manifest (`scripts/manifest-sign.mjs`).
 - Добавлены compliance profiles (ISO 42001, EU AI Act, NIST AI RMF).
 - Добавлен reference‑сканер на энтропию токенов (`--entropyScanner`) как optional security plugin.
+- PDF export / print stylesheet / expand assertions в UI — **сделано** (Print/PDF button + print CSS + assertions details).
+- Replay diff: truncation для больших args/payload/final_output.
 
 Осталось актуальным:
 - regex‑only security не заменён на ML/LLM (остается опциональной интеграцией).
-- PDF export / print stylesheet / expand assertions в UI — **сделано** (Print/PDF button + print CSS + assertions details).
-- нужен warning по localStorage (filters persistence).
+ - localStorage warning — сделано (UI показывает предупреждение при блокировке).
 
 ---
 

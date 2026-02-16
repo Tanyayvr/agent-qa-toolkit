@@ -13,10 +13,11 @@
 - compliance profiles (ISO 42001 / EU AI Act / NIST AI RMF).
 - optional entropy scanner (`--entropyScanner`) as local security plugin.
 - print/PDF support + expandable assertions in HTML.
+- replayDiff truncation for large args/payload/final_output.
+- localStorage warning for filters persistence.
 
 Осталось актуальным:
 - regex‑only security без ML/LLM.
-- localStorage warning для filters persistence.
 
 ---
 
