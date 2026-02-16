@@ -52,7 +52,7 @@ No silent omissions (coverage is explicit)
 
 compare-report.json.items[] MUST contain one item per case in the compared set.
 
-Cases that were skipped or filtered_out MUST still be represented as items.
+Cases that were missing or filtered_out MUST still be represented as items.
 
 summary.data_coverage MUST surface totals and missing/broken artifact counts, and MUST make omissions impossible to hide.
 
@@ -94,7 +94,7 @@ Portable report directory + strict href rules
 
 items[] coverage: one item per case, no silent omissions
 
-items[].case_status = executed | skipped | filtered_out
+items[].case_status = executed | missing | filtered_out
 
 summary.data_coverage (including items_emitted == total_cases)
 
@@ -227,7 +227,7 @@ Portable report directory + strict href rules
 
 items[] coverage: one item per case, no silent omissions
 
-items[].case_status (executed|skipped|filtered_out) + optional reason
+items[].case_status (executed|missing|filtered_out) + optional reason
 
 summary.data_coverage
 

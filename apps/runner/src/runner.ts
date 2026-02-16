@@ -7,6 +7,7 @@ import { TextDecoder } from "node:util";
 import type { ReadableStream } from "node:stream/web";
 import type { FetchFailureClass, NetErrorKind, RunnerFailureArtifact, Version } from "shared-types";
 import { consumeRunOrThrow } from "aq-license";
+import { makeArgvHelpers } from "cli-utils";
 import { sanitizeValue, type RedactionPreset } from "./sanitize";
 
 type CaseFileItem = {
@@ -98,7 +99,7 @@ Examples:
   ts-node src/index.ts --baseUrl http://localhost:8787 --cases cases/cases.json --runId latest
 `.trim();
 
-const ARGV = normalizeArgv(process.argv);
+const { ARGV, hasFlag, getFlag, getArg, assertNoUnknownOptions, assertHasValue, parseIntFlag } = makeArgvHelpers(process.argv);
 const AUDIT_LOG_ENV = process.env.AUDIT_LOG_PATH;
 
 class CliUsageError extends Error {
@@ -119,66 +120,31 @@ async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
   }
 }
 
-function normalizeArgv(argv: string[]): string[] {
-  const out: string[] = [];
-  for (const a of argv) {
-    if (a.startsWith("--") && a.includes("=")) {
-      const idx = a.indexOf("=");
-      const key = a.slice(0, idx);
-      const val = a.slice(idx + 1);
-      out.push(key);
-      if (val.length) out.push(val);
-    } else {
-      out.push(a);
-    }
-  }
-  return out;
-}
-
-function hasFlag(...names: string[]): boolean {
-  return names.some((n) => ARGV.includes(n));
-}
-
-function getArg(name: string): string | null {
-  const idx = ARGV.indexOf(name);
-  if (idx === -1) return null;
-  const val = ARGV[idx + 1];
-  if (!val || val.startsWith("--")) return null;
-  return val;
-}
-
-function getFlag(name: string): boolean {
-  return ARGV.includes(name);
-}
-
-function assertNoUnknownOptions(allowed: Set<string>): void {
-  const args = ARGV.slice(2);
-  for (const a of args) {
-    if (a.startsWith("--") && !allowed.has(a)) {
-      throw new CliUsageError(`Unknown option: ${a}\n\n${HELP_TEXT}`);
-    }
+function assertNoUnknownOptionsOrThrow(allowed: Set<string>): void {
+  try {
+    assertNoUnknownOptions(allowed, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
   }
 }
 
-function assertHasValue(flag: string): void {
-  const idx = ARGV.indexOf(flag);
-  if (idx === -1) return;
-  const next = ARGV[idx + 1];
-  if (!next || next.startsWith("--")) {
-    throw new CliUsageError(`Missing value for ${flag}\n\n${HELP_TEXT}`);
+function assertHasValueOrThrow(flag: string): void {
+  try {
+    assertHasValue(flag, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
   }
 }
 
-function parseIntFlag(name: string, def: number): number {
-  const raw = getArg(name);
-  if (raw === null) return def;
-  const n = Number.parseInt(raw, 10);
-  if (!Number.isFinite(n)) throw new CliUsageError(`Invalid integer for ${name}: ${raw}\n\n${HELP_TEXT}`);
-  return n;
+function parseIntFlagOrThrow(name: string, def: number): number {
+  try {
+    return parseIntFlag(name, def, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
+  }
 }
 
-function parseOnlyCaseIds(): string[] | null {
-  const raw = getArg("--only");
+export function parseOnlyCaseIdsRaw(raw: string | null): string[] | null {
   if (!raw) return null;
   const ids = raw
     .split(",")
@@ -187,7 +153,11 @@ function parseOnlyCaseIds(): string[] | null {
   return ids.length ? ids : null;
 }
 
-function normalizeBaseUrl(url: string): string {
+function parseOnlyCaseIds(): string[] | null {
+  return parseOnlyCaseIdsRaw(getArg("--only"));
+}
+
+export function normalizeBaseUrl(url: string): string {
   return url.endsWith("/") ? url.slice(0, -1) : url;
 }
 
@@ -891,7 +861,7 @@ export async function runRunner(): Promise<void> {
     return;
   }
 
-  assertNoUnknownOptions(
+  assertNoUnknownOptionsOrThrow(
     new Set([
       "--repoRoot",
       "--baseUrl",
@@ -916,21 +886,21 @@ export async function runRunner(): Promise<void> {
     ])
   );
 
-  assertHasValue("--repoRoot");
-  assertHasValue("--baseUrl");
-  assertHasValue("--cases");
-  assertHasValue("--outDir");
-  assertHasValue("--runId");
-  assertHasValue("--only");
-  assertHasValue("--timeoutMs");
-  assertHasValue("--retries");
-  assertHasValue("--backoffBaseMs");
-  assertHasValue("--concurrency");
-  assertHasValue("--bodySnippetBytes");
-  assertHasValue("--maxBodyBytes");
-  assertHasValue("--redactionPreset");
-  assertHasValue("--retentionDays");
-  assertHasValue("--license");
+  assertHasValueOrThrow("--repoRoot");
+  assertHasValueOrThrow("--baseUrl");
+  assertHasValueOrThrow("--cases");
+  assertHasValueOrThrow("--outDir");
+  assertHasValueOrThrow("--runId");
+  assertHasValueOrThrow("--only");
+  assertHasValueOrThrow("--timeoutMs");
+  assertHasValueOrThrow("--retries");
+  assertHasValueOrThrow("--backoffBaseMs");
+  assertHasValueOrThrow("--concurrency");
+  assertHasValueOrThrow("--bodySnippetBytes");
+  assertHasValueOrThrow("--maxBodyBytes");
+  assertHasValueOrThrow("--redactionPreset");
+  assertHasValueOrThrow("--retentionDays");
+  assertHasValueOrThrow("--license");
 
   const keepRaw = getFlag("--keepRaw");
 
@@ -951,15 +921,15 @@ export async function runRunner(): Promise<void> {
     redactionPreset,
     keepRaw,
 
-    timeoutMs: parseIntFlag("--timeoutMs", 15000),
-    retries: parseIntFlag("--retries", 2),
-    backoffBaseMs: parseIntFlag("--backoffBaseMs", 250),
-    concurrency: parseIntFlag("--concurrency", 1),
+    timeoutMs: parseIntFlagOrThrow("--timeoutMs", 15000),
+    retries: parseIntFlagOrThrow("--retries", 2),
+    backoffBaseMs: parseIntFlagOrThrow("--backoffBaseMs", 250),
+    concurrency: parseIntFlagOrThrow("--concurrency", 1),
 
-    bodySnippetBytes: parseIntFlag("--bodySnippetBytes", 4000),
-    maxBodyBytes: parseIntFlag("--maxBodyBytes", 2000000),
+    bodySnippetBytes: parseIntFlagOrThrow("--bodySnippetBytes", 4000),
+    maxBodyBytes: parseIntFlagOrThrow("--maxBodyBytes", 2000000),
     saveFullBodyOnError: !getFlag("--noSaveFullBodyOnError"),
-    retentionDays: Math.max(0, parseIntFlag("--retentionDays", 0))
+    retentionDays: Math.max(0, parseIntFlagOrThrow("--retentionDays", 0))
   };
 
   const licensePath = getArg("--license") ?? process.env.AQ_LICENSE_PATH ?? null;

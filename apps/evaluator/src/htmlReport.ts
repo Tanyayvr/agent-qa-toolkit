@@ -519,6 +519,16 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       const assertionChip = assertions.length
         ? `<span class="metaChip" title="${escHtml(failedAssertions.join(", "))}">assertions: ${assertions.length} (fail: ${failedAssertions.length})</span>`
         : "";
+      const assertionsBaseline = it.assertions_baseline ?? [];
+      const failedBaseline = assertionsBaseline.filter((a) => a.pass === false).map((a) => a.name);
+      const assertionBaselineChip = assertionsBaseline.length
+        ? `<span class="metaChip" title="${escHtml(failedBaseline.join(", "))}">baseline assertions: ${assertionsBaseline.length} (fail: ${failedBaseline.length})</span>`
+        : "";
+      const assertionsNew = it.assertions_new ?? [];
+      const failedNew = assertionsNew.filter((a) => a.pass === false).map((a) => a.name);
+      const assertionNewChip = assertionsNew.length
+        ? `<span class="metaChip" title="${escHtml(failedNew.join(", "))}">new assertions: ${assertionsNew.length} (fail: ${failedNew.length})</span>`
+        : "";
       return `
 <tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}" data-diff="${diffKind}" data-ts="${escHtml(String(it.case_ts ?? ""))}">
   <td>
@@ -530,7 +540,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       <span class="metaChip">${escHtml(it.case_status)}</span>
       <span class="metaChip">${escHtml(suite)}</span>
       ${suite === "robustness" ? `<span class="metaChip">no assertions</span>` : ""}
-      ${assertionChip}
+      ${assertionChip}${assertionBaselineChip}${assertionNewChip}
       ${hasFailure ? failureBadge() : ""}
     </div>
   </td>

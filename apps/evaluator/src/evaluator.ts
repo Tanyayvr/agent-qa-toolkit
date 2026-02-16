@@ -24,6 +24,7 @@ import { findUnredactedMarkers } from "./redactionCheck";
 import { runSecurityScanners, type SecurityScanner } from "./securityScanner";
 import { TOOLKIT_VERSION } from "./version";
 import { checkLicenseOnly } from "aq-license";
+import { makeArgvHelpers } from "cli-utils";
 
 import type {
   Version,
@@ -39,6 +40,12 @@ function extractCaseTs(resp?: AgentResponse): number | undefined {
     if (typeof t === "number" && (ts === undefined || t < ts)) ts = t;
   }
   return ts;
+}
+
+export function deriveCaseStatus(selected: boolean, hasAnyResp: boolean): { status: CaseStatus; reason?: string } {
+  if (!selected) return { status: "filtered_out", reason: "excluded_by_filter" };
+  if (!hasAnyResp) return { status: "missing", reason: "missing_case_response" };
+  return { status: "executed" };
 }
 
 import {
@@ -84,7 +91,7 @@ Optional:
   --help, -h        Show this help
 `.trim();
 
-const ARGV = normalizeArgv(process.argv);
+const { ARGV, hasFlag, getArg, getFlag, assertNoUnknownOptions, assertHasValue, parseIntFlag } = makeArgvHelpers(process.argv);
 const AUDIT_LOG_ENV = process.env.AUDIT_LOG_PATH;
 
 class CliUsageError extends Error {
@@ -105,62 +112,28 @@ async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
   }
 }
 
-function normalizeArgv(argv: string[]): string[] {
-  const out: string[] = [];
-  for (const a of argv) {
-    if (a.startsWith("--") && a.includes("=")) {
-      const idx = a.indexOf("=");
-      const key = a.slice(0, idx);
-      const val = a.slice(idx + 1);
-      out.push(key);
-      if (val.length) out.push(val);
-    } else {
-      out.push(a);
-    }
-  }
-  return out;
-}
-
-function hasFlag(...names: string[]): boolean {
-  return names.some((n) => ARGV.includes(n));
-}
-
-function assertNoUnknownOptions(allowed: Set<string>): void {
-  const args = ARGV.slice(2);
-  for (const a of args) {
-    if (a.startsWith("--") && !allowed.has(a)) {
-      throw new CliUsageError(`Unknown option: ${a}\n\n${HELP_TEXT}`);
-    }
+function assertNoUnknownOptionsOrThrow(allowed: Set<string>): void {
+  try {
+    assertNoUnknownOptions(allowed, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
   }
 }
 
-function assertHasValue(flag: string): void {
-  const idx = ARGV.indexOf(flag);
-  if (idx === -1) return;
-  const next = ARGV[idx + 1];
-  if (!next || next.startsWith("--")) {
-    throw new CliUsageError(`Missing value for ${flag}\n\n${HELP_TEXT}`);
+function assertHasValueOrThrow(flag: string): void {
+  try {
+    assertHasValue(flag, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
   }
 }
 
-function getArg(name: string): string | null {
-  const idx = ARGV.indexOf(name);
-  if (idx === -1) return null;
-  const val = ARGV[idx + 1];
-  if (!val || val.startsWith("--")) return null;
-  return val;
-}
-
-function getFlag(name: string): boolean {
-  return ARGV.includes(name);
-}
-
-function parseIntFlag(name: string, def: number): number {
-  const raw = getArg(name);
-  if (raw === null) return def;
-  const n = Number.parseInt(raw, 10);
-  if (!Number.isFinite(n)) throw new CliUsageError(`Invalid integer for ${name}: ${raw}\n\n${HELP_TEXT}`);
-  return n;
+function parseIntFlagOrThrow(name: string, def: number): number {
+  try {
+    return parseIntFlag(name, def, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
+  }
 }
 
 function resolveFromRoot(projectRoot: string, p: string): string {
@@ -592,7 +565,7 @@ export async function runEvaluator(): Promise<void> {
     return;
   }
 
-  assertNoUnknownOptions(
+  assertNoUnknownOptionsOrThrow(
     new Set([
       "--cases",
       "--baselineDir",
@@ -611,14 +584,14 @@ export async function runEvaluator(): Promise<void> {
       "-h",
     ])
   );
-  assertHasValue("--cases");
-  assertHasValue("--baselineDir");
-  assertHasValue("--newDir");
-  assertHasValue("--outDir");
-  assertHasValue("--reportId");
-  assertHasValue("--transferClass");
-  assertHasValue("--retentionDays");
-  assertHasValue("--license");
+  assertHasValueOrThrow("--cases");
+  assertHasValueOrThrow("--baselineDir");
+  assertHasValueOrThrow("--newDir");
+  assertHasValueOrThrow("--outDir");
+  assertHasValueOrThrow("--reportId");
+  assertHasValueOrThrow("--transferClass");
+  assertHasValueOrThrow("--retentionDays");
+  assertHasValueOrThrow("--license");
 
   const casesArg = getArg("--cases");
   const baselineArg = getArg("--baselineDir");
@@ -690,8 +663,8 @@ export async function runEvaluator(): Promise<void> {
     throw new CliUsageError(`Invalid --transferClass value: ${transferClassArg}. Must be "internal_only" or "transferable".\n\n${HELP_TEXT}`);
   }
   const transferClass: "internal_only" | "transferable" = transferClassArg;
-  const warnBodyBytes = Math.max(0, parseIntFlag("--warnBodyBytes", 1_000_000));
-  const retentionDays = Math.max(0, parseIntFlag("--retentionDays", 0));
+  const warnBodyBytes = Math.max(0, parseIntFlagOrThrow("--warnBodyBytes", 1_000_000));
+  const retentionDays = Math.max(0, parseIntFlagOrThrow("--retentionDays", 0));
 
   const reportId = getArg("--reportId") ?? randomUUID();
   const outDirArg = getArg("--outDir") ?? path.join("apps", "evaluator", "reports", reportId);
@@ -851,13 +824,7 @@ export async function runEvaluator(): Promise<void> {
 
     const selected = baselineSelected.has(c.id) || newSelected.has(c.id);
     const hasAnyResp = Boolean(baseResp || newResp);
-    const caseStatus: CaseStatus = !selected ? "filtered_out" : hasAnyResp ? "executed" : "missing";
-    const caseStatusReason =
-      caseStatus === "filtered_out"
-        ? "excluded_by_filter"
-        : caseStatus === "missing"
-          ? "missing_case_response"
-          : undefined;
+    const { status: caseStatus, reason: caseStatusReason } = deriveCaseStatus(selected, hasAnyResp);
 
     let baselinePassFlag = bEval?.pass ?? false;
     let newPassFlag = nEval?.pass ?? false;

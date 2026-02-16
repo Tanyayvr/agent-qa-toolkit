@@ -14,7 +14,8 @@
   "dependencies": {
     "shared-types": "*",
     "aq-license": "*",
-    "redaction": "*"
+    "redaction": "*",
+    "cli-utils": "*"
   },
   "devDependencies": {
     "@types/node": "20.11.30",

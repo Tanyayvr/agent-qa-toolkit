@@ -158,11 +158,12 @@ Each item includes:
 - case_id (non-empty)
 - title
 - suite (optional, e.g. "correctness" | "robustness")
-- case_status: executed | skipped | filtered_out
+- case_status: executed | missing | filtered_out
 - case_status_reason (optional)
 - data_availability (baseline/new status + reason_code/details)
 - baseline_pass, new_pass
 - assertions[] (optional; includes name/pass/details)
+- assertions_baseline[] / assertions_new[] (optional; per‑version assertions)
 - trace_integrity, security
 - risk_level, risk_tags, gate_recommendation
 - artifacts (hrefs + manifest keys)

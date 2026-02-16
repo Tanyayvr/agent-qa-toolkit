@@ -723,7 +723,7 @@ export function deriveRiskTags(params: {
     for (const s of params.newSignals) tags.add(s.kind);
     if (params.regression) tags.add("regression");
     if (params.caseStatus === "filtered_out") tags.add("filtered_out");
-    if (params.caseStatus === "skipped") tags.add("skipped");
+    if (params.caseStatus === "missing") tags.add("missing");
     if (params.newAvailability.status === "missing") tags.add("missing_new");
     if (params.newAvailability.status === "broken") tags.add("broken_new");
     return Array.from(tags);
