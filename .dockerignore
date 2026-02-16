@@ -10,4 +10,4 @@ apps/**/reports
 apps/**/runs
 apps/**/reports/**
 apps/**/runs/**
-docs/market
+docs/internal/market

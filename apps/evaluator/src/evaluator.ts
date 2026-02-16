@@ -22,6 +22,7 @@ import {
 import type { Manifest, ManifestItem, ThinIndex } from "./manifest";
 import { findUnredactedMarkers } from "./redactionCheck";
 import { runSecurityScanners, type SecurityScanner } from "./securityScanner";
+import { createEntropyScanner } from "./scanners/entropyScanner";
 import { TOOLKIT_VERSION } from "./version";
 import { checkLicenseOnly } from "aq-license";
 import { makeArgvHelpers } from "cli-utils";
@@ -83,6 +84,7 @@ Optional:
   --transferClass   Transfer classification: internal_only (default) or transferable
   --strictPortability  Fail if portability violations are detected
   --strictRedaction    Fail if redaction is applied but sensitive markers remain
+  --entropyScanner     Enable local entropy-based token scanner (optional)
   --warnBodyBytes      Warn when case response JSON exceeds this size (default: 1000000)
   --retentionDays      Delete report directories older than N days (default: 0 = disabled)
   --environment     JSON file with environment metadata (agent_id, model, prompt_version, tools_version)
@@ -575,6 +577,7 @@ export async function runEvaluator(): Promise<void> {
       "--transferClass",
       "--strictPortability",
       "--strictRedaction",
+      "--entropyScanner",
       "--warnBodyBytes",
       "--retentionDays",
       "--environment",
@@ -689,6 +692,9 @@ export async function runEvaluator(): Promise<void> {
   const baselineRun = await readRunDir(baselineDirAbs);
   const newRun = await readRunDir(newDirAbs);
   const scanners: SecurityScanner[] = [];
+  if (hasFlag("--entropyScanner")) {
+    scanners.push(createEntropyScanner());
+  }
 
   const baselineById = baselineRun.byId;
   const newById = newRun.byId;

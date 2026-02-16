@@ -160,6 +160,7 @@ Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case resp
 | Prompt injection markers detected | `evaluator/core.ts`: `computeSecuritySide()` | Detection, triggers signal |
 | Redaction (pipeline) | `runner/sanitize.ts` + `runner/runner.ts` | Opt‑in via `--redactionPreset`; writes sanitized artifacts and metadata in `run.json` |
 | Redaction enforcement | `evaluator/evaluator.ts` | `--strictRedaction` fails if markers remain after redaction |
+| Entropy/token scanner (optional) | `evaluator/scanners/entropyScanner.ts` | Enable via `--entropyScanner` |
 | Raw retention | `runner/runner.ts` | `--keepRaw` stores unsanitized responses under `_raw/` (opt‑in) |
 | Transfer classification CLI flag | `evaluator/evaluator.ts`: `--transferClass` (internal_only / transferable) | Written to `summary.quality.transfer_class` |
 | npm audit | `npm audit` currently reports `found 0 vulnerabilities`. Root `package.json` contains `overrides.qs: "6.14.2"` (npm v8+ feature) to pin qs outside advisory GHSA-w7fw-mjwx-w883. Prior to this override, audit reported 1 low-severity vulnerability. Verify: `cat package.json \| grep -A2 overrides` and `npm audit` (run as separate commands) |

@@ -15,7 +15,7 @@ You get:
 - Per-case replay diff (`case-<case_id>.html`) for human triage
 - Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
 - Root cause attribution (RCA) and policy hints
-- Security Signals Pack (signals may be empty in demo)
+- Security Signals Pack (regex + optional entropy scanner via `--entropyScanner`)
 - Stage 2 (queued): evidence-linked governance (policy-as-code / approvals / runtime gates)
 
 ---
