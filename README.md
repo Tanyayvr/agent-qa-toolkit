@@ -223,6 +223,7 @@ The report format is published as **AEPF (Agent Evidence Pack Format)**:
 
 - Spec: `docs/aepf-spec-v1.md`
 - Schema: `schemas/compare-report-v5.schema.json`
+- Standardization plan: `docs/aepf-standardization.md`
 
 ---
 

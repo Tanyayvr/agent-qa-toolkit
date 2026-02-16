@@ -105,6 +105,7 @@
 - adapters: Promptfoo/DeepEval → AEPF (minimal converters)
 - shared case library (seeded, offline‑syncable)
 - GitHub Action for CI gate (`agent‑qa/gate`)
+- conformance suite + Python/Go validators (public standard readiness)
 
 ---
 
