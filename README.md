@@ -294,11 +294,8 @@ Machine report (CI interface):
 We can connect your agent in **~1–3 hours** if it already exposes `/run-case`,
 or within **0.5–1 day** if an adapter is needed.
 
-Two install modes (both run on your infrastructure):
-
-1. **Self‑run**: you install and run the toolkit locally using our docs.
-2. **Assisted**: we guide the setup (pairing session), provide a one‑time key,
-   and help generate the first report pack.
+**Self‑run only**: you install and run the toolkit locally using our docs.
+This is intentional so we catch real setup friction and fix it.
 
 Artifacts never leave your environment unless you choose to export them.
 
