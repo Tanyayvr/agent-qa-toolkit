@@ -216,6 +216,8 @@ export type CompareReport = {
     gate_recommendation: "none" | "require_approval" | "block";
     case_ts?: number;
     assertions?: ItemAssertion[];
+    assertions_baseline?: ItemAssertion[];
+    assertions_new?: ItemAssertion[];
 
     failure_summary?: {
       baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number };

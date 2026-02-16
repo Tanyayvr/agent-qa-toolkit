@@ -184,11 +184,35 @@
           "case_id": { "type": "string" },
           "title": { "type": "string" },
           "suite": { "type": "string" },
-          "case_status": { "enum": ["executed", "skipped", "filtered_out"] },
+          "case_status": { "enum": ["executed", "filtered_out", "missing"] },
           "baseline_pass": { "type": "boolean" },
           "new_pass": { "type": "boolean" },
           "case_ts": { "type": "number" },
           "assertions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "pass"],
+              "properties": {
+                "name": { "type": "string" },
+                "pass": { "type": "boolean" },
+                "details": { "type": "object" }
+              }
+            }
+          },
+          "assertions_baseline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "pass"],
+              "properties": {
+                "name": { "type": "string" },
+                "pass": { "type": "boolean" },
+                "details": { "type": "object" }
+              }
+            }
+          },
+          "assertions_new": {
             "type": "array",
             "items": {
               "type": "object",

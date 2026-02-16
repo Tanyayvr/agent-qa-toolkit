@@ -62,7 +62,7 @@ export type EvaluationResult = {
 export type GateRecommendation = "none" | "require_approval" | "block";
 export type RiskLevel = "low" | "medium" | "high";
 export type AvailabilityStatus = "present" | "missing" | "broken";
-export type CaseStatus = "executed" | "skipped" | "filtered_out";
+export type CaseStatus = "executed" | "filtered_out" | "missing";
 
 export type DataAvailabilitySide = {
     status: AvailabilityStatus;

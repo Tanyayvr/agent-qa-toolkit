@@ -849,8 +849,15 @@ export async function runEvaluator(): Promise<void> {
       };
     }
 
-    const caseStatus: CaseStatus = baselineSelected.has(c.id) || newSelected.has(c.id) ? "executed" : "filtered_out";
-    const caseStatusReason = caseStatus === "filtered_out" ? "excluded_by_filter" : undefined;
+    const selected = baselineSelected.has(c.id) || newSelected.has(c.id);
+    const hasAnyResp = Boolean(baseResp || newResp);
+    const caseStatus: CaseStatus = !selected ? "filtered_out" : hasAnyResp ? "executed" : "missing";
+    const caseStatusReason =
+      caseStatus === "filtered_out"
+        ? "excluded_by_filter"
+        : caseStatus === "missing"
+          ? "missing_case_response"
+          : undefined;
 
     let baselinePassFlag = bEval?.pass ?? false;
     let newPassFlag = nEval?.pass ?? false;
@@ -1111,6 +1118,8 @@ export async function runEvaluator(): Promise<void> {
       risk_tags: riskTags,
       gate_recommendation: gateRecommendation,
     };
+    if (bEval?.assertions?.length) item.assertions_baseline = bEval.assertions;
+    if (nEval?.assertions?.length) item.assertions_new = nEval.assertions;
     if (nEval?.assertions?.length) item.assertions = nEval.assertions;
     if (caseTs !== undefined) item.case_ts = caseTs;
     if (caseStatusReason) item.case_status_reason = caseStatusReason;

@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "eslint": "9.39.2",
-    "express": "4.22.1"
+    "express": "4.22.1",
+    "redaction": "*"
 
   },
   "devDependencies": {

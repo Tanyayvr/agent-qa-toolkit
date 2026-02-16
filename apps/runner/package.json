@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "shared-types": "*",
-    "aq-license": "*"
+    "aq-license": "*",
+    "redaction": "*"
   },
   "devDependencies": {
     "@types/node": "20.11.30",
