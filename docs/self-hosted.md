@@ -26,6 +26,11 @@ Because this is self-hosted:
 - Audit trails, retention policies, and data lifecycle controls are governed by the customer’s internal policies.
 - Optional: manifest signatures can be produced locally to attest bundle integrity (`scripts/manifest-sign.mjs`).
 
+### Security expectations (important)
+- Self-hosted does **not** remove prompt‑injection risk by itself.
+- Layered scanning is recommended (regex baseline + optional entropy scanner).
+- Use `--entropyScanner` for stronger offline detection.
+
 ## 4. Compliance and Regulatory Posture
 
 The vendor is **not a data processor** for customer content, because no data leaves the customer environment by default.

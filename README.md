@@ -37,6 +37,7 @@ This reduces compliance scope: data does not leave your environment unless you e
 See formal policy: `docs/self-hosted.md`
 Deployment: `docs/self-hosted-deploy.md`
 CI: `docs/ci.md`
+Security: `docs/security-layered.md`, `docs/security-faq.md`
 
 Licensing (optional, offline): `docs/license.md`
 Keygen/sign helpers: `scripts/license-keygen.mjs`, `scripts/license-sign.mjs`

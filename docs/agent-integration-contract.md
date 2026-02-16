@@ -83,6 +83,7 @@ Optional but recommended:
 - The toolkit is tolerant to missing `events`, but correctness checks (tool_sequence, tool_required, evidence_required) rely on it.
 - If your agent does not execute tools, omit `proposed_actions` and `events`.
 - The evaluator reads response JSON directly from runner artifacts; ensure it is valid JSON.
+- Self-hosted does **not** remove prompt‑injection risk by itself; use layered scanning (regex baseline + optional entropy scanner).
 
 ---
 
