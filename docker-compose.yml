@@ -1,6 +1,8 @@
 services:
   demo-agent:
-    build: .
+    build:
+      context: .
+      target: dev
     command: ["npm", "-w", "demo-agent", "run", "dev"]
     ports:
       - "8787:8787"
@@ -11,7 +13,9 @@ services:
       retries: 10
 
   runner:
-    build: .
+    build:
+      context: .
+      target: dev
     depends_on:
       demo-agent:
         condition: service_healthy
@@ -36,7 +40,9 @@ services:
       - ./apps/runner/runs:/app/apps/runner/runs
 
   evaluator:
-    build: .
+    build:
+      context: .
+      target: dev
     depends_on:
       runner:
         condition: service_completed_successfully

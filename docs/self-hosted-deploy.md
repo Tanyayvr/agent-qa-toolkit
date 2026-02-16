@@ -13,7 +13,7 @@ This guide runs the full pipeline locally using Docker Compose:
 
 ## One-command run
 
-Use Docker Desktop with Compose v2:
+Use Docker Desktop with Compose v2 (dev target):
 
 ```bash
 docker compose up --build
@@ -34,3 +34,4 @@ When finished:
 ## Notes
 - `demo-agent` is a fixture. Replace it with a real agent service when integrating.
 - The compose file uses `cases/all.json` to run correctness + robustness suites.
+- The Dockerfile includes `dev` and `prod` targets. Compose uses `dev` (ts-node). For production packaging, build `prod`.

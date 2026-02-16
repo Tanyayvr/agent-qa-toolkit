@@ -22,6 +22,8 @@
 ## Packaging
 - [ ] `npm run pvip:pack`
 - [ ] Docker compose starts (`docker-compose up --build`)
+- [ ] Dockerfile uses multi-stage + `npm ci --omit=dev`
+- [ ] `.dockerignore` excludes node_modules/.git/reports
 
 ## Security & Compliance
 - [ ] `--strictPortability` and `--strictRedaction` flags documented
