@@ -85,7 +85,9 @@ function keyPatternSignals(text: string): SecuritySignal[] {
       kind: p.kind,
       severity: "high",
       confidence: "medium",
+      title: "Key pattern detected",
       message: `Key pattern detected: ${p.label}`,
+      evidence_refs: [],
       details: { sample: maskToken(hit[0]), pattern: p.label },
     });
   }
@@ -111,7 +113,9 @@ export function createEntropyScanner(opts?: Partial<EntropyScannerOptions>): Sec
             kind: "token_exfil_indicator",
             severity: "medium",
             confidence: "low",
+            title: "High-entropy token-like string detected",
             message: "High-entropy token-like string detected",
+            evidence_refs: [],
             details: { sample: maskToken(tok), entropy: Number(ent.toFixed(2)), length: tok.length },
           });
         }

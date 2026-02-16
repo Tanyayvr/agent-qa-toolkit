@@ -35,6 +35,7 @@ export type SecuritySignal = {
   severity: SignalSeverity;
   confidence: SignalConfidence;
   title: string;
+  message?: string;
   details?: {
     tool?: string;
     call_id?: string;
@@ -42,6 +43,10 @@ export type SecuritySignal = {
     fields?: string[];
     urls?: string[];
     notes?: string;
+    sample?: string;
+    pattern?: string;
+    entropy?: number;
+    length?: number;
   };
   evidence_refs: EvidenceRef[];
 };

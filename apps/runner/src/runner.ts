@@ -99,7 +99,7 @@ Examples:
   ts-node src/index.ts --baseUrl http://localhost:8787 --cases cases/cases.json --runId latest
 `.trim();
 
-const { ARGV, hasFlag, getFlag, getArg, assertNoUnknownOptions, assertHasValue, parseIntFlag } = makeArgvHelpers(process.argv);
+const { hasFlag, getFlag, getArg, assertNoUnknownOptions, assertHasValue, parseIntFlag } = makeArgvHelpers(process.argv);
 const AUDIT_LOG_ENV = process.env.AUDIT_LOG_PATH;
 
 class CliUsageError extends Error {

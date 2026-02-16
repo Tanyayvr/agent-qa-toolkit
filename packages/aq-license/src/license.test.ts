@@ -5,16 +5,17 @@ import path from "node:path";
 import os from "node:os";
 import { checkLicenseOnly, consumeRunOrThrow } from "./index";
 
-function canonicalize(value: any): string {
+function canonicalize(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map((v) => canonicalize(v)).join(",")}]`;
   if (value && typeof value === "object") {
-    const keys = Object.keys(value).sort();
-    return `{${keys.map((k) => JSON.stringify(k) + ":" + canonicalize(value[k])).join(",")}}`;
+    const rec = value as Record<string, unknown>;
+    const keys = Object.keys(rec).sort();
+    return `{${keys.map((k) => JSON.stringify(k) + ":" + canonicalize(rec[k])).join(",")}}`;
   }
   return JSON.stringify(value);
 }
 
-async function setupLicense(license: any) {
+async function setupLicense(license: Record<string, unknown>) {
   const dir = path.join(os.tmpdir(), `aq-license-${Date.now()}`);
   await mkdir(dir, { recursive: true });
   const licensePath = path.join(dir, "license.json");
