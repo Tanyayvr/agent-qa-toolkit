@@ -32,6 +32,15 @@ Because this is self-hosted:
 - Layered scanning is recommended (regex baseline + optional entropy scanner).
 - Use `--entropyScanner` for stronger offline detection.
 
+### Self-hosted security checklist (recommended)
+- Run agents in restricted containers/VMs with least-privilege access.
+- Enforce network egress allowlists at the host or cluster level.
+- Keep secrets outside the workspace; mount read-only if needed.
+- Disable or strictly allowlist tools that can exfiltrate data.
+- Add an output DLP layer (regex + entropy + known secret patterns).
+- Apply spend limits and key scoping at the model provider.
+- Rotate keys and keep a key handling runbook.
+
 ## 4. Compliance and Regulatory Posture
 
 The vendor is **not a data processor** for customer content, because no data leaves the customer environment by default.

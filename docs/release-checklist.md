@@ -20,7 +20,6 @@
 - [ ] Verify LocalStorage warning when filters persistence is blocked
 
 ## Spec & Docs
-- [ ] `docs/aepf-spec-v1.md` up to date
 - [ ] `schemas/compare-report-v5.schema.json` matches current output
 - [ ] README references AEPF spec + schema
 - [ ] `docs/self-hosted.md` current
