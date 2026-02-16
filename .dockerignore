@@ -10,4 +10,5 @@ apps/**/reports
 apps/**/runs
 apps/**/reports/**
 apps/**/runs/**
-docs/internal/market
+docs/internal
+docs/internal/**
