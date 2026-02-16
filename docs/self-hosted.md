@@ -24,6 +24,7 @@ Because this is self-hosted:
 - **Encryption at rest** is recommended for storage volumes that contain artifacts.
 - **Encryption in transit** is required only for customer-controlled transfers (e.g., CI artifact storage, internal file servers).
 - Audit trails, retention policies, and data lifecycle controls are governed by the customer’s internal policies.
+- Optional: manifest signatures can be produced locally to attest bundle integrity (`scripts/manifest-sign.mjs`).
 
 ## 4. Compliance and Regulatory Posture
 

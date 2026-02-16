@@ -1,5 +1,11 @@
 # Public Release Checklist (Self‑Hosted)
 
+## Current Results (v1.4.0)
+- lint ✅
+- typecheck ✅
+- unit tests ✅ (53/53)
+- pvip verify ✅
+
 ## Build & Test
 - [ ] `npm run lint`
 - [ ] `npm run typecheck`
@@ -30,6 +36,9 @@
 - [ ] `compliance_mapping` present in reports (if profile provided)
 - [ ] No secrets committed (manual spot‑check)
 - [ ] License flow documented (keygen + sign + usage)
+- [ ] Prebuilt compliance profiles added (ISO 42001 / NIST AI RMF / EU AI Act)
+- [ ] SBOM generated (`npm run sbom`)
+- [ ] Manifest signature generated (`npm run manifest:sign`)
 
 ## Release Hygiene
 - [ ] `CHANGELOG.md` updated (if used)

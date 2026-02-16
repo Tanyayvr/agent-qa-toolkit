@@ -258,6 +258,16 @@ Machine report (CI interface):
 
 `apps/evaluator/reports/latest/compare-report.json`
 
+## Dev Validation (before integrating a real agent)
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+SKIP_AUDIT=1 node scripts/demo-e2e.mjs --baseUrl http://localhost:8788 --skipAudit
+npm run pvip:verify:strict
+```
+
 Demo pipeline (what npm run demo does)
 Runs:
 

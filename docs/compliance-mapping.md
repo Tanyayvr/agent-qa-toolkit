@@ -11,6 +11,12 @@ Evaluator CLI:
 npm --workspace evaluator run dev -- --complianceProfile docs/compliance-profile.example.json
 ```
 
+Example profiles:
+
+- `docs/compliance-profile-iso42001.json`
+- `docs/compliance-profile-nist-ai-rmf.json`
+- `docs/compliance-profile-eu-ai-act.json`
+
 ## compare-report.json (optional)
 
 ```json

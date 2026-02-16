@@ -1,0 +1,16 @@
+{
+  "compliance_mapping": [
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_9",
+      "title": "Risk management system",
+      "evidence": ["compare-report.json.summary", "report.html"]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_12",
+      "title": "Record‑keeping and logging",
+      "evidence": ["compare-report.json", "artifacts/manifest.json"]
+    }
+  ]
+}

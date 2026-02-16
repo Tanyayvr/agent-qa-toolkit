@@ -1,0 +1,16 @@
+{
+  "compliance_mapping": [
+    {
+      "framework": "NIST_AI_RMF",
+      "clause": "GOVERN-1.1",
+      "title": "AI risk management strategy",
+      "evidence": ["compare-report.json.summary", "report.html"]
+    },
+    {
+      "framework": "NIST_AI_RMF",
+      "clause": "MEASURE-2.2",
+      "title": "Test and evaluation methods",
+      "evidence": ["compare-report.json.items", "case-*.html"]
+    }
+  ]
+}

@@ -44,6 +44,7 @@ Evaluator produces:
 - optionally baseline/, new/ (local raw copies)
 - optionally repro/ (if compare-report.json.repro exists)
 - artifacts/manifest.json (evidence manifest; canonical)
+- artifacts/manifest.sig (optional signature over manifest.json)
 
 2. Portability rules (MUST)
 All portable path fields stored in compare-report.json MUST be:
