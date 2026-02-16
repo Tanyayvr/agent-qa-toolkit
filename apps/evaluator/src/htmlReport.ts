@@ -711,6 +711,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       <div class="card" style="margin-bottom:16px;">
         <div style="font-size:16px;font-weight:900;">Filters</div>
         <div class="filters">
+          <div id="localStorageWarning" class="note" style="display:none;">LocalStorage disabled: filters won’t persist after reload.</div>
           <input id="filterText" type="text" placeholder="Search case id or title" />
           <select id="filterSuite">
             <option value="">Suite: all</option>
@@ -1176,6 +1177,10 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       var fromHash = parseHash();
       if (fromHash) setFilters(fromHash);
       applyFilters();
+      try { window.localStorage.setItem("__pvip_ls__", "1"); window.localStorage.removeItem("__pvip_ls__"); } catch (e) {
+        var warn = document.getElementById("localStorageWarning");
+        if (warn) warn.style.display = "block";
+      }
       loadSavedFilters();
     })();
   </script>
