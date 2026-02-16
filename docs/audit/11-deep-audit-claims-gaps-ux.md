@@ -15,7 +15,7 @@
 
 Осталось актуальным:
 - regex‑only security не заменён на ML/LLM (остается опциональной интеграцией).
-- нет PDF export / print stylesheet / expand assertions в UI.
+- PDF export / print stylesheet / expand assertions в UI — **сделано** (Print/PDF button + print CSS + assertions details).
 - нужен warning по localStorage (filters persistence).
 
 ---

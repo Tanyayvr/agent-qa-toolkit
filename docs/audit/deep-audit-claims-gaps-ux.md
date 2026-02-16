@@ -4,6 +4,22 @@
 
 ---
 
+## Update (16 февраля 2026)
+
+Закрыто:
+- `assertions_baseline` + `assertions_new` добавлены (baseline parity).
+- `.dockerignore`, multi‑stage Dockerfile, `npm ci --omit=dev`.
+- SBOM (`scripts/sbom.mjs`), manifest signing (`scripts/manifest-sign.mjs`).
+- compliance profiles (ISO 42001 / EU AI Act / NIST AI RMF).
+- optional entropy scanner (`--entropyScanner`) as local security plugin.
+- print/PDF support + expandable assertions in HTML.
+
+Осталось актуальным:
+- regex‑only security без ML/LLM.
+- localStorage warning для filters persistence.
+
+---
+
 ## 1. Заявления в README vs реальный код
 
 Проверено каждое утверждение из README (711 LOC) + AEPF spec (223 LOC) + контракты.
@@ -45,7 +61,7 @@
 | 1 | **Security Signals** «signals may be empty in demo» | `computeSecuritySide()` реализован, но ищет только **regex-паттерны** (sk-*, api_key, prompt injection markers). Нет ML/LLM-based scanner. Но: есть **plugin interface** `SecurityScanner` для подключения custom scanners | ✅ Честно |
 | 2 | **Policy rules** (Rule1-4) | `mapPolicyRules()` маппит RCA → rule IDs. Enforcement — **Stage 2** (не заявлено для Stage 1) | ✅ Честно |
 | 3 | **Stage 2/3** | Явно помечены как «QUEUED / NEXT» и «VISION» — не заявлены как реализованные | ✅ Честно |
-| 4 | **assertions[] в items[]** | Добавляются условно (строка 1114): `if (nEval?.assertions?.length) item.assertions = nEval.assertions;` — только для `new` версии, не для `baseline` | ⚠️ |
+| 4 | **assertions[] в items[]** | Исправлено: `assertions_baseline` + `assertions_new` | ✅ |
 
 ### Вердикт: соответствие заявлениям → **9.5/10**
 

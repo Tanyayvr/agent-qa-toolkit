@@ -529,6 +529,30 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       const assertionNewChip = assertionsNew.length
         ? `<span class="metaChip" title="${escHtml(failedNew.join(", "))}">new assertions: ${assertionsNew.length} (fail: ${failedNew.length})</span>`
         : "";
+      const renderAssertionRows = (label: string, rows: ItemAssertion[]) =>
+        rows
+          .map(
+            (a) =>
+              `<div class="assertionRow"><span class="muted">${escHtml(label)}:</span><span class="name">${escHtml(a.name)}</span><span class="${a.pass ? "pass" : "fail"}">${a.pass ? "pass" : "fail"}</span></div>`
+          )
+          .join("");
+      const assertionDetails =
+        assertionsBaseline.length || assertionsNew.length
+          ? `<details class="assertions">
+              <summary>Assertions details</summary>
+              <div class="assertionList">
+                ${assertionsBaseline.length ? renderAssertionRows("baseline", assertionsBaseline) : ""}
+                ${assertionsNew.length ? renderAssertionRows("new", assertionsNew) : ""}
+              </div>
+            </details>`
+          : assertions.length
+            ? `<details class="assertions">
+                <summary>Assertions details</summary>
+                <div class="assertionList">
+                  ${renderAssertionRows("case", assertions)}
+                </div>
+              </details>`
+            : "";
       return `
 <tr class="${rowClass}" data-case="${escHtml(it.case_id)}" data-risk="${escHtml(it.risk_level)}" data-gate="${escHtml(it.gate_recommendation)}" data-status="${escHtml(it.case_status)}" data-suite="${escHtml(suite)}" data-diff="${diffKind}" data-ts="${escHtml(String(it.case_ts ?? ""))}">
   <td>
@@ -543,6 +567,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       ${assertionChip}${assertionBaselineChip}${assertionNewChip}
       ${hasFailure ? failureBadge() : ""}
     </div>
+    ${assertionDetails}
   </td>
   <td>${base}</td>
   <td>${neu}</td>
@@ -625,7 +650,24 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
   .caseTitle { font-weight: 800; font-size: 14px; }
   .caseMeta { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
   .metaChip { background:#0b0d10; border:1px solid #232836; border-radius: 999px; padding: 2px 8px; font-size: 12px; color:#cbd5e1; }
+  details.assertions { margin-top:6px; background:#0b0d10; border:1px solid #232836; border-radius: 10px; padding: 6px 8px; }
+  details.assertions summary { cursor:pointer; font-size:12px; color:#cbd5e1; }
+  .assertionList { margin-top:6px; display:flex; flex-direction:column; gap:4px; }
+  .assertionRow { display:flex; gap:8px; align-items:center; font-size:12px; color:#cbd5e1; }
+  .assertionRow .name { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color:#e5e7eb; }
+  .assertionRow .pass { color:#22c55e; font-weight:700; }
+  .assertionRow .fail { color:#f97316; font-weight:700; }
+  .printOnly { display:none; }
   @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } .side { position: static; } }
+  @media print {
+    body { background:#ffffff; color:#111827; }
+    .wrap { padding: 12px; }
+    .card, .table th, .table td { background:#ffffff !important; color:#111827 !important; border-color:#e5e7eb !important; box-shadow: none !important; }
+    .side, .filters, .savedRow, .savedList, .tabRow, .btn, .chip { display:none !important; }
+    .hero { align-items:flex-start; }
+    .printOnly { display:block; font-size:12px; color:#111827; margin-top:6px; }
+    .table { font-size:12px; }
+  }
 </style>
 </head>
 <body>
@@ -646,6 +688,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
       <div class="chips">
         <span class="chip">transfer: ${escHtml(s.quality.transfer_class)}</span>
         <span class="chip">redaction: ${escHtml(s.quality.redaction_status)}${s.quality.redaction_preset_id ? ` (${escHtml(s.quality.redaction_preset_id)})` : ""}</span>
+        <button class="btn" onclick="window.print()">Print / PDF</button>
       </div>
     </div>
     <div class="muted" style="margin-top:6px;">
