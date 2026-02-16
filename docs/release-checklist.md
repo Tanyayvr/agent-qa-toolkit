@@ -17,6 +17,7 @@
 - [ ] `npm run pvip:verify`
 - [ ] `npm run pvip:verify:strict`
 - [ ] `npm run pvip:verify:json`
+- [ ] Verify LocalStorage warning when filters persistence is blocked
 
 ## Spec & Docs
 - [ ] `docs/aepf-spec-v1.md` up to date

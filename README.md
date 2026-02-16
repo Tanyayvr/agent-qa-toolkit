@@ -18,6 +18,9 @@ You get:
 - Security Signals Pack (regex + optional entropy scanner via `--entropyScanner`)
 - Stage 2 (queued): evidence-linked governance (policy-as-code / approvals / runtime gates)
 
+Notes:
+- Filters persist via LocalStorage. If it’s blocked, the report shows a warning and filters won’t be saved.
+
 ---
 
 ## Data handling (Self-hosted only)
