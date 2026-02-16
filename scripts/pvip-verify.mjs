@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync, statSync, existsSync } from "node:fs";
-import { createHash } from "node:crypto";
+import { createHash, createPublicKey, verify } from "node:crypto";
 import path from "node:path";
 import Ajv from "ajv";
 
@@ -91,18 +91,45 @@ if (!ok) {
   process.exit(1);
 }
 
-const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+const manifestRaw = readFileSync(manifestPath);
+const manifestText = manifestRaw.toString("utf-8");
+const manifest = JSON.parse(manifestText);
 if (!manifest.items || !Array.isArray(manifest.items)) {
   outFail("Invalid manifest.items");
   process.exit(1);
 }
 
 if (report.embedded_manifest_index && report.embedded_manifest_index.source_manifest_sha256) {
-  const manifestRaw = readFileSync(manifestPath);
   const hash = createHash("sha256").update(manifestRaw).digest("hex");
   if (hash !== report.embedded_manifest_index.source_manifest_sha256) {
     outFail("embedded_manifest_index.source_manifest_sha256 mismatch");
     if (strict) process.exit(1);
+  }
+}
+
+const sigPath = path.join(absReport, "artifacts", "manifest.sig");
+if (existsSync(sigPath)) {
+  const pubB64 = process.env.AQ_LICENSE_PUBLIC_KEY;
+  if (!pubB64) {
+    outFail("manifest.sig present but AQ_LICENSE_PUBLIC_KEY is not set");
+    if (strict) process.exit(1);
+  } else {
+    const sig = readFileSync(sigPath, "utf-8").trim();
+    try {
+      const key = createPublicKey({
+        key: Buffer.from(pubB64, "base64"),
+        format: "der",
+        type: "spki",
+      });
+      const okSig = verify(null, Buffer.from(manifestText, "utf-8"), key, Buffer.from(sig, "base64"));
+      if (!okSig) {
+        outFail("manifest.sig verification failed");
+        process.exit(1);
+      }
+    } catch (err) {
+      outFail(`manifest.sig verification error: ${err?.message || String(err)}`);
+      process.exit(1);
+    }
   }
 }
 

@@ -184,18 +184,6 @@ Extended signal kinds (optional):
 - New fields are additive (schema is forward‑compatible).
 - Validators must ignore unknown fields.
 
-## Standard Readiness
-
-- **Internal format**: 10/10 (fully implemented in toolkit).
-- **Public standard**: 7/10.
-
-To publish AEPF as an external standard, we still need:
-
-1. Separate public spec repo (schema + RFC).
-2. Conformance test suite (golden evidence packs).
-3. Multi‑language validators (Python + Go).
-4. RFC numbering and versioning policy.
-
 ## `artifacts/manifest.json` (Canonical)
 
 The manifest is the **single source of truth** for evidence integrity.
