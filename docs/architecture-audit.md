@@ -92,6 +92,7 @@ Runner supports extended redaction via `--redactionPreset transferable_extended`
 
 **Security plugins:**  
 Evaluator now exposes a `SecurityScanner` interface (`apps/evaluator/src/securityScanner.ts`) to allow sidecar scanners (Presidio/TruffleHog) to append signals without replacing core regex checks.
+Reference local scanner (entropy + key patterns) can be enabled via `--entropyScanner` for offline layered defense.
 
 **Audit log:**  
 Runner and evaluator append audit events to a JSONL file when `AUDIT_LOG_PATH` is set (start/finish, run/report ids).

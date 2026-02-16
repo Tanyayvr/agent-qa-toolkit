@@ -19,6 +19,12 @@ This toolkit ships a **layered** model so teams can choose how far to go while s
 ## Layer 4 — Human Review / Policy
 - CI gates (`require_approval` / `block`) + evidence packs for review.
 
+## Offline scanner candidates (examples)
+- Entropy + key patterns (built‑in optional `--entropyScanner`)
+- YARA‑style rulesets for credential patterns
+- Presidio (local) for PII
+- LLM Guard / Rebuff (self‑hosted) for injection heuristics
+
 ## Why layered?
 - Forum feedback shows regex‑only detection misses obfuscated attacks.
 - Teams want offline‑safe options, not SaaS dependencies.
