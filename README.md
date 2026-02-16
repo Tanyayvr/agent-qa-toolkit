@@ -78,12 +78,18 @@ npm -w evaluator run dev -- --license .license/license.json ...
 - Regression/improvement row highlights
 
 **Production (Docker, standalone):**
-The Dockerfile ships `dev` and `prod` targets. For production, build `prod` and run runner/evaluator as CLI commands:
+The Dockerfile ships `dev` and `prod` targets. For runnable containers, use `dev` target or include dev deps; the `prod` target is a minimal packaging baseline.
 
 ```bash
 docker build -t agent-qa:prod --target prod .
 docker run --rm agent-qa:prod npm -w runner run dev -- --baseUrl http://your-agent:8787 --cases cases/all.json --outDir /data/runs --runId latest
 docker run --rm agent-qa:prod npm -w evaluator run dev -- --cases cases/all.json --baselineDir /data/runs/baseline/latest --newDir /data/runs/new/latest --outDir /data/reports/latest --reportId latest
+```
+
+Optional entrypoint helper (requires dev deps / dev target):
+```bash
+docker build -t agent-qa:dev --target dev .
+docker run --rm agent-qa:dev /app/scripts/entrypoint-prod.sh runner --baseUrl http://your-agent:8787 --cases cases/all.json --outDir /data/runs --runId latest
 ```
 
 **Integration options:**

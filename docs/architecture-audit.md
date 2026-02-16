@@ -103,6 +103,10 @@ Runner supports `--keepRaw` to store unsanitized responses under `_raw/`. This i
 **Large payload warnings:**  
 Evaluator supports `--warnBodyBytes` (default 1,000,000) to flag large case responses in `quality_flags.large_payloads`.
 
+**Container entrypoint:**  
+A helper script exists at `scripts/entrypoint-prod.sh` to run runner/evaluator inside containers.  
+Note: the `prod` image omits dev dependencies, so the helper is primarily for `dev` target or images that include `ts-node`.
+
 ## Category Details
 
 ### 1. Architecture and Boundaries
