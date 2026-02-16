@@ -247,9 +247,11 @@ Optional (recommended in v5):
 
 ---
 
-## AEPF Spec
+## Evidence Pack Format (draft)
 
-The report format is published as **AEPF (Agent Evidence Pack Format)**:
+We are collecting feedback on the evidence pack format (field set + structure).
+This is **not** a standard yet. If you have an existing format or missing fields,
+please open an issue.
 
 - Schema: `schemas/compare-report-v5.schema.json`
 
@@ -286,6 +288,19 @@ Per-case diffs:
 Machine report (CI interface):
 
 `apps/evaluator/reports/latest/compare-report.json`
+
+## Pilot Onboarding (first 5 teams)
+
+We can connect your agent in **~1–3 hours** if it already exposes `/run-case`,
+or within **0.5–1 day** if an adapter is needed.
+
+Two install modes (both run on your infrastructure):
+
+1. **Self‑run**: you install and run the toolkit locally using our docs.
+2. **Assisted**: we guide the setup (pairing session), provide a one‑time key,
+   and help generate the first report pack.
+
+Artifacts never leave your environment unless you choose to export them.
 
 ## Dev Validation (before integrating a real agent)
 
