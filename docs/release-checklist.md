@@ -45,3 +45,4 @@
 - [ ] `CHANGELOG.md` updated (if used)
 - [ ] `LICENSE` present
 - [ ] `SECURITY.md` present (if public)
+- [ ] Internal docs excluded from public release (docs/internal/**)
