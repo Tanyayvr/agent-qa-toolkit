@@ -318,6 +318,24 @@ Pilot support (first 5 teams):
 - Open a Pilot Request issue to apply: https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_request.yml
 - If slots are full, open a Pilot Waitlist issue and we’ll follow up.
 
+Integration Pack (paid deliverable):
+- Adapter code + config for your stack
+- One “run pack” command (end‑to‑end)
+- CI example (GitHub Actions / GitLab CI)
+- Strict verify step (pvip verify)
+- Short `integration.md` for your stack
+
+Public vs Paid scope:
+
+Public repo (open):
+- core CLI (pack + verify base)
+- schema + contract (v5)
+- demo bundle + quickstart
+- “Integration Kit interface” (points of extension)
+
+Paid:
+- ready‑made adapters for popular stacks (LangChain/LangGraph, OpenAI, Anthropic)
+
 ## Pilot Onboarding (first 5 teams)
 
 We can connect your agent in **~1–3 hours** if it already exposes `/run-case`,
