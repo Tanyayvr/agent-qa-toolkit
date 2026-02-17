@@ -310,6 +310,9 @@ Machine report (CI interface):
 
 Full install modes: `docs/installation.md`
 
+Demo bundle:
+- `examples/demo-bundle.zip` (extract and open `report.html`)
+
 ## Pilot Onboarding (first 5 teams)
 
 We can connect your agent in **~1–3 hours** if it already exposes `/run-case`,
