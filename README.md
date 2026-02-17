@@ -313,6 +313,10 @@ Full install modes: `docs/installation.md`
 Demo bundle:
 - `examples/demo-bundle.zip` (extract and open `report.html`)
 
+Pilot support (first 5 teams):
+- We offer self‑run pilot support to 5 teams.
+- Open a Pilot Request issue to apply.
+
 ## Pilot Onboarding (first 5 teams)
 
 We can connect your agent in **~1–3 hours** if it already exposes `/run-case`,
