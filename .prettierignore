@@ -1,9 +1,0 @@
-node_modules
-dist
-runs
-reports
-apps/**/runs
-apps/**/reports
-*.html
-package-lock.json
-apps/**/package-lock.json

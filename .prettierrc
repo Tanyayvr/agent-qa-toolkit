@@ -1,7 +1,0 @@
-{
-  "__file": ".prettierrc",
-  "singleQuote": false,
-  "printWidth": 110,
-  "semi": true,
-  "trailingComma": "es5"
-}

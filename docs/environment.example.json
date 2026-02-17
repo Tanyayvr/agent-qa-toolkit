@@ -1,6 +1,0 @@
-{
-  "agent_id": "support_ticketing_v1",
-  "model": "gpt-4.1-mini",
-  "prompt_version": "2026-02-15",
-  "tools_version": "v3"
-}
