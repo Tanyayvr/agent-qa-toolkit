@@ -12,7 +12,7 @@ Content-Type: application/json
 ```
 
 Optional headers:
-- `x-redaction-preset`: `none | internal_only | transferable` (demo-agent uses this; real agents may ignore)
+- `x-redaction-preset`: `none | internal_only | transferable` (demo-only hint). Production redaction is applied by the runner before writing artifacts; agents are not required to implement or honor this header.
 
 ---
 

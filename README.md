@@ -191,6 +191,8 @@ Compliance mapping (optional):
 - Note: the `://` restriction applies to **href fields**. URLs may still appear as data in `security.signals[].details.urls`.
 - `baseline_dir` / `new_dir` / `cases_path` are **informational only** and must **not** be used to resolve links.
 - `quality_flags.portable_paths` is computed by scanning stored path/href strings for violations (see `docs/report-contract-v5.md`).
+Portability is advisory by default; strict mode makes portability violations fatal.
+Schema is forward-compatible (`additionalProperties: true`). Strictness is enforced by `pvip:verify:strict`, not by JSON Schema alone.
 
 ### Evidence links (Report Contract v5)
 
@@ -203,6 +205,12 @@ Compliance mapping (optional):
 - If redaction is applied, summary includes `summary.quality.redaction_status` and optional `summary.quality.redaction_preset_id`.
 - When `redaction_status=applied`, a `artifacts/redaction-summary.json` file is included.
 - Manifest items SHOULD include `bytes` and `media_type` so viewers/validators can stay bounded-memory.
+
+Source of truth (production): runner.
+Redaction is applied in the runner before artifacts are written. The agent is not required to support `x-redaction-preset`.
+Runner records redaction metadata in `run.json` (e.g., `redaction_applied: true` and preset id). Evaluator derives
+`summary.quality.redaction_status` and optional `summary.quality.redaction_preset_id` from runner metadata.
+`--strictRedaction` is a safety gate that checks artifacts for residual markers; it is not a source of truth.
 
 ---
 
@@ -220,6 +228,9 @@ Each case in `compare-report.json.items[]` includes:
 
 **CI gating reads only:** `compare-report.json.items[].gate_recommendation`  
 Everything else is supporting evidence for humans and RCA.
+
+Pass counts (`summary.baseline_pass` / `summary.new_pass`) include only executed cases (`case_status=executed`).
+Missing or broken artifacts do not count as pass.
 
 ## Policy rules (recommended_policy_rules)
 Derived from root cause + evidence:
