@@ -14,6 +14,14 @@ Content-Type: application/json
 Optional headers:
 - `x-redaction-preset`: `none | internal_only | transferable` (demo-only hint). Production redaction is applied by the runner before writing artifacts; agents are not required to implement or honor this header.
 
+Runner metadata (normative):
+- `run.json.redaction_applied`: boolean (MUST)
+- `run.json.redaction_preset_id`: string (MUST when applied)
+Evaluator MUST derive `summary.quality.redaction_status` only from `run.json.redaction_applied` and, if applied,
+propagate `run.json.redaction_preset_id`. It MUST NOT set `redaction_status=applied` solely from CLI flags.
+In strict mode, `--strictRedaction` MUST scan the contents of all files referenced by `artifacts/manifest.json`
+(including report HTML/JSON and assets) for residual sensitive markers.
+
 ---
 
 ## Request schema (minimal)
