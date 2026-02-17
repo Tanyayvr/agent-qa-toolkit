@@ -316,6 +316,7 @@ Demo bundle:
 Pilot support (first 5 teams):
 - We offer self‑run pilot support to 5 teams.
 - Open a Pilot Request issue to apply.
+- If slots are full, open a Pilot Waitlist issue and we’ll follow up.
 
 ## Pilot Onboarding (first 5 teams)
 

@@ -1,0 +1,29 @@
+name: Pilot Waitlist
+about: Join waitlist if pilot slots are full
+labels: [pilot, waitlist]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Pilot slots may be full. Add your details below to join the waitlist.
+  - type: input
+    id: contact
+    attributes:
+      label: Contact (email or handle)
+      placeholder: you@company.com
+    validations:
+      required: true
+  - type: input
+    id: stack
+    attributes:
+      label: Agent stack
+      placeholder: LangChain / custom / etc.
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: Short note
+      placeholder: What do you want to test?
+    validations:
+      required: true
