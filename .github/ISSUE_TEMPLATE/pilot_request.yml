@@ -35,6 +35,24 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: runtime
+    attributes:
+      label: Where do you run it?
+      options:
+        - Local / dev machine
+        - CI (GitHub/GitLab)
+        - Server / production
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: pack_contents
+    attributes:
+      label: What do you want inside the evidence pack?
+      placeholder: logs, events, tool calls, payloads, redaction, etc.
+    validations:
+      required: true
+  - type: dropdown
     id: run_case
     attributes:
       label: Do you already expose /run-case?
