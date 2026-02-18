@@ -4,6 +4,8 @@ A self‑hosted toolkit that turns agent runs into portable evidence packs
 (HTML report + machine‑readable JSON for CI gating). Designed for offline handoff
 and review‑ready artifacts.
 
+Run your agent on a case suite → get `report.html` + `compare-report.json` you can attach to an issue or gate in CI.
+
 ## What you get
 - Baseline vs new regression diff
 - Single CI gate decision: `none | require_approval | block`
@@ -30,4 +32,3 @@ Pilot deliverable: `docs/pilot.md`
 
 ## Data handling
 Data stays local unless you export it.
-
