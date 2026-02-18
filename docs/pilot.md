@@ -8,8 +8,9 @@
 - Private repo access (for updates + issue tracking)
 - `docs/installation.md` (self‑run from scratch)
 - `docs/pilot-runbook.md` (1‑page: demo run, real agent run, report location)
-- `integration.md` + one end‑to‑end “run pack” command
-- One CI example (GitHub Actions **or** GitLab CI)
+- `docs/integration.md` + one end‑to‑end “run pack” command
+- `docs/ci-example.md` (GitHub Actions default)
+- `docs/support-scope.md`
 - Strict verify step (pvip verify)
 
 ## Pilot deliverable (optional, if needed)

@@ -1,0 +1,32 @@
+name: Bug Report (Pilot)
+about: Report an issue during pilot runs
+labels: ["bug"]
+body:
+  - type: input
+    id: stack
+    attributes:
+      label: Stack / agent framework
+      placeholder: LangChain, custom, etc.
+    validations:
+      required: true
+  - type: input
+    id: os_node
+    attributes:
+      label: OS / Node version
+      placeholder: macOS 14 / Node 20
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command used
+      placeholder: npm run pilot
+    validations:
+      required: true
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Attach artifacts
+      placeholder: compare-report.json, artifacts/manifest.json, run.json, case-*.html
+    validations:
+      required: true
