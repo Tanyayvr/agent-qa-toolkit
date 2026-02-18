@@ -4,12 +4,12 @@ A self‑hosted toolkit that turns agent runs into portable evidence packs
 (HTML report + machine‑readable JSON for CI gating). Designed for offline handoff
 and review‑ready artifacts.
 
-Run your agent on a case suite → get `report.html` + `compare-report.json` you can attach to an issue or gate in CI.
+Run your agent on a case suite → get `report.html` + `compare-report.json` you can attach to an issue/ticket or gate in CI.
 
 ## What you get
 - Baseline vs new regression diff
-- Single CI gate decision: `none | require_approval | block`
-- Self‑contained report bundle (data stays local unless you export it)
+- Per‑case CI gate decision: `none | require_approval | block`
+- Offline report bundle (data stays local unless you export it)
 
 ## Demo bundle
 Open an example pack: `examples/demo-bundle.zip` → extract → open `report.html`.
@@ -17,7 +17,7 @@ Open an example pack: `examples/demo-bundle.zip` → extract → open `report.ht
 
 ## Evidence pack format (draft)
 We’re collecting feedback on the evidence pack format (field set + structure).
-This is **not** a standard yet. If you’re missing fields or have a competing format,
+This is **not** a standard yet. If you’re missing fields or already use a different format,
 please open an issue.
 
 - Schema: `schemas/compare-report-v5.schema.json`
@@ -25,8 +25,8 @@ please open an issue.
 
 ## Pilot support (first 5 teams)
 We offer **self‑run** pilot support to 5 teams.
-- Apply: https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_request.yml
-- Waitlist: https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_waitlist.yml
+- Apply (issue template): https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_request.yml
+- Waitlist (issue template): https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_waitlist.yml
 
 Pilot deliverable: `docs/pilot.md`
 
