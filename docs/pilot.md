@@ -4,15 +4,24 @@
 - Self‑hosted only. You install and run the toolkit in your environment.
 - We provide limited pilot support to 5 teams.
 
-## What’s included (free for pilots)
-- Review of your agent stack and integration path
-- One Integration Pack:
-  - adapter code + config
-  - one “run pack” command
-  - CI example (GitHub Actions or GitLab)
-  - strict verify step
-  - short `integration.md`
-- 30‑day support window for fixes/compat updates
+## Pilot deliverable (required)
+- Private repo access (for updates + issue tracking)
+- `docs/installation.md` (self‑run from scratch)
+- `docs/pilot-runbook.md` (1‑page: demo run, real agent run, report location)
+- `integration.md` + one end‑to‑end “run pack” command
+- One CI example (GitHub Actions **or** GitLab CI)
+- Strict verify step (pvip verify)
+
+## Pilot deliverable (optional, if needed)
+- Redaction preset for your data format
+- Sample case suite
+
+## Support boundaries
+- **Scope:** 1 agent / 1 stack
+- **Support window:** 30 days **or** up to 3 rounds of fixes
+
+## Pilot key (support access)
+“One‑time Pilot Support Key: includes integration pack, CI example, and 30‑day integration support window.”
 
 ## What’s not included
 - Hosting or managed service
@@ -29,4 +38,3 @@ https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_waitlist.
 ## After pilot
 - Option to continue with paid Integration Packs
 - Option to move to support subscription
-
