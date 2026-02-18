@@ -317,6 +317,7 @@ Pilot support (first 5 teams):
 - We offer self‑run pilot support to 5 teams.
 - Open a Pilot Request issue to apply: https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_request.yml
 - If slots are full, open a Pilot Waitlist issue and we’ll follow up.
+- Pilot program details: `docs/pilot.md`
 
 Integration Pack (paid deliverable):
 - Adapter code + config for your stack
