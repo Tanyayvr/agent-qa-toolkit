@@ -80,7 +80,7 @@ Required response fields:
 - `version` (string): `baseline | new`
 - `final_output` (object): `{ content_type: "text|json", content: any }`
 
-Optional but recommended:
+Recommended (for full checks):
 - `workflow_id` (string)
 - `proposed_actions` (array)
 - `events` (array; used for tool trace integrity + security signals)
