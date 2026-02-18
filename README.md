@@ -16,7 +16,6 @@ You get:
 - Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
 - Root cause attribution (RCA) and policy hints
 - Security Signals Pack (regex + optional entropy scanner via `--entropyScanner`)
-- Stage 2 (queued): evidence-linked governance (policy-as-code / approvals / runtime gates)
 
 Notes:
 - Filters persist via LocalStorage. If it’s blocked, the report shows a warning and filters won’t be saved.
@@ -109,12 +108,6 @@ docker run --rm agent-qa:dev /app/scripts/entrypoint-prod.sh runner --baseUrl ht
 - Viewer opens artifacts with no vendor access.
 
 ---
-
-## Stages (Stage 1–3)
-
-- **Stage 1 (MUST):** Portable report directory + evidence links + CI gating truth (this repo ships this now).
-- **Stage 2 (QUEUED / NEXT):** Evidence-linked action governance (policy enforcement + approvals) using Stage 1 evidence.
-- **Stage 3 (VISION):** Repro + causal debug platform (replay ladder + counterfactual experiments). Not required for Stage 1.
 
 ---
 
