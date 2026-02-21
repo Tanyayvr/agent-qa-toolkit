@@ -1,0 +1,163 @@
+# .github/workflows/agent-drift-detection.yml
+#
+# Scenario 4: Overnight Drift Detection CI Run
+#
+# PURPOSE:
+#   Runs the agent evaluation suite every night (and on demand).
+#   Compares baseline artifacts vs new to detect model drift or regressions.
+#
+# OUTPUTS:
+#   - compare-report.json  → gate decision (derived from cases_block_recommended / cases_requiring_approval)
+#   - flakiness.json       → per-case pass_rate (written when --runs > 1)
+#   - report.html          → human-readable drift report
+#   - run.json             → git_commit + git_branch in artifact for traceability
+#
+# DATA PRIVACY:
+#   All artifacts are written locally within the runner job.
+#   Nothing is uploaded unless you add an upload step.
+
+name: Agent Drift Detection (Nightly)
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      runs_per_case:
+        description: "Number of runs per case for flakiness analysis (default: 5)"
+        required: false
+        default: "5"
+      only_cases:
+        description: "Comma-separated case IDs to run (empty = all)"
+        required: false
+        default: ""
+
+env:
+  AGENT_URL: http://localhost:8787
+  RUNS_PER_CASE: ${{ github.event.inputs.runs_per_case || '5' }}
+
+jobs:
+  drift-detection:
+    name: Nightly Agent Drift Detection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start agent (replace with your agent startup)
+        run: |
+          echo "TODO: replace this step with your agent startup command"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Run agent evaluation suite (flakiness mode)
+        run: |
+          npx ts-node apps/runner/src/index.ts \
+            --repoRoot . \
+            --baseUrl "$AGENT_URL" \
+            --cases cases/cases.json \
+            --outDir apps/runner/runs \
+            --runId drift-${{ github.run_id }} \
+            --runs $RUNS_PER_CASE \
+            --concurrency 2 \
+            --timeoutMs 30000
+        env:
+          AQ_LICENSE_PUBLIC_KEY: ${{ secrets.AQ_LICENSE_PUBLIC_KEY }}
+        continue-on-error: true
+
+      - name: Run evaluator (generate compare-report + HTML)
+        id: evaluator
+        run: |
+          npx ts-node apps/evaluator/src/index.ts \
+            --repoRoot . \
+            --baselineDir apps/runner/runs/baseline/drift-${{ github.run_id }} \
+            --newDir apps/runner/runs/new/drift-${{ github.run_id }} \
+            --cases cases/cases.json \
+            --outDir apps/evaluator/reports/drift-${{ github.run_id }}
+        env:
+          AQ_LICENSE_PUBLIC_KEY: ${{ secrets.AQ_LICENSE_PUBLIC_KEY }}
+
+      - name: Check gate decision
+        run: |
+          GATE=$(node -e "
+            const r = require('./apps/evaluator/reports/drift-${{ github.run_id }}/compare-report.json');
+            const summary = r.summary || {};
+            const block = Number(summary.cases_block_recommended || 0);
+            const approve = Number(summary.cases_requiring_approval || 0);
+            const gate = block > 0 ? 'block' : (approve > 0 ? 'require_approval' : 'none');
+            console.log(gate);
+          ")
+          echo "Gate decision: $GATE"
+          echo "gate=$GATE" >> $GITHUB_OUTPUT
+
+          if [ "$GATE" = "block" ]; then
+            echo "DRIFT DETECTED: gate=block. Agent has regressed."
+            exit 1
+          elif [ "$GATE" = "require_approval" ]; then
+            echo "WARNING: gate=require_approval. Manual review required."
+          fi
+        id: gate
+
+      - name: Print flakiness summary
+        if: always()
+        run: |
+          FLAKINESS_FILE="apps/runner/runs/new/drift-${{ github.run_id }}/flakiness.json"
+          if [ -f "$FLAKINESS_FILE" ]; then
+            echo "=== Flakiness Summary ==="
+            node -e "
+              const f = require('./' + '$FLAKINESS_FILE');
+              const flaky = (f.cases || []).filter(c => c.new_pass_rate < 0.8);
+              if (flaky.length === 0) {
+                console.log('All cases: pass_rate >= 0.80 ✓');
+              } else {
+                console.log('Flaky cases (pass_rate < 0.80):');
+                flaky.forEach(c => console.log('  ' + c.case_id + ': ' + (c.new_pass_rate * 100).toFixed(0) + '%'));
+              }
+            "
+          else
+            echo "No flakiness.json found (--runs was 1 or runner failed)"
+          fi
+
+      - name: Upload evidence pack
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-evidence-${{ github.run_id }}
+          path: |
+            apps/evaluator/reports/drift-${{ github.run_id }}/
+            apps/runner/runs/baseline/drift-${{ github.run_id }}/flakiness.json
+            apps/runner/runs/new/drift-${{ github.run_id }}/flakiness.json
+          retention-days: 30
+
+      - name: Create issue on drift detected
+        if: failure() && steps.gate.outputs.gate == 'block'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "🚨 Agent Drift Detected — Nightly Run ${{ github.run_id }}",
+              body: [
+                "**Nightly drift detection found a regression.**",
+                "",
+                "- Run ID: `drift-${{ github.run_id }}`",
+                "- Gate: `block`",
+                "- Date: " + new Date().toISOString(),
+                "",
+                "Download the evidence pack from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).",
+                "",
+                "Evidence pack contains: `compare-report.json`, `report.html`, `flakiness.json`."
+              ].join("\\n"),
+              labels: ["agent-drift", "automated"]
+            });

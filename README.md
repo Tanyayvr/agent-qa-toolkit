@@ -10,6 +10,7 @@ Run your agent on a case suite → get `report.html` + `compare-report.json` you
 - Baseline vs new regression diff
 - Per‑case CI gate decision: `none | require_approval | block`
 - Offline report bundle (data stays local unless you export it)
+- Optional drift detection: `--runs N` flakiness summary + nightly CI workflow
 
 ## Demo bundle
 Open an example pack: `examples/demo-bundle.zip` → extract → open `report.html`.
@@ -32,3 +33,13 @@ Pilot deliverable: `docs/pilot.md`
 
 ## Data handling
 Data stays local unless you export it.
+
+## Paid plugins
+
+The paid version includes adapter plugins for common agent stacks:
+
+- **LangChain adapter** — wrap any LangChain `Runnable` as a `/run-case` handler
+- **OpenAI Responses adapter** — wrap `client.responses.create(...)` as a `/run-case` handler
+- **OTel anchor** — attach `trace_id` / `span_id` to report `environment` for tracing backend correlation
+
+Contact us for access or see the pilot form above.
