@@ -84,6 +84,26 @@ Recommended (for full checks):
 - `workflow_id` (string)
 - `proposed_actions` (array)
 - `events` (array; used for tool trace integrity + security signals)
+- `token_usage` (object; optional cost + loop signals)
+
+Optional `token_usage` (if available):
+```json
+{
+  "input_tokens": 123,
+  "output_tokens": 456,
+  "total_tokens": 579,
+  "tool_call_count": 3,
+  "loop_detected": false,
+  "loop_details": {
+    "similarity_suspects": [
+      { "tool": "search_kb", "call_ids": ["c1","c2","c3"], "similarity_score": 0.93 }
+    ],
+    "output_hash_duplicates": [
+      { "hash": "9f3a2c1e0b12", "call_ids": ["c4","c5"], "count": 2 }
+    ]
+  }
+}
+```
 
 ---
 

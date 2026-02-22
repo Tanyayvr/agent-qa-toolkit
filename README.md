@@ -11,6 +11,7 @@ Run your agent on a case suite → get `report.html` + `compare-report.json` you
 - Per‑case CI gate decision: `none | require_approval | block`
 - Offline report bundle (data stays local unless you export it)
 - Optional drift detection: `--runs N` flakiness summary + nightly CI workflow
+- Optional loop detection: similarity breaker + output hash tracking (reported in `token_usage.loop_details`)
 
 ## Demo bundle
 Open an example pack: `examples/demo-bundle.zip` → extract → open `report.html`.
