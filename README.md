@@ -1,7 +1,7 @@
 <!-- /README.md -->
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green.svg)](package.json)
-[![Tests](https://img.shields.io/badge/tests-93%20(open%20core)%20%2F%20121%20(with%20adapters)-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-93%20passing-brightgreen.svg)](#)
 
 # Agent QA Toolkit — Portable Evidence Packs, Regression Diffs, and CI Gates
 
