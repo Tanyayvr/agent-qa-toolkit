@@ -1,0 +1,4 @@
+{
+  "content_type": "text",
+  "content": "runner: fetch failure (network_error)\ncase_id=fetch_network_drop_001\nversion=new\nattempt=3\nurl=http://localhost:8788/run-case\nnet_error_kind=unknown\nis_transient=true\nerror=TypeError: fetch failed"
+}

@@ -1,0 +1,4 @@
+{
+  "content_type": "text",
+  "content": "runner: fetch failure (timeout)\ncase_id=fetch_timeout_001\nversion=new\nattempt=3\nurl=http://localhost:8788/run-case\nnet_error_kind=abort\nis_transient=true\nerror=AbortError: This operation was aborted"
+}

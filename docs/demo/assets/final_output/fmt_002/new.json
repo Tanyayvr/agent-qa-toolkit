@@ -1,0 +1,7 @@
+{
+  "content_type": "json",
+  "content": {
+    "action": "update_ticket_status",
+    "status": "resolved"
+  }
+}

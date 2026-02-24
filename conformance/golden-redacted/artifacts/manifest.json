@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "manifest_key": "k1",
+      "rel_path": "case-c1.html",
+      "sha256": "cc53a03a94fa72cae9887003a16be4ad53d481fd8cf23d47181b1a9f6e05a2d3",
+      "bytes": 34
+    },
+    {
+      "manifest_key": "k2",
+      "rel_path": "compare-report.json",
+      "sha256": "46c0c65010bdb0fcc0de73de769496f1a49d8ea694047d19aa46e08a8a0eac7e",
+      "bytes": 2159
+    }
+  ]
+}

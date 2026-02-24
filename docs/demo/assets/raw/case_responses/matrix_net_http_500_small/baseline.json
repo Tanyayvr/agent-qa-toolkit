@@ -1,0 +1,30 @@
+{
+  "case_id": "matrix_net_http_500_small",
+  "version": "baseline",
+  "proposed_actions": [],
+  "final_output": {
+    "content_type": "text",
+    "content": "runner: fetch failure (http_error)\ncase_id=matrix_net_http_500_small\nversion=baseline\nattempt=3\nurl=http://localhost:8788/run-case\nhttp=500 Internal Server Error\nis_transient=true\nfull_body_saved_to=apps/runner/runs/_runner_failures/matrix_net_http_500_small.baseline.attempt3.body.bin\nfull_body_meta_saved_to=apps/runner/runs/_runner_failures/matrix_net_http_500_small.baseline.attempt3.body.meta.json\nbody_truncated=false\nbody_bytes_written=64"
+  },
+  "events": [],
+  "runner_failure": {
+    "type": "runner_fetch_failure",
+    "class": "http_error",
+    "case_id": "matrix_net_http_500_small",
+    "version": "baseline",
+    "url": "http://localhost:8788/run-case",
+    "attempt": 3,
+    "timeout_ms": 15000,
+    "latency_ms": 2,
+    "status": 500,
+    "status_text": "Internal Server Error",
+    "http_is_transient": true,
+    "body_snippet": "demo-agent forced 500\nref=token_abc12345\nemail=test@example.com\n",
+    "max_body_bytes": 2000000,
+    "full_body_saved_to": "apps/runner/runs/_runner_failures/matrix_net_http_500_small.baseline.attempt3.body.bin",
+    "full_body_meta_saved_to": "apps/runner/runs/_runner_failures/matrix_net_http_500_small.baseline.attempt3.body.meta.json",
+    "body_truncated": false,
+    "body_bytes_written": 64,
+    "is_transient": true
+  }
+}

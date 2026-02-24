@@ -1,0 +1,45 @@
+{
+  "case_id": "data_002",
+  "version": "new",
+  "workflow_id": "kb_answering_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a21",
+      "action_type": "answer_question",
+      "tool_name": "none",
+      "params": {
+        "topic": "sla_support_v2"
+      },
+      "risk_level": "low",
+      "evidence_refs": [
+        {
+          "kind": "retrieval_doc",
+          "id": "sla_support_v2"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "text",
+    "content": "Priority High tickets have a guaranteed first response time within 1 hour."
+  },
+  "events": [
+    {
+      "type": "retrieval",
+      "ts": 1738044261100,
+      "query": "priority high first response time",
+      "doc_ids": [
+        "sla_support_v2"
+      ],
+      "snippets_hashes": [
+        "s3p9"
+      ]
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044261300,
+      "content_type": "text",
+      "content": "Priority High tickets have a guaranteed first response time within 1 hour."
+    }
+  ]
+}

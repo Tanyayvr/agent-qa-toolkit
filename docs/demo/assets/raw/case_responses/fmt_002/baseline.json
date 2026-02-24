@@ -1,0 +1,106 @@
+{
+  "case_id": "fmt_002",
+  "version": "baseline",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a9",
+      "action_type": "get_ticket",
+      "tool_name": "get_ticket",
+      "target": {
+        "type": "ticket",
+        "id": "T-2002"
+      },
+      "params": {
+        "ticket_id": "T-2002"
+      },
+      "risk_level": "low",
+      "evidence_refs": []
+    },
+    {
+      "action_id": "a10",
+      "action_type": "update_ticket_status",
+      "tool_name": "update_ticket_status",
+      "target": {
+        "type": "ticket",
+        "id": "T-2002"
+      },
+      "params": {
+        "ticket_id": "T-2002",
+        "status": "resolved"
+      },
+      "risk_level": "medium",
+      "evidence_refs": [
+        {
+          "kind": "tool_result",
+          "call_id": "c9"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "json",
+    "content": {
+      "action": "update_ticket_status",
+      "ticket_id": "T-2002",
+      "status": "resolved"
+    }
+  },
+  "events": [
+    {
+      "type": "tool_call",
+      "ts": 1738044100000,
+      "call_id": "c9",
+      "action_id": "a9",
+      "tool": "get_ticket",
+      "args": {
+        "ticket_id": "T-2002"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044100200,
+      "call_id": "c9",
+      "action_id": "a9",
+      "status": "ok",
+      "latency_ms": 200,
+      "payload_summary": {
+        "ticket_id": "T-2002",
+        "status": "open"
+      }
+    },
+    {
+      "type": "tool_call",
+      "ts": 1738044100300,
+      "call_id": "c10",
+      "action_id": "a10",
+      "tool": "update_ticket_status",
+      "args": {
+        "ticket_id": "T-2002",
+        "status": "resolved"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044100600,
+      "call_id": "c10",
+      "action_id": "a10",
+      "status": "ok",
+      "latency_ms": 300,
+      "payload_summary": {
+        "ticket_id": "T-2002",
+        "status": "resolved"
+      }
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044100700,
+      "content_type": "json",
+      "content": {
+        "action": "update_ticket_status",
+        "ticket_id": "T-2002",
+        "status": "resolved"
+      }
+    }
+  ]
+}

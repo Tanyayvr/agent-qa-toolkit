@@ -1,4 +1,13 @@
 .DS_Store
+**/.DS_Store
+
 node_modules
+.DS_Store
 docs/internal
-apps
+docs/internal/**
+dist
+apps/**/dist
+apps/**/runs
+apps/**/reports
+runs
+reports

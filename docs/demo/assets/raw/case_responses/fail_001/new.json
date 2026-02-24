@@ -1,0 +1,97 @@
+{
+  "case_id": "fail_001",
+  "version": "new",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a49",
+      "action_type": "get_customer",
+      "tool_name": "get_customer",
+      "target": {
+        "type": "customer",
+        "id": "CUST-9999"
+      },
+      "params": {
+        "customer_id": "CUST-9999"
+      },
+      "risk_level": "low",
+      "evidence_refs": []
+    },
+    {
+      "action_id": "a50",
+      "action_type": "create_ticket",
+      "tool_name": "create_ticket",
+      "target": {
+        "type": "ticket"
+      },
+      "params": {
+        "customer_id": "CUST-9999",
+        "summary": "Cannot access account",
+        "priority": "high"
+      },
+      "risk_level": "medium",
+      "evidence_refs": [
+        {
+          "kind": "tool_result",
+          "call_id": "c49"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "text",
+    "content": "I couldn't create the ticket due to a timeout. Please retry."
+  },
+  "events": [
+    {
+      "type": "tool_call",
+      "ts": 1738044310001,
+      "call_id": "c49",
+      "action_id": "a49",
+      "tool": "get_customer",
+      "args": {
+        "customer_id": "CUST-9999"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044310201,
+      "call_id": "c49",
+      "action_id": "a49",
+      "status": "ok",
+      "latency_ms": 200,
+      "payload_summary": {
+        "customer_id": "CUST-9999",
+        "name": "Test Customer",
+        "tier": "standard"
+      }
+    },
+    {
+      "type": "tool_call",
+      "ts": 1738044310100,
+      "call_id": "c50",
+      "action_id": "a50",
+      "tool": "create_ticket",
+      "args": {
+        "customer_id": "CUST-9999",
+        "summary": "Cannot access account",
+        "priority": "high"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044315100,
+      "call_id": "c50",
+      "action_id": "a50",
+      "status": "timeout",
+      "latency_ms": 5000,
+      "payload_summary": "timeout after 5000ms"
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044315200,
+      "content_type": "text",
+      "content": "I couldn't create the ticket due to a timeout. Please retry."
+    }
+  ]
+}

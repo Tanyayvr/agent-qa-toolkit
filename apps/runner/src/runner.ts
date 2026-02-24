@@ -1,0 +1,1263 @@
+// apps/runner/src/runner.ts
+import { mkdir, readFile, writeFile, appendFile, rm, stat, readdir } from "node:fs/promises";
+import { createWriteStream } from "node:fs";
+import { execFile } from "node:child_process";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
+import { TextDecoder } from "node:util";
+import type { ReadableStream } from "node:stream/web";
+import type { FetchFailureClass, NetErrorKind, RunnerFailureArtifact, TokenUsage, RunEvent, Version } from "shared-types";
+import { makeArgvHelpers } from "cli-utils";
+import { sanitizeValue, type RedactionPreset } from "./sanitize";
+import { analyzeLoops } from "./loopDetection";
+
+type CaseFileItem = {
+  id: string;
+  title: string;
+  input: { user: string; context?: unknown };
+  expected?: unknown;
+  metadata?: unknown;
+};
+
+type RunCaseRequest = {
+  case_id: string;
+  version: Version;
+  input: { user: string; context?: unknown };
+};
+
+type RunnerConfig = {
+  repoRoot: string;
+  baseUrl: string;
+  casesPath: string;
+  outDir: string;
+  runId: string;
+  onlyCaseIds: string[] | null;
+  dryRun: boolean;
+  redactionPreset: RedactionPreset;
+  keepRaw: boolean;
+
+  timeoutMs: number;
+  retries: number;
+  backoffBaseMs: number;
+  concurrency: number;
+
+  bodySnippetBytes: number;
+
+  maxBodyBytes: number;
+  saveFullBodyOnError: boolean;
+  retentionDays: number;
+
+  /** Scenario 2: Flakiness — run each case N times and aggregate pass_rate. */
+  runs: number;
+};
+
+/* ------------------------------------------------------------------ */
+/*  Scenario 3: Git context auto-capture                               */
+/* ------------------------------------------------------------------ */
+
+type GitContext = {
+  git_commit?: string;
+  git_branch?: string;
+  git_dirty?: boolean;
+};
+
+function execCmd(cmd: string, args: string[], cwd: string): Promise<string> {
+  return new Promise((resolve) => {
+    execFile(cmd, args, { cwd, timeout: 3000 }, (err, stdout) => {
+      resolve(err ? "" : stdout.trim());
+    });
+  });
+}
+
+async function captureGitContext(repoRoot: string): Promise<GitContext> {
+  try {
+    const [commit, branch, dirty] = await Promise.all([
+      execCmd("git", ["rev-parse", "--short", "HEAD"], repoRoot),
+      execCmd("git", ["rev-parse", "--abbrev-ref", "HEAD"], repoRoot),
+      execCmd("git", ["status", "--porcelain"], repoRoot),
+    ]);
+    const ctx: GitContext = {};
+    if (commit) ctx.git_commit = commit;
+    if (branch) ctx.git_branch = branch;
+    if (commit || branch || dirty !== "") ctx.git_dirty = dirty.length > 0;
+    return ctx;
+  } catch {
+    return {};
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Scenario 1: Token usage aggregation across runs                    */
+/* ------------------------------------------------------------------ */
+
+function aggregateTokenUsage(usages: (TokenUsage | undefined)[]): TokenUsage | undefined {
+  const valid = usages.filter((u): u is TokenUsage => u !== undefined);
+  if (valid.length === 0) return undefined;
+  const result: TokenUsage = {};
+  let hasInput = false, hasOutput = false, hasTotal = false, hasTools = false;
+  for (const u of valid) {
+    if (typeof u.input_tokens === "number") { result.input_tokens = (result.input_tokens ?? 0) + u.input_tokens; hasInput = true; }
+    if (typeof u.output_tokens === "number") { result.output_tokens = (result.output_tokens ?? 0) + u.output_tokens; hasOutput = true; }
+    if (typeof u.total_tokens === "number") { result.total_tokens = (result.total_tokens ?? 0) + u.total_tokens; hasTotal = true; }
+    if (typeof u.tool_call_count === "number") { result.tool_call_count = (result.tool_call_count ?? 0) + u.tool_call_count; hasTools = true; }
+    if (u.loop_detected === true) result.loop_detected = true;
+  }
+  if (!hasInput) delete result.input_tokens;
+  if (!hasOutput) delete result.output_tokens;
+  if (!hasTotal) delete result.total_tokens;
+  if (!hasTools) delete result.tool_call_count;
+  return result;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Loop detection enrichment (Similarity Breaker + Output Hash)       */
+/* ------------------------------------------------------------------ */
+
+/** Enrich a response object with loop detection analysis.
+ *  Runs similarity breaker + output hash tracking on events[], and
+ *  merges results into token_usage.loop_detected / loop_details. */
+function enrichResponseWithLoopAnalysis(resp: unknown): void {
+  if (!resp || typeof resp !== "object") return;
+  const r = resp as { events?: RunEvent[]; token_usage?: TokenUsage };
+  if (!r.events || r.events.length === 0) return;
+
+  const { loop_detected, loop_details } = analyzeLoops(r.events);
+  if (!loop_detected) return;
+
+  // Initialize token_usage if agent didn't provide it
+  if (!r.token_usage) r.token_usage = {};
+
+  // Only set loop_detected if not already set by the agent
+  if (r.token_usage.loop_detected !== true) {
+    r.token_usage.loop_detected = true;
+  }
+  if (loop_details) r.token_usage.loop_details = loop_details;
+}
+
+type MinimalAgentResponseOnFailure = {
+  case_id: string;
+  version: Version;
+  workflow_id?: string;
+  proposed_actions: unknown[];
+  final_output: { content_type: "text"; content: string };
+  events: unknown[];
+  runner_failure: RunnerFailureArtifact;
+};
+
+const HELP_TEXT = `
+Usage:
+  runner [--repoRoot <path>] [--baseUrl <url>] [--cases <path>] [--outDir <dir>] [--runId <id>] [--only <ids>] [--dryRun]
+         [--timeoutMs <ms>] [--retries <n>] [--backoffBaseMs <ms>] [--concurrency <n>]
+         [--bodySnippetBytes <n>] [--maxBodyBytes <n>] [--noSaveFullBodyOnError]
+         [--runs <n>]
+
+Options:
+  --repoRoot                Repo root (default: INIT_CWD or cwd)
+  --baseUrl                 Agent base URL (default: http://localhost:8787)
+  --cases                   Path to cases JSON (default: cases/cases.json)
+  --outDir                  Output directory (default: apps/runner/runs)
+  --runId                   Run id (default: random UUID)
+  --only                    Comma-separated case ids (e.g. tool_001,fmt_002)
+  --dryRun                  Do not call the agent, only print selected cases
+
+Reliability (benchmark mode; defaults are conservative):
+  --timeoutMs               Per-request timeout in ms (default: 15000)
+  --retries                 Retries per request (default: 2)
+  --backoffBaseMs           Base backoff in ms (default: 250)
+  --concurrency             Max concurrent cases (default: 1)
+
+Flakiness / multi-run analysis (Scenario 2):
+  --runs                    Run each case N times and compute pass_rate per case (default: 1)
+                            When N > 1, each run result is written as <case_id>.run<k>.json;
+                            a flakiness summary is written to flakiness.json in the run dir.
+
+Artifacts / memory limits:
+  --bodySnippetBytes        Error body snippet size in bytes (default: 4000)
+  --maxBodyBytes            Max bytes to write/read for a response body (default: 2000000)
+  --noSaveFullBodyOnError   Do not write full error bodies to disk (default: save enabled)
+  --redactionPreset         none | internal_only | transferable | transferable_extended (default: none)
+  --keepRaw                 Keep raw (unsanitized) responses in _raw/ when redaction is enabled
+  --retentionDays           Delete run directories older than N days (default: 0 = disabled)
+
+  --help, -h                Show this help
+
+Exit codes:
+  0  success
+  1  runtime error
+  2  bad arguments / usage
+
+Examples:
+  ts-node src/index.ts --cases cases/cases.json --outDir apps/runner/runs --runId latest --only tool_001,fmt_002
+  ts-node src/index.ts --baseUrl http://localhost:8787 --cases cases/cases.json --runId latest
+`.trim();
+
+const { hasFlag, getFlag, getArg, assertNoUnknownOptions, assertHasValue, parseIntFlag } = makeArgvHelpers(process.argv);
+const AUDIT_LOG_ENV = process.env.AUDIT_LOG_PATH;
+
+class CliUsageError extends Error {
+  public readonly exitCode = 2;
+  constructor(message: string) {
+    super(message);
+    this.name = "CliUsageError";
+  }
+}
+
+async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
+  if (!AUDIT_LOG_ENV) return;
+  const line = JSON.stringify({ ts: Date.now(), ...entry }) + "\n";
+  try {
+    await appendFile(AUDIT_LOG_ENV, line, "utf-8");
+  } catch {
+    // audit logging must not fail the run
+  }
+}
+
+function assertNoUnknownOptionsOrThrow(allowed: Set<string>): void {
+  try {
+    assertNoUnknownOptions(allowed, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
+  }
+}
+
+function assertHasValueOrThrow(flag: string): void {
+  try {
+    assertHasValue(flag, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
+  }
+}
+
+function parseIntFlagOrThrow(name: string, def: number): number {
+  try {
+    return parseIntFlag(name, def, HELP_TEXT);
+  } catch (err) {
+    throw new CliUsageError(String((err as Error).message));
+  }
+}
+
+export function parseOnlyCaseIdsRaw(raw: string | null): string[] | null {
+  if (!raw) return null;
+  const ids = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  return ids.length ? ids : null;
+}
+
+function parseOnlyCaseIds(): string[] | null {
+  return parseOnlyCaseIdsRaw(getArg("--only"));
+}
+
+export function normalizeBaseUrl(url: string): string {
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+}
+
+function resolveFromRoot(repoRoot: string, p: string): string {
+  if (path.isAbsolute(p)) return p;
+  return path.resolve(repoRoot, p);
+}
+
+async function ensureDir(p: string): Promise<void> {
+  await mkdir(p, { recursive: true });
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null;
+}
+
+function parseCasesJson(raw: string): CaseFileItem[] {
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error("cases.json must be an array");
+
+  return parsed.map((x) => {
+    if (!isRecord(x)) throw new Error("cases.json element must be an object");
+
+    if (!("id" in x)) throw new Error("cases.json element missing id");
+    const id = String(x.id ?? "").trim();
+    if (!id) throw new Error("cases.json element has empty id");
+    const title = String(x.title ?? "");
+    const inputObj = isRecord(x.input) ? x.input : {};
+    const user = String(inputObj.user ?? "");
+    const context = inputObj.context;
+
+    return { id, title, input: { user, context }, expected: x.expected, metadata: x.metadata };
+  });
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function backoffMs(base: number, attempt: number): number {
+  const exp = Math.min(6, Math.max(0, attempt - 1));
+  const raw = base * Math.pow(2, exp);
+  const jitter = Math.floor(Math.random() * Math.max(1, Math.floor(raw * 0.2)));
+  return raw + jitter;
+}
+
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function toRel(repoRoot: string, abs: string): string {
+  const rel = path.relative(repoRoot, abs).split(path.sep).join("/");
+  return rel.length ? rel : path.basename(abs);
+}
+
+function snippetFromBytes(bytes: Uint8Array, maxBytes: number): string {
+  if (maxBytes <= 0) return "";
+  const cut = bytes.byteLength <= maxBytes ? bytes : bytes.slice(0, maxBytes);
+  const dec = new TextDecoder("utf-8", { fatal: false });
+  return dec.decode(cut);
+}
+
+async function readBodySnippet(res: Response, maxBytes: number): Promise<string> {
+  if (maxBytes <= 0) return "";
+  const body = res.body as unknown as ReadableStream<Uint8Array> | null;
+  if (!body) return "";
+
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  let truncated = false;
+
+  try {
+    for (; ;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      if (total + value.byteLength <= maxBytes) {
+        chunks.push(value);
+        total += value.byteLength;
+      } else {
+        const remain = maxBytes - total;
+        if (remain > 0) {
+          chunks.push(value.slice(0, remain));
+          total += remain;
+        }
+        truncated = true;
+        break;
+      }
+    }
+  } finally {
+    if (truncated) {
+      try {
+        await reader.cancel();
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  const merged =
+    chunks.length === 0
+      ? new Uint8Array(0)
+      : (() => {
+        const out = new Uint8Array(total);
+        let off = 0;
+        for (const c0 of chunks) {
+          out.set(c0, off);
+          off += c0.byteLength;
+        }
+        return out;
+      })();
+
+  return snippetFromBytes(merged, maxBytes);
+}
+
+type SavedBody = {
+  bodyRel?: string;
+  metaRel?: string;
+  truncated: boolean;
+  bytes_written: number;
+  snippet: string;
+};
+
+async function writeStreamOnceDrain(stream: ReturnType<typeof createWriteStream>, chunk: Uint8Array): Promise<void> {
+  const ok = stream.write(chunk);
+  if (ok) return;
+  await new Promise<void>((resolve, reject) => {
+    const onDrain = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = (e: Error) => {
+      cleanup();
+      reject(e);
+    };
+    const cleanup = () => {
+      stream.off("drain", onDrain);
+      stream.off("error", onError);
+    };
+    stream.on("drain", onDrain);
+    stream.on("error", onError);
+  });
+}
+
+async function saveBodyStreamed(
+  cfg: RunnerConfig,
+  caseId: string,
+  version: Version,
+  attempt: number,
+  res: Response
+): Promise<SavedBody> {
+  const failuresDirAbs = path.join(cfg.outDir, "_runner_failures");
+  await ensureDir(failuresDirAbs);
+
+  const bodyAbs = path.join(failuresDirAbs, `${caseId}.${version}.attempt${attempt}.body.bin`);
+  const metaAbs = path.join(failuresDirAbs, `${caseId}.${version}.attempt${attempt}.body.meta.json`);
+
+  const bodyStream = createWriteStream(bodyAbs, { flags: "w" });
+
+  let bytesWritten = 0;
+  let truncated = false;
+
+  const snippetBytesMax = Math.max(0, cfg.bodySnippetBytes);
+  const snippetChunks: Uint8Array[] = [];
+  let snippetCollected = 0;
+
+  const maxBodyBytes = Math.max(0, cfg.maxBodyBytes);
+
+  const body = res.body as unknown as ReadableStream<Uint8Array> | null;
+  if (!body) {
+    const meta = {
+      kind: "runner_body_capture",
+      case_id: caseId,
+      version,
+      attempt,
+      max_body_bytes: maxBodyBytes,
+      truncated: false,
+      bytes_written: 0,
+      note: "response.body is null"
+    };
+    await writeFile(metaAbs, JSON.stringify(meta, null, 2), "utf-8");
+
+    bodyStream.end();
+
+    return {
+      bodyRel: toRel(cfg.repoRoot, bodyAbs),
+      metaRel: toRel(cfg.repoRoot, metaAbs),
+      truncated: false,
+      bytes_written: 0,
+      snippet: ""
+    };
+  }
+
+  const reader = body.getReader();
+
+  try {
+    for (; ;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      if (snippetCollected < snippetBytesMax) {
+        const remain = snippetBytesMax - snippetCollected;
+        const take = value.byteLength <= remain ? value : value.slice(0, remain);
+        snippetChunks.push(take);
+        snippetCollected += take.byteLength;
+      }
+
+      if (bytesWritten < maxBodyBytes) {
+        const remainBody = maxBodyBytes - bytesWritten;
+        const toWrite = value.byteLength <= remainBody ? value : value.slice(0, remainBody);
+        await writeStreamOnceDrain(bodyStream, toWrite);
+        bytesWritten += toWrite.byteLength;
+
+        if (toWrite.byteLength < value.byteLength) {
+          truncated = true;
+          break;
+        }
+      } else {
+        truncated = true;
+        break;
+      }
+    }
+  } finally {
+    if (truncated) {
+      try {
+        await reader.cancel();
+      } catch {
+        // ignore
+      }
+    }
+    await new Promise<void>((resolve, reject) => {
+      bodyStream.end(() => resolve());
+      bodyStream.once("error", (e) => reject(e));
+    });
+  }
+
+  const mergedSnippet =
+    snippetChunks.length === 0
+      ? new Uint8Array(0)
+      : (() => {
+        const total = snippetChunks.reduce((s, c) => s + c.byteLength, 0);
+        const out = new Uint8Array(total);
+        let off = 0;
+        for (const c of snippetChunks) {
+          out.set(c, off);
+          off += c.byteLength;
+        }
+        return out;
+      })();
+
+  const meta = {
+    kind: "runner_body_capture",
+    case_id: caseId,
+    version,
+    attempt,
+    max_body_bytes: maxBodyBytes,
+    truncated,
+    bytes_written: bytesWritten,
+    content_type: res.headers.get("content-type") ?? null
+  };
+
+  await writeFile(metaAbs, JSON.stringify(meta, null, 2), "utf-8");
+
+  return {
+    bodyRel: toRel(cfg.repoRoot, bodyAbs),
+    metaRel: toRel(cfg.repoRoot, metaAbs),
+    truncated,
+    bytes_written: bytesWritten,
+    snippet: snippetFromBytes(mergedSnippet, cfg.bodySnippetBytes)
+  };
+}
+
+function httpIsTransient(status: number): boolean {
+  if (status === 408) return true;
+  if (status === 429) return true;
+  if (status >= 500 && status <= 599) return true;
+  return false;
+}
+
+function inferNetErrorKind(e: unknown): NetErrorKind {
+  const name = e instanceof Error ? e.name : "";
+  const msg = e instanceof Error ? e.message : String(e ?? "");
+
+  const s = `${name} ${msg}`.toLowerCase();
+
+  if (name === "AbortError" || s.includes("abort")) return "abort";
+  if (s.includes("enotfound") || s.includes("eai_again") || s.includes("dns")) return "dns";
+  if (s.includes("cert") || s.includes("tls") || s.includes("ssl") || s.includes("handshake")) return "tls";
+  if (s.includes("econnrefused") || s.includes("connection refused")) return "conn_refused";
+  if (s.includes("econnreset") || s.includes("connection reset")) return "conn_reset";
+  if (s.includes("socket hang up")) return "socket_hang_up";
+  if (s.includes("proxy")) return "proxy";
+
+  return "unknown";
+}
+
+function isTransientFailure(artifact: RunnerFailureArtifact): boolean {
+  if (artifact.class === "timeout") return true;
+  if (artifact.class === "network_error") return true;
+  if (artifact.class === "http_error" && typeof artifact.status === "number") return httpIsTransient(artifact.status);
+  return false;
+}
+
+function mkFailureResponse(artifact: RunnerFailureArtifact, message: string): MinimalAgentResponseOnFailure {
+  return {
+    case_id: artifact.case_id,
+    version: artifact.version,
+    proposed_actions: [],
+    final_output: { content_type: "text", content: message },
+    events: [],
+    runner_failure: artifact
+  };
+}
+
+async function runOneCaseWithReliability(cfg: RunnerConfig, c: CaseFileItem, version: Version): Promise<unknown> {
+  const url = `${cfg.baseUrl}/run-case`;
+  const reqBody: RunCaseRequest = {
+    case_id: c.id,
+    version,
+    input: { user: c.input.user, context: c.input.context }
+  };
+
+  const payload = JSON.stringify(reqBody);
+
+  for (let attempt = 1; attempt <= Math.max(1, cfg.retries + 1); attempt++) {
+    const started = Date.now();
+
+    try {
+      const res = await fetchWithTimeout(
+        url,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload
+        },
+        cfg.timeoutMs
+      );
+
+      const latency = Date.now() - started;
+
+      if (!res.ok) {
+        const klass: FetchFailureClass = "http_error";
+
+        let bodyRel: string | undefined;
+        let metaRel: string | undefined;
+        let snippet = "";
+        let truncated = false;
+        let bytesWritten = 0;
+
+        if (cfg.saveFullBodyOnError) {
+          const saved = await saveBodyStreamed(cfg, c.id, version, attempt, res);
+          bodyRel = saved.bodyRel;
+          metaRel = saved.metaRel;
+          snippet = saved.snippet;
+          truncated = saved.truncated;
+          bytesWritten = saved.bytes_written;
+        } else {
+          snippet = await readBodySnippet(res, cfg.bodySnippetBytes);
+        }
+
+        const artifact: RunnerFailureArtifact = {
+          type: "runner_fetch_failure",
+          class: klass,
+          case_id: c.id,
+          version,
+          url,
+          attempt,
+          timeout_ms: cfg.timeoutMs,
+          latency_ms: latency,
+          status: res.status,
+          status_text: res.statusText,
+          http_is_transient: httpIsTransient(res.status),
+          body_snippet: snippet,
+          max_body_bytes: cfg.maxBodyBytes
+        };
+
+        if (bodyRel !== undefined) artifact.full_body_saved_to = bodyRel;
+        if (metaRel !== undefined) artifact.full_body_meta_saved_to = metaRel;
+        if (cfg.saveFullBodyOnError) {
+          artifact.body_truncated = truncated;
+          artifact.body_bytes_written = bytesWritten;
+        }
+
+        artifact.is_transient = isTransientFailure(artifact);
+
+        const msg = [
+          `runner: fetch failure (${klass})`,
+          `case_id=${c.id}`,
+          `version=${version}`,
+          `attempt=${attempt}`,
+          `url=${url}`,
+          `http=${res.status} ${res.statusText}`,
+          `is_transient=${String(artifact.is_transient)}`,
+          bodyRel ? `full_body_saved_to=${bodyRel}` : `full_body_saved_to=disabled`,
+          metaRel ? `full_body_meta_saved_to=${metaRel}` : `full_body_meta_saved_to=disabled`,
+          cfg.saveFullBodyOnError ? `body_truncated=${String(truncated)}` : `body_truncated=disabled`,
+          cfg.saveFullBodyOnError ? `body_bytes_written=${String(bytesWritten)}` : `body_bytes_written=disabled`
+        ].join("\n");
+
+        if (attempt <= cfg.retries && artifact.is_transient === true) {
+          await sleep(backoffMs(cfg.backoffBaseMs, attempt));
+          continue;
+        }
+
+        return mkFailureResponse(artifact, msg);
+      }
+
+      const body = res.body as unknown as ReadableStream<Uint8Array> | null;
+      if (!body) {
+        const artifact: RunnerFailureArtifact = {
+          type: "runner_fetch_failure",
+          class: "invalid_json",
+          case_id: c.id,
+          version,
+          url,
+          attempt,
+          timeout_ms: cfg.timeoutMs,
+          latency_ms: latency,
+          error_name: "RunnerError",
+          error_message: "response.body is null",
+          is_transient: false
+        };
+        return mkFailureResponse(artifact, "runner: invalid_json (response.body is null)");
+      }
+
+      const reader = body.getReader();
+      const chunks: Uint8Array[] = [];
+      let total = 0;
+      let truncated = false;
+
+      try {
+        for (; ;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (!value) continue;
+
+          if (total + value.byteLength <= cfg.maxBodyBytes) {
+            chunks.push(value);
+            total += value.byteLength;
+          } else {
+            const remain = cfg.maxBodyBytes - total;
+            if (remain > 0) {
+              chunks.push(value.slice(0, remain));
+              total += remain;
+            }
+            truncated = true;
+            break;
+          }
+        }
+      } finally {
+        if (truncated) {
+          try {
+            await reader.cancel();
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      const merged =
+        chunks.length === 0
+          ? new Uint8Array(0)
+          : (() => {
+            const out = new Uint8Array(total);
+            let off = 0;
+            for (const c0 of chunks) {
+              out.set(c0, off);
+              off += c0.byteLength;
+            }
+            return out;
+          })();
+
+      const dec = new TextDecoder("utf-8", { fatal: false });
+      const text = dec.decode(merged);
+
+      if (truncated) {
+        let bodyRel: string | undefined;
+        let metaRel: string | undefined;
+        if (cfg.saveFullBodyOnError) {
+          const failuresDirAbs = path.join(cfg.outDir, "_runner_failures");
+          await ensureDir(failuresDirAbs);
+
+          const bodyAbs = path.join(failuresDirAbs, `${c.id}.${version}.attempt${attempt}.success_truncated.body.bin`);
+          const metaAbs = path.join(failuresDirAbs, `${c.id}.${version}.attempt${attempt}.success_truncated.body.meta.json`);
+
+          await writeFile(bodyAbs, merged);
+          const meta = {
+            kind: "runner_body_capture_success_truncated",
+            case_id: c.id,
+            version,
+            attempt,
+            max_body_bytes: cfg.maxBodyBytes,
+            truncated: true,
+            bytes_written: merged.byteLength,
+            content_type: res.headers.get("content-type") ?? null
+          };
+          await writeFile(metaAbs, JSON.stringify(meta, null, 2), "utf-8");
+
+          bodyRel = toRel(cfg.repoRoot, bodyAbs);
+          metaRel = toRel(cfg.repoRoot, metaAbs);
+        }
+
+        const artifact: RunnerFailureArtifact = {
+          type: "runner_fetch_failure",
+          class: "invalid_json",
+          case_id: c.id,
+          version,
+          url,
+          attempt,
+          timeout_ms: cfg.timeoutMs,
+          latency_ms: latency,
+          error_name: "BodyTooLarge",
+          error_message: `Response body exceeded maxBodyBytes=${cfg.maxBodyBytes} and was truncated; cannot parse JSON.`,
+          body_snippet: snippetFromBytes(merged, cfg.bodySnippetBytes),
+          max_body_bytes: cfg.maxBodyBytes,
+          body_truncated: true,
+          body_bytes_written: merged.byteLength,
+          is_transient: false
+        };
+        if (bodyRel !== undefined) artifact.full_body_saved_to = bodyRel;
+        if (metaRel !== undefined) artifact.full_body_meta_saved_to = metaRel;
+
+        const msg = [
+          `runner: fetch failure (invalid_json)`,
+          `case_id=${c.id}`,
+          `version=${version}`,
+          `attempt=${attempt}`,
+          `url=${url}`,
+          `error=${artifact.error_name}: ${artifact.error_message}`,
+          bodyRel ? `full_body_saved_to=${bodyRel}` : `full_body_saved_to=disabled`,
+          metaRel ? `full_body_meta_saved_to=${metaRel}` : `full_body_meta_saved_to=disabled`
+        ].join("\n");
+
+        return mkFailureResponse(artifact, msg);
+      }
+
+      try {
+        return JSON.parse(text) as unknown;
+      } catch (e) {
+        const klass: FetchFailureClass = "invalid_json";
+        const snippet = text.length ? text.slice(0, Math.max(0, cfg.bodySnippetBytes)) : "";
+
+        let bodyRel: string | undefined;
+        let metaRel: string | undefined;
+
+        if (cfg.saveFullBodyOnError) {
+          const failuresDirAbs = path.join(cfg.outDir, "_runner_failures");
+          await ensureDir(failuresDirAbs);
+
+          const bodyAbs = path.join(failuresDirAbs, `${c.id}.${version}.attempt${attempt}.invalid_json.body.txt`);
+          const metaAbs = path.join(failuresDirAbs, `${c.id}.${version}.attempt${attempt}.invalid_json.body.meta.json`);
+
+          await writeFile(bodyAbs, text, "utf-8");
+          const meta = {
+            kind: "runner_invalid_json_capture",
+            case_id: c.id,
+            version,
+            attempt,
+            max_body_bytes: cfg.maxBodyBytes,
+            truncated: false,
+            bytes_written: Buffer.byteLength(text, "utf8"),
+            content_type: res.headers.get("content-type") ?? null
+          };
+          await writeFile(metaAbs, JSON.stringify(meta, null, 2), "utf-8");
+
+          bodyRel = toRel(cfg.repoRoot, bodyAbs);
+          metaRel = toRel(cfg.repoRoot, metaAbs);
+        }
+
+        const artifact: RunnerFailureArtifact = {
+          type: "runner_fetch_failure",
+          class: klass,
+          case_id: c.id,
+          version,
+          url,
+          attempt,
+          timeout_ms: cfg.timeoutMs,
+          latency_ms: latency,
+          error_name: e instanceof Error ? e.name : "Error",
+          error_message: e instanceof Error ? e.message : String(e),
+          body_snippet: snippet,
+          max_body_bytes: cfg.maxBodyBytes,
+          is_transient: false
+        };
+        if (bodyRel !== undefined) artifact.full_body_saved_to = bodyRel;
+        if (metaRel !== undefined) artifact.full_body_meta_saved_to = metaRel;
+
+        const msg = [
+          `runner: fetch failure (${klass})`,
+          `case_id=${c.id}`,
+          `version=${version}`,
+          `attempt=${attempt}`,
+          `url=${url}`,
+          `error=${artifact.error_name}: ${artifact.error_message}`,
+          bodyRel ? `full_body_saved_to=${bodyRel}` : `full_body_saved_to=disabled`,
+          metaRel ? `full_body_meta_saved_to=${metaRel}` : `full_body_meta_saved_to=disabled`
+        ].join("\n");
+
+        return mkFailureResponse(artifact, msg);
+      }
+    } catch (e) {
+      const latency = Date.now() - started;
+      const aborted = e instanceof Error && e.name === "AbortError";
+      const klass: FetchFailureClass = aborted ? "timeout" : "network_error";
+
+      const artifact: RunnerFailureArtifact = {
+        type: "runner_fetch_failure",
+        class: klass,
+        net_error_kind: inferNetErrorKind(e),
+        case_id: c.id,
+        version,
+        url,
+        attempt,
+        timeout_ms: cfg.timeoutMs,
+        latency_ms: latency,
+        error_name: e instanceof Error ? e.name : "Error",
+        error_message: e instanceof Error ? e.message : String(e)
+      };
+
+      artifact.is_transient = klass === "timeout" || klass === "network_error";
+
+      const msg = [
+        `runner: fetch failure (${klass})`,
+        `case_id=${c.id}`,
+        `version=${version}`,
+        `attempt=${attempt}`,
+        `url=${url}`,
+        `net_error_kind=${String(artifact.net_error_kind ?? "unknown")}`,
+        `is_transient=${String(artifact.is_transient)}`,
+        `error=${artifact.error_name}: ${artifact.error_message}`
+      ].join("\n");
+
+      if (attempt <= cfg.retries && artifact.is_transient === true) {
+        await sleep(backoffMs(cfg.backoffBaseMs, attempt));
+        continue;
+      }
+
+      return mkFailureResponse(artifact, msg);
+    }
+  }
+
+  const fallback: RunnerFailureArtifact = {
+    type: "runner_fetch_failure",
+    class: "network_error",
+    net_error_kind: "unknown",
+    is_transient: true,
+    case_id: c.id,
+    version,
+    url: `${cfg.baseUrl}/run-case`,
+    attempt: 1,
+    timeout_ms: cfg.timeoutMs,
+    latency_ms: 0,
+    error_name: "RunnerError",
+    error_message: "unreachable"
+  };
+  return mkFailureResponse(fallback, "runner: unreachable state");
+}
+
+async function runWithConcurrency<T, R>(items: T[], concurrency: number, fn: (item: T, idx: number) => Promise<R>): Promise<R[]> {
+  const n = Math.max(1, Math.floor(concurrency));
+  const results: R[] = new Array(items.length);
+  let nextIdx = 0;
+
+  async function worker(): Promise<void> {
+    for (; ;) {
+      const idx = nextIdx;
+      nextIdx += 1;
+      if (idx >= items.length) return;
+
+      const item = items[idx];
+      if (item === undefined) return;
+
+      results[idx] = await fn(item, idx);
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(n, items.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
+export async function runRunner(): Promise<void> {
+  const repoRoot = getArg("--repoRoot") ?? process.env.INIT_CWD ?? process.cwd();
+  const rel = (p: string) => path.relative(repoRoot, p).split(path.sep).join("/");
+  const fmtRel = (p: string) => {
+    const r = rel(p);
+    return r.length ? r : ".";
+  };
+
+  if (hasFlag("--help", "-h")) {
+    console.log(HELP_TEXT);
+    return;
+  }
+
+  assertNoUnknownOptionsOrThrow(
+    new Set([
+      "--repoRoot",
+      "--baseUrl",
+      "--cases",
+      "--outDir",
+      "--runId",
+      "--only",
+      "--dryRun",
+      "--timeoutMs",
+      "--retries",
+      "--backoffBaseMs",
+      "--concurrency",
+      "--bodySnippetBytes",
+      "--maxBodyBytes",
+      "--noSaveFullBodyOnError",
+      "--redactionPreset",
+      "--keepRaw",
+      "--retentionDays",
+      "--runs",
+      "--help",
+      "-h"
+    ])
+  );
+
+  assertHasValueOrThrow("--repoRoot");
+  assertHasValueOrThrow("--baseUrl");
+  assertHasValueOrThrow("--cases");
+  assertHasValueOrThrow("--outDir");
+  assertHasValueOrThrow("--runId");
+  assertHasValueOrThrow("--only");
+  assertHasValueOrThrow("--timeoutMs");
+  assertHasValueOrThrow("--retries");
+  assertHasValueOrThrow("--backoffBaseMs");
+  assertHasValueOrThrow("--concurrency");
+  assertHasValueOrThrow("--bodySnippetBytes");
+  assertHasValueOrThrow("--maxBodyBytes");
+  assertHasValueOrThrow("--redactionPreset");
+  assertHasValueOrThrow("--retentionDays");
+
+  const keepRaw = getFlag("--keepRaw");
+
+  const redactionPresetRaw = getArg("--redactionPreset");
+  if (redactionPresetRaw && redactionPresetRaw !== "none" && redactionPresetRaw !== "internal_only" && redactionPresetRaw !== "transferable" && redactionPresetRaw !== "transferable_extended") {
+    throw new CliUsageError(`Invalid --redactionPreset value: ${redactionPresetRaw}. Must be "none", "internal_only", "transferable", or "transferable_extended".\n\n${HELP_TEXT}`);
+  }
+  const redactionPreset: RedactionPreset = (redactionPresetRaw ?? "none") as RedactionPreset;
+
+  const cfg: RunnerConfig = {
+    repoRoot,
+    baseUrl: normalizeBaseUrl(getArg("--baseUrl") ?? "http://localhost:8787"),
+    casesPath: resolveFromRoot(repoRoot, getArg("--cases") ?? "cases/cases.json"),
+    outDir: resolveFromRoot(repoRoot, getArg("--outDir") ?? "apps/runner/runs"),
+    runId: getArg("--runId") ?? randomUUID(),
+    onlyCaseIds: parseOnlyCaseIds(),
+    dryRun: getFlag("--dryRun"),
+    redactionPreset,
+    keepRaw,
+
+    timeoutMs: parseIntFlagOrThrow("--timeoutMs", 15000),
+    retries: parseIntFlagOrThrow("--retries", 2),
+    backoffBaseMs: parseIntFlagOrThrow("--backoffBaseMs", 250),
+    concurrency: parseIntFlagOrThrow("--concurrency", 1),
+
+    bodySnippetBytes: parseIntFlagOrThrow("--bodySnippetBytes", 4000),
+    maxBodyBytes: parseIntFlagOrThrow("--maxBodyBytes", 2000000),
+    saveFullBodyOnError: !getFlag("--noSaveFullBodyOnError"),
+    retentionDays: Math.max(0, parseIntFlagOrThrow("--retentionDays", 0)),
+    runs: Math.max(1, parseIntFlagOrThrow("--runs", 1)),
+  };
+
+
+  const raw = await readFile(cfg.casesPath, "utf-8");
+  const cases = parseCasesJson(raw);
+
+  const selectedCases = cfg.onlyCaseIds ? cases.filter((c) => cfg.onlyCaseIds!.includes(c.id)) : cases;
+  if (selectedCases.length === 0) throw new Error("No cases selected. Check --only or cases.json content.");
+
+  const baselineDir = path.join(cfg.outDir, "baseline", cfg.runId);
+  const newDir = path.join(cfg.outDir, "new", cfg.runId);
+  const rawDir = path.join(cfg.outDir, "_raw");
+  const baselineRawDir = path.join(rawDir, "baseline", cfg.runId);
+  const newRawDir = path.join(rawDir, "new", cfg.runId);
+
+  await ensureDir(baselineDir);
+  await ensureDir(newDir);
+  const useRaw = cfg.redactionPreset !== "none" && cfg.keepRaw;
+  if (useRaw) {
+    await ensureDir(baselineRawDir);
+    await ensureDir(newRawDir);
+  }
+
+  // Scenario 3: capture git context (commit, branch, dirty) — fails silently if not a git repo
+  const gitContext = await captureGitContext(repoRoot);
+
+  const runMeta = {
+    run_id: cfg.runId,
+    base_url: cfg.baseUrl,
+    cases_path: rel(cfg.casesPath),
+    selected_case_ids: selectedCases.map((c) => c.id),
+    started_at: Date.now(),
+    versions: ["baseline", "new"] as const,
+    redaction_applied: cfg.redactionPreset !== "none",
+    redaction_preset: cfg.redactionPreset,
+    redaction_keep_raw: useRaw,
+    // Scenario 3: git context for prompt version tracing
+    ...gitContext,
+    runner: {
+      timeout_ms: cfg.timeoutMs,
+      retries: cfg.retries,
+      backoff_base_ms: cfg.backoffBaseMs,
+      concurrency: cfg.concurrency,
+      body_snippet_bytes: cfg.bodySnippetBytes,
+      max_body_bytes: cfg.maxBodyBytes,
+      save_full_body_on_error: cfg.saveFullBodyOnError,
+      redaction_preset: cfg.redactionPreset,
+      keep_raw: useRaw,
+      retention_days: cfg.retentionDays,
+      runs: cfg.runs,
+    }
+  };
+
+  console.log("Runner started");
+  await appendAuditLog({
+    component: "runner",
+    event: "start",
+    run_id: cfg.runId,
+    base_url: cfg.baseUrl,
+    cases_path: rel(cfg.casesPath),
+    out_dir: rel(cfg.outDir),
+    selected_case_ids: selectedCases.map((c) => c.id),
+    redaction_preset: cfg.redactionPreset,
+    keep_raw: cfg.keepRaw,
+    retention_days: cfg.retentionDays,
+  });
+  console.log("repoRoot:", fmtRel(cfg.repoRoot));
+  console.log("baseUrl:", cfg.baseUrl);
+  console.log("cases:", selectedCases.length);
+  console.log("runId:", cfg.runId);
+  console.log("outDir:", fmtRel(cfg.outDir));
+  if (cfg.onlyCaseIds) console.log("only:", cfg.onlyCaseIds.join(", "));
+  if (cfg.dryRun) console.log("dryRun:", true);
+  console.log("timeoutMs:", cfg.timeoutMs);
+  console.log("retries:", cfg.retries);
+  console.log("concurrency:", cfg.concurrency);
+  console.log("maxBodyBytes:", cfg.maxBodyBytes);
+  console.log("redactionPreset:", cfg.redactionPreset);
+  console.log("keepRaw:", cfg.keepRaw);
+  console.log("retentionDays:", cfg.retentionDays);
+  if (cfg.keepRaw) {
+    console.warn("WARNING: --keepRaw enabled. Raw responses will be stored under _raw/ and are NOT sanitized.");
+  }
+
+  if (cfg.dryRun) {
+    for (const c of selectedCases) console.log("Case:", c.id);
+    const finished = { ...runMeta, ended_at: Date.now() };
+    await writeFile(path.join(baselineDir, "run.json"), JSON.stringify(finished, null, 2), "utf-8");
+    await writeFile(path.join(newDir, "run.json"), JSON.stringify(finished, null, 2), "utf-8");
+    console.log("Runner finished");
+    console.log("baseline:", fmtRel(baselineDir));
+    console.log("new:", fmtRel(newDir));
+    await appendAuditLog({
+      component: "runner",
+      event: "finish",
+      run_id: cfg.runId,
+      baseline_dir: rel(baselineDir),
+      new_dir: rel(newDir),
+      cases_count: selectedCases.length,
+      dry_run: true,
+    });
+    if (cfg.retentionDays > 0) {
+      await cleanupOldRuns(cfg.outDir, cfg.retentionDays, "runner");
+    }
+    return;
+  }
+
+  // Scenario 2: Flakiness tracking — accumulate per-case results across --runs N executions
+  type FlakinessEntry = {
+    case_id: string;
+    runs: number;
+    baseline_pass_count: number;
+    new_pass_count: number;
+    baseline_pass_rate: number;
+    new_pass_rate: number;
+    baseline_token_usage?: TokenUsage;
+    new_token_usage?: TokenUsage;
+  };
+  const flakinessEntries: FlakinessEntry[] = [];
+
+  await runWithConcurrency(selectedCases, cfg.concurrency, async (c) => {
+    console.log("Case:", c.id);
+
+    const baselineTokenUsages: (TokenUsage | undefined)[] = [];
+    const newTokenUsages: (TokenUsage | undefined)[] = [];
+    let baselinePassCount = 0;
+    let newPassCount = 0;
+
+    for (let run = 1; run <= cfg.runs; run++) {
+      const suffix = cfg.runs > 1 ? `.run${run}` : "";
+
+      const baselineResp = await runOneCaseWithReliability(cfg, c, "baseline");
+      enrichResponseWithLoopAnalysis(baselineResp);
+      const baselineSanitized = sanitizeValue(baselineResp, cfg.redactionPreset);
+      const baselineFilename = `${c.id}${suffix}.json`;
+      await writeFile(path.join(baselineDir, baselineFilename), JSON.stringify(baselineSanitized, null, 2), "utf-8");
+      if (useRaw) {
+        await writeFile(path.join(baselineRawDir, baselineFilename), JSON.stringify(baselineResp, null, 2), "utf-8");
+      }
+      // Collect token usage and pass signal
+      const bResp = baselineResp as { token_usage?: TokenUsage; runner_failure?: unknown };
+      baselineTokenUsages.push(bResp.token_usage);
+      if (!bResp.runner_failure) baselinePassCount++;
+
+      const newResp = await runOneCaseWithReliability(cfg, c, "new");
+      enrichResponseWithLoopAnalysis(newResp);
+      const newSanitized = sanitizeValue(newResp, cfg.redactionPreset);
+      const newFilename = `${c.id}${suffix}.json`;
+      await writeFile(path.join(newDir, newFilename), JSON.stringify(newSanitized, null, 2), "utf-8");
+      if (useRaw) {
+        await writeFile(path.join(newRawDir, newFilename), JSON.stringify(newResp, null, 2), "utf-8");
+      }
+      const nResp = newResp as { token_usage?: TokenUsage; runner_failure?: unknown };
+      newTokenUsages.push(nResp.token_usage);
+      if (!nResp.runner_failure) newPassCount++;
+    }
+
+    if (cfg.runs > 1) {
+      const entry: FlakinessEntry = {
+        case_id: c.id,
+        runs: cfg.runs,
+        baseline_pass_count: baselinePassCount,
+        new_pass_count: newPassCount,
+        baseline_pass_rate: baselinePassCount / cfg.runs,
+        new_pass_rate: newPassCount / cfg.runs,
+      };
+      const aggBaseline = aggregateTokenUsage(baselineTokenUsages);
+      const aggNew = aggregateTokenUsage(newTokenUsages);
+      if (aggBaseline) entry.baseline_token_usage = aggBaseline;
+      if (aggNew) entry.new_token_usage = aggNew;
+      flakinessEntries.push(entry);
+    }
+
+    return true;
+  });
+
+  // Write flakiness summary when --runs > 1
+  if (cfg.runs > 1 && flakinessEntries.length > 0) {
+    const flakinessSummary = {
+      run_id: cfg.runId,
+      runs_per_case: cfg.runs,
+      ...gitContext,
+      cases: flakinessEntries,
+    };
+    await writeFile(path.join(baselineDir, "flakiness.json"), JSON.stringify(flakinessSummary, null, 2), "utf-8");
+    await writeFile(path.join(newDir, "flakiness.json"), JSON.stringify(flakinessSummary, null, 2), "utf-8");
+    console.log("Flakiness summary written: flakiness.json");
+    const flaky = flakinessEntries.filter((e) => e.new_pass_rate < 0.8);
+    if (flaky.length > 0) {
+      console.warn(`WARNING: ${flaky.length} case(s) have new_pass_rate < 0.80 (potential flakiness):`);
+      for (const f of flaky) console.warn(`  ${f.case_id}: pass_rate=${f.new_pass_rate.toFixed(2)} (${f.new_pass_count}/${f.runs})`);
+    }
+  }
+
+  const finished = { ...runMeta, ended_at: Date.now() };
+  await writeFile(path.join(baselineDir, "run.json"), JSON.stringify(finished, null, 2), "utf-8");
+  await writeFile(path.join(newDir, "run.json"), JSON.stringify(finished, null, 2), "utf-8");
+
+  console.log("Runner finished");
+  console.log("baseline:", fmtRel(baselineDir));
+  console.log("new:", fmtRel(newDir));
+  await appendAuditLog({
+    component: "runner",
+    event: "finish",
+    run_id: cfg.runId,
+    baseline_dir: rel(baselineDir),
+    new_dir: rel(newDir),
+    cases_count: selectedCases.length,
+    dry_run: false,
+  });
+  if (cfg.retentionDays > 0) {
+    await cleanupOldRuns(cfg.outDir, cfg.retentionDays, "runner");
+  }
+}
+
+async function cleanupOldRuns(baseDir: string, retentionDays: number, component: "runner" | "evaluator"): Promise<void> {
+  const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  for (const sub of ["baseline", "new", "_raw"]) {
+    const dir = path.join(baseDir, sub);
+    let names: string[] = [];
+    try {
+      names = await readdir(dir);
+    } catch {
+      continue;
+    }
+    for (const name of names) {
+      const p = path.join(dir, name);
+      try {
+        const st = await stat(p);
+        if (st.isDirectory() && st.mtimeMs < cutoff) {
+          await rm(p, { recursive: true, force: true });
+          await appendAuditLog({ component, event: "retention_delete", path: p });
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+}

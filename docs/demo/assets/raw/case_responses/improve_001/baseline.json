@@ -1,0 +1,18 @@
+{
+  "case_id": "improve_001",
+  "version": "baseline",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [],
+  "final_output": {
+    "content_type": "text",
+    "content": "Draft response prepared. Awaiting verification."
+  },
+  "events": [
+    {
+      "type": "final_output",
+      "ts": 1738044500000,
+      "content_type": "text",
+      "content": "Draft response prepared. Awaiting verification."
+    }
+  ]
+}

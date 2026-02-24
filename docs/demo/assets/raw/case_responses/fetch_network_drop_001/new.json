@@ -1,0 +1,24 @@
+{
+  "case_id": "fetch_network_drop_001",
+  "version": "new",
+  "proposed_actions": [],
+  "final_output": {
+    "content_type": "text",
+    "content": "runner: fetch failure (network_error)\ncase_id=fetch_network_drop_001\nversion=new\nattempt=3\nurl=http://localhost:8788/run-case\nnet_error_kind=unknown\nis_transient=true\nerror=TypeError: fetch failed"
+  },
+  "events": [],
+  "runner_failure": {
+    "type": "runner_fetch_failure",
+    "class": "network_error",
+    "net_error_kind": "unknown",
+    "case_id": "fetch_network_drop_001",
+    "version": "new",
+    "url": "http://localhost:8788/run-case",
+    "attempt": 3,
+    "timeout_ms": 15000,
+    "latency_ms": 4,
+    "error_name": "TypeError",
+    "error_message": "fetch failed",
+    "is_transient": true
+  }
+}

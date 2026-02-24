@@ -1,0 +1,47 @@
+{
+  "name": "agent-qa-toolkit",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier -w .",
+    "typecheck": "npm --workspaces run typecheck",
+    "loadtest": "ts-node apps/runner/src/load-test.ts",
+    "test": "vitest run",
+    "audit": "npm audit",
+    "demo": "node scripts/demo.mjs",
+    "demo:correctness": "node scripts/demo.mjs --suite correctness",
+    "demo:robustness": "node scripts/demo.mjs --suite robustness",
+    "demo:e2e": "node scripts/demo-e2e.mjs",
+    "test:toolkit": "node scripts/toolkit-tests.mjs",
+    "pvip:pack": "node scripts/pvip-pack.mjs --reportDir apps/evaluator/reports/latest",
+    "pvip:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest",
+    "pvip:verify:strict": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --strict",
+    "pvip:verify:json": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --json",
+    "aepf:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --mode aepf",
+    "aepf:verify:pvip": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --mode pvip",
+    "aepf:verify:strict": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --mode strict",
+    "sbom": "node scripts/sbom.mjs",
+    "manifest:sign": "node scripts/manifest-sign.mjs apps/evaluator/reports/latest"
+  },
+  "overrides": {
+    "qs": "6.14.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.30",
+    "@typescript-eslint/eslint-plugin": "8.31.0",
+    "@typescript-eslint/parser": "8.31.0",
+    "eslint": "9.39.2",
+    "eslint-config-prettier": "10.1.1",
+    "prettier": "3.5.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5",
+    "vitest": "^4.0.18"
+  }
+}

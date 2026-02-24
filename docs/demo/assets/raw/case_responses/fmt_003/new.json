@@ -1,0 +1,66 @@
+{
+  "case_id": "fmt_003",
+  "version": "new",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a11",
+      "action_type": "send_email",
+      "tool_name": "send_email",
+      "target": {
+        "type": "email"
+      },
+      "params": {
+        "to": "customer@example.com",
+        "subject": "Apology for the delay"
+      },
+      "risk_level": "low",
+      "evidence_refs": []
+    }
+  ],
+  "final_output": {
+    "content_type": "json",
+    "content": {
+      "action": "send_email",
+      "to": "customer@example.com",
+      "subject": "Apology for the delay",
+      "body": "We apologize for the delay and are working to resolve your issue."
+    }
+  },
+  "events": [
+    {
+      "type": "tool_call",
+      "ts": 1738044121000,
+      "call_id": "c11",
+      "action_id": "a11",
+      "tool": "send_email",
+      "args": {
+        "to": "customer@example.com",
+        "subject": "Apology for the delay",
+        "body": "We apologize for the delay and are working to resolve your issue."
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044121200,
+      "call_id": "c11",
+      "action_id": "a11",
+      "status": "ok",
+      "latency_ms": 170,
+      "payload_summary": {
+        "message_id": "MSG-3002"
+      }
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044121300,
+      "content_type": "json",
+      "content": {
+        "action": "send_email",
+        "to": "customer@example.com",
+        "subject": "Apology for the delay",
+        "body": "We apologize for the delay and are working to resolve your issue."
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "runner_fetch_failure",
+  "class": "network_error",
+  "net_error_kind": "unknown",
+  "case_id": "matrix_net_partial",
+  "version": "new",
+  "url": "http://localhost:8788/run-case",
+  "attempt": 3,
+  "timeout_ms": 15000,
+  "latency_ms": 3,
+  "error_name": "TypeError",
+  "error_message": "fetch failed",
+  "is_transient": true
+}

@@ -1,0 +1,16 @@
+{
+  "compliance_mapping": [
+    {
+      "framework": "ISO_42001",
+      "clause": "9.2",
+      "title": "Monitoring, measurement, analysis",
+      "evidence": ["compare-report.json", "report.html", "artifacts/manifest.json"]
+    },
+    {
+      "framework": "ISO_42001",
+      "clause": "8.1",
+      "title": "Operational planning and control",
+      "evidence": ["compare-report.json.items", "case-*.html"]
+    }
+  ]
+}

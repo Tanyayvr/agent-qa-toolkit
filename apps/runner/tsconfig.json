@@ -1,0 +1,9 @@
+{
+  "__file": "apps/runner/tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"]
+}

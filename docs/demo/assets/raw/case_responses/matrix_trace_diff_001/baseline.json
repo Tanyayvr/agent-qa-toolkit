@@ -1,0 +1,39 @@
+{
+  "case_id": "matrix_trace_diff_001",
+  "version": "baseline",
+  "workflow_id": "matrix_v1",
+  "proposed_actions": [],
+  "final_output": {
+    "content_type": "text",
+    "content": "Trace diff case"
+  },
+  "events": [
+    {
+      "type": "tool_call",
+      "ts": 1771274842255,
+      "call_id": "c1",
+      "action_id": "a1",
+      "tool": "lookup_customer",
+      "args": {
+        "customer_id": "CUST-TRACE"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1771274842260,
+      "call_id": "c1",
+      "action_id": "a1",
+      "status": "ok",
+      "latency_ms": 5,
+      "payload_summary": {
+        "customer_id": "CUST-TRACE"
+      }
+    },
+    {
+      "type": "final_output",
+      "ts": 1771274842265,
+      "content_type": "text",
+      "content": "Trace diff case"
+    }
+  ]
+}

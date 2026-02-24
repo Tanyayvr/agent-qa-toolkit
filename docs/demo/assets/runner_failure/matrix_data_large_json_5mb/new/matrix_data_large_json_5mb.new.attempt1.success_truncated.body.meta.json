@@ -1,0 +1,10 @@
+{
+  "kind": "runner_body_capture_success_truncated",
+  "case_id": "matrix_data_large_json_5mb",
+  "version": "new",
+  "attempt": 1,
+  "max_body_bytes": 2000000,
+  "truncated": true,
+  "bytes_written": 2000000,
+  "content_type": "application/json; charset=utf-8"
+}

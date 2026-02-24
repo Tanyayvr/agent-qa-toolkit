@@ -1,5 +1,8 @@
 # Integration Template
 
+## Adapters (external)
+Adapters for specific stacks (LangChain, OpenAI Responses, OTel anchors) are maintained separately from this repo.
+
 ## Stack
 - Framework / SDK:
 - Agent runtime:
@@ -16,4 +19,3 @@
 ```bash
 npm run pilot
 ```
-

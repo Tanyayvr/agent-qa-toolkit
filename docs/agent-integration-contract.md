@@ -12,15 +12,7 @@ Content-Type: application/json
 ```
 
 Optional headers:
-- `x-redaction-preset`: `none | internal_only | transferable` (demo-only hint). Production redaction is applied by the runner before writing artifacts; agents are not required to implement or honor this header.
-
-Runner metadata (normative):
-- `run.json.redaction_applied`: boolean (MUST)
-- `run.json.redaction_preset_id`: string (MUST when applied)
-Evaluator MUST derive `summary.quality.redaction_status` only from `run.json.redaction_applied` and, if applied,
-propagate `run.json.redaction_preset_id`. It MUST NOT set `redaction_status=applied` solely from CLI flags.
-In strict mode, `--strictRedaction` MUST scan the contents of all files referenced by `artifacts/manifest.json`
-(including report HTML/JSON and assets) for residual sensitive markers.
+- `x-redaction-preset`: `none | internal_only | transferable` (demo-agent uses this; real agents may ignore)
 
 ---
 
@@ -112,6 +104,7 @@ Optional `token_usage` (if available):
 - If your agent does not execute tools, omit `proposed_actions` and `events`.
 - The evaluator reads response JSON directly from runner artifacts; ensure it is valid JSON.
 - Self-hosted does **not** remove prompt‑injection risk by itself; use layered scanning (regex baseline + optional entropy scanner).
+- Multi‑agent runs: bundles are **run‑scoped**. If a single orchestrator can observe the workflow, emit one bundle with multiple `trace_id`s; otherwise emit multiple bundles and stitch via `workflow_id` / `parent_run_id` / `trace_id`. See `docs/format/multi-agent-bundling.md`.
 
 ---
 

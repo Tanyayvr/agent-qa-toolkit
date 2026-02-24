@@ -3,24 +3,28 @@
 # Scenario 4: Overnight Drift Detection CI Run
 #
 # PURPOSE:
-#   Runs the agent evaluation suite every night (and on demand).
-#   Compares baseline artifacts vs new to detect model drift or regressions.
+#   Runs the full agent evaluation suite every night (and on demand).
+#   Compares baseline artifacts vs new to detect model drift, silent regressions,
+#   or behavior changes that occur WITHOUT code changes (e.g. model version updates).
 #
 # OUTPUTS:
-#   - compare-report.json  → gate decision (derived from cases_block_recommended / cases_requiring_approval)
+#   - compare-report.json  → gate_recommendation field for CI decision
 #   - flakiness.json       → per-case pass_rate (written when --runs > 1)
 #   - report.html          → human-readable drift report
 #   - run.json             → git_commit + git_branch in artifact for traceability
 #
 # DATA PRIVACY:
 #   All artifacts are written locally within the runner job.
-#   Nothing is uploaded unless you add an upload step.
+#   Nothing is uploaded to external services unless you add an upload step.
+#   To share artifacts, use actions/upload-artifact (see step below).
 
 name: Agent Drift Detection (Nightly)
 
 on:
+  # Run every night at 03:00 UTC
   schedule:
     - cron: "0 3 * * *"
+  # Allow manual trigger from GitHub UI
   workflow_dispatch:
     inputs:
       runs_per_case:
@@ -33,6 +37,8 @@ on:
         default: ""
 
 env:
+  # Your agent must be running at this URL during the job.
+  # For self-hosted runners: start your agent as a background service before this step.
   AGENT_URL: http://localhost:8787
   RUNS_PER_CASE: ${{ github.event.inputs.runs_per_case || '5' }}
 
@@ -54,12 +60,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # ----------------------------------------------------------------
+      # START YOUR AGENT HERE
+      # Replace this step with your actual agent startup command.
+      # The agent must listen on $AGENT_URL/run-case before the runner starts.
+      # ----------------------------------------------------------------
       - name: Start agent (replace with your agent startup)
         run: |
+          # Example: npm run start:agent &
+          # Example: docker run -d -p 8787:8787 my-agent:latest
+          # Example: npx ts-node packages/agent-sdk/demo-agent.ts &
           echo "TODO: replace this step with your agent startup command"
+          # Wait for agent to be ready
+          # npx wait-on http://localhost:8787/health --timeout 30000
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
+      # ----------------------------------------------------------------
+      # RUN: Flakiness mode (--runs N) for drift detection
+      # The runner captures git_commit and git_branch automatically.
+      # ----------------------------------------------------------------
       - name: Run agent evaluation suite (flakiness mode)
         run: |
           npx ts-node apps/runner/src/index.ts \
@@ -73,8 +93,11 @@ jobs:
             --timeoutMs 30000
         env:
           AQ_LICENSE_PUBLIC_KEY: ${{ secrets.AQ_LICENSE_PUBLIC_KEY }}
-        continue-on-error: true
+        continue-on-error: true  # Don't fail job here; evaluator decides the gate
 
+      # ----------------------------------------------------------------
+      # EVALUATE: Compare baseline vs new, generate report
+      # ----------------------------------------------------------------
       - name: Run evaluator (generate compare-report + HTML)
         id: evaluator
         run: |
@@ -87,7 +110,11 @@ jobs:
         env:
           AQ_LICENSE_PUBLIC_KEY: ${{ secrets.AQ_LICENSE_PUBLIC_KEY }}
 
-      - name: Check gate decision
+      # ----------------------------------------------------------------
+      # GATE: Read gate_recommendation from compare-report.json
+      # Fails the job if gate_recommendation is "block"
+      # ----------------------------------------------------------------
+      - name: Check gate recommendation
         run: |
           GATE=$(node -e "
             const r = require('./apps/evaluator/reports/drift-${{ github.run_id }}/compare-report.json');
@@ -97,17 +124,21 @@ jobs:
             const gate = block > 0 ? 'block' : (approve > 0 ? 'require_approval' : 'none');
             console.log(gate);
           ")
-          echo "Gate decision: $GATE"
+          echo "Gate recommendation: $GATE"
           echo "gate=$GATE" >> $GITHUB_OUTPUT
 
           if [ "$GATE" = "block" ]; then
-            echo "DRIFT DETECTED: gate=block. Agent has regressed."
+            echo "DRIFT DETECTED: gate_recommendation=block. Agent has regressed."
             exit 1
           elif [ "$GATE" = "require_approval" ]; then
-            echo "WARNING: gate=require_approval. Manual review required."
+            echo "WARNING: gate_recommendation=require_approval. Manual review required."
+            # Does not fail the job — but creates a warning annotation
           fi
         id: gate
 
+      # ----------------------------------------------------------------
+      # FLAKINESS: Print flakiness summary to the job log
+      # ----------------------------------------------------------------
       - name: Print flakiness summary
         if: always()
         run: |
@@ -128,6 +159,10 @@ jobs:
             echo "No flakiness.json found (--runs was 1 or runner failed)"
           fi
 
+      # ----------------------------------------------------------------
+      # UPLOAD ARTIFACTS: Store evidence pack for offline review
+      # Artifacts available in GitHub Actions UI for 30 days
+      # ----------------------------------------------------------------
       - name: Upload evidence pack
         if: always()
         uses: actions/upload-artifact@v4
@@ -139,6 +174,10 @@ jobs:
             apps/runner/runs/new/drift-${{ github.run_id }}/flakiness.json
           retention-days: 30
 
+      # ----------------------------------------------------------------
+      # NOTIFY: On block, create a GitHub issue for the team
+      # Optional — remove if not needed
+      # ----------------------------------------------------------------
       - name: Create issue on drift detected
         if: failure() && steps.gate.outputs.gate == 'block'
         uses: actions/github-script@v7
@@ -158,6 +197,6 @@ jobs:
                 "Download the evidence pack from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).",
                 "",
                 "Evidence pack contains: `compare-report.json`, `report.html`, `flakiness.json`."
-              ].join("\\n"),
+              ].join("\n"),
               labels: ["agent-drift", "automated"]
             });

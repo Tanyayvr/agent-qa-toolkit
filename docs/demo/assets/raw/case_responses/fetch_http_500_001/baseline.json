@@ -1,0 +1,18 @@
+{
+  "case_id": "fetch_http_500_001",
+  "version": "baseline",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [],
+  "final_output": {
+    "content_type": "text",
+    "content": "baseline ok"
+  },
+  "events": [
+    {
+      "type": "final_output",
+      "ts": 1771274695999,
+      "content_type": "text",
+      "content": "baseline ok"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "case_id": "tool_001",
+  "version": "baseline",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a1",
+      "action_type": "get_customer",
+      "tool_name": "get_customer",
+      "target": {
+        "type": "customer",
+        "id": "CUST-1004"
+      },
+      "params": {
+        "customer_id": "CUST-1004"
+      },
+      "risk_level": "low",
+      "evidence_refs": []
+    },
+    {
+      "action_id": "a2",
+      "action_type": "create_ticket",
+      "tool_name": "create_ticket",
+      "target": {
+        "type": "ticket"
+      },
+      "params": {
+        "customer_id": "CUST-1004",
+        "summary": "Billing page shows error 500",
+        "priority": "high"
+      },
+      "risk_level": "medium",
+      "evidence_refs": [
+        {
+          "kind": "tool_result",
+          "call_id": "c1"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "json",
+    "content": {
+      "action": "create_ticket",
+      "customer_id": "CUST-1004",
+      "summary": "Billing page shows error 500",
+      "priority": "high",
+      "ticket_id": "T-9012"
+    }
+  },
+  "events": [
+    {
+      "type": "tool_call",
+      "ts": 1738044000123,
+      "call_id": "c1",
+      "action_id": "a1",
+      "tool": "get_customer",
+      "args": {
+        "customer_id": "CUST-1004"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044000456,
+      "call_id": "c1",
+      "action_id": "a1",
+      "status": "ok",
+      "latency_ms": 333,
+      "payload_summary": {
+        "customer_id": "CUST-1004",
+        "name": "Alex Doe",
+        "tier": "pro"
+      }
+    },
+    {
+      "type": "tool_call",
+      "ts": 1738044000789,
+      "call_id": "c2",
+      "action_id": "a2",
+      "tool": "create_ticket",
+      "args": {
+        "customer_id": "CUST-1004",
+        "summary": "Billing page shows error 500",
+        "priority": "high"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044001200,
+      "call_id": "c2",
+      "action_id": "a2",
+      "status": "ok",
+      "latency_ms": 411,
+      "payload_summary": {
+        "ticket_id": "T-9012"
+      }
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044001300,
+      "content_type": "json",
+      "content": {
+        "action": "create_ticket",
+        "customer_id": "CUST-1004",
+        "summary": "Billing page shows error 500",
+        "priority": "high",
+        "ticket_id": "T-9012"
+      }
+    }
+  ]
+}

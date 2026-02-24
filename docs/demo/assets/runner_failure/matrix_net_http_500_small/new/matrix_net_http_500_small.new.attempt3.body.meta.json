@@ -1,0 +1,10 @@
+{
+  "kind": "runner_body_capture",
+  "case_id": "matrix_net_http_500_small",
+  "version": "new",
+  "attempt": 3,
+  "max_body_bytes": 2000000,
+  "truncated": false,
+  "bytes_written": 64,
+  "content_type": "text/plain; charset=utf-8"
+}

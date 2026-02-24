@@ -1,0 +1,45 @@
+{
+  "case_id": "tool_002",
+  "version": "baseline",
+  "workflow_id": "kb_answering_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a30",
+      "action_type": "search_kb",
+      "tool_name": "search_kb",
+      "params": {
+        "query": "reset password steps"
+      },
+      "risk_level": "low",
+      "evidence_refs": [
+        {
+          "kind": "retrieval_doc",
+          "id": "kb_reset_password_v1"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "text",
+    "content": "To reset your password, go to Settings -> Security -> Reset Password."
+  },
+  "events": [
+    {
+      "type": "retrieval",
+      "ts": 1738044250100,
+      "query": "reset password steps",
+      "doc_ids": [
+        "kb_reset_password_v1"
+      ],
+      "snippets_hashes": [
+        "k2a1"
+      ]
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044250300,
+      "content_type": "text",
+      "content": "To reset your password, go to Settings -> Security -> Reset Password."
+    }
+  ]
+}

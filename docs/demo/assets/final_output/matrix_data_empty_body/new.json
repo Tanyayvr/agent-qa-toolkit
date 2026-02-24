@@ -1,0 +1,4 @@
+{
+  "content_type": "text",
+  "content": "runner: fetch failure (invalid_json)\ncase_id=matrix_data_empty_body\nversion=new\nattempt=1\nurl=http://localhost:8788/run-case\nerror=SyntaxError: Unexpected end of JSON input\nfull_body_saved_to=apps/runner/runs/_runner_failures/matrix_data_empty_body.new.attempt1.invalid_json.body.txt\nfull_body_meta_saved_to=apps/runner/runs/_runner_failures/matrix_data_empty_body.new.attempt1.invalid_json.body.meta.json"
+}

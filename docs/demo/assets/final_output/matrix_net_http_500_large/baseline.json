@@ -1,0 +1,4 @@
+{
+  "content_type": "text",
+  "content": "runner: fetch failure (http_error)\ncase_id=matrix_net_http_500_large\nversion=baseline\nattempt=3\nurl=http://localhost:8788/run-case\nhttp=500 Internal Server Error\nis_transient=true\nfull_body_saved_to=apps/runner/runs/_runner_failures/matrix_net_http_500_large.baseline.attempt3.body.bin\nfull_body_meta_saved_to=apps/runner/runs/_runner_failures/matrix_net_http_500_large.baseline.attempt3.body.meta.json\nbody_truncated=true\nbody_bytes_written=2000000"
+}

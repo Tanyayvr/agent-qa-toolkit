@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+const { spawnSync } = require('node:child_process');
+
+const args = process.argv.slice(2);
+const cmd = args[0];
+if (cmd !== 'verify') {
+  console.error('Usage: aepf verify [--strict|--format-only] <dir>');
+  process.exit(2);
+}
+
+const hasStrict = args.includes('--strict');
+const hasFormatOnly = args.includes('--format-only');
+const mode = hasFormatOnly ? 'aepf' : (hasStrict ? 'strict' : 'pvip');
+
+const dir = args.find((a) => !a.startsWith('-') && a !== 'verify');
+if (!dir) {
+  console.error('Missing report directory');
+  process.exit(2);
+}
+
+const res = spawnSync('node', [
+  'scripts/pvip-verify.mjs',
+  '--reportDir', dir,
+  '--mode', mode,
+], { stdio: 'inherit' });
+process.exit(res.status ?? 1);

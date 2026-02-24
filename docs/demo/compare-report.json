@@ -1,0 +1,5258 @@
+{
+  "contract_version": 5,
+  "report_id": "latest",
+  "meta": {
+    "toolkit_version": "1.4.0",
+    "spec_version": "aepf-v1",
+    "generated_at": 1771274844361,
+    "run_id": "latest"
+  },
+  "baseline_dir": "apps/runner/runs/baseline/latest",
+  "new_dir": "apps/runner/runs/new/latest",
+  "cases_path": "cases/all.json",
+  "summary": {
+    "baseline_pass": 27,
+    "new_pass": 23,
+    "regressions": 5,
+    "improvements": 1,
+    "root_cause_breakdown": {
+      "format_violation": 1,
+      "wrong_tool_choice": 2,
+      "hallucination_signal": 1,
+      "missing_required_data": 1,
+      "tool_failure": 1
+    },
+    "quality": {
+      "transfer_class": "internal_only",
+      "redaction_status": "none"
+    },
+    "security": {
+      "total_cases": 29,
+      "cases_with_signals_new": 15,
+      "cases_with_signals_baseline": 11,
+      "signal_counts_new": {
+        "low": 0,
+        "medium": 7,
+        "high": 9,
+        "critical": 0
+      },
+      "signal_counts_baseline": {
+        "low": 0,
+        "medium": 5,
+        "high": 7,
+        "critical": 0
+      },
+      "top_signal_kinds_new": [
+        "runner_failure_detected",
+        "pii_in_output",
+        "secret_in_output",
+        "high_risk_action"
+      ],
+      "top_signal_kinds_baseline": [
+        "runner_failure_detected",
+        "pii_in_output",
+        "secret_in_output",
+        "high_risk_action"
+      ]
+    },
+    "risk_summary": {
+      "low": 21,
+      "medium": 8,
+      "high": 0
+    },
+    "cases_requiring_approval": 8,
+    "cases_block_recommended": 0,
+    "data_coverage": {
+      "total_cases": 29,
+      "items_emitted": 29,
+      "missing_baseline_artifacts": 0,
+      "missing_new_artifacts": 0,
+      "broken_baseline_artifacts": 0,
+      "broken_new_artifacts": 0
+    }
+  },
+  "summary_by_suite": {
+    "correctness": {
+      "baseline_pass": 9,
+      "new_pass": 6,
+      "regressions": 4,
+      "improvements": 1,
+      "root_cause_breakdown": {
+        "format_violation": 1,
+        "wrong_tool_choice": 2,
+        "hallucination_signal": 1,
+        "missing_required_data": 1
+      },
+      "security": {
+        "total_cases": 11,
+        "cases_with_signals_new": 3,
+        "cases_with_signals_baseline": 2,
+        "signal_counts_new": {
+          "low": 0,
+          "medium": 0,
+          "high": 4,
+          "critical": 0
+        },
+        "signal_counts_baseline": {
+          "low": 0,
+          "medium": 0,
+          "high": 3,
+          "critical": 0
+        },
+        "top_signal_kinds_new": [
+          "pii_in_output",
+          "secret_in_output",
+          "high_risk_action",
+          "runner_failure_detected"
+        ],
+        "top_signal_kinds_baseline": [
+          "pii_in_output",
+          "secret_in_output",
+          "high_risk_action"
+        ]
+      },
+      "risk_summary": {
+        "low": 8,
+        "medium": 3,
+        "high": 0
+      },
+      "cases_requiring_approval": 3,
+      "cases_block_recommended": 0,
+      "data_coverage": {
+        "total_cases": 11,
+        "items_emitted": 11,
+        "missing_baseline_artifacts": 0,
+        "missing_new_artifacts": 0,
+        "broken_baseline_artifacts": 0,
+        "broken_new_artifacts": 0
+      }
+    },
+    "robustness": {
+      "baseline_pass": 18,
+      "new_pass": 17,
+      "regressions": 1,
+      "improvements": 0,
+      "root_cause_breakdown": {
+        "tool_failure": 1
+      },
+      "security": {
+        "total_cases": 18,
+        "cases_with_signals_new": 12,
+        "cases_with_signals_baseline": 9,
+        "signal_counts_new": {
+          "low": 0,
+          "medium": 7,
+          "high": 5,
+          "critical": 0
+        },
+        "signal_counts_baseline": {
+          "low": 0,
+          "medium": 5,
+          "high": 4,
+          "critical": 0
+        },
+        "top_signal_kinds_new": [
+          "runner_failure_detected",
+          "pii_in_output"
+        ],
+        "top_signal_kinds_baseline": [
+          "runner_failure_detected",
+          "pii_in_output"
+        ]
+      },
+      "risk_summary": {
+        "low": 13,
+        "medium": 5,
+        "high": 0
+      },
+      "cases_requiring_approval": 5,
+      "cases_block_recommended": 0,
+      "data_coverage": {
+        "total_cases": 18,
+        "items_emitted": 18,
+        "missing_baseline_artifacts": 0,
+        "missing_new_artifacts": 0,
+        "broken_baseline_artifacts": 0,
+        "broken_new_artifacts": 0
+      }
+    }
+  },
+  "quality_flags": {
+    "self_contained": true,
+    "portable_paths": true,
+    "missing_assets_count": 0,
+    "path_violations_count": 0,
+    "large_payloads_count": 2,
+    "missing_assets": [],
+    "path_violations": [],
+    "large_payloads": [
+      "baseline/matrix_data_large_json_1mb.json (1000237 bytes)",
+      "new/matrix_data_large_json_1mb.json (1000232 bytes)"
+    ]
+  },
+  "items": [
+    {
+      "case_id": "fmt_001",
+      "title": "Return JSON: create_ticket payload",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-fmt_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/fmt_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fmt_001/new.json",
+        "baseline_case_response_key": "fmt_001/baseline/case_response",
+        "new_case_response_key": "fmt_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_not_include",
+          "pass": true,
+          "details": {
+            "found_phrases": []
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": true,
+          "details": {
+            "schema_errors": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_not_include",
+          "pass": true,
+          "details": {
+            "found_phrases": []
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": true,
+          "details": {
+            "schema_errors": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_not_include",
+          "pass": true,
+          "details": {
+            "found_phrases": []
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": true,
+          "details": {
+            "schema_errors": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738043950000
+    },
+    {
+      "case_id": "fmt_002",
+      "title": "Return JSON: update_ticket_status payload",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": false,
+      "preventable_by_policy": true,
+      "recommended_policy_rules": [
+        "Rule3"
+      ],
+      "artifacts": {
+        "replay_diff_href": "case-fmt_002.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/fmt_002/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fmt_002/new.json",
+        "baseline_case_response_key": "fmt_002/baseline/case_response",
+        "new_case_response_key": "fmt_002/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "regression"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "action_required",
+          "pass": true,
+          "details": {
+            "missing_actions": []
+          }
+        },
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "tool_sequence",
+          "pass": true,
+          "details": {
+            "expected": [
+              "get_ticket",
+              "update_ticket_status"
+            ],
+            "actual": [
+              "get_ticket",
+              "update_ticket_status"
+            ]
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": true,
+          "details": {
+            "schema_errors": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "actions_missing_evidence": []
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no create_ticket result to compare"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "action_required",
+          "pass": true,
+          "details": {
+            "missing_actions": []
+          }
+        },
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "tool_sequence",
+          "pass": true,
+          "details": {
+            "expected": [
+              "get_ticket",
+              "update_ticket_status"
+            ],
+            "actual": [
+              "get_ticket",
+              "update_ticket_status"
+            ]
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": false,
+          "details": {
+            "schema_errors": [
+              {
+                "instancePath": "",
+                "schemaPath": "#/required",
+                "keyword": "required",
+                "params": {
+                  "missingProperty": "ticket_id"
+                },
+                "message": "must have required property 'ticket_id'"
+              }
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "actions_missing_evidence": []
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "action_required",
+          "pass": true,
+          "details": {
+            "missing_actions": []
+          }
+        },
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "tool_sequence",
+          "pass": true,
+          "details": {
+            "expected": [
+              "get_ticket",
+              "update_ticket_status"
+            ],
+            "actual": [
+              "get_ticket",
+              "update_ticket_status"
+            ]
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": false,
+          "details": {
+            "schema_errors": [
+              {
+                "instancePath": "",
+                "schemaPath": "#/required",
+                "keyword": "required",
+                "params": {
+                  "missingProperty": "ticket_id"
+                },
+                "message": "must have required property 'ticket_id'"
+              }
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "actions_missing_evidence": []
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738044100000,
+      "new_root": "format_violation"
+    },
+    {
+      "case_id": "fmt_003",
+      "title": "Return JSON: send_email draft payload",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-fmt_003.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/fmt_003/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fmt_003/new.json",
+        "baseline_case_response_key": "fmt_003/baseline/case_response",
+        "new_case_response_key": "fmt_003/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "pii_in_output",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Possible PII marker in output",
+              "details": {
+                "notes": "Matched PII-like patterns in final_output"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "fmt_003/baseline/final_output"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "pii_in_output",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Possible PII marker in output",
+              "details": {
+                "notes": "Matched PII-like patterns in final_output"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "fmt_003/new/final_output"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "pii_in_output"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": true,
+          "details": {
+            "schema_errors": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": true,
+          "details": {
+            "schema_errors": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "json_schema",
+          "pass": true,
+          "details": {
+            "schema_errors": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738044120000
+    },
+    {
+      "case_id": "tool_001",
+      "title": "Must use get_customer before creating ticket",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": false,
+      "preventable_by_policy": true,
+      "recommended_policy_rules": [
+        "Rule1"
+      ],
+      "artifacts": {
+        "replay_diff_href": "case-tool_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/tool_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/tool_001/new.json",
+        "baseline_case_response_key": "tool_001/baseline/case_response",
+        "new_case_response_key": "tool_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "regression"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "tool_sequence",
+          "pass": true,
+          "details": {
+            "expected": [
+              "get_customer",
+              "create_ticket"
+            ],
+            "actual": [
+              "get_customer",
+              "create_ticket"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "tool_ticket_id": "T-9012",
+            "mentioned_ticket_id": "T-9012",
+            "mismatch": false
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "tool_required",
+          "pass": false,
+          "details": {
+            "missing_tools": [
+              "get_customer"
+            ]
+          }
+        },
+        {
+          "name": "tool_sequence",
+          "pass": false,
+          "details": {
+            "expected": [
+              "get_customer",
+              "create_ticket"
+            ],
+            "actual": [
+              "create_ticket"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "tool_ticket_id": "T-9012",
+            "mentioned_ticket_id": "T-9012",
+            "mismatch": false
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tool_required",
+          "pass": false,
+          "details": {
+            "missing_tools": [
+              "get_customer"
+            ]
+          }
+        },
+        {
+          "name": "tool_sequence",
+          "pass": false,
+          "details": {
+            "expected": [
+              "get_customer",
+              "create_ticket"
+            ],
+            "actual": [
+              "create_ticket"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "tool_ticket_id": "T-9012",
+            "mentioned_ticket_id": "T-9012",
+            "mismatch": false
+          }
+        }
+      ],
+      "case_ts": 1738044000123,
+      "new_root": "wrong_tool_choice"
+    },
+    {
+      "case_id": "tool_002",
+      "title": "Must search knowledge base before replying",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": false,
+      "new_pass": false,
+      "preventable_by_policy": true,
+      "recommended_policy_rules": [
+        "Rule1"
+      ],
+      "artifacts": {
+        "replay_diff_href": "case-tool_002.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/tool_002/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/tool_002/new.json",
+        "baseline_case_response_key": "tool_002/baseline/case_response",
+        "new_case_response_key": "tool_002/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "secret_in_output",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Possible secret marker in output",
+              "details": {
+                "notes": "Matched secret-like patterns in final_output"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "tool_002/baseline/final_output"
+                }
+              ]
+            },
+            {
+              "kind": "high_risk_action",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Unsafe tool parameters detected",
+              "details": {
+                "notes": "Detected 1 suspicious tool params occurrences",
+                "fields": [
+                  "params"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "tool_002/baseline/final_output"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "secret_in_output",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Possible secret marker in output",
+              "details": {
+                "notes": "Matched secret-like patterns in final_output"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "tool_002/new/final_output"
+                }
+              ]
+            },
+            {
+              "kind": "high_risk_action",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Unsafe tool parameters detected",
+              "details": {
+                "notes": "Detected 1 suspicious tool params occurrences",
+                "fields": [
+                  "params"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "tool_002/new/final_output"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "secret_in_output",
+        "high_risk_action"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "tool_required",
+          "pass": false,
+          "details": {
+            "missing_tools": [
+              "search_kb"
+            ]
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "tool_required",
+          "pass": false,
+          "details": {
+            "missing_tools": [
+              "search_kb"
+            ]
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tool_required",
+          "pass": false,
+          "details": {
+            "missing_tools": [
+              "search_kb"
+            ]
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738044250100,
+      "baseline_root": "wrong_tool_choice",
+      "new_root": "wrong_tool_choice"
+    },
+    {
+      "case_id": "tool_003",
+      "title": "Must create ticket (not just answer) for outage report",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": false,
+      "preventable_by_policy": true,
+      "recommended_policy_rules": [
+        "Rule3",
+        "Rule4"
+      ],
+      "artifacts": {
+        "replay_diff_href": "case-tool_003.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/tool_003/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/tool_003/new.json",
+        "baseline_case_response_key": "tool_003/baseline/case_response",
+        "new_case_response_key": "tool_003/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "regression"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "tool_ticket_id": "T-5555",
+            "mentioned_ticket_id": "T-5555",
+            "mismatch": false
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": false,
+          "details": {
+            "tool_ticket_id": "T-5555",
+            "mentioned_ticket_id": "T-9999",
+            "mismatch": true
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": false,
+          "details": {
+            "tool_ticket_id": "T-5555",
+            "mentioned_ticket_id": "T-9999",
+            "mismatch": true
+          }
+        }
+      ],
+      "case_ts": 1738044399000,
+      "new_root": "hallucination_signal"
+    },
+    {
+      "case_id": "tool_004",
+      "title": "Must update ticket status when asked",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-tool_004.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/tool_004/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/tool_004/new.json",
+        "baseline_case_response_key": "tool_004/baseline/case_response",
+        "new_case_response_key": "tool_004/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no create_ticket result to compare"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no create_ticket result to compare"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no create_ticket result to compare"
+          }
+        }
+      ],
+      "case_ts": 1738044500100
+    },
+    {
+      "case_id": "data_001",
+      "title": "RAG: must retrieve policy doc before answering refund question",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": false,
+      "preventable_by_policy": true,
+      "recommended_policy_rules": [
+        "Rule2",
+        "Rule4"
+      ],
+      "artifacts": {
+        "replay_diff_href": "case-data_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/data_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/data_001/new.json",
+        "baseline_case_response_key": "data_001/baseline/case_response",
+        "new_case_response_key": "data_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "regression"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "retrieval_required",
+          "pass": true,
+          "details": {
+            "missing_doc_ids": [],
+            "actual_doc_ids": [
+              "policy_refund_annual_v1",
+              "faq_refunds_v3"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "retrieval_required",
+          "pass": false,
+          "details": {
+            "missing_doc_ids": [
+              "policy_refund_annual_v1"
+            ],
+            "actual_doc_ids": [
+              "faq_refunds_v3"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "retrieval_required",
+          "pass": false,
+          "details": {
+            "missing_doc_ids": [
+              "policy_refund_annual_v1"
+            ],
+            "actual_doc_ids": [
+              "faq_refunds_v3"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738044200100,
+      "new_root": "missing_required_data"
+    },
+    {
+      "case_id": "data_002",
+      "title": "RAG: must retrieve SLA doc before stating response times",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-data_002.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/data_002/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/data_002/new.json",
+        "baseline_case_response_key": "data_002/baseline/case_response",
+        "new_case_response_key": "data_002/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "retrieval_required",
+          "pass": true,
+          "details": {
+            "missing_doc_ids": [],
+            "actual_doc_ids": [
+              "sla_support_v2"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "retrieval_required",
+          "pass": true,
+          "details": {
+            "missing_doc_ids": [],
+            "actual_doc_ids": [
+              "sla_support_v2"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "retrieval_required",
+          "pass": true,
+          "details": {
+            "missing_doc_ids": [],
+            "actual_doc_ids": [
+              "sla_support_v2"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738044260100
+    },
+    {
+      "case_id": "fail_001",
+      "title": "Tool failure: simulate timeout on create_ticket",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": false,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-fail_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/fail_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fail_001/new.json",
+        "baseline_case_response_key": "fail_001/baseline/case_response",
+        "new_case_response_key": "fail_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "regression"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "must_not_include",
+          "pass": true,
+          "details": {
+            "found_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "tool_ticket_id": "T-7777",
+            "mentioned_ticket_id": "T-7777",
+            "mismatch": false
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "must_not_include",
+          "pass": true,
+          "details": {
+            "found_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": false,
+          "details": {
+            "failed": [
+              {
+                "call_id": "c50",
+                "status": "timeout"
+              }
+            ]
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tool_required",
+          "pass": true,
+          "details": {
+            "missing_tools": []
+          }
+        },
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "must_not_include",
+          "pass": true,
+          "details": {
+            "found_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": false,
+          "details": {
+            "failed": [
+              {
+                "call_id": "c50",
+                "status": "timeout"
+              }
+            ]
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738044300001,
+      "new_root": "tool_failure"
+    },
+    {
+      "case_id": "improve_001",
+      "title": "Improvement case: verified fix message must appear",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": false,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-improve_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/improve_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/improve_001/new.json",
+        "baseline_case_response_key": "improve_001/baseline/case_response",
+        "new_case_response_key": "improve_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "ok",
+          "issues": []
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "must_include",
+          "pass": false,
+          "details": {
+            "missing_phrases": [
+              "Verified fix"
+            ]
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "missing_phrases": []
+          }
+        },
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1738044500000,
+      "baseline_root": "unknown"
+    },
+    {
+      "case_id": "fetch_http_500_001",
+      "title": "Runner fetch failure: HTTP 500 with JSON body",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "http_error",
+          "details": {
+            "timeout_ms": 15000,
+            "http_status": 500,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-fetch_http_500_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "new_failure_body_href": "assets/runner_failure/fetch_http_500_001/new/fetch_http_500_001.new.attempt3.body.bin",
+        "new_failure_meta_href": "assets/runner_failure/fetch_http_500_001/new/fetch_http_500_001.new.attempt3.body.meta.json",
+        "new_failure_body_key": "fetch_http_500_001/new/runner_failure_body",
+        "new_failure_meta_key": "fetch_http_500_001/new/runner_failure_meta",
+        "baseline_case_response_href": "assets/raw/case_responses/fetch_http_500_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fetch_http_500_001/new.json",
+        "baseline_case_response_key": "fetch_http_500_001/baseline/case_response",
+        "new_case_response_key": "fetch_http_500_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=http_error · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "fetch_http_500_001/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1771274695999,
+      "failure_summary": {
+        "new": {
+          "class": "http_error",
+          "http_status": 500,
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "fetch_invalid_json_001",
+      "title": "Runner fetch failure: 200 OK but invalid JSON body (HTML)",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "invalid_json",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 1
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-fetch_invalid_json_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "new_failure_body_href": "assets/runner_failure/fetch_invalid_json_001/new/fetch_invalid_json_001.new.attempt1.invalid_json.body.txt",
+        "new_failure_meta_href": "assets/runner_failure/fetch_invalid_json_001/new/fetch_invalid_json_001.new.attempt1.invalid_json.body.meta.json",
+        "new_failure_body_key": "fetch_invalid_json_001/new/runner_failure_body",
+        "new_failure_meta_key": "fetch_invalid_json_001/new/runner_failure_meta",
+        "baseline_case_response_href": "assets/raw/case_responses/fetch_invalid_json_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fetch_invalid_json_001/new.json",
+        "baseline_case_response_key": "fetch_invalid_json_001/baseline/case_response",
+        "new_case_response_key": "fetch_invalid_json_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=invalid_json · error_name=SyntaxError · error=Expected double-quoted property name in JSON at position 28 (line 1 column 29) · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "fetch_invalid_json_001/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1771274696848,
+      "failure_summary": {
+        "new": {
+          "class": "invalid_json",
+          "timeout_ms": 15000,
+          "attempts": 1
+        }
+      }
+    },
+    {
+      "case_id": "fetch_timeout_001",
+      "title": "Runner fetch failure: request timeout (server stalls)",
+      "suite": "correctness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "timeout",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-fetch_timeout_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/fetch_timeout_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fetch_timeout_001/new.json",
+        "baseline_case_response_key": "fetch_timeout_001/baseline/case_response",
+        "new_case_response_key": "fetch_timeout_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=timeout · error_name=AbortError · error=This operation was aborted · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "fetch_timeout_001/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1771274696852,
+      "failure_summary": {
+        "new": {
+          "class": "timeout",
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "fetch_network_drop_001",
+      "title": "Runner fetch failure: connection drop (network_error)",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "network_error",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-fetch_network_drop_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/fetch_network_drop_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/fetch_network_drop_001/new.json",
+        "baseline_case_response_key": "fetch_network_drop_001/baseline/case_response",
+        "new_case_response_key": "fetch_network_drop_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=network_error · error_name=TypeError · error=fetch failed · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "fetch_network_drop_001/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1771274742691,
+      "failure_summary": {
+        "new": {
+          "class": "network_error",
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "matrix_net_http_500_small",
+      "title": "Network: HTTP 500 with small body",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "http_error",
+          "details": {
+            "timeout_ms": 15000,
+            "http_status": 500,
+            "attempt": 3
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "http_error",
+          "details": {
+            "timeout_ms": 15000,
+            "http_status": 500,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_net_http_500_small.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_failure_body_href": "assets/runner_failure/matrix_net_http_500_small/baseline/matrix_net_http_500_small.baseline.attempt3.body.bin",
+        "baseline_failure_meta_href": "assets/runner_failure/matrix_net_http_500_small/baseline/matrix_net_http_500_small.baseline.attempt3.body.meta.json",
+        "baseline_failure_body_key": "matrix_net_http_500_small/baseline/runner_failure_body",
+        "baseline_failure_meta_key": "matrix_net_http_500_small/baseline/runner_failure_meta",
+        "new_failure_body_href": "assets/runner_failure/matrix_net_http_500_small/new/matrix_net_http_500_small.new.attempt3.body.bin",
+        "new_failure_meta_href": "assets/runner_failure/matrix_net_http_500_small/new/matrix_net_http_500_small.new.attempt3.body.meta.json",
+        "new_failure_body_key": "matrix_net_http_500_small/new/runner_failure_body",
+        "new_failure_meta_key": "matrix_net_http_500_small/new/runner_failure_meta",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_net_http_500_small/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_net_http_500_small/new.json",
+        "baseline_case_response_key": "matrix_net_http_500_small/baseline/case_response",
+        "new_case_response_key": "matrix_net_http_500_small/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=http_error · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_http_500_small/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=http_error · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_http_500_small/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "http_error",
+          "http_status": 500,
+          "timeout_ms": 15000,
+          "attempts": 3
+        },
+        "new": {
+          "class": "http_error",
+          "http_status": 500,
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "matrix_net_http_500_large",
+      "title": "Network: HTTP 500 with large body (truncation)",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "http_error",
+          "details": {
+            "timeout_ms": 15000,
+            "http_status": 500,
+            "attempt": 3
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "http_error",
+          "details": {
+            "timeout_ms": 15000,
+            "http_status": 500,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_net_http_500_large.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_failure_body_href": "assets/runner_failure/matrix_net_http_500_large/baseline/matrix_net_http_500_large.baseline.attempt3.body.bin",
+        "baseline_failure_meta_href": "assets/runner_failure/matrix_net_http_500_large/baseline/matrix_net_http_500_large.baseline.attempt3.body.meta.json",
+        "baseline_failure_body_key": "matrix_net_http_500_large/baseline/runner_failure_body",
+        "baseline_failure_meta_key": "matrix_net_http_500_large/baseline/runner_failure_meta",
+        "new_failure_body_href": "assets/runner_failure/matrix_net_http_500_large/new/matrix_net_http_500_large.new.attempt3.body.bin",
+        "new_failure_meta_href": "assets/runner_failure/matrix_net_http_500_large/new/matrix_net_http_500_large.new.attempt3.body.meta.json",
+        "new_failure_body_key": "matrix_net_http_500_large/new/runner_failure_body",
+        "new_failure_meta_key": "matrix_net_http_500_large/new/runner_failure_meta",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_net_http_500_large/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_net_http_500_large/new.json",
+        "baseline_case_response_key": "matrix_net_http_500_large/baseline/case_response",
+        "new_case_response_key": "matrix_net_http_500_large/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=http_error · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_http_500_large/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=http_error · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_http_500_large/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "http_error",
+          "http_status": 500,
+          "timeout_ms": 15000,
+          "attempts": 3
+        },
+        "new": {
+          "class": "http_error",
+          "http_status": 500,
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "matrix_net_timeout",
+      "title": "Network: timeout",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "timeout",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "timeout",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_net_timeout.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_net_timeout/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_net_timeout/new.json",
+        "baseline_case_response_key": "matrix_net_timeout/baseline/case_response",
+        "new_case_response_key": "matrix_net_timeout/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=timeout · error_name=AbortError · error=This operation was aborted · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_timeout/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=timeout · error_name=AbortError · error=This operation was aborted · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_timeout/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "timeout",
+          "timeout_ms": 15000,
+          "attempts": 3
+        },
+        "new": {
+          "class": "timeout",
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "matrix_net_drop",
+      "title": "Network: connection drop",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "network_error",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "network_error",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_net_drop.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_net_drop/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_net_drop/new.json",
+        "baseline_case_response_key": "matrix_net_drop/baseline/case_response",
+        "new_case_response_key": "matrix_net_drop/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=network_error · error_name=TypeError · error=fetch failed · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_drop/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=network_error · error_name=TypeError · error=fetch failed · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_drop/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "network_error",
+          "timeout_ms": 15000,
+          "attempts": 3
+        },
+        "new": {
+          "class": "network_error",
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "matrix_net_partial",
+      "title": "Network: partial response then drop",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "network_error",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "network_error",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 3
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_net_partial.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_net_partial/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_net_partial/new.json",
+        "baseline_case_response_key": "matrix_net_partial/baseline/case_response",
+        "new_case_response_key": "matrix_net_partial/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=network_error · error_name=TypeError · error=fetch failed · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_partial/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "high",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=network_error · error_name=TypeError · error=fetch failed · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_net_partial/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "network_error",
+          "timeout_ms": 15000,
+          "attempts": 3
+        },
+        "new": {
+          "class": "network_error",
+          "timeout_ms": 15000,
+          "attempts": 3
+        }
+      }
+    },
+    {
+      "case_id": "matrix_data_empty_body",
+      "title": "Data: empty body with 200 OK",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "invalid_json",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 1
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "invalid_json",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 1
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_empty_body.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_failure_body_href": "assets/runner_failure/matrix_data_empty_body/baseline/matrix_data_empty_body.baseline.attempt1.invalid_json.body.txt",
+        "baseline_failure_meta_href": "assets/runner_failure/matrix_data_empty_body/baseline/matrix_data_empty_body.baseline.attempt1.invalid_json.body.meta.json",
+        "baseline_failure_body_key": "matrix_data_empty_body/baseline/runner_failure_body",
+        "baseline_failure_meta_key": "matrix_data_empty_body/baseline/runner_failure_meta",
+        "new_failure_body_href": "assets/runner_failure/matrix_data_empty_body/new/matrix_data_empty_body.new.attempt1.invalid_json.body.txt",
+        "new_failure_meta_href": "assets/runner_failure/matrix_data_empty_body/new/matrix_data_empty_body.new.attempt1.invalid_json.body.meta.json",
+        "new_failure_body_key": "matrix_data_empty_body/new/runner_failure_body",
+        "new_failure_meta_key": "matrix_data_empty_body/new/runner_failure_meta",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_empty_body/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_empty_body/new.json",
+        "baseline_case_response_key": "matrix_data_empty_body/baseline/case_response",
+        "new_case_response_key": "matrix_data_empty_body/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=invalid_json · error_name=SyntaxError · error=Unexpected end of JSON input · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_data_empty_body/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=invalid_json · error_name=SyntaxError · error=Unexpected end of JSON input · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_data_empty_body/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "invalid_json",
+          "timeout_ms": 15000,
+          "attempts": 1
+        },
+        "new": {
+          "class": "invalid_json",
+          "timeout_ms": 15000,
+          "attempts": 1
+        }
+      }
+    },
+    {
+      "case_id": "matrix_data_invalid_json",
+      "title": "Data: invalid JSON payload",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "invalid_json",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 1
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "invalid_json",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 1
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_invalid_json.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_failure_body_href": "assets/runner_failure/matrix_data_invalid_json/baseline/matrix_data_invalid_json.baseline.attempt1.invalid_json.body.txt",
+        "baseline_failure_meta_href": "assets/runner_failure/matrix_data_invalid_json/baseline/matrix_data_invalid_json.baseline.attempt1.invalid_json.body.meta.json",
+        "baseline_failure_body_key": "matrix_data_invalid_json/baseline/runner_failure_body",
+        "baseline_failure_meta_key": "matrix_data_invalid_json/baseline/runner_failure_meta",
+        "new_failure_body_href": "assets/runner_failure/matrix_data_invalid_json/new/matrix_data_invalid_json.new.attempt1.invalid_json.body.txt",
+        "new_failure_meta_href": "assets/runner_failure/matrix_data_invalid_json/new/matrix_data_invalid_json.new.attempt1.invalid_json.body.meta.json",
+        "new_failure_body_key": "matrix_data_invalid_json/new/runner_failure_body",
+        "new_failure_meta_key": "matrix_data_invalid_json/new/runner_failure_meta",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_invalid_json/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_invalid_json/new.json",
+        "baseline_case_response_key": "matrix_data_invalid_json/baseline/case_response",
+        "new_case_response_key": "matrix_data_invalid_json/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=invalid_json · error_name=SyntaxError · error=Unexpected token ',', \"{\"bad\": ,,,}\" is not valid JSON · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_data_invalid_json/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=invalid_json · error_name=SyntaxError · error=Unexpected token ',', \"{\"bad\": ,,,}\" is not valid JSON · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_data_invalid_json/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "invalid_json",
+          "timeout_ms": 15000,
+          "attempts": 1
+        },
+        "new": {
+          "class": "invalid_json",
+          "timeout_ms": 15000,
+          "attempts": 1
+        }
+      }
+    },
+    {
+      "case_id": "matrix_data_wrong_types",
+      "title": "Data: wrong types for fields",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_wrong_types.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_wrong_types/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_wrong_types/new.json",
+        "baseline_case_response_key": "matrix_data_wrong_types/baseline/case_response",
+        "new_case_response_key": "matrix_data_wrong_types/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "broken",
+          "issues": [
+            "events_not_array",
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "broken",
+          "issues": [
+            "events_not_array",
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "missing final_output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "missing final_output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "missing final_output"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "matrix_data_missing_fields",
+      "title": "Data: missing required fields",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_missing_fields.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_missing_fields/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_missing_fields/new.json",
+        "baseline_case_response_key": "matrix_data_missing_fields/baseline/case_response",
+        "new_case_response_key": "matrix_data_missing_fields/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "broken",
+          "issues": [
+            "events_not_array",
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "broken",
+          "issues": [
+            "events_not_array",
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "missing final_output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "missing final_output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "missing final_output"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "matrix_data_extra_fields",
+      "title": "Data: extra fields present",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_extra_fields.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_extra_fields/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_extra_fields/new.json",
+        "baseline_case_response_key": "matrix_data_extra_fields/baseline/case_response",
+        "new_case_response_key": "matrix_data_extra_fields/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "broken",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "broken",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "matrix_data_large_json_1mb",
+      "title": "Data: large JSON body (~1MB)",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_large_json_1mb.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_large_json_1mb/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_large_json_1mb/new.json",
+        "baseline_case_response_key": "matrix_data_large_json_1mb/baseline/case_response",
+        "new_case_response_key": "matrix_data_large_json_1mb/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "broken",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "broken",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "pii_in_output",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Possible PII marker in output",
+              "details": {
+                "notes": "Matched PII-like patterns in final_output"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "matrix_data_large_json_1mb/baseline/final_output"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "pii_in_output",
+              "severity": "high",
+              "confidence": "medium",
+              "title": "Possible PII marker in output",
+              "details": {
+                "notes": "Matched PII-like patterns in final_output"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "final_output",
+                  "manifest_key": "matrix_data_large_json_1mb/new/final_output"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": true
+        }
+      },
+      "risk_level": "medium",
+      "risk_tags": [
+        "pii_in_output"
+      ],
+      "gate_recommendation": "require_approval",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "matrix_data_large_json_5mb",
+      "title": "Data: large JSON body (~5MB, triggers truncation)",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present",
+          "reason_code": "invalid_json",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 1
+          }
+        },
+        "new": {
+          "status": "present",
+          "reason_code": "invalid_json",
+          "details": {
+            "timeout_ms": 15000,
+            "attempt": 1
+          }
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_large_json_5mb.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_failure_body_href": "assets/runner_failure/matrix_data_large_json_5mb/baseline/matrix_data_large_json_5mb.baseline.attempt1.success_truncated.body.bin",
+        "baseline_failure_meta_href": "assets/runner_failure/matrix_data_large_json_5mb/baseline/matrix_data_large_json_5mb.baseline.attempt1.success_truncated.body.meta.json",
+        "baseline_failure_body_key": "matrix_data_large_json_5mb/baseline/runner_failure_body",
+        "baseline_failure_meta_key": "matrix_data_large_json_5mb/baseline/runner_failure_meta",
+        "new_failure_body_href": "assets/runner_failure/matrix_data_large_json_5mb/new/matrix_data_large_json_5mb.new.attempt1.success_truncated.body.bin",
+        "new_failure_meta_href": "assets/runner_failure/matrix_data_large_json_5mb/new/matrix_data_large_json_5mb.new.attempt1.success_truncated.body.meta.json",
+        "new_failure_body_key": "matrix_data_large_json_5mb/new/runner_failure_body",
+        "new_failure_meta_key": "matrix_data_large_json_5mb/new/runner_failure_meta",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_large_json_5mb/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_large_json_5mb/new.json",
+        "baseline_case_response_key": "matrix_data_large_json_5mb/baseline/case_response",
+        "new_case_response_key": "matrix_data_large_json_5mb/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "partial",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=invalid_json · error_name=BodyTooLarge · error=Response body exceeded maxBodyBytes=2000000 and was truncated; cannot parse JSON. · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_data_large_json_5mb/baseline/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [
+            {
+              "kind": "runner_failure_detected",
+              "severity": "medium",
+              "confidence": "high",
+              "title": "Runner failure captured",
+              "details": {
+                "notes": "class=invalid_json · error_name=BodyTooLarge · error=Response body exceeded maxBodyBytes=2000000 and was truncated; cannot parse JSON. · url=http://localhost:8788/run-case",
+                "urls": [
+                  "http://localhost:8788/run-case"
+                ]
+              },
+              "evidence_refs": [
+                {
+                  "kind": "runner_failure",
+                  "manifest_key": "matrix_data_large_json_5mb/new/runner_failure"
+                }
+              ]
+            }
+          ],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [
+        "runner_failure_detected"
+      ],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "failure_summary": {
+        "baseline": {
+          "class": "invalid_json",
+          "timeout_ms": 15000,
+          "attempts": 1
+        },
+        "new": {
+          "class": "invalid_json",
+          "timeout_ms": 15000,
+          "attempts": 1
+        }
+      }
+    },
+    {
+      "case_id": "matrix_data_huge_string_900k",
+      "title": "Data: huge string payload (~900KB, valid JSON)",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_data_huge_string_900k.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_data_huge_string_900k/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_data_huge_string_900k/new.json",
+        "baseline_case_response_key": "matrix_data_huge_string_900k/baseline/case_response",
+        "new_case_response_key": "matrix_data_huge_string_900k/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "broken",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        },
+        "new": {
+          "status": "broken",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "matrix_trace_diff_001",
+      "title": "Trace: baseline has events, new missing events",
+      "suite": "robustness",
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "preventable_by_policy": false,
+      "recommended_policy_rules": [],
+      "artifacts": {
+        "replay_diff_href": "case-matrix_trace_diff_001.html",
+        "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
+        "new_run_meta_href": "assets/raw/run_meta/new.run.json",
+        "baseline_case_response_href": "assets/raw/case_responses/matrix_trace_diff_001/baseline.json",
+        "new_case_response_href": "assets/raw/case_responses/matrix_trace_diff_001/new.json",
+        "baseline_case_response_key": "matrix_trace_diff_001/baseline/case_response",
+        "new_case_response_key": "matrix_trace_diff_001/new/case_response"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok",
+          "issues": []
+        },
+        "new": {
+          "status": "broken",
+          "issues": [
+            "no_events",
+            "missing_final_output_event"
+          ]
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        },
+        "new": {
+          "signals": [],
+          "requires_gate_recommendation": false
+        }
+      },
+      "risk_level": "low",
+      "risk_tags": [],
+      "gate_recommendation": "none",
+      "assertions_baseline": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions_new": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "evidence_required_for_actions",
+          "pass": true,
+          "details": {
+            "note": "not required"
+          }
+        },
+        {
+          "name": "tool_execution",
+          "pass": true,
+          "details": {
+            "failed": []
+          }
+        },
+        {
+          "name": "hallucination_signal_check",
+          "pass": true,
+          "details": {
+            "note": "no ticket id in output"
+          }
+        }
+      ],
+      "case_ts": 1771274842255
+    }
+  ]
+}

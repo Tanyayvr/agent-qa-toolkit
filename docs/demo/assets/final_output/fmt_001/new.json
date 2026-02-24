@@ -1,0 +1,9 @@
+{
+  "content_type": "json",
+  "content": {
+    "action": "create_ticket",
+    "customer_id": "CUST-1001",
+    "summary": "App crashes on login",
+    "priority": "high"
+  }
+}

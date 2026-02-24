@@ -1,0 +1,10 @@
+{
+  "kind": "runner_invalid_json_capture",
+  "case_id": "matrix_data_empty_body",
+  "version": "new",
+  "attempt": 1,
+  "max_body_bytes": 2000000,
+  "truncated": false,
+  "bytes_written": 0,
+  "content_type": null
+}

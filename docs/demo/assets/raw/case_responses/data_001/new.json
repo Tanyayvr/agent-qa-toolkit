@@ -1,0 +1,45 @@
+{
+  "case_id": "data_001",
+  "version": "new",
+  "workflow_id": "kb_answering_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a20",
+      "action_type": "answer_question",
+      "tool_name": "none",
+      "params": {
+        "topic": "refund_policy_annual"
+      },
+      "risk_level": "low",
+      "evidence_refs": [
+        {
+          "kind": "retrieval_doc",
+          "id": "faq_refunds_v3"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "text",
+    "content": "Refunds for annual plans depend on the refund policy. Please check the policy for details."
+  },
+  "events": [
+    {
+      "type": "retrieval",
+      "ts": 1738044210100,
+      "query": "refund policy annual plans",
+      "doc_ids": [
+        "faq_refunds_v3"
+      ],
+      "snippets_hashes": [
+        "h7b2"
+      ]
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044210300,
+      "content_type": "text",
+      "content": "Refunds for annual plans depend on the refund policy. Please check the policy for details."
+    }
+  ]
+}

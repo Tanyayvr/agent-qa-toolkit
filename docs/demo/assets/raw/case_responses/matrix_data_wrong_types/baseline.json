@@ -1,0 +1,8 @@
+{
+  "case_id": "matrix_data_wrong_types",
+  "version": "baseline",
+  "workflow_id": 123,
+  "proposed_actions": "not-an-array",
+  "final_output": "oops",
+  "events": "bad"
+}

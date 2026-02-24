@@ -1,0 +1,10 @@
+{
+  "content_type": "json",
+  "content": {
+    "action": "create_ticket",
+    "customer_id": "CUST-1004",
+    "summary": "Billing page shows error 500",
+    "priority": "high",
+    "ticket_id": "T-9012"
+  }
+}

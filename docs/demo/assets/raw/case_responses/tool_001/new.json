@@ -1,0 +1,69 @@
+{
+  "case_id": "tool_001",
+  "version": "new",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a2",
+      "action_type": "create_ticket",
+      "tool_name": "create_ticket",
+      "target": {
+        "type": "ticket"
+      },
+      "params": {
+        "customer_id": "CUST-1004",
+        "summary": "Billing page shows error 500",
+        "priority": "high"
+      },
+      "risk_level": "medium",
+      "evidence_refs": []
+    }
+  ],
+  "final_output": {
+    "content_type": "json",
+    "content": {
+      "action": "create_ticket",
+      "customer_id": "CUST-1004",
+      "summary": "Billing page shows error 500",
+      "priority": "high",
+      "ticket_id": "T-9012"
+    }
+  },
+  "events": [
+    {
+      "type": "tool_call",
+      "ts": 1738044010789,
+      "call_id": "c2",
+      "action_id": "a2",
+      "tool": "create_ticket",
+      "args": {
+        "customer_id": "CUST-1004",
+        "summary": "Billing page shows error 500",
+        "priority": "high"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044011200,
+      "call_id": "c2",
+      "action_id": "a2",
+      "status": "ok",
+      "latency_ms": 411,
+      "payload_summary": {
+        "ticket_id": "T-9012"
+      }
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044011300,
+      "content_type": "json",
+      "content": {
+        "action": "create_ticket",
+        "customer_id": "CUST-1004",
+        "summary": "Billing page shows error 500",
+        "priority": "high",
+        "ticket_id": "T-9012"
+      }
+    }
+  ]
+}

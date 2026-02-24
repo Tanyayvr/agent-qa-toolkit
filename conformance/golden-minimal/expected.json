@@ -1,0 +1,12 @@
+{
+  "aepf_mode": {
+    "expected": "pass"
+  },
+  "pvip_mode": {
+    "expected": "pass"
+  },
+  "strict_mode": {
+    "expected": "fail",
+    "reason": "no manifest.sig"
+  }
+}

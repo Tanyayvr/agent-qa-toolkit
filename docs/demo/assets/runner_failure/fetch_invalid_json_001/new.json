@@ -1,0 +1,17 @@
+{
+  "type": "runner_fetch_failure",
+  "class": "invalid_json",
+  "case_id": "fetch_invalid_json_001",
+  "version": "new",
+  "url": "http://localhost:8788/run-case",
+  "attempt": 1,
+  "timeout_ms": 15000,
+  "latency_ms": 1,
+  "error_name": "SyntaxError",
+  "error_message": "Expected double-quoted property name in JSON at position 28 (line 1 column 29)",
+  "body_snippet": "{\"this_is\":\"not valid json\",,,,",
+  "max_body_bytes": 2000000,
+  "is_transient": false,
+  "full_body_saved_to": "apps/runner/runs/_runner_failures/fetch_invalid_json_001.new.attempt1.invalid_json.body.txt",
+  "full_body_meta_saved_to": "apps/runner/runs/_runner_failures/fetch_invalid_json_001.new.attempt1.invalid_json.body.meta.json"
+}

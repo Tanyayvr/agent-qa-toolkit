@@ -1,0 +1,62 @@
+{
+  "case_id": "tool_004",
+  "version": "baseline",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a80",
+      "action_type": "update_ticket_status",
+      "tool_name": "update_ticket_status",
+      "target": {
+        "type": "ticket",
+        "id": "T-2010"
+      },
+      "params": {
+        "ticket_id": "T-2010",
+        "status": "pending"
+      },
+      "risk_level": "medium",
+      "evidence_refs": [
+        {
+          "kind": "tool_result",
+          "call_id": "c80"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "text",
+    "content": "Ticket T-2010 moved to pending."
+  },
+  "events": [
+    {
+      "type": "tool_call",
+      "ts": 1738044500100,
+      "call_id": "c80",
+      "action_id": "a80",
+      "tool": "update_ticket_status",
+      "args": {
+        "ticket_id": "T-2010",
+        "status": "pending"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044500300,
+      "call_id": "c80",
+      "action_id": "a80",
+      "status": "ok",
+      "latency_ms": 220,
+      "payload_summary": {
+        "ticket_id": "T-2010",
+        "status": "pending"
+      }
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044500400,
+      "content_type": "text",
+      "content": "Ticket T-2010 moved to pending."
+    }
+  ]
+}

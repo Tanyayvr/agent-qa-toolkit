@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "manifest_key": "k1",
+      "rel_path": "case-c1.html",
+      "sha256": "deadbeef",
+      "bytes": 33
+    },
+    {
+      "manifest_key": "k2",
+      "rel_path": "compare-report.json",
+      "sha256": "8d902b3e1deecb4a0dc3745fadf79ba063a012adcebdf08efa6dcec3df7284a5",
+      "bytes": 52
+    }
+  ]
+}

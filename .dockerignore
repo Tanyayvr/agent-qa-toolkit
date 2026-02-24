@@ -1,0 +1,14 @@
+node_modules
+.git
+.DS_Store
+**/dist
+**/.cache
+**/coverage
+**/reports
+**/runs
+apps/**/reports
+apps/**/runs
+apps/**/reports/**
+apps/**/runs/**
+docs/internal
+docs/internal/**

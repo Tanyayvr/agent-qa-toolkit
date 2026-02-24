@@ -1,0 +1,4 @@
+{
+  "content_type": "text",
+  "content": "runner: fetch failure (invalid_json)\ncase_id=matrix_data_large_json_5mb\nversion=new\nattempt=1\nurl=http://localhost:8788/run-case\nerror=BodyTooLarge: Response body exceeded maxBodyBytes=2000000 and was truncated; cannot parse JSON.\nfull_body_saved_to=apps/runner/runs/_runner_failures/matrix_data_large_json_5mb.new.attempt1.success_truncated.body.bin\nfull_body_meta_saved_to=apps/runner/runs/_runner_failures/matrix_data_large_json_5mb.new.attempt1.success_truncated.body.meta.json"
+}

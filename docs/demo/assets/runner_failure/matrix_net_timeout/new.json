@@ -1,0 +1,14 @@
+{
+  "type": "runner_fetch_failure",
+  "class": "timeout",
+  "net_error_kind": "abort",
+  "case_id": "matrix_net_timeout",
+  "version": "new",
+  "url": "http://localhost:8788/run-case",
+  "attempt": 3,
+  "timeout_ms": 15000,
+  "latency_ms": 15001,
+  "error_name": "AbortError",
+  "error_message": "This operation was aborted",
+  "is_transient": true
+}

@@ -1,0 +1,14 @@
+{
+  "type": "runner_fetch_failure",
+  "class": "network_error",
+  "net_error_kind": "unknown",
+  "case_id": "fetch_network_drop_001",
+  "version": "new",
+  "url": "http://localhost:8787/run-case",
+  "attempt": 3,
+  "timeout_ms": 15000,
+  "latency_ms": 5,
+  "error_name": "TypeError",
+  "error_message": "fetch failed",
+  "is_transient": true
+}

@@ -1,0 +1,14 @@
+{
+  "case_id": "matrix_data_extra_fields",
+  "version": "new",
+  "workflow_id": "matrix_v1",
+  "proposed_actions": [],
+  "final_output": {
+    "content_type": "text",
+    "content": "ok"
+  },
+  "events": [],
+  "extra_field": {
+    "note": "extra payload field"
+  }
+}

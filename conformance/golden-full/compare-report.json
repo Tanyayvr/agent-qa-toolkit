@@ -1,0 +1,125 @@
+{
+  "contract_version": 5,
+  "report_id": "r-full",
+  "meta": {
+    "toolkit_version": "0.1.0",
+    "spec_version": "aepf-v1",
+    "generated_at": 0,
+    "run_id": "run-full"
+  },
+  "baseline_dir": "baseline/run",
+  "new_dir": "new/run",
+  "cases_path": "cases.json",
+  "summary": {
+    "baseline_pass": 1,
+    "new_pass": 1,
+    "regressions": 0,
+    "improvements": 0,
+    "quality": {
+      "transfer_class": "internal_only",
+      "redaction_status": "none"
+    },
+    "security": {
+      "total_cases": 1,
+      "cases_with_signals_new": 0,
+      "cases_with_signals_baseline": 0,
+      "signal_counts_new": {},
+      "signal_counts_baseline": {},
+      "top_signal_kinds_new": [],
+      "top_signal_kinds_baseline": []
+    },
+    "risk_summary": {
+      "low": 1,
+      "medium": 0,
+      "high": 0
+    },
+    "cases_requiring_approval": 0,
+    "cases_block_recommended": 0,
+    "data_coverage": {
+      "total_cases": 1,
+      "items_emitted": 1,
+      "missing_baseline_artifacts": 0,
+      "missing_new_artifacts": 0,
+      "broken_baseline_artifacts": 0,
+      "broken_new_artifacts": 0
+    }
+  },
+  "quality_flags": {
+    "self_contained": true,
+    "portable_paths": true,
+    "missing_assets_count": 0,
+    "path_violations_count": 0,
+    "large_payloads_count": 0,
+    "missing_assets": [],
+    "path_violations": [],
+    "large_payloads": []
+  },
+  "items": [
+    {
+      "case_id": "c1",
+      "title": "Case 1",
+      "case_status": "executed",
+      "baseline_pass": true,
+      "new_pass": true,
+      "data_availability": {
+        "baseline": {
+          "status": "present"
+        },
+        "new": {
+          "status": "present"
+        }
+      },
+      "artifacts": {
+        "replay_diff_href": "case-c1.html"
+      },
+      "trace_integrity": {
+        "baseline": {
+          "status": "ok"
+        },
+        "new": {
+          "status": "ok"
+        }
+      },
+      "security": {
+        "baseline": {
+          "signals": []
+        },
+        "new": {
+          "signals": []
+        }
+      },
+      "risk_level": "low",
+      "gate_recommendation": "none",
+      "assertions": [
+        {
+          "name": "must_include",
+          "pass": true,
+          "details": {
+            "expected": [
+              "hello"
+            ],
+            "found": [
+              "hello"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "environment": {
+    "agent_id": "agent-1",
+    "model": "gpt-4.1-mini",
+    "prompt_version": "v1",
+    "tools_version": "v1"
+  },
+  "compliance_mapping": [
+    {
+      "framework": "ISO_42001",
+      "clause": "8.4",
+      "title": "AI system testing",
+      "evidence": [
+        "case-c1.html"
+      ]
+    }
+  ]
+}

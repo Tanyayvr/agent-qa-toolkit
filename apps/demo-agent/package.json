@@ -1,0 +1,26 @@
+{
+  "__file": "apps/demo-agent/package.json",
+  "name": "demo-agent",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "eslint": "9.39.2",
+    "express": "4.22.1",
+    "redaction": "*"
+
+  },
+  "devDependencies": {
+    "@types/express": "4.17.21",
+    "@types/node": "20.11.30",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5"
+  }
+}

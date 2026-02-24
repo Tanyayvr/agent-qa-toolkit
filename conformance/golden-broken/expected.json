@@ -1,0 +1,11 @@
+{
+  "aepf_mode": {
+    "expected": "fail"
+  },
+  "pvip_mode": {
+    "expected": "fail"
+  },
+  "strict_mode": {
+    "expected": "fail"
+  }
+}

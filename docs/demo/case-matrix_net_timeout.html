@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Replay diff · matrix_net_timeout</title>
+<style>
+  :root {
+    font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", ui-sans-serif, system-ui;
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #1b2a3a 0%, transparent 55%),
+      radial-gradient(900px 600px at 90% -20%, #2d1f32 0%, transparent 55%),
+      #0b0d10;
+    color: #e8eaed;
+  }
+  a { color: #8ab4f8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1500px; margin: 0 auto; padding: 24px; }
+  .top { display:flex; justify-content: space-between; align-items:center; gap: 12px; }
+  .badge { display:inline-block; padding: 2px 8px; border-radius: 999px; background:#1b1f27; border:1px solid #2b303b; color:#cbd5e1; font-size:12px; }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .col { background:#0f1217; border:1px solid #232836; border-radius: 16px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+  .h2 { font-size: 18px; font-weight: 800; margin: 0 0 6px 0; }
+  .h3 { font-size: 14px; font-weight: 700; margin: 0; }
+  .muted { color:#9aa4b2; font-size: 13px; }
+  .mt8 { margin-top: 8px; }
+  .mt12 { margin-top: 12px; }
+  .mt16 { margin-top: 16px; }
+  code { color:#cdd6f4; }
+  .pre { white-space: pre-wrap; word-break: break-word; background:#0b0d10; border:1px solid #232836; border-radius: 12px; padding: 10px; overflow:auto; }
+  .pre.sm { font-size: 12px; }
+  .table { width:100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  .table th, .table td { border-top:1px solid #232836; padding: 8px; vertical-align: top; }
+  .table th { text-align:left; color:#cbd5e1; font-weight:700; }
+  .box { background:#0b0d10; border:1px solid #232836; border-radius: 12px; padding: 10px; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div style="font-size:20px;font-weight:800;">Replay diff · matrix_net_timeout</div>
+        <div class="muted">case_id: <span class="badge">matrix_net_timeout</span></div>
+      </div>
+      <div>
+        <a href="report.html">Back to report</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      
+<div class="col">
+  <div class="h2">Baseline</div>
+  <div class="muted">workflow_id: (none)</div>
+
+  <div class="mt12 h3">Final output</div>
+  <pre class="pre">runner: fetch failure (timeout)
+case_id=matrix_net_timeout
+version=baseline
+attempt=3
+url=http://localhost:8788/run-case
+net_error_kind=abort
+is_transient=true
+error=AbortError: This operation was aborted</pre>
+
+  <div class="mt12 h3">Proposed actions</div>
+  <div class="muted">No proposed_actions</div>
+
+  <div class="mt12 h3">Runner failure</div>
+  <div class="box"><div><b>class</b>: timeout</div><div><b>attempt</b>: 3</div><div><b>timeout_ms</b>: 15000</div><div><b>latency_ms</b>: 15001</div><div><b>url</b>: <code>http://localhost:8788/run-case</code></div><div><b>error</b>: AbortError: This operation was aborted</div></div>
+
+  <div class="mt12 h3">Events</div>
+  <div class="muted">No events</div>
+</div>
+      
+<div class="col">
+  <div class="h2">New</div>
+  <div class="muted">workflow_id: (none)</div>
+
+  <div class="mt12 h3">Final output</div>
+  <pre class="pre">runner: fetch failure (timeout)
+case_id=matrix_net_timeout
+version=new
+attempt=3
+url=http://localhost:8788/run-case
+net_error_kind=abort
+is_transient=true
+error=AbortError: This operation was aborted</pre>
+
+  <div class="mt12 h3">Proposed actions</div>
+  <div class="muted">No proposed_actions</div>
+
+  <div class="mt12 h3">Runner failure</div>
+  <div class="box"><div><b>class</b>: timeout</div><div><b>attempt</b>: 3</div><div><b>timeout_ms</b>: 15000</div><div><b>latency_ms</b>: 15001</div><div><b>url</b>: <code>http://localhost:8788/run-case</code></div><div><b>error</b>: AbortError: This operation was aborted</div></div>
+
+  <div class="mt12 h3">Events</div>
+  <div class="muted">No events</div>
+</div>
+    </div>
+  </div>
+</body>
+</html>

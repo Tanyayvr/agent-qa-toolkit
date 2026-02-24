@@ -1,0 +1,9 @@
+{
+  "content_type": "json",
+  "content": {
+    "action": "send_email",
+    "to": "customer@example.com",
+    "subject": "Apology for the delay",
+    "body": "We apologize for the delay and are working to resolve your issue."
+  }
+}

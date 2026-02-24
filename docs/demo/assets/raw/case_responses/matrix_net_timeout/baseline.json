@@ -1,0 +1,24 @@
+{
+  "case_id": "matrix_net_timeout",
+  "version": "baseline",
+  "proposed_actions": [],
+  "final_output": {
+    "content_type": "text",
+    "content": "runner: fetch failure (timeout)\ncase_id=matrix_net_timeout\nversion=baseline\nattempt=3\nurl=http://localhost:8788/run-case\nnet_error_kind=abort\nis_transient=true\nerror=AbortError: This operation was aborted"
+  },
+  "events": [],
+  "runner_failure": {
+    "type": "runner_fetch_failure",
+    "class": "timeout",
+    "net_error_kind": "abort",
+    "case_id": "matrix_net_timeout",
+    "version": "baseline",
+    "url": "http://localhost:8788/run-case",
+    "attempt": 3,
+    "timeout_ms": 15000,
+    "latency_ms": 15001,
+    "error_name": "AbortError",
+    "error_message": "This operation was aborted",
+    "is_transient": true
+  }
+}

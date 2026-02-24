@@ -1,0 +1,77 @@
+{
+  "case_id": "tool_003",
+  "version": "baseline",
+  "workflow_id": "support_ticketing_v1",
+  "proposed_actions": [
+    {
+      "action_id": "a70",
+      "action_type": "create_ticket",
+      "tool_name": "create_ticket",
+      "target": {
+        "type": "ticket"
+      },
+      "params": {
+        "summary": "Production outage affecting checkout",
+        "priority": "high",
+        "type": "incident"
+      },
+      "risk_level": "high",
+      "risk_tags": [
+        "incident"
+      ],
+      "evidence_refs": [
+        {
+          "kind": "retrieval_doc",
+          "id": "incident_playbook_v1"
+        }
+      ]
+    }
+  ],
+  "final_output": {
+    "content_type": "text",
+    "content": "Incident logged. Created incident ticket T-5555 for the checkout outage."
+  },
+  "events": [
+    {
+      "type": "retrieval",
+      "ts": 1738044399000,
+      "query": "incident playbook checkout outage",
+      "doc_ids": [
+        "incident_playbook_v1"
+      ],
+      "snippets_hashes": [
+        "i9p1"
+      ]
+    },
+    {
+      "type": "tool_call",
+      "ts": 1738044400100,
+      "call_id": "c70",
+      "action_id": "a70",
+      "tool": "create_ticket",
+      "args": {
+        "summary": "Production outage affecting checkout",
+        "priority": "high",
+        "type": "incident"
+      }
+    },
+    {
+      "type": "tool_result",
+      "ts": 1738044400400,
+      "call_id": "c70",
+      "action_id": "a70",
+      "status": "ok",
+      "latency_ms": 300,
+      "payload_summary": {
+        "ticket_id": "T-5555",
+        "type": "incident"
+      }
+    },
+    {
+      "type": "final_output",
+      "ts": 1738044400500,
+      "content_type": "text",
+      "content": "Incident logged. Created incident ticket T-5555 for the checkout outage."
+    }
+  ]
+}

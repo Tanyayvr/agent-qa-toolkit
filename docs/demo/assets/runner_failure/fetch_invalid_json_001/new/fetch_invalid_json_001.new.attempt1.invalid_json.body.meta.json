@@ -1,0 +1,10 @@
+{
+  "kind": "runner_invalid_json_capture",
+  "case_id": "fetch_invalid_json_001",
+  "version": "new",
+  "attempt": 1,
+  "max_body_bytes": 2000000,
+  "truncated": false,
+  "bytes_written": 31,
+  "content_type": "application/json; charset=utf-8"
+}

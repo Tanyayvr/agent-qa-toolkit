@@ -1,0 +1,684 @@
+[
+  {
+    "id": "fmt_001",
+    "title": "Return JSON: create_ticket payload",
+    "input": {
+      "user": "Create a support ticket for customer CUST-1001: 'App crashes on login'. Return JSON only."
+    },
+    "expected": {
+      "json_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "customer_id",
+          "summary",
+          "priority"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "create_ticket"
+          },
+          "customer_id": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        }
+      },
+      "tool_required": [
+        "create_ticket"
+      ],
+      "must_not_include": [
+        "CUST-9999"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "format",
+        "tool"
+      ],
+      "severity": "high",
+      "kind": "tool_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "fmt_002",
+    "title": "Return JSON: update_ticket_status payload",
+    "input": {
+      "user": "Set ticket T-2002 status to 'resolved'. Return JSON only."
+    },
+    "expected": {
+      "action_required": [
+        "get_ticket",
+        "update_ticket_status"
+      ],
+      "evidence_required_for_actions": true,
+      "tool_required": [
+        "get_ticket",
+        "update_ticket_status"
+      ],
+      "tool_sequence": [
+        "get_ticket",
+        "update_ticket_status"
+      ],
+      "json_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "ticket_id",
+          "status"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "update_ticket_status"
+          },
+          "ticket_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "pending",
+              "resolved"
+            ]
+          }
+        }
+      }
+    },
+    "metadata": {
+      "tags": [
+        "format",
+        "tool"
+      ],
+      "severity": "medium",
+      "kind": "tool_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "fmt_003",
+    "title": "Return JSON: send_email draft payload",
+    "input": {
+      "user": "Draft an email to customer CUST-1003 apologizing for the delay. Return JSON only."
+    },
+    "expected": {
+      "json_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "to",
+          "subject",
+          "body"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "send_email"
+          },
+          "to": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        }
+      },
+      "tool_required": [
+        "send_email"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "format",
+        "tool"
+      ],
+      "severity": "low",
+      "kind": "tool_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "tool_001",
+    "title": "Must use get_customer before creating ticket",
+    "input": {
+      "user": "Customer CUST-1004 says: 'Billing page shows error 500'. Create a ticket."
+    },
+    "expected": {
+      "tool_required": [
+        "get_customer",
+        "create_ticket"
+      ],
+      "tool_sequence": [
+        "get_customer",
+        "create_ticket"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "wrong_tool",
+        "sequence"
+      ],
+      "severity": "high",
+      "kind": "tool_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "tool_002",
+    "title": "Must search knowledge base before replying",
+    "input": {
+      "user": "User asks: 'How do I reset my password?' Provide the best answer."
+    },
+    "expected": {
+      "tool_required": [
+        "search_kb"
+      ],
+      "must_include": [
+        "reset your password"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "wrong_tool",
+        "kb"
+      ],
+      "severity": "medium",
+      "kind": "rag_or_tool_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "tool_003",
+    "title": "Must create ticket (not just answer) for outage report",
+    "input": {
+      "user": "We have a production outage affecting checkout. Log an incident ticket and return confirmation."
+    },
+    "expected": {
+      "tool_required": [
+        "create_ticket"
+      ],
+      "must_include": [
+        "incident"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "wrong_tool",
+        "tool_required"
+      ],
+      "severity": "high",
+      "kind": "tool_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "tool_004",
+    "title": "Must update ticket status when asked",
+    "input": {
+      "user": "Ticket T-2010 should be moved to pending while we wait for logs. Do it."
+    },
+    "expected": {
+      "tool_required": [
+        "update_ticket_status"
+      ],
+      "must_include": [
+        "pending"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "wrong_tool",
+        "tool_required"
+      ],
+      "severity": "medium",
+      "kind": "tool_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "data_001",
+    "title": "RAG: must retrieve policy doc before answering refund question",
+    "input": {
+      "user": "What is our refund policy for annual plans? Answer with a short summary."
+    },
+    "expected": {
+      "retrieval_required": {
+        "doc_ids": [
+          "policy_refund_annual_v1"
+        ]
+      },
+      "must_include": [
+        "refund"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "missing_data",
+        "rag"
+      ],
+      "severity": "high",
+      "kind": "rag_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "data_002",
+    "title": "RAG: must retrieve SLA doc before stating response times",
+    "input": {
+      "user": "What is the guaranteed first response time for Priority High tickets?"
+    },
+    "expected": {
+      "retrieval_required": {
+        "doc_ids": [
+          "sla_support_v2"
+        ]
+      },
+      "must_include": [
+        "Priority High"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "missing_data",
+        "rag"
+      ],
+      "severity": "medium",
+      "kind": "rag_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "fail_001",
+    "title": "Tool failure: simulate timeout on create_ticket",
+    "input": {
+      "user": "Create a ticket for customer CUST-9999: 'Cannot access account'. Return confirmation."
+    },
+    "expected": {
+      "tool_required": [
+        "create_ticket"
+      ],
+      "must_include": [
+        "ticket"
+      ],
+      "must_not_include": [
+        "success",
+        "completed",
+        "ticket created"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "tool_failure"
+      ],
+      "severity": "high",
+      "kind": "tool_agent"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "improve_001",
+    "title": "Improvement case: verified fix message must appear",
+    "input": {
+      "user": "Provide a short status update after applying the fix."
+    },
+    "expected": {
+      "must_include": [
+        "Verified fix"
+      ]
+    },
+    "metadata": {
+      "tags": [
+        "improvement"
+      ],
+      "severity": "low",
+      "kind": "text_agent"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "fetch_http_500_001",
+    "title": "Runner fetch failure: HTTP 500 with JSON body",
+    "input": {
+      "user": "Trigger an HTTP 500 error from the agent transport layer."
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "transport",
+        "http_error"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "fetch_invalid_json_001",
+    "title": "Runner fetch failure: 200 OK but invalid JSON body (HTML)",
+    "input": {
+      "user": "Trigger a 200 OK response with non-JSON body."
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "transport",
+        "invalid_json"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "fetch_timeout_001",
+    "title": "Runner fetch failure: request timeout (server stalls)",
+    "input": {
+      "user": "Trigger a request timeout from the agent (no response within timeout)."
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "transport",
+        "timeout"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "correctness"
+  },
+  {
+    "id": "fetch_network_drop_001",
+    "title": "Runner fetch failure: connection drop (network_error)",
+    "input": {
+      "user": "Trigger a network connection drop during the request."
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "transport",
+        "network_error"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_net_http_500_small",
+    "title": "Network: HTTP 500 with small body",
+    "input": {
+      "user": "Trigger HTTP 500 (small body)"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "network",
+        "http_500"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_net_http_500_large",
+    "title": "Network: HTTP 500 with large body (truncation)",
+    "input": {
+      "user": "Trigger HTTP 500 (large body)"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "network",
+        "http_500",
+        "large_body"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_net_timeout",
+    "title": "Network: timeout",
+    "input": {
+      "user": "Trigger timeout (stall response)"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "network",
+        "timeout"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_net_drop",
+    "title": "Network: connection drop",
+    "input": {
+      "user": "Trigger socket drop"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "network",
+        "drop"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_net_partial",
+    "title": "Network: partial response then drop",
+    "input": {
+      "user": "Trigger partial response then drop"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "network",
+        "partial"
+      ],
+      "severity": "high",
+      "kind": "transport_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_empty_body",
+    "title": "Data: empty body with 200 OK",
+    "input": {
+      "user": "Return empty body"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "empty_body"
+      ],
+      "severity": "high",
+      "kind": "data_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_invalid_json",
+    "title": "Data: invalid JSON payload",
+    "input": {
+      "user": "Return invalid JSON"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "invalid_json"
+      ],
+      "severity": "high",
+      "kind": "data_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_wrong_types",
+    "title": "Data: wrong types for fields",
+    "input": {
+      "user": "Return wrong types"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "wrong_types"
+      ],
+      "severity": "medium",
+      "kind": "data_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_missing_fields",
+    "title": "Data: missing required fields",
+    "input": {
+      "user": "Return minimal fields only"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "missing_fields"
+      ],
+      "severity": "medium",
+      "kind": "data_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_extra_fields",
+    "title": "Data: extra fields present",
+    "input": {
+      "user": "Return extra fields"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "extra_fields"
+      ],
+      "severity": "low",
+      "kind": "data_variation"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_large_json_1mb",
+    "title": "Data: large JSON body (~1MB)",
+    "input": {
+      "user": "Return large JSON payload (1MB)"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "large",
+        "1mb"
+      ],
+      "severity": "low",
+      "kind": "data_variation"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_large_json_5mb",
+    "title": "Data: large JSON body (~5MB, triggers truncation)",
+    "input": {
+      "user": "Return large JSON payload (5MB)"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "large",
+        "5mb"
+      ],
+      "severity": "high",
+      "kind": "data_failure"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_data_huge_string_900k",
+    "title": "Data: huge string payload (~900KB, valid JSON)",
+    "input": {
+      "user": "Return huge string within valid JSON"
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "data",
+        "large",
+        "string"
+      ],
+      "severity": "medium",
+      "kind": "data_variation"
+    },
+    "suite": "robustness"
+  },
+  {
+    "id": "matrix_trace_diff_001",
+    "title": "Trace: baseline has events, new missing events",
+    "input": {
+      "user": "Return identical output but drop events in new."
+    },
+    "expected": {},
+    "metadata": {
+      "tags": [
+        "matrix",
+        "trace",
+        "events"
+      ],
+      "severity": "low",
+      "kind": "trace_variation"
+    },
+    "suite": "robustness"
+  }
+]
