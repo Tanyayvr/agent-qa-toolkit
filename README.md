@@ -11,7 +11,7 @@ did it call the right tools, in the right order, with safe parameters — and ca
 
 Portable Evidence Packs · Regression Diffs · CI Gates · Security Signals
 
-**Why this exists:** most observability tools trace what happened, but do not produce a portable, signed, offline‑verifiable artifact you can attach to a ticket or gate in CI. This toolkit does — via Evidence Packs + per‑case CI gate decisions + offline artifacts.
+**Why this exists:** most observability tools trace what happened, but do not produce a portable, signed, offline‑verifiable artifact you can attach to a ticket or gate in CI. This toolkit does - via Evidence Packs + per‑case CI gate decisions + offline artifacts.
 
 **Quick links:**
 [Quickstart](#quickstart) · [Live report](https://tanyayvr.github.io/agent-qa-toolkit/demo/report.html) · [Demo bundle](#demo-bundle) · [CI usage](docs/ci.md) · [Evidence Pack contract](#evidence-pack-format) · [Security scanners](docs/security-scanners.md) · [Architecture](docs/architecture.md)
@@ -31,12 +31,12 @@ Portable Evidence Packs · Regression Diffs · CI Gates · Security Signals
 ## What You Get
 Turn agent runs into a portable evidence pack you can share and gate in CI:
 
-**Incident → Evidence Pack → RCA → Risk/Gate Decision**
+**Incident - Evidence Pack - RCA - Risk/Gate Decision**
 
 You get:
 - Baseline vs New regression runs
 - Per‑case replay diff (`case-<case_id>.html`) for human triage
-- Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
+- Machine report (`compare-report.json`) as the source of truth for CI dashboards and gating
 - Root cause attribution (RCA) and policy hints
 - Security signals (6 scanners + optional entropy scanner)
 
@@ -87,8 +87,8 @@ Live demo (no install): https://tanyayvr.github.io/agent-qa-toolkit/demo/report.
 ---
 
 ## Evidence Pack Format
-Evaluator produces a **self‑contained report directory**:
-- `report.html` — overview report
+Evaluator produces a self‑contained report directory:
+- `report.html` - overview report
 - `case-<case_id>.html` — per‑case replay diff
 - `compare-report.json` — CI contract
 - `assets/` — evidence files
@@ -174,5 +174,5 @@ npm test
 ---
 
 ## Pilot Program
-We’re onboarding **5–10 teams** in the pilot cohort.  
+We’re onboarding 5 teams in the pilot cohort.  
 Apply: https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_request.yml
