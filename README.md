@@ -68,7 +68,16 @@ https://tanyayvr.github.io/agent-qa-toolkit/demo/report.html
 ---
 
 ## Demo Bundle
-Open an example pack:\n`examples/demo-bundle.zip`\n\nLive demo (no install):\nhttps://tanyayvr.github.io/agent-qa-toolkit/demo/report.html
+Open an example pack: `examples/demo-bundle.zip`  
+Live demo (no install): https://tanyayvr.github.io/agent-qa-toolkit/demo/report.html
+
+## Screenshots
+![Report 1](docs/assets/screenshots/01.png)
+![Report 2](docs/assets/screenshots/02.png)
+![Report 3](docs/assets/screenshots/03.png)
+![Report 4](docs/assets/screenshots/04.png)
+![Report 5](docs/assets/screenshots/05.png)
+![Report 6](docs/assets/screenshots/06.png)
 
 ---
 
