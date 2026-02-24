@@ -7,7 +7,7 @@
 
 **The only open‑source regression testing framework purpose‑built for tool‑using AI agents.**
 Most tools measure *model quality*. We measure *agent behavior*:
-did it call the right tools, in the right order, with safe parameters — and can you **prove it**?
+did it call the right tools, in the right order, with safe parameters — and can you  prive it?
 
 Portable Evidence Packs · Regression Diffs · CI Gates · Security Signals
 
