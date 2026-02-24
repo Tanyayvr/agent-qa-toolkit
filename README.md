@@ -40,13 +40,18 @@ You get:
 - Root cause attribution (RCA) and policy hints
 - Security signals (6 scanners + optional entropy scanner)
 
-## Comparison
-| Feature | Agent QA Toolkit | LangSmith/Langfuse | Custom scripts |
-|---|:---:|:---:|:---:|
-| Portable evidence pack | ✅ | ❌ | ❌ |
-| Offline, self‑hosted | ✅ | ❌ | ✅ |
-| Per‑case CI gate decision | ✅ | ❌ | ❌ |
-| Security scanners in pipeline | ✅ | ❌ | ❌ |
+## What makes this different
+|  | Agent QA Toolkit | LangSmith / Langfuse | Custom eval scripts |
+|--|:---:|:---:|:---:|
+| Portable offline artifact | ✅ | ❌ | ❌ |
+| CI gate (single JSON field) | ✅ | Partial | Manual |
+| Integrity checks (sha256) | ✅ | ❌ | Manual |
+| Signed manifest (optional, offline) | ✅ | ❌ | ❌ |
+| Redaction pre-write (runner truth) | ✅ | Configurable / depends | Manual |
+| Token cost tracking | ✅ | ✅ | Manual |
+| Loop detection | ✅ | Depends | Manual |
+| Flakiness / pass_rate | ✅ | Partial / depends | Custom |
+| No SaaS dependency | ✅ | ❌ | ✅ |
 
 Notes: see `docs/comparison.md` for rationale.
 
