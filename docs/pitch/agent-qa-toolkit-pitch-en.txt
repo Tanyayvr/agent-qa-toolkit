@@ -15,6 +15,7 @@ Solution
 - report.html (human) + compare-report.json (CI contract)
 - assets/ + manifest.json with sha256 integrity
 - Strict verify: portability + integrity checks
+- NEW: Historical Trending (local SQLite) to catch regression and cost drift over time
 
 How It Works
 - Runner executes cases against the agent
@@ -28,22 +29,48 @@ What You Get
 - Security scanners (PII, injection, exfiltration, risk)
 - Self-contained, portable report directory
 
-Why Not Promptfoo / DeepEval / LangSmith
-- They focus on model quality and hosted traces
-- We focus on agent behavior + offline handoff
-- Evidence Pack is attachable to tickets
-- No SaaS dependency
+Historical Trending (Pro+ add‑on, when available)
+- Drift detection across releases (not just a single diff)
+- Flaky visibility: pass/fail over time
+- Gate trend: none/approval/block over time
+- Token cost trend: early signal of cost drift
+- Release safety: avoid “green today, broken next week”
+- Incident forensics: when the degradation started
+- Offline‑first: SQLite + HTML, no data egress
+- Shareable artifacts: attach trend.html to tickets
+- No tracing UI dependency: trends from Evidence Packs
+- Vendor‑neutral: works in air‑gapped environments
+- CI‑friendly CLI: trend runs/tokens/html
+- Audit readiness: historical evidence for compliance
+- Quantifies improvements by release
+- Cost control: facts for budgets/limits
+- No hidden telemetry
+
+Historical Trending (Offline)
+- Every run is ingested into a local SQLite store
+- Trend CLI + trend.html (no SaaS, no external requests)
+- Track regressions, gates, and token cost over time
+
+Why Not Promptfoo / DeepEval / LangSmith / Galileo
+- They are strong for model evals and/or observability workflows
+- We focus on agent behavior + portable offline handoff artifacts
+- Evidence Pack is attachable to tickets/PRs/incident docs
+- Deterministic CI gate from one machine contract (`compare-report.json`)
+- Complement path: keep observability platform, add us for release evidence in CI
+- Plus: local trend DB + offline charts (no vendor lock-in, no data egress)
 
 Deployment
 - Self-hosted only
 - Works in air-gapped environments
 - No accounts or external storage
 - You control retention and sharing
+- Trend DB is local (SQLite), no SaaS or telemetry
 
 Pricing
 - Free: open-source core
 - Services-first: onboarding + CI setup + custom rules
-- Pro (later): rules library + trending
+- Pro (later): rules library
+- Pro+ (later): Historical Trending + retention management
 - Enterprise: advanced redaction + support SLA
 
 Use Cases

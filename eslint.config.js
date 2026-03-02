@@ -9,6 +9,8 @@ module.exports = [
       "**/dist/**",
       "**/runs/**",
       "**/reports/**",
+      "**/coverage/**",
+      "**/vendor/**",
       "**/*.html",
       "**/package-lock.json",
       "**/apps/**/package-lock.json"

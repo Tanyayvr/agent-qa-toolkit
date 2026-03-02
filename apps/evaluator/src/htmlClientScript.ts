@@ -1,0 +1,425 @@
+export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
+      var el = document.getElementById("embedded-manifest-index");
+      if (!el) return;
+      var raw = el.textContent || "";
+      var idx = null;
+      try { idx = JSON.parse(raw); } catch (e) { idx = null; }
+      if (idx && Array.isArray(idx.items)) {
+        var map = new Map();
+        for (var i = 0; i < idx.items.length; i++) {
+          var it = idx.items[i];
+          if (it && it.manifest_key && it.rel_path) map.set(String(it.manifest_key), String(it.rel_path));
+        }
+        var links = document.querySelectorAll("a[data-manifest-key]");
+        for (var j = 0; j < links.length; j++) {
+          var a = links[j];
+          var key = a.getAttribute("data-manifest-key");
+          if (!key) continue;
+          var href = map.get(key);
+          if (href) {
+            a.setAttribute("href", href);
+          } else {
+            a.classList.add("muted");
+            a.removeAttribute("href");
+          }
+        }
+      }
+
+      var filterText = document.getElementById("filterText");
+      var filterSuite = document.getElementById("filterSuite");
+      var filterDiff = document.getElementById("filterDiff");
+      var filterSort = document.getElementById("filterSort");
+      var filterRisk = document.getElementById("filterRisk");
+      var filterGate = document.getElementById("filterGate");
+      var filterStatus = document.getElementById("filterStatus");
+      var copyFilterLink = document.getElementById("copyFilterLink");
+      var resetFilters = document.getElementById("resetFilters");
+      var saveFilters = document.getElementById("saveFilters");
+      var savedFilters = document.getElementById("savedFilters");
+      var filterCount = document.getElementById("filterCount");
+      var casesBody = document.getElementById("casesBody");
+      var pagePrev = document.getElementById("pagePrev");
+      var pageNext = document.getElementById("pageNext");
+      var pageSize = document.getElementById("pageSize");
+      var pageInfo = document.getElementById("pageInfo");
+      var rowsDataEl = document.getElementById("rows-data");
+      var rowsData = [];
+      try {
+        rowsData = rowsDataEl && rowsDataEl.textContent ? JSON.parse(rowsDataEl.textContent) : [];
+      } catch (e) {
+        rowsData = [];
+      }
+      if (!Array.isArray(rowsData)) rowsData = [];
+      var currentPage = 1;
+      var manifestMap = map;
+      var renderJobId = 0;
+      var textFilterDebounceTimer = null;
+      var LARGE_REPORT_ROWS = 1500;
+      var RENDER_CHUNK_SIZE = 20;
+      if (pageSize && rowsData.length >= LARGE_REPORT_ROWS && pageSize.value !== "25") {
+        pageSize.value = "25";
+      }
+
+      function getFilters() {
+        return {
+          text: filterText && filterText.value || "",
+          suite: filterSuite && filterSuite.value || "",
+          diff: filterDiff && filterDiff.value || "",
+          sort: filterSort && filterSort.value || "case_id",
+          risk: filterRisk && filterRisk.value || "",
+          gate: filterGate && filterGate.value || "",
+          status: filterStatus && filterStatus.value || ""
+        };
+      }
+
+      function setFilters(f) {
+        if (!f) return;
+        if (filterText) filterText.value = f.text || "";
+        if (filterSuite) filterSuite.value = f.suite || "";
+        if (filterDiff) filterDiff.value = f.diff || "";
+        if (filterSort) filterSort.value = f.sort || "case_id";
+        if (filterRisk) filterRisk.value = f.risk || "";
+        if (filterGate) filterGate.value = f.gate || "";
+        if (filterStatus) filterStatus.value = f.status || "";
+      }
+
+      function parseHash() {
+        var raw = window.location.hash || "";
+        if (!raw || raw.length < 2) return null;
+        var qs = raw.startsWith("#?") ? raw.slice(2) : raw.slice(1);
+        var params = new URLSearchParams(qs);
+        return {
+          text: params.get("text") || "",
+          suite: params.get("suite") || "",
+          diff: params.get("diff") || "",
+          sort: params.get("sort") || "case_id",
+          risk: params.get("risk") || "",
+          gate: params.get("gate") || "",
+          status: params.get("status") || ""
+        };
+      }
+
+      function updateHash(f) {
+        var params = new URLSearchParams();
+        if (f.text) params.set("text", f.text);
+        if (f.suite) params.set("suite", f.suite);
+        if (f.diff) params.set("diff", f.diff);
+        if (f.sort && f.sort !== "case_id") params.set("sort", f.sort);
+        if (f.risk) params.set("risk", f.risk);
+        if (f.gate) params.set("gate", f.gate);
+        if (f.status) params.set("status", f.status);
+        var next = params.toString();
+        window.location.hash = next ? "?" + next : "";
+      }
+
+      function loadSavedFilters() {
+        if (!savedFilters) return;
+        savedFilters.innerHTML = "";
+        var raw = null;
+        try { raw = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { raw = null; }
+        if (!raw) {
+          var empty = document.createElement("div");
+          empty.className = "muted";
+          empty.textContent = "No saved filters (localStorage may be blocked).";
+          savedFilters.appendChild(empty);
+          return;
+        }
+        var list = [];
+        try { list = JSON.parse(raw) || []; } catch (e) { list = []; }
+        if (!Array.isArray(list) || list.length === 0) {
+          var empty2 = document.createElement("div");
+          empty2.className = "muted";
+          empty2.textContent = "No saved filters.";
+          savedFilters.appendChild(empty2);
+          return;
+        }
+        list.forEach(function(it, idx) {
+          var row = document.createElement("div");
+          row.className = "savedItem";
+          var btn = document.createElement("button");
+          btn.className = "btn";
+          btn.textContent = it.name || ("Filter " + (idx + 1));
+          btn.onclick = function() {
+            setFilters(it.filters || {});
+            applyFilters({ preservePage: false });
+          };
+          var del = document.createElement("button");
+          del.className = "btn";
+          del.textContent = "Remove";
+          del.onclick = function() {
+            var next = list.slice();
+            next.splice(idx, 1);
+            try { window.localStorage.setItem("pvip_saved_filters", JSON.stringify(next)); } catch (e) {}
+            loadSavedFilters();
+          };
+          var name = document.createElement("div");
+          name.className = "name";
+          name.textContent = it.name || "";
+          row.appendChild(btn);
+          row.appendChild(del);
+          row.appendChild(name);
+          savedFilters.appendChild(row);
+        });
+      }
+
+      function sortRows(entries, f) {
+        var arr = entries.slice();
+        var orderRisk = { low: 0, medium: 1, high: 2 };
+        var orderGate = { none: 0, require_approval: 1, block: 2 };
+        var orderDiff = { regression: 0, improvement: 1, same: 2 };
+        arr.sort(function (a, b) {
+          var aCase = String(a.case_id || "");
+          var bCase = String(b.case_id || "");
+          var aSuite = String(a.suite || "");
+          var bSuite = String(b.suite || "");
+          var aRisk = String(a.risk || "");
+          var bRisk = String(b.risk || "");
+          var aGate = String(a.gate || "");
+          var bGate = String(b.gate || "");
+          var aDiff = String(a.diff || "");
+          var bDiff = String(b.diff || "");
+          var aTs = Number(a.ts || 0);
+          var bTs = Number(b.ts || 0);
+          switch (f.sort) {
+            case "risk":
+              return (orderRisk[aRisk] ?? 9) - (orderRisk[bRisk] ?? 9) || aCase.localeCompare(bCase);
+            case "gate":
+              return (orderGate[aGate] ?? 9) - (orderGate[bGate] ?? 9) || aCase.localeCompare(bCase);
+            case "diff":
+              return (orderDiff[aDiff] ?? 9) - (orderDiff[bDiff] ?? 9) || aCase.localeCompare(bCase);
+            case "suite":
+              return aSuite.localeCompare(bSuite) || aCase.localeCompare(bCase);
+            case "time_desc":
+              return bTs - aTs || aCase.localeCompare(bCase);
+            case "time_asc":
+              return aTs - bTs || aCase.localeCompare(bCase);
+            default:
+              return aCase.localeCompare(bCase);
+          }
+        });
+        return arr;
+      }
+
+      function hydrateManifestLinks() {
+        if (!manifestMap || manifestMap.size === 0) return;
+        var links = document.querySelectorAll("a[data-manifest-key]");
+        for (var j = 0; j < links.length; j++) {
+          var a = links[j];
+          var key = a.getAttribute("data-manifest-key");
+          if (!key) continue;
+          var href = manifestMap.get(key);
+          if (href) {
+            a.setAttribute("href", href);
+          } else {
+            a.classList.add("muted");
+            a.removeAttribute("href");
+          }
+        }
+      }
+
+      function renderPage(sorted, totalFiltered) {
+        if (!casesBody) return;
+        var jobId = ++renderJobId;
+        var size = Number(pageSize && pageSize.value ? pageSize.value : "50");
+        if (!Number.isFinite(size) || size <= 0) size = 50;
+        var totalPages = Math.max(1, Math.ceil(totalFiltered / size));
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        var start = (currentPage - 1) * size;
+        var end = start + size;
+        var pageRows = sorted.slice(start, end);
+        if (pageInfo) {
+          if (totalFiltered === 0) pageInfo.textContent = "Page 0 / 0";
+          else pageInfo.textContent = "Rendering " + pageRows.length + " row(s)...";
+        }
+        if (pagePrev) pagePrev.disabled = true;
+        if (pageNext) pageNext.disabled = true;
+
+        if (totalFiltered === 0 || pageRows.length === 0) {
+          casesBody.innerHTML = "";
+          if (pageInfo) pageInfo.textContent = "Page 0 / 0";
+          if (pagePrev) pagePrev.disabled = true;
+          if (pageNext) pageNext.disabled = true;
+          return;
+        }
+
+        casesBody.innerHTML = '<tr><td colspan="10" class="muted">Rendering rows...</td></tr>';
+
+        var finalize = function () {
+          if (jobId !== renderJobId) return;
+          hydrateManifestLinks();
+          if (pageInfo) {
+            var largeHint = rowsData.length >= LARGE_REPORT_ROWS ? " (incremental)" : "";
+            pageInfo.textContent = "Page " + currentPage + " / " + totalPages + largeHint;
+          }
+          if (pagePrev) pagePrev.disabled = currentPage <= 1;
+          if (pageNext) pageNext.disabled = currentPage >= totalPages;
+        };
+
+        var appendChunk = function (offset) {
+          if (jobId !== renderJobId) return;
+          if (offset === 0) casesBody.innerHTML = "";
+          var next = Math.min(offset + RENDER_CHUNK_SIZE, pageRows.length);
+          var chunkHtml = pageRows
+            .slice(offset, next)
+            .map(function (r) { return r.row_html || ""; })
+            .join("");
+          if (chunkHtml) {
+            casesBody.insertAdjacentHTML("beforeend", chunkHtml);
+          }
+          if (next >= pageRows.length) {
+            finalize();
+            return;
+          }
+          if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(function () { appendChunk(next); });
+          } else {
+            setTimeout(function () { appendChunk(next); }, 0);
+          }
+        };
+
+        appendChunk(0);
+      }
+
+      function applyFilters(opts) {
+        var preservePage = opts && opts.preservePage === true;
+        if (!preservePage) currentPage = 1;
+        var f = getFilters();
+        var text = (f.text || "").toLowerCase();
+        var suite = f.suite || "";
+        var diff = f.diff || "";
+        var risk = f.risk || "";
+        var gate = f.gate || "";
+        var status = f.status || "";
+
+        var filtered = rowsData.filter(function (r) {
+          var caseId = String(r.case_id || "").toLowerCase();
+          var title = String(r.title || "").toLowerCase();
+          var rRisk = String(r.risk || "");
+          var rGate = String(r.gate || "");
+          var rStatus = String(r.status || "");
+          var rSuite = String(r.suite || "");
+          var rDiff = String(r.diff || "");
+
+          if (text && !(caseId.includes(text) || title.includes(text))) return false;
+          if (suite && rSuite !== suite) return false;
+          if (diff && rDiff !== diff) return false;
+          if (risk && rRisk !== risk) return false;
+          if (gate && rGate !== gate) return false;
+          if (status && rStatus !== status) return false;
+          return true;
+        });
+        var sorted = sortRows(filtered, f);
+        renderPage(sorted, filtered.length);
+
+        if (filterCount) {
+          filterCount.textContent = "Showing " + filtered.length + " / " + rowsData.length;
+        }
+
+        updateHash(f);
+        updateTabActive();
+      }
+
+      if (filterText) {
+        filterText.addEventListener("input", function () {
+          if (textFilterDebounceTimer) clearTimeout(textFilterDebounceTimer);
+          textFilterDebounceTimer = setTimeout(function () {
+            textFilterDebounceTimer = null;
+            applyFilters({ preservePage: false });
+          }, 120);
+        });
+      }
+      if (filterSuite) filterSuite.addEventListener("change", function () { applyFilters({ preservePage: false }); });
+      if (filterDiff) filterDiff.addEventListener("change", function () { applyFilters({ preservePage: false }); });
+      if (filterSort) filterSort.addEventListener("change", function () { applyFilters({ preservePage: false }); });
+      if (filterRisk) filterRisk.addEventListener("change", function () { applyFilters({ preservePage: false }); });
+      if (filterGate) filterGate.addEventListener("change", function () { applyFilters({ preservePage: false }); });
+      if (filterStatus) filterStatus.addEventListener("change", function () { applyFilters({ preservePage: false }); });
+      if (pageSize) {
+        pageSize.addEventListener("change", function () {
+          currentPage = 1;
+          applyFilters({ preservePage: true });
+        });
+      }
+      if (pagePrev) {
+        pagePrev.addEventListener("click", function () {
+          currentPage = Math.max(1, currentPage - 1);
+          applyFilters({ preservePage: true });
+        });
+      }
+      if (pageNext) {
+        pageNext.addEventListener("click", function () {
+          currentPage += 1;
+          applyFilters({ preservePage: true });
+        });
+      }
+
+      var suiteButtons = document.querySelectorAll(".suiteBtn");
+      if (suiteButtons && filterSuite) {
+        for (var k = 0; k < suiteButtons.length; k++) {
+          suiteButtons[k].addEventListener("click", function (e) {
+            var btn = e.currentTarget;
+            var value = btn && btn.getAttribute("data-suite");
+            filterSuite.value = value || "";
+            applyFilters({ preservePage: false });
+          });
+        }
+      }
+
+      function updateTabActive() {
+        var suite = filterSuite && filterSuite.value || "";
+        for (var t = 0; t < suiteButtons.length; t++) {
+          var btn = suiteButtons[t];
+          var value = btn.getAttribute("data-suite") || "";
+          if (value === suite) btn.classList.add("active");
+          else btn.classList.remove("active");
+        }
+      }
+
+      if (copyFilterLink) {
+        copyFilterLink.addEventListener("click", function () {
+          var link = window.location.href;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link);
+            copyFilterLink.textContent = "Copied";
+            setTimeout(function () { copyFilterLink.textContent = "Copy filter link"; }, 1200);
+          } else {
+            window.prompt("Copy filter link:", link);
+          }
+        });
+      }
+
+      if (saveFilters) {
+        saveFilters.addEventListener("click", function () {
+          var name = window.prompt("Save filters as:") || "";
+          var f = getFilters();
+          var raw = null;
+          try { raw = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { raw = null; }
+          var list = [];
+          try { list = raw ? JSON.parse(raw) : []; } catch (e) { list = []; }
+          if (!Array.isArray(list)) list = [];
+          list.push({ name: name.trim() || ("Filter " + (list.length + 1)), filters: f });
+          try { window.localStorage.setItem("pvip_saved_filters", JSON.stringify(list)); } catch (e) {}
+          loadSavedFilters();
+        });
+      }
+
+      if (resetFilters) {
+        resetFilters.addEventListener("click", function () {
+          setFilters({ text: "", suite: "", diff: "", sort: "case_id", risk: "", gate: "", status: "" });
+          updateHash({ text: "", suite: "", diff: "", sort: "case_id", risk: "", gate: "", status: "" });
+          applyFilters({ preservePage: false });
+        });
+      }
+
+      var fromHash = parseHash();
+      if (fromHash) setFilters(fromHash);
+      applyFilters({ preservePage: false });
+      try { window.localStorage.setItem("__pvip_ls__", "1"); window.localStorage.removeItem("__pvip_ls__"); } catch (e) {
+        var warn = document.getElementById("localStorageWarning");
+        if (warn) warn.style.display = "block";
+      }
+      loadSavedFilters();
+    })();
+`;

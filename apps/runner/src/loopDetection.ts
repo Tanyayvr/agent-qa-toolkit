@@ -41,11 +41,48 @@ function argsSimilarity(a: Record<string, unknown>, b: Record<string, unknown>):
 }
 
 /** Window size: how many recent calls to compare per tool. */
-const SIMILARITY_WINDOW = 3;
-const SIMILARITY_THRESHOLD = 0.9;
+const DEFAULT_SIMILARITY_WINDOW = 3;
+const DEFAULT_SIMILARITY_THRESHOLD = 0.9;
+
+export type SimilarityConfig = {
+    window?: number;
+    threshold?: number;
+};
+
+function parsePositiveIntEnv(raw: string | undefined, fallback: number): number {
+    if (!raw) return fallback;
+    const n = Number.parseInt(raw, 10);
+    if (!Number.isFinite(n) || n <= 0) return fallback;
+    return n;
+}
+
+function parseThresholdEnv(raw: string | undefined, fallback: number): number {
+    if (!raw) return fallback;
+    const n = Number.parseFloat(raw);
+    if (!Number.isFinite(n)) return fallback;
+    if (n <= 0 || n > 1) return fallback;
+    return n;
+}
+
+function resolveSimilarityConfig(cfg?: SimilarityConfig): { window: number; threshold: number } {
+    const envWindow = parsePositiveIntEnv(process.env.AQ_LOOP_SIMILARITY_WINDOW, DEFAULT_SIMILARITY_WINDOW);
+    const envThreshold = parseThresholdEnv(process.env.AQ_LOOP_SIMILARITY_THRESHOLD, DEFAULT_SIMILARITY_THRESHOLD);
+
+    const window =
+        typeof cfg?.window === "number" && Number.isFinite(cfg.window) && cfg.window > 0
+            ? Math.floor(cfg.window)
+            : envWindow;
+    const threshold =
+        typeof cfg?.threshold === "number" && Number.isFinite(cfg.threshold) && cfg.threshold > 0 && cfg.threshold <= 1
+            ? cfg.threshold
+            : envThreshold;
+
+    return { window, threshold };
+}
 
 /** Detect tool-call loops by args similarity within a sliding window. */
-export function detectSimilarityLoops(events: RunEvent[]): LoopDetails["similarity_suspects"] {
+export function detectSimilarityLoops(events: RunEvent[], cfg?: SimilarityConfig): LoopDetails["similarity_suspects"] {
+    const { window: similarityWindow, threshold: similarityThreshold } = resolveSimilarityConfig(cfg);
     const toolCalls = events.filter((e): e is ToolCallEvent => e.type === "tool_call");
     if (toolCalls.length < 2) return undefined;
 
@@ -63,7 +100,7 @@ export function detectSimilarityLoops(events: RunEvent[]): LoopDetails["similari
         if (calls.length < 2) continue;
 
         // Sliding window: compare each call to the previous N calls
-        const window = calls.slice(-SIMILARITY_WINDOW);
+        const window = calls.slice(-similarityWindow);
         if (window.length < 2) continue;
 
         // Pairwise similarity within the window
@@ -78,7 +115,7 @@ export function detectSimilarityLoops(events: RunEvent[]): LoopDetails["similari
 
         const avgSimilarity = pairs > 0 ? totalSim / pairs : 0;
 
-        if (avgSimilarity >= SIMILARITY_THRESHOLD) {
+        if (avgSimilarity >= similarityThreshold) {
             suspects.push({
                 tool,
                 call_ids: window.map((c) => c.call_id),

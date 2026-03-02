@@ -61,6 +61,18 @@ export function manifestItemForFinalOutput(params: {
   };
 }
 
+export function manifestItemForTraceAnchor(params: {
+  caseId: string;
+  version: "baseline" | "new";
+  rel_path: string;
+}): ManifestItem {
+  return {
+    manifest_key: manifestKeyFor({ caseId: params.caseId, version: params.version, kind: "trace_anchor" }),
+    rel_path: params.rel_path,
+    media_type: "application/json",
+  };
+}
+
 export function manifestItemForRunnerFailureArtifact(params: {
   caseId: string;
   version: "baseline" | "new";

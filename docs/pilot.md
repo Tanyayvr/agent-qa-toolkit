@@ -39,3 +39,7 @@ https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_waitlist.
 ## After pilot
 - Option to continue with paid Integration Packs
 - Option to move to support subscription
+
+## Lead source note
+- Reddit can be used as a pilot lead source (value-first technical outreach).
+- Internal outreach playbooks are maintained under `docs/internal/market/social/`.

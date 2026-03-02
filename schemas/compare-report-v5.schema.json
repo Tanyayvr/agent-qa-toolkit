@@ -53,7 +53,8 @@
         "risk_summary",
         "cases_requiring_approval",
         "cases_block_recommended",
-        "data_coverage"
+        "data_coverage",
+        "trace_anchor_coverage"
       ],
       "properties": {
         "baseline_pass": { "type": "integer" },
@@ -121,6 +122,92 @@
             "missing_new_artifacts": { "type": "integer" },
             "broken_baseline_artifacts": { "type": "integer" },
             "broken_new_artifacts": { "type": "integer" }
+          }
+        },
+        "execution_quality": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "status": { "type": "string" },
+            "reasons": { "type": "array", "items": { "type": "string" } },
+            "thresholds": { "type": "object", "additionalProperties": true },
+            "total_executed_cases": { "type": "integer" },
+            "baseline_runner_failures": { "type": "integer" },
+            "new_runner_failures": { "type": "integer" },
+            "baseline_runner_failure_rate": { "type": "number" },
+            "new_runner_failure_rate": { "type": "number" },
+            "baseline_transport_success_rate": { "type": "number" },
+            "new_transport_success_rate": { "type": "number" },
+            "weak_expected_cases": { "type": "integer" },
+            "weak_expected_rate": { "type": "number" },
+            "model_quality_inconclusive": { "type": "boolean" },
+            "model_quality_inconclusive_reason": { "type": "string" },
+            "baseline_runner_failure_kinds": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" }
+            },
+            "new_runner_failure_kinds": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" }
+            },
+            "admissibility_kpi": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": [
+                "risk_mass_before",
+                "risk_mass_after",
+                "pre_action_entropy_removed",
+                "blocked_cases",
+                "reconstruction_minutes_saved_total",
+                "reconstruction_minutes_saved_per_block",
+                "model"
+              ],
+              "properties": {
+                "risk_mass_before": { "type": "number" },
+                "risk_mass_after": { "type": "number" },
+                "pre_action_entropy_removed": { "type": "number" },
+                "blocked_cases": { "type": "integer" },
+                "reconstruction_minutes_saved_total": { "type": "number" },
+                "reconstruction_minutes_saved_per_block": { "type": "number" },
+                "model": {
+                  "type": "object",
+                  "required": [
+                    "risk_weight_by_level",
+                    "residual_factor_by_gate",
+                    "minutes_per_removed_risk_unit"
+                  ],
+                  "properties": {
+                    "risk_weight_by_level": {
+                      "type": "object",
+                      "required": ["low", "medium", "high"],
+                      "properties": {
+                        "low": { "type": "number" },
+                        "medium": { "type": "number" },
+                        "high": { "type": "number" }
+                      }
+                    },
+                    "residual_factor_by_gate": {
+                      "type": "object",
+                      "required": ["none", "require_approval", "block"],
+                      "properties": {
+                        "none": { "type": "number" },
+                        "require_approval": { "type": "number" },
+                        "block": { "type": "number" }
+                      }
+                    },
+                    "minutes_per_removed_risk_unit": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "trace_anchor_coverage": {
+          "type": "object",
+          "required": ["cases_with_anchor_baseline", "cases_with_anchor_new"],
+          "properties": {
+            "cases_with_anchor_baseline": { "type": "integer" },
+            "cases_with_anchor_new": { "type": "integer" }
           }
         }
       }
@@ -224,6 +311,13 @@
               }
             }
           },
+          "trace_anchors": {
+            "type": "object",
+            "properties": {
+              "baseline": { "type": "object", "additionalProperties": true },
+              "new": { "type": "object", "additionalProperties": true }
+            }
+          },
           "data_availability": {
             "type": "object",
             "required": ["baseline", "new"],
@@ -240,13 +334,69 @@
               }
             }
           },
+          "failure_summary": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "baseline": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "class": { "type": "string" },
+                  "http_status": { "type": "integer" },
+                  "timeout_ms": { "type": "integer" },
+                  "attempts": { "type": "integer" },
+                  "net_error_kind": {
+                    "enum": [
+                      "dns",
+                      "tls",
+                      "conn_refused",
+                      "conn_reset",
+                      "headers_timeout",
+                      "socket_hang_up",
+                      "proxy",
+                      "abort",
+                      "unknown"
+                    ]
+                  }
+                }
+              },
+              "new": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "class": { "type": "string" },
+                  "http_status": { "type": "integer" },
+                  "timeout_ms": { "type": "integer" },
+                  "attempts": { "type": "integer" },
+                  "net_error_kind": {
+                    "enum": [
+                      "dns",
+                      "tls",
+                      "conn_refused",
+                      "conn_reset",
+                      "headers_timeout",
+                      "socket_hang_up",
+                      "proxy",
+                      "abort",
+                      "unknown"
+                    ]
+                  }
+                }
+              }
+            }
+          },
           "risk_level": { "enum": ["low", "medium", "high"] },
           "gate_recommendation": { "enum": ["none", "require_approval", "block"] },
           "artifacts": {
             "type": "object",
             "required": ["replay_diff_href"],
             "properties": {
-              "replay_diff_href": { "type": "string" }
+              "replay_diff_href": { "type": "string" },
+              "baseline_trace_anchor_href": { "type": "string" },
+              "baseline_trace_anchor_key": { "type": "string" },
+              "new_trace_anchor_href": { "type": "string" },
+              "new_trace_anchor_key": { "type": "string" }
             }
           }
         }

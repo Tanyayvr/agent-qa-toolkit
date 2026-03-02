@@ -11,3 +11,9 @@ apps/**/runs
 apps/**/reports
 runs
 reports
+.agent-qa/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+coverage/

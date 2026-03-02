@@ -1,6 +1,18 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { detectSimilarityLoops, detectOutputHashDuplicates, analyzeLoops } from "./loopDetection";
 import type { RunEvent } from "shared-types";
+
+const ORIGINAL_ENV = {
+    AQ_LOOP_SIMILARITY_WINDOW: process.env.AQ_LOOP_SIMILARITY_WINDOW,
+    AQ_LOOP_SIMILARITY_THRESHOLD: process.env.AQ_LOOP_SIMILARITY_THRESHOLD,
+};
+
+afterEach(() => {
+    if (ORIGINAL_ENV.AQ_LOOP_SIMILARITY_WINDOW === undefined) delete process.env.AQ_LOOP_SIMILARITY_WINDOW;
+    else process.env.AQ_LOOP_SIMILARITY_WINDOW = ORIGINAL_ENV.AQ_LOOP_SIMILARITY_WINDOW;
+    if (ORIGINAL_ENV.AQ_LOOP_SIMILARITY_THRESHOLD === undefined) delete process.env.AQ_LOOP_SIMILARITY_THRESHOLD;
+    else process.env.AQ_LOOP_SIMILARITY_THRESHOLD = ORIGINAL_ENV.AQ_LOOP_SIMILARITY_THRESHOLD;
+});
 
 /* ------------------------------------------------------------------ */
 /*  Similarity Breaker tests                                           */
@@ -56,6 +68,31 @@ describe("detectSimilarityLoops", () => {
             { type: "tool_call", ts: 2, call_id: "c2", tool: "fetch", args: { url: "/b", method: "POST", body: "{}" } },
         ];
         expect(detectSimilarityLoops(events)).toBeUndefined();
+    });
+
+    it("supports explicit similarity threshold override", () => {
+        const events: RunEvent[] = [
+            { type: "tool_call", ts: 1, call_id: "c1", tool: "api", args: { a: 1, b: 2 } },
+            { type: "tool_call", ts: 2, call_id: "c2", tool: "api", args: { a: 1, b: 3 } },
+            { type: "tool_call", ts: 3, call_id: "c3", tool: "api", args: { a: 1, b: 4 } },
+        ];
+        expect(detectSimilarityLoops(events)).toBeUndefined();
+        const withLowerThreshold = detectSimilarityLoops(events, { threshold: 0.2, window: 3 });
+        expect(withLowerThreshold).toBeDefined();
+        expect(withLowerThreshold![0]!.tool).toBe("api");
+    });
+
+    it("reads similarity config from env vars", () => {
+        process.env.AQ_LOOP_SIMILARITY_THRESHOLD = "0.2";
+        process.env.AQ_LOOP_SIMILARITY_WINDOW = "3";
+        const events: RunEvent[] = [
+            { type: "tool_call", ts: 1, call_id: "c1", tool: "api", args: { a: 1, b: 2 } },
+            { type: "tool_call", ts: 2, call_id: "c2", tool: "api", args: { a: 1, b: 3 } },
+            { type: "tool_call", ts: 3, call_id: "c3", tool: "api", args: { a: 1, b: 4 } },
+        ];
+        const result = detectSimilarityLoops(events);
+        expect(result).toBeDefined();
+        expect(result![0]!.tool).toBe("api");
     });
 });
 

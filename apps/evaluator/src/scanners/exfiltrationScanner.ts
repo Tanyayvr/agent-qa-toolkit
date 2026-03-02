@@ -48,6 +48,7 @@ function hasSensitiveQuery(u: string): boolean {
 function methodAndBody(args: Record<string, unknown>): { method?: string; hasBody: boolean } {
   const method = typeof args.method === "string" ? args.method.toUpperCase() : undefined;
   const hasBody = !!(args.body || args.data || args.payload);
+  if (!method) return { hasBody };
   return { method, hasBody };
 }
 

@@ -12,14 +12,15 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "eslint": "9.39.2",
     "express": "4.22.1",
-    "redaction": "*"
-
+    "redaction": "*",
+    "cli-utils": "*",
+    "shared-types": "*"
   },
   "devDependencies": {
+    "eslint": "9.39.2",
     "@types/express": "4.17.21",
-    "@types/node": "20.11.30",
+    "@types/node": "20.19.0",
     "ts-node": "10.9.2",
     "typescript": "5.4.5"
   }

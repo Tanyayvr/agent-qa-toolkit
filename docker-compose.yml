@@ -1,5 +1,20 @@
 services:
+  quickstart:
+    build:
+      context: .
+      target: dev
+    command:
+      [
+        "sh",
+        "-lc",
+        "test -f scripts/demo.mjs || { echo 'missing scripts/demo.mjs'; exit 2; }; node scripts/demo.mjs --cases cases/all.json --reportId latest --skipAudit --skipLint --skipTypecheck"
+      ]
+    volumes:
+      - ./apps/runner/runs:/app/apps/runner/runs
+      - ./apps/evaluator/reports:/app/apps/evaluator/reports
+
   demo-agent:
+    profiles: ["stack"]
     build:
       context: .
       target: dev
@@ -13,6 +28,7 @@ services:
       retries: 10
 
   runner:
+    profiles: ["stack"]
     build:
       context: .
       target: dev
@@ -40,6 +56,7 @@ services:
       - ./apps/runner/runs:/app/apps/runner/runs
 
   evaluator:
+    profiles: ["stack"]
     build:
       context: .
       target: dev

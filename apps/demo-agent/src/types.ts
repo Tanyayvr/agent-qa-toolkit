@@ -1,4 +1,6 @@
 //apps/demo-agent/src/types.ts
+import type { HandoffEnvelope, HandoffEnvelopeInput, HandoffReceipt, RunMeta, TraceAnchor } from "shared-types";
+
 export type ContentType = "text" | "json";
 
 export type EvidenceRef = { kind: "tool_result"; call_id: string } | { kind: "retrieval_doc"; id: string };
@@ -60,6 +62,9 @@ export type AgentCaseResponse = {
   proposed_actions: ProposedAction[];
   final_output: FinalOutput;
   events: RunEvent[];
+  trace_anchor?: TraceAnchor;
+  handoff_receipts?: HandoffReceipt[];
+  handoff_emits?: HandoffEnvelope[];
 };
 
 export type RunCaseRequestBody = {
@@ -67,5 +72,6 @@ export type RunCaseRequestBody = {
   version?: string;
   workflow_id?: string;
   input?: { user?: string; context?: unknown };
-  run_meta?: { run_id?: string };
+  run_meta?: RunMeta;
+  handoff?: HandoffEnvelopeInput;
 };

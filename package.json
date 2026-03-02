@@ -6,7 +6,8 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "plugins/*"
   ],
   "scripts": {
     "lint": "eslint .",
@@ -14,12 +15,22 @@
     "typecheck": "npm --workspaces run typecheck",
     "loadtest": "ts-node apps/runner/src/load-test.ts",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "docs:check-links": "node scripts/check-doc-links.mjs",
+    "marketing:preflight": "node scripts/marketing-preflight.mjs && npm run docs:check-links",
     "audit": "npm audit",
     "demo": "node scripts/demo.mjs",
     "demo:correctness": "node scripts/demo.mjs --suite correctness",
+    "demo:quality": "node scripts/demo.mjs --cases cases/cases-quality.json --reportId quality_latest",
     "demo:robustness": "node scripts/demo.mjs --suite robustness",
     "demo:e2e": "node scripts/demo-e2e.mjs",
     "test:toolkit": "node scripts/toolkit-tests.mjs",
+    "bundle:group": "node scripts/group-bundle.mjs",
+    "bundle:group:verify": "node scripts/group-bundle-verify.mjs",
+    "proof:otel": "node scripts/proof-otel-anchors.mjs",
+    "proof:otel:demo": "npm run demo:correctness && npm run proof:otel -- --reportDir apps/evaluator/reports/correctness_latest --minCases 1",
+    "proof:runtime-handoff": "node scripts/proof-runtime-handoff.mjs",
+    "bridge": "ts-node plugins/vendor-bridge/src/cli.ts",
     "pvip:pack": "node scripts/pvip-pack.mjs --reportDir apps/evaluator/reports/latest",
     "pvip:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest",
     "pvip:verify:strict": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --strict",
@@ -28,15 +39,19 @@
     "aepf:verify:pvip": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --mode pvip",
     "aepf:verify:strict": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest --mode strict",
     "sbom": "node scripts/sbom.mjs",
-    "manifest:sign": "node scripts/manifest-sign.mjs apps/evaluator/reports/latest"
+    "manifest:sign": "node scripts/manifest-sign.mjs apps/evaluator/reports/latest",
+    "trend": "ts-node packages/trending/src/cli.ts",
+    "quality:gate": "npm run lint -- --max-warnings=0 && npm run typecheck && npm run test:coverage && npm run docs:check-links && docker compose config --quiet && npm audit --audit-level=high"
   },
   "overrides": {
-    "qs": "6.14.2"
+    "qs": "6.14.2",
+    "rollup": "4.59.0"
   },
   "devDependencies": {
-    "@types/node": "20.11.30",
+    "@types/node": "20.19.0",
     "@typescript-eslint/eslint-plugin": "8.31.0",
     "@typescript-eslint/parser": "8.31.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.1",
     "prettier": "3.5.2",

@@ -204,6 +204,27 @@ export function checkEvidenceRefsStrict(expected: Expected, resp: AgentResponse)
     };
 }
 
+export function checkRunnerTransport(resp: AgentResponse): AssertionResult {
+    const rf = resp.runner_failure;
+    if (!rf || rf.type !== "runner_fetch_failure") {
+        return { name: "runner_transport_success", pass: true, details: { note: "no_runner_failure" } };
+    }
+
+    const details: AssertionDetails = {
+        class: rf.class,
+        attempt: rf.attempt,
+    };
+    if (typeof rf.status === "number") details.http_status = rf.status;
+    if (typeof rf.timeout_ms === "number") details.timeout_ms = rf.timeout_ms;
+    if (typeof rf.error_name === "string") details.error_name = rf.error_name;
+
+    return {
+        name: "runner_transport_success",
+        pass: false,
+        details,
+    };
+}
+
 export function checkToolExecution(resp: AgentResponse): AssertionResult {
     const ev = resp.events ?? [];
     const failed = toolResults(ev)
@@ -265,6 +286,15 @@ export function chooseRootCause(assertions: AssertionResult[], resp: AgentRespon
     const toolFailure = toolResults(ev).some((e) => e.status === "error" || e.status === "timeout");
     if (toolFailure) return "tool_failure";
 
+    // Transport/runtime failures should dominate assertion-derived classifications
+    // (e.g. avoid mislabeling a runner HTTP 500 as a format_violation).
+    const rf = resp.runner_failure;
+    if (rf && rf.type === "runner_fetch_failure") {
+        if (rf.class === "timeout" || rf.class === "network_error" || rf.class === "http_error" || rf.class === "invalid_json") {
+            return "missing_required_data";
+        }
+    }
+
     const schema = assertions.find((a) => a.name === "json_schema");
     if (schema && schema.pass === false) return "format_violation";
 
@@ -279,13 +309,6 @@ export function chooseRootCause(assertions: AssertionResult[], resp: AgentRespon
 
     const halluc = assertions.find((a) => a.name === "hallucination_signal_check");
     if (halluc && halluc.pass === false) return "hallucination_signal";
-
-    const rf = resp.runner_failure;
-    if (rf && rf.type === "runner_fetch_failure") {
-        if (rf.class === "timeout" || rf.class === "network_error" || rf.class === "http_error" || rf.class === "invalid_json") {
-            return "missing_required_data";
-        }
-    }
 
     return "unknown";
 }
@@ -366,6 +389,11 @@ export function evaluateOne(c: Case, resp: AgentResponse, ajv: Ajv): EvaluationR
             details: pass ? { schema_errors: [] } : { schema_errors: validate.errors ?? [] },
         });
     }
+
+    // A captured runner failure means the agent response artifact is not a valid
+    // execution result, even if no case-specific assertions were configured.
+    const runnerTransport = checkRunnerTransport(resp);
+    assertions.push(runnerTransport);
 
     const evidence = checkEvidenceRefsStrict(exp, resp);
     assertions.push(evidence);
@@ -564,12 +592,17 @@ export function deriveRiskTags(params: {
     return Array.from(tags);
 }
 
-export function deriveFailureSummarySide(rf: RunnerFailureArtifact | undefined): { class: string; http_status?: number; timeout_ms?: number; attempts?: number } | undefined {
+export function deriveFailureSummarySide(
+    rf: RunnerFailureArtifact | undefined
+): { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string } | undefined {
     if (!rf || rf.type !== "runner_fetch_failure") return undefined;
-    const out: { class: string; http_status?: number; timeout_ms?: number; attempts?: number } = { class: rf.class ?? "other" };
+    const out: { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string } = {
+        class: rf.class ?? "other",
+    };
     if (typeof rf.status === "number") out.http_status = rf.status;
     if (typeof rf.timeout_ms === "number") out.timeout_ms = rf.timeout_ms;
     if (typeof rf.attempt === "number") out.attempts = rf.attempt;
+    if (typeof rf.net_error_kind === "string" && rf.net_error_kind.length > 0) out.net_error_kind = rf.net_error_kind;
     return out;
 }
 

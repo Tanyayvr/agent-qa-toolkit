@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "shared-types": "*"
+    "shared-types": "*",
+    "cli-utils": "*"
   }
 }

@@ -12,12 +12,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "ajv": "8.17.1",
-    "shared-types": "*",
-    "cli-utils": "*"
+    "ajv": "^8.18.0",
+    "cli-utils": "*",
+    "shared-types": "*"
   },
   "devDependencies": {
-    "@types/node": "20.11.30",
+    "@types/node": "20.19.0",
     "ts-node": "10.9.2",
     "typescript": "5.4.5"
   }

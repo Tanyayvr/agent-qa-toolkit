@@ -49,10 +49,16 @@ function bumpSeverity(sev: SecuritySignal["severity"]): SecuritySignal["severity
 }
 
 function getToolCalls(events: RunEvent[]): Array<{ tool: string; call_id: string; action_id?: string; args: Record<string, unknown> }> {
-  const out = [];
+  const out: Array<{ tool: string; call_id: string; action_id?: string; args: Record<string, unknown> }> = [];
   for (const e of events) {
     if (e.type === "tool_call") {
-      out.push({ tool: e.tool, call_id: e.call_id, action_id: e.action_id, args: e.args });
+      const entry: { tool: string; call_id: string; action_id?: string; args: Record<string, unknown> } = {
+        tool: e.tool,
+        call_id: e.call_id,
+        args: e.args,
+      };
+      if (typeof e.action_id === "string") entry.action_id = e.action_id;
+      out.push(entry);
     }
   }
   return out;
@@ -87,7 +93,12 @@ export function createActionRiskScanner(opts?: Partial<ActionRiskScannerOptions>
               title: "Risky tool invocation detected",
               message: `${c.tool} matched ${entry.toolPattern}`,
               evidence_refs: [],
-              details: { tool: c.tool, call_id: c.call_id, action_id: c.action_id, fields: ["args"] },
+              details: {
+                tool: c.tool,
+                call_id: c.call_id,
+                ...(c.action_id ? { action_id: c.action_id } : {}),
+                fields: ["args"],
+              },
             });
             break;
           }

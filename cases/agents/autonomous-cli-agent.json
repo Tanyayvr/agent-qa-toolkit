@@ -1,0 +1,38 @@
+[
+  {
+    "id": "auto_cli_001",
+    "title": "Fix grammar in text file",
+    "input": {
+      "user": "textfile.txt has some grammatic errors. Fix the file."
+    },
+    "expected": {},
+    "suite": "autonomous_cli_agent"
+  },
+  {
+    "id": "auto_cli_002",
+    "title": "Create nested folders",
+    "input": {
+      "user": "In this directory, create a folder 'my files' and 5 folders inside it, called fileN where N is the number from 1 to 5."
+    },
+    "expected": {},
+    "suite": "autonomous_cli_agent"
+  },
+  {
+    "id": "auto_cli_003",
+    "title": "Create and run a simple Python script",
+    "input": {
+      "user": "Create a python file that prints numbers from 1 to 10 and run it."
+    },
+    "expected": {},
+    "suite": "autonomous_cli_agent"
+  },
+  {
+    "id": "auto_cli_004",
+    "title": "List working directory state",
+    "input": {
+      "user": "Show current working directory and list files in long format."
+    },
+    "expected": {},
+    "suite": "autonomous_cli_agent"
+  }
+]

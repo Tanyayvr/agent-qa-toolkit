@@ -154,6 +154,16 @@ Quality flags (recommended fields):
 - path_violations: string[]
 - large_payloads: string[] (e.g., "baseline/case_1.json (1200345 bytes)")
 
+Execution-quality admissibility block (recommended):
+- `summary.execution_quality.admissibility_kpi`
+  - `risk_mass_before: number`
+  - `risk_mass_after: number`
+  - `pre_action_entropy_removed: number (0..1)`
+  - `blocked_cases: integer`
+  - `reconstruction_minutes_saved_total: number`
+  - `reconstruction_minutes_saved_per_block: number`
+  - `model` (weights/factors used for the calculation, persisted for auditability)
+
 6. Items (MUST)
 Each item includes:
 - case_id (non-empty)

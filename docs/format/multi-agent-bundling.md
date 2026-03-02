@@ -3,7 +3,18 @@
 
 This document clarifies how evidence packs are produced when a workflow spans multiple agents or services.
 
-## Principle: bundle = run scope
+## Principle: runtime transfer + run-scope evidence
+
+There are two separate layers:
+
+1. **Runtime handoff layer** (`POST /handoff`, optional inline handoff on `/run-case`):
+- agent-to-agent transfer under one `incident_id`
+- idempotent by `incident_id + handoff_id`
+- checksum-protected envelope
+
+2. **Evidence layer** (bundle/group bundle):
+- portable artifacts for review, CI, and compliance
+- cross-run navigation and integrity verification
 
 A bundle is **run‑scoped**, not trace‑scoped. The goal is to produce one portable artifact per observed run.
 
@@ -13,6 +24,7 @@ If one orchestrator/runner can observe the full workflow (agent→agent handoff,
 
 - Emit **one bundle**
 - Include multiple `trace_id`s (and/or `workflow_id`) as **correlation anchors**
+- Include runtime handoff receipts/emits in run artifacts where available
 - Attach per‑step latency, model parameters, and retrieval snapshots as manifest‑indexed evidence assets
 
 ## Case B: Distributed ownership (no single observer)
@@ -36,4 +48,3 @@ To make cross‑bundle review practical, we recommend capturing:
 - `latency`: per‑step breakdown (not just total)
 - `retrieval_context`: snippets or doc IDs as seen by the model
 - `trace_id` / `span_id` (if OTel available)
-

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "auto_cli_001",
+    "title": "Fix grammar in text file",
+    "input": {
+      "user": "textfile.txt has some grammatic errors. Fix the file."
+    },
+    "expected": {
+      "must_include": ["textfile.txt", "step 1"],
+      "must_not_include": [
+        "[adapter:timeout]",
+        "[adapter:spawn_error]",
+        "[adapter:non_zero_exit]",
+        "[adapter:invalid_config]",
+        "[adapter:busy]"
+      ]
+    },
+    "suite": "autonomous_cli_agent_quality"
+  },
+  {
+    "id": "auto_cli_002",
+    "title": "Create nested folders",
+    "input": {
+      "user": "In this directory, create a folder 'my files' and 5 folders inside it, called fileN where N is the number from 1 to 5."
+    },
+    "expected": {
+      "must_include": ["my files", "step 1"],
+      "must_not_include": [
+        "[adapter:timeout]",
+        "[adapter:spawn_error]",
+        "[adapter:non_zero_exit]",
+        "[adapter:invalid_config]",
+        "[adapter:busy]"
+      ]
+    },
+    "suite": "autonomous_cli_agent_quality"
+  },
+  {
+    "id": "auto_cli_003",
+    "title": "Create and run a simple Python script",
+    "input": {
+      "user": "Create a python file that prints numbers from 1 to 10 and run it."
+    },
+    "expected": {
+      "must_include": ["python", "step 1"],
+      "must_not_include": [
+        "[adapter:timeout]",
+        "[adapter:spawn_error]",
+        "[adapter:non_zero_exit]",
+        "[adapter:invalid_config]",
+        "[adapter:busy]"
+      ]
+    },
+    "suite": "autonomous_cli_agent_quality"
+  },
+  {
+    "id": "auto_cli_004",
+    "title": "List working directory state",
+    "input": {
+      "user": "Show current working directory and list files in long format."
+    },
+    "expected": {
+      "must_include": ["working directory", "step 1"],
+      "must_not_include": [
+        "[adapter:timeout]",
+        "[adapter:spawn_error]",
+        "[adapter:non_zero_exit]",
+        "[adapter:invalid_config]",
+        "[adapter:busy]"
+      ]
+    },
+    "suite": "autonomous_cli_agent_quality"
+  }
+]

@@ -1,5 +1,5 @@
 //tool/apps/evaluator/src/replayDiff.ts
-type Version = "baseline" | "new";
+import type { FetchFailureClass, NetErrorKind, TraceAnchor, Version } from "shared-types";
 
 type EvidenceRef = { kind: "tool_result"; call_id: string } | { kind: "retrieval_doc"; id: string };
 
@@ -54,11 +54,10 @@ type FinalOutputEvent = {
 
 type RunEvent = ToolCallEvent | ToolResultEvent | RetrievalEvent | FinalOutputEvent;
 
-type FetchFailureClass = "http_error" | "timeout" | "network_error" | "invalid_json";
-
 type RunnerFailureArtifact = {
   type: "runner_fetch_failure";
   class: FetchFailureClass;
+  net_error_kind?: NetErrorKind;
   case_id: string;
   version: Version;
   url: string;
@@ -82,6 +81,7 @@ export type AgentResponse = {
   final_output: FinalOutput;
   events?: RunEvent[];
   runner_failure?: RunnerFailureArtifact;
+  trace_anchor?: TraceAnchor;
 };
 
 function escHtml(s: string): string {
@@ -257,6 +257,9 @@ function renderFailureBlock(f: RunnerFailureArtifact | undefined): string {
   lines.push(`<div><b>timeout_ms</b>: ${escHtml(String(f.timeout_ms))}</div>`);
   lines.push(`<div><b>latency_ms</b>: ${escHtml(String(f.latency_ms))}</div>`);
   lines.push(`<div><b>url</b>: <code>${escHtml(f.url)}</code></div>`);
+  if (f.net_error_kind) {
+    lines.push(`<div><b>net_error_kind</b>: ${escHtml(String(f.net_error_kind))}</div>`);
+  }
 
   if (typeof f.status === "number") {
     lines.push(`<div><b>http</b>: ${escHtml(String(f.status))} ${escHtml(String(f.status_text ?? ""))}</div>`);
@@ -294,6 +297,19 @@ function renderFailureBlock(f: RunnerFailureArtifact | undefined): string {
   }
 
   return `<div class="box">${lines.join("")}</div>`;
+}
+
+function renderTraceAnchorBlock(anchor: TraceAnchor | undefined): string {
+  if (!anchor || typeof anchor !== "object") return `<div class="muted">No trace anchor</div>`;
+  const rows: string[] = [];
+  if (anchor.trace_id) rows.push(`<div><b>trace_id</b>: <code>${escHtml(anchor.trace_id)}</code></div>`);
+  if (anchor.span_id) rows.push(`<div><b>span_id</b>: <code>${escHtml(anchor.span_id)}</code></div>`);
+  if (anchor.parent_span_id) rows.push(`<div><b>parent_span_id</b>: <code>${escHtml(anchor.parent_span_id)}</code></div>`);
+  if (anchor.source) rows.push(`<div><b>source</b>: <code>${escHtml(anchor.source)}</code></div>`);
+  if (anchor.traceparent) rows.push(`<div><b>traceparent</b>: <code>${escHtml(anchor.traceparent)}</code></div>`);
+  if (anchor.baggage) rows.push(`<div><b>baggage</b>: <code>${escHtml(anchor.baggage)}</code></div>`);
+  if (rows.length === 0) return `<div class="muted">No trace anchor</div>`;
+  return rows.join("");
 }
 
 function renderActions(actions: ProposedAction[] | undefined): string {
@@ -422,6 +438,9 @@ function renderOneSide(title: string, resp: AgentResponse): string {
 
   <div class="mt12 h3">Runner failure</div>
   ${renderFailureBlock(resp.runner_failure)}
+
+  <div class="mt12 h3">Trace anchor</div>
+  ${renderTraceAnchorBlock(resp.trace_anchor)}
 
   <div class="mt12 h3">Events</div>
   ${renderToolTimeline(resp.events)}

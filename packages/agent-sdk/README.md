@@ -23,7 +23,16 @@ const agent = async ({ user }: { user: string }) => ({
 createRunCaseServer({ port: 8787, handler: wrapSimpleAgent(agent) });
 ```
 
-## LangChain adapter
+## Plugin adapters in this repo
 
-LangChain adapter is distributed as a **paid plugin** in `plugins/langchain-adapter`.
-See: `docs/integrations/langchain.md`.
+- `plugins/langchain-adapter`
+- `plugins/openai-responses-adapter`
+- `plugins/otel-anchor-adapter`
+- `plugins/vendor-bridge` (Promptfoo / DeepEval / Giskard converters)
+
+Use the runnable examples:
+
+```bash
+npx ts-node ../../scripts/agent-sdk-langchain-example.ts
+npx ts-node ../../scripts/agent-sdk-openai-responses-example.ts
+```

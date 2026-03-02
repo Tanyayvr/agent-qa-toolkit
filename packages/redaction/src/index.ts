@@ -1,5 +1,21 @@
 export type RedactionPreset = "none" | "internal_only" | "transferable" | "transferable_extended";
 
+function luhnValid(digits: string): boolean {
+  if (!/^\d{13,19}$/.test(digits)) return false;
+  let sum = 0;
+  let shouldDouble = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let d = Number(digits[i]);
+    if (shouldDouble) {
+      d *= 2;
+      if (d > 9) d -= 9;
+    }
+    sum += d;
+    shouldDouble = !shouldDouble;
+  }
+  return sum % 10 === 0;
+}
+
 function maskString(input: string, preset: RedactionPreset): string {
   if (preset === "none") return input;
   let s = input;
@@ -12,9 +28,16 @@ function maskString(input: string, preset: RedactionPreset): string {
   }
   if (preset === "transferable_extended") {
     s = s.replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g, "[redacted_ip]");
-    s = s.replace(/\b(?:\d[ -]*?){13,19}\b/g, "[redacted_cc]");
+    s = s.replace(/\b(?:\d[ -]*?){13,19}\b/g, (match) => {
+      const digits = match.replace(/\D/g, "");
+      return luhnValid(digits) ? "[redacted_cc]" : match;
+    });
     s = s.replace(/\beyJ[a-zA-Z0-9_-]+?\.[a-zA-Z0-9_-]+?\.[a-zA-Z0-9_-]+?\b/g, "[redacted_jwt]");
-    s = s.replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[redacted_phone]");
+    s = s.replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, (match) => {
+      const digits = match.replace(/\D/g, "");
+      if (digits.length >= 13 && digits.length <= 19) return match;
+      return "[redacted_phone]";
+    });
   }
   return s;
 }

@@ -103,6 +103,9 @@ export function createEntropyScanner(opts?: Partial<EntropyScannerOptions>): Sec
       if (!text) return [];
       const out: SecuritySignal[] = [];
       out.push(...keyPatternSignals(text));
+      if (out.length >= cfg.maxSignals) {
+        return out.slice(0, cfg.maxSignals);
+      }
 
       const candidates = extractCandidates(text, cfg.minTokenLength);
       for (const tok of candidates) {

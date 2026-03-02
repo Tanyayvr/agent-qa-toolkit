@@ -15,6 +15,7 @@ Portable Evidence Packs для tool-using AI агентов
 - report.html (человеку) + compare-report.json (CI контракт)
 - assets/ + manifest.json с sha256 целостностью
 - Strict verify: portability + integrity checks
+- НОВОЕ: Historical Trending (локальная SQLite) для дрейфа регрессий и костов во времени
 
 Как работает
 - Runner запускает кейсы
@@ -28,22 +29,48 @@ Portable Evidence Packs для tool-using AI агентов
 - Security scanners (PII, injection, exfiltration, risk)
 - Self-contained, portable report directory
 
-Почему не Promptfoo / DeepEval / LangSmith
-- Они про model quality и hosted traces
-- Мы про agent behavior + offline handoff
-- Evidence Pack можно вложить в тикет
-- Без SaaS зависимости
+Historical Trending (Pro+ add‑on, когда доступен)
+- Дрейф регрессий между релизами (не один дифф)
+- Flaky‑кейсы: pass/fail во времени
+- Тренд gate‑решений: none/approval/block
+- Тренд токен‑костов: ранний сигнал удорожания
+- Release safety: “зелёное сегодня, сломалось завтра” становится видимым
+- Разбор инцидентов: когда началась деградация
+- Offline‑first: SQLite + HTML, без egress
+- Shareable: trend.html можно вложить в тикет
+- Без зависимости от tracing UI: тренды из Evidence Packs
+- Vendor‑neutral: работает в air‑gapped
+- CI‑friendly CLI: trend runs/tokens/html
+- Audit readiness: исторические доказательства для compliance
+- Измерение улучшений по релизам
+- Контроль затрат: база для бюджетов/лимитов
+- Без скрытой телеметрии
+
+Historical Trending (offline)
+- Каждый run пишется в локальную SQLite базу
+- Trend CLI + trend.html (без SaaS и внешних запросов)
+- Тренды регрессий, gate-решений и токен‑костов
+
+Почему не Promptfoo / DeepEval / LangSmith / Galileo
+- Они сильны в model evals и/или observability
+- Мы про agent behavior + переносимый offline handoff
+- Evidence Pack можно вложить в тикет/PR/incident-док
+- Детерминированный CI gate из одного машинного контракта (`compare-report.json`)
+- Путь комплементарности: оставить observability платформу и добавить нас как release-evidence слой в CI
+- Плюс: локальная БД трендов и офлайн‑графики (без lock‑in и egress)
 
 Деплой
 - Только self-hosted
 - Работает в air-gapped
 - Нет аккаунтов и внешнего хранения
 - Вы контролируете ретеншн и шаринг
+- Trend DB локальная (SQLite), без SaaS/телеметрии
 
 Цены
 - Free: open-source core
 - Services-first: onboarding + CI setup + custom rules
-- Pro (позже): rules library + trending
+- Pro (позже): rules library
+- Pro+ (позже): Historical Trending + retention management
 - Enterprise: advanced redaction + support SLA
 
 Use Cases

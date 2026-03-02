@@ -1,0 +1,36 @@
+{
+  "test_results": [
+    {
+      "name": "summary_accuracy",
+      "description": "summary must preserve key facts",
+      "input": "Summarize incident timeline",
+      "actual_output": "Deployment failed because migration timed out",
+      "expected_output": "Deployment failed due to migration timeout",
+      "metrics": [
+        {
+          "name": "semantic_similarity",
+          "success": true,
+          "score": 0.87,
+          "threshold": 0.8
+        }
+      ],
+      "success": true
+    },
+    {
+      "name": "json_contract",
+      "description": "output should satisfy JSON schema",
+      "input": "Return structured remediation plan",
+      "actual_output": "{\"steps\":[\"rollback\"]}",
+      "expected_output": "json",
+      "metrics": [
+        {
+          "name": "json_schema",
+          "success": true,
+          "score": 1,
+          "threshold": 1
+        }
+      ],
+      "success": true
+    }
+  ]
+}

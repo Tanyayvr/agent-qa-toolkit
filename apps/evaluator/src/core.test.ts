@@ -5,8 +5,20 @@ import {
     evaluateOne,
     chooseRootCause,
     mapPolicyRules,
+    checkEvidenceRefsStrict,
+    checkRunnerTransport,
+    checkToolExecution,
+    checkHallucinationSignal,
+    toolCalls,
+    toolResults,
+    retrievalEvents,
+    finalOutputEvents,
+    extractRetrievalDocIds,
+    extractToolResultsWithToolName,
+    computeTraceIntegritySide,
     deriveGateRecommendation,
     deriveRiskLevel,
+    deriveRiskTags,
     missingTraceSide,
     computeSecuritySide,
     deriveFailureSummarySide,
@@ -81,6 +93,175 @@ describe("extractToolCallNames", () => {
     });
 });
 
+describe("event helpers", () => {
+    const events: RunEvent[] = [
+        { type: "tool_call", ts: 1, call_id: "c1", tool: "search", args: {} },
+        { type: "tool_result", ts: 2, call_id: "c1", status: "ok", payload_summary: { hits: 1 } },
+        { type: "retrieval", ts: 3, doc_ids: ["d1", "d2"] },
+        { type: "final_output", ts: 4, content_type: "text", content: "done" },
+    ];
+
+    it("filters event subsets by type", () => {
+        expect(toolCalls(events)).toHaveLength(1);
+        expect(toolResults(events)).toHaveLength(1);
+        expect(retrievalEvents(events)).toHaveLength(1);
+        expect(finalOutputEvents(events)).toHaveLength(1);
+    });
+
+    it("extracts retrieval doc ids and maps tool names onto tool results", () => {
+        expect(extractRetrievalDocIds(events)).toEqual(["d1", "d2"]);
+        expect(extractToolResultsWithToolName(events)).toEqual([
+            { call_id: "c1", status: "ok", payload_summary: { hits: 1 }, tool: "search" },
+        ]);
+    });
+});
+
+describe("checkEvidenceRefsStrict", () => {
+    it("passes when evidence is not required", () => {
+        const result = checkEvidenceRefsStrict({}, mkResp());
+        expect(result.pass).toBe(true);
+    });
+
+    it("fails when medium/high risk action has no evidence refs", () => {
+        const result = checkEvidenceRefsStrict(
+            { evidence_required_for_actions: true },
+            mkResp({
+                proposed_actions: [
+                    {
+                        action_id: "a1",
+                        action_type: "tool_call",
+                        tool_name: "dangerous_tool",
+                        params: {},
+                        risk_level: "high",
+                    },
+                ],
+            })
+        );
+        expect(result.pass).toBe(false);
+        expect(result.details).toMatchObject({ actions_missing_evidence: ["a1"] });
+    });
+
+    it("fails when evidence refs point to missing tool_result/retrieval_doc", () => {
+        const result = checkEvidenceRefsStrict(
+            { evidence_required_for_actions: true },
+            mkResp({
+                proposed_actions: [
+                    {
+                        action_id: "a1",
+                        action_type: "tool_call",
+                        tool_name: "dangerous_tool",
+                        params: {},
+                        risk_level: "high",
+                        evidence_refs: [{ kind: "tool_result", call_id: "missing" }],
+                    },
+                ],
+                events: [],
+            })
+        );
+        expect(result.pass).toBe(false);
+        expect(result.details).toMatchObject({ error: "evidence_refs references missing tool_result" });
+    });
+
+    it("passes when evidence refs point to existing tool_result and retrieval doc", () => {
+        const result = checkEvidenceRefsStrict(
+            { evidence_required_for_actions: true },
+            mkResp({
+                proposed_actions: [
+                    {
+                        action_id: "a1",
+                        action_type: "lookup",
+                        tool_name: "search_docs",
+                        params: {},
+                        risk_level: "high",
+                        evidence_refs: [
+                            { kind: "tool_result", call_id: "call-1" },
+                            { kind: "retrieval_doc", id: "doc-1" },
+                        ],
+                    },
+                    {
+                        action_id: "a2",
+                        action_type: "noop",
+                        tool_name: "noop",
+                        params: {},
+                        risk_level: "low",
+                    },
+                ],
+                events: [
+                    { type: "tool_result", ts: 1, call_id: "call-1", status: "ok" },
+                    { type: "retrieval", ts: 2, doc_ids: ["doc-1"] },
+                ],
+            })
+        );
+        expect(result.pass).toBe(true);
+    });
+});
+
+describe("transport/tool/hallucination checks", () => {
+    it("checkRunnerTransport handles both success and runner failure", () => {
+        expect(checkRunnerTransport(mkResp()).pass).toBe(true);
+        const failed = checkRunnerTransport(
+            mkResp({
+                runner_failure: {
+                    type: "runner_fetch_failure",
+                    class: "timeout",
+                    case_id: "c1",
+                    version: "new",
+                    url: "http://localhost:8788/run-case",
+                    attempt: 2,
+                    timeout_ms: 1000,
+                    latency_ms: 1100,
+                    error_name: "AbortError",
+                },
+            })
+        );
+        expect(failed.pass).toBe(false);
+        expect(failed.details).toMatchObject({ class: "timeout", attempt: 2 });
+    });
+
+    it("checkToolExecution reports non-ok tool results", () => {
+        const res = checkToolExecution(
+            mkResp({
+                events: [
+                    { type: "tool_result", ts: 1, call_id: "a", status: "ok" },
+                    { type: "tool_result", ts: 2, call_id: "b", status: "timeout" },
+                ],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({ failed: [{ call_id: "b", status: "timeout" }] });
+    });
+
+    it("checkHallucinationSignal detects mismatch between mentioned and tool ticket id", () => {
+        const res = checkHallucinationSignal(
+            mkResp({
+                final_output: { content_type: "text", content: "Created ticket T-1000" },
+                events: [
+                    { type: "tool_call", ts: 1, call_id: "x", tool: "create_ticket", args: {} },
+                    {
+                        type: "tool_result",
+                        ts: 2,
+                        call_id: "x",
+                        status: "ok",
+                        payload_summary: { ticket_id: "T-2000" },
+                    },
+                ],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({ mismatch: true });
+    });
+
+    it("checkHallucinationSignal returns pass when create_ticket output is absent", () => {
+        const res = checkHallucinationSignal(
+            mkResp({
+                final_output: { content_type: "text", content: "Ticket T-1000 created" },
+                events: [{ type: "tool_result", ts: 1, call_id: "x", status: "ok" }],
+            })
+        );
+        expect(res.pass).toBe(true);
+    });
+});
+
 /* ------------------------------------------------------------------ */
 /*  evaluateOne                                                        */
 /* ------------------------------------------------------------------ */
@@ -110,6 +291,40 @@ describe("evaluateOne", () => {
         const toolAssertion = result.assertions.find((a) => a.name === "tool_required");
         expect(toolAssertion?.pass).toBe(false);
         expect((toolAssertion?.details as Record<string, unknown>)?.missing_tools).toEqual(["write"]);
+    });
+
+    it("evaluates action_required and tool_sequence assertions", () => {
+        const c = mkCase({
+            expected: {
+                action_required: ["search"],
+                tool_sequence: ["search", "write"],
+            },
+        });
+        const resp = mkResp({
+            proposed_actions: [
+                { action_id: "a1", action_type: "search", tool_name: "search", params: {} },
+            ],
+            events: [
+                { type: "tool_call", ts: 1, call_id: "c1", tool: "search", args: {} },
+                { type: "tool_call", ts: 2, call_id: "c2", tool: "write", args: {} },
+            ],
+        });
+        const result = evaluateOne(c, resp, ajv);
+        expect(result.assertions.find((a) => a.name === "action_required")?.pass).toBe(true);
+        expect(result.assertions.find((a) => a.name === "tool_sequence")?.pass).toBe(true);
+    });
+
+    it("fails retrieval_required when required docs are missing", () => {
+        const c = mkCase({
+            expected: {
+                retrieval_required: { doc_ids: ["d1", "d2"] },
+            },
+        });
+        const resp = mkResp({
+            events: [{ type: "retrieval", ts: 1, doc_ids: ["d1"] }],
+        });
+        const result = evaluateOne(c, resp, ajv);
+        expect(result.assertions.find((a) => a.name === "retrieval_required")?.pass).toBe(false);
     });
 
     it("passes when all required tools are present", () => {
@@ -178,6 +393,30 @@ describe("evaluateOne", () => {
         expect(result.pass).toBe(false);
         expect(result.root_cause).toBeDefined();
     });
+
+    it("fails when runner_failure is present even with empty expected", () => {
+        const c = mkCase();
+        const resp = mkResp({
+            final_output: { content_type: "text", content: "runner: fetch failure (http_error)" },
+            runner_failure: {
+                type: "runner_fetch_failure",
+                class: "http_error",
+                case_id: "c1",
+                version: "new",
+                attempt: 3,
+                timeout_ms: 15000,
+                latency_ms: 32,
+                status: 500,
+                url: "http://localhost:8788/run-case",
+            },
+        });
+        const result = evaluateOne(c, resp, ajv);
+
+        const transport = result.assertions.find((a) => a.name === "runner_transport_success");
+        expect(transport?.pass).toBe(false);
+        expect(result.pass).toBe(false);
+        expect(result.root_cause).toBe("missing_required_data");
+    });
 });
 
 /* ------------------------------------------------------------------ */
@@ -214,6 +453,27 @@ describe("chooseRootCause", () => {
         ];
         const resp = mkResp();
         expect(chooseRootCause(assertions, resp)).toBe("hallucination_signal");
+    });
+
+    it("prioritizes runner failure over assertion-derived format issues", () => {
+        const assertions = [
+            { name: "json_schema", pass: false, details: {} },
+            { name: "runner_transport_success", pass: false, details: {} },
+        ];
+        const resp = mkResp({
+            runner_failure: {
+                type: "runner_fetch_failure",
+                class: "http_error",
+                case_id: "c1",
+                version: "new",
+                attempt: 1,
+                timeout_ms: 15000,
+                latency_ms: 5,
+                status: 500,
+                url: "http://localhost:8788/run-case",
+            },
+        });
+        expect(chooseRootCause(assertions, resp)).toBe("missing_required_data");
     });
 });
 
@@ -315,6 +575,35 @@ describe("deriveRiskLevel", () => {
     it("maps none -> low", () => expect(deriveRiskLevel("none")).toBe("low"));
 });
 
+describe("deriveRiskTags", () => {
+    it("adds expected tags based on signals/regressions/availability", () => {
+        const tags = deriveRiskTags({
+            newSignals: [
+                { kind: "prompt_injection_marker", severity: "critical", confidence: "high", title: "pi", details: {}, evidence_refs: [] },
+                { kind: "secret_in_output", severity: "high", confidence: "medium", title: "secret", details: {}, evidence_refs: [] },
+            ],
+            regression: true,
+            caseStatus: "executed",
+            newAvailability: { status: "missing", reason_code: "missing_file" },
+        });
+        expect(tags).toContain("regression");
+        expect(tags).toContain("missing_new");
+        expect(tags).toContain("prompt_injection_marker");
+        expect(tags).toContain("secret_in_output");
+    });
+
+    it("tags filtered/missing and broken availability states", () => {
+        const tags = deriveRiskTags({
+            newSignals: [],
+            regression: false,
+            caseStatus: "filtered_out",
+            newAvailability: { status: "broken", reason_code: "invalid_json" },
+        });
+        expect(tags).toContain("filtered_out");
+        expect(tags).toContain("broken_new");
+    });
+});
+
 /* ------------------------------------------------------------------ */
 /*  missingTraceSide                                                   */
 /* ------------------------------------------------------------------ */
@@ -384,6 +673,7 @@ describe("deriveFailureSummarySide", () => {
         const result = deriveFailureSummarySide({
             type: "runner_fetch_failure",
             class: "timeout",
+            net_error_kind: "headers_timeout",
             case_id: "c1",
             version: "new",
             url: "http://localhost",
@@ -396,6 +686,7 @@ describe("deriveFailureSummarySide", () => {
         expect(result?.http_status).toBe(504);
         expect(result?.timeout_ms).toBe(5000);
         expect(result?.attempts).toBe(3);
+        expect(result?.net_error_kind).toBe("headers_timeout");
     });
 });
 
@@ -422,10 +713,91 @@ describe("computeSecuritySide", () => {
                 attempt: 1,
                 timeout_ms: 1000,
                 latency_ms: 1001,
+                url: "http://example.com",
             },
         });
         const { signals } = computeSecuritySide(resp);
         expect(signals.length).toBe(1);
         expect(signals[0]?.kind).toBe("runner_failure_detected");
+    });
+
+    it("sets medium severity for non-timeout runner failures", () => {
+        const resp = mkResp({
+            runner_failure: {
+                type: "runner_fetch_failure",
+                class: "http_error",
+                case_id: "c1",
+                version: "new",
+                attempt: 1,
+                timeout_ms: 1000,
+                latency_ms: 1001,
+                error_name: "HttpError",
+                error_message: "500 from upstream",
+                url: "http://example.com",
+            },
+        });
+        const { signals } = computeSecuritySide(resp);
+        expect(signals[0]?.severity).toBe("medium");
+        expect(signals[0]?.details?.notes).toContain("class=http_error");
+    });
+});
+
+describe("computeTraceIntegritySide", () => {
+    it("returns ok when event chain is consistent", () => {
+        const resp = mkResp({
+            events: [
+                { type: "tool_call", ts: 1, call_id: "c1", tool: "search", args: {} },
+                { type: "tool_result", ts: 2, call_id: "c1", status: "ok" },
+                { type: "final_output", ts: 3, content_type: "text", content: "ok" },
+            ],
+        });
+        const out = computeTraceIntegritySide(resp, {});
+        expect(out.status).toBe("ok");
+        expect(out.issues).toEqual([]);
+    });
+
+    it("returns partial for missing retrieval/final output/timestamps", () => {
+        const resp = mkResp({
+            events: [
+                { type: "tool_call", ts: Number.NaN, call_id: "c1", tool: "search", args: {} },
+                { type: "tool_result", ts: 2, call_id: "c1", status: "ok" },
+            ],
+        });
+        const out = computeTraceIntegritySide(resp, { retrieval_required: { doc_ids: ["d1"] } });
+        expect(out.status).toBe("partial");
+        expect(out.issues).toContain("missing_timestamps");
+        expect(out.issues).toContain("missing_final_output_event");
+        expect(out.issues).toContain("retrieval_required_missing");
+    });
+
+    it("returns broken for orphan tool results", () => {
+        const resp = mkResp({
+            events: [
+                { type: "tool_result", ts: 2, call_id: "orphan", status: "ok" },
+                { type: "final_output", ts: 3, content_type: "text", content: "ok" },
+            ],
+        });
+        const out = computeTraceIntegritySide(resp, {});
+        expect(out.status).toBe("broken");
+        expect(out.issues).toContain("tool_result_without_call");
+    });
+
+    it("marks empty events as partial when runner failure is present", () => {
+        const resp = mkResp({
+            events: [],
+            runner_failure: {
+                type: "runner_fetch_failure",
+                class: "timeout",
+                case_id: "c1",
+                version: "new",
+                attempt: 1,
+                timeout_ms: 1000,
+                latency_ms: 1500,
+                url: "http://localhost:8788/run-case",
+            },
+        });
+        const out = computeTraceIntegritySide(resp, {});
+        expect(out.status).toBe("partial");
+        expect(out.issues).toContain("no_events");
     });
 });

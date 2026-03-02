@@ -1,7 +1,7 @@
 <!-- /README.md -->
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green.svg)](package.json)
-[![Tests](https://img.shields.io/badge/tests-93%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-vitest-brightgreen.svg)](#development)
 
 # Agent QA Toolkit — Portable Evidence Packs, Regression Diffs, and CI Gates
 
@@ -23,8 +23,9 @@ Quick links:
 4. [Evidence Pack Format](#evidence-pack-format)
 5. [CI Gate Decision](#ci-gate-decision)
 6. [Security Scanners](#security-scanners)
-7. [Docs Map](#docs-map)
-8. [Development](#development)
+7. [Historical Trending](#historical-trending)
+8. [Docs Map](#docs-map)
+9. [Development](#development)
 
 ---
 
@@ -36,7 +37,9 @@ Incident - Evidence Pack - RCA - Risk/Gate Decision
 You get:
 - Baseline vs New regression runs
 - Per‑case replay diff (`case-<case_id>.html`) for human triage
-- Machine report (`compare-report.json`) as the source of truth for CI dashboards and gating
+- Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
+- Conservative pass semantics: runner transport/runtime failures are recorded as evidence and counted as `pass=false` (not "green" by default)
+- Execution-quality summary (`summary.execution_quality`) with transport success and weak-assertion rate
 - Root cause attribution (RCA) and policy hints
 - Security signals (6 scanners + optional entropy scanner)
 
@@ -53,7 +56,8 @@ You get:
 | Flakiness / pass_rate | ✅ | Partial / depends | Custom |
 | No SaaS dependency | ✅ | ❌ | ✅ |
 
-Notes: see `docs/comparison.md` for rationale.
+Notes: see `docs/comparison.md` for rationale.  
+Positioning: for teams already using Galileo or similar observability stacks, this toolkit is a complementary release-evidence layer (portable artifact + deterministic CI gate).
 
 ---
 
@@ -65,6 +69,11 @@ npm run demo
 Open the report:
 ```
 apps/evaluator/reports/latest/report.html
+```
+
+One-command Docker quickstart (self-hosted):
+```bash
+docker compose up --build
 ```
 
 Live report (no install):
@@ -121,6 +130,30 @@ See:
 
 ---
 
+## Admissibility KPI (Numeric)
+The report includes a numeric admissibility block in:
+- `compare-report.json` -> `summary.execution_quality.admissibility_kpi`
+
+Formulas:
+- `pre_action_entropy_removed = (risk_mass_before - risk_mass_after) / risk_mass_before`
+- `reconstruction_minutes_saved_per_block = reconstruction_minutes_saved_total / blocked_cases`
+
+Purpose:
+- separate probability-space (risk mass reduced before action)
+- from cost-space (human reconstruction time saved)
+
+Default model (explicit in artifact):
+- risk weights: `low=1`, `medium=2`, `high=3`
+- residual gate factors: `none=1`, `require_approval=0.4`, `block=0`
+- minutes per removed risk unit: `30`
+
+Tune model:
+```bash
+AQ_RECON_MINUTES_PER_REMOVED_RISK_UNIT=45 npm --workspace evaluator run dev -- ...
+```
+
+---
+
 ## Security Scanners
 Six scanners run in the pipeline:
 - PII/secret detection
@@ -135,12 +168,64 @@ Details:
 
 ---
 
+## Historical Trending
+**Pro+ add‑on (paid, when available)**  
+To avoid pricing ambiguity:
+- OSS today: `npm run trend` CLI, local SQLite store, and HTML trend export are available in this repo.
+- Pro+ (paid): packaged rollout, support SLA, migration help, and governed operations for long-term trend retention.
+- Pilot: early teams can use Pro+ workflows with direct support while the packaging matures.
+
+Why it matters:
+- Drift detection across releases (not just a single diff)
+- Flaky visibility: pass/fail over time
+- Gate trend: none/approval/block over time
+- Admissibility KPI trend by release: pre-action entropy removed + reconstruction minutes saved/block
+- Token cost trend: early signal of cost drift
+- Release safety: avoid “green today, broken next week”
+- Incident forensics: when the degradation started
+- Offline‑first: SQLite + HTML, no data egress
+- Shareable artifacts: attach trend.html to tickets
+- No tracing UI dependency: trends from Evidence Packs
+- Vendor‑neutral: works in air‑gapped environments
+- CI‑friendly CLI: trend runs/tokens/html
+- Audit readiness: historical evidence for compliance
+- Quantifies improvements by release
+- Cost control: facts for budgets/limits
+- No hidden telemetry
+
+Use it:
+```bash
+npm run trend -- runs --last 30
+npm run trend -- tokens --last 30
+npm run trend -- html --last 50 --out /tmp/trends
+```
+This stores data in `.agent-qa/trend.sqlite` (local filesystem; avoid NFS/SMB).
+
+Recommended developer workflow (2 reports):
+- `full history` for long-run drift context
+- `kpi window` for post-KPI operational decisions
+
+```bash
+# Full history (quality/drift context)
+npm run trend -- html --last 200 --out apps/evaluator/reports/trend-full
+
+# KPI window (after KPI rollout date)
+npm run trend -- html --since 2026-03-01 --out apps/evaluator/reports/trend-kpi
+```
+
+Note:
+- Old reports created before KPI rollout will show `kpi_* = null`; this is expected.
+
+---
+
 ## Docs Map
 - Quick install: `docs/installation.md`
 - Architecture: `docs/architecture.md`
 - Agent contract: `docs/agent-integration-contract.md`
 - CI guide: `docs/ci.md`
 - Self‑hosted policy: `docs/self-hosted.md`
+- Threat model: `docs/threat-model.md`
+- Security FAQ: `docs/security-faq.md`
 
 ---
 
@@ -149,15 +234,135 @@ Runner:
 ```bash
 npm --workspace runner run dev -- --baseUrl http://localhost:8787 --cases cases/cases.json --outDir apps/runner/runs --runId latest
 ```
+Quality-only demo suite (no intentionally weak-expected transport-failure cases):
+```bash
+npm run demo:quality
+```
+Correctness demo now defaults to `cases/cases-quality.json` and validates weak-expected rate before run:
+```bash
+npm run demo:correctness
+```
+One-command local campaign (baseline/new2/new3 + evaluator + trend):
+```bash
+BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod ./scripts/run-local-campaign.sh
+```
+Slow-agent profile (auto timeout tuning):
+```bash
+BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=autonomous CAMPAIGN_PROFILE=quality RUN_PREFIX=auto_prod REPORT_PREFIX=auto-prod TIMEOUT_PROFILE=auto TIMEOUT_MS=120000 TIMEOUT_AUTO_CAP_MS=1800000 TIMEOUT_AUTO_LOOKBACK_RUNS=20 RETRIES=0 PREFLIGHT_MODE=off ./scripts/run-local-campaign.sh
+```
+Infra-only smoke profile (weak assertions allowed):
+```bash
+BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=autonomous CAMPAIGN_PROFILE=infra RUN_PREFIX=auto_infra REPORT_PREFIX=auto-infra ./scripts/run-local-campaign.sh
+```
+One-command post-run evidence pack (evaluator + trend + gated check + zip):
+```bash
+CASES=cases/agents/autonomous-cli-agent.json RUN_BASE=auto_prod_auto_base RUN_NEW2=auto_prod_auto_new2 RUN_NEW3=auto_prod_auto_new3 REPORT_PREFIX=auto-prod-auto PROJECT_KEY=autonomous-cli-agent ./scripts/post-run-evidence.sh
+```
+Multi-agent incident bundle (group 2+ report folders under one `run_id` family):
+```bash
+npm run bundle:group -- \
+  --groupId incident-2026-02-28 \
+  --outDir apps/evaluator/reports/groups/incident-2026-02-28 \
+  --report agentA=apps/evaluator/reports/cli-prod \
+  --report agentB=apps/evaluator/reports/agent-cli-live-2
+
+npm run bundle:group:verify -- \
+  --bundleDir apps/evaluator/reports/groups/incident-2026-02-28
+```
+Vendor-bridge conversion (Promptfoo / DeepEval / Giskard -> canonical bridge run):
+```bash
+npm run bridge -- convert --vendor promptfoo --in examples/vendor-bridge/promptfoo-baseline.json --out /tmp/promptfoo-baseline.bridge.json --runId promptfoo_base
+npm run bridge -- convert --vendor promptfoo --in examples/vendor-bridge/promptfoo-candidate.json --out /tmp/promptfoo-candidate.bridge.json --runId promptfoo_candidate
+npm run bridge -- diff --baseline /tmp/promptfoo-baseline.bridge.json --candidate /tmp/promptfoo-candidate.bridge.json --out /tmp/promptfoo.diff.json --runId promptfoo_base_vs_candidate
+```
+Runtime handoff (live transfer between agents/adapters under one incident):
+```bash
+curl -sS http://127.0.0.1:8788/handoff \
+  -H 'Content-Type: application/json' \
+  --data '{
+    "incident_id":"incident-2026-02-28",
+    "handoff_id":"h-001",
+    "from_agent_id":"planner",
+    "to_agent_id":"executor",
+    "objective":"Execute approved plan",
+    "schema_version":"1.0.0"
+  }'
+
+npm --workspace runner run dev -- \
+  --baseUrl http://127.0.0.1:8788 \
+  --cases cases/agents/cli-agent.json \
+  --outDir apps/runner/runs \
+  --runId demo-handoff \
+  --incidentId incident-2026-02-28 \
+  --agentId executor
+```
+Proof commands (claim-safe checks before outbound posts/outreach):
+```bash
+# OTel anchors must exist in final evaluator artifact
+npm run proof:otel -- --reportDir apps/evaluator/reports/auto-prod
+
+# One-command demo proof (regenerates correctness report + verifies anchors)
+npm run proof:otel:demo
+
+# Runtime handoff endpoint/idempotency smoke (fast)
+npm run proof:runtime-handoff -- --baseUrl http://127.0.0.1:8788 --mode endpoint
+
+# Optional e2e receipt check (calls /run-case; use on fast adapters)
+npm run proof:runtime-handoff -- --baseUrl http://127.0.0.1:8788 --mode e2e --runCaseTimeoutMs 30000
+```
+Proof notes:
+- `proof:otel` is expected to fail when the selected report has no `trace_id`/`span_id` anchors (for example, runs without anchor-enabled adapter/plugin).
+- `proof:runtime-handoff` requires a running adapter at `--baseUrl`; if adapter is down, the command fails with an explicit health hint.
+
+Note:
+- Runner executes both `baseline` and `new` per case.
+- CLI flags that take values require a delimiter: use `--timeoutMs 210000` or `--timeoutMs=210000` (not `--timeoutMs210000`).
+- Effective runtime grows with `timeoutMs * (retries + 1)`; for slow local agents start with `--retries 0` and tune `--timeoutMs` intentionally.
+- For slow/variable agents, prefer `--timeoutProfile auto` with `--timeoutAutoCapMs` to auto-tune timeout from historical latencies + adapter `/health` timeout hints.
+- `--timeoutProfile auto` now also constrains runner timeout by adapter server timeout safe window (`server_request_timeout_ms - 5000ms`) when `/health` exposes it.
+- Runner now has a built-in Node HTTP fallback for long-running local calls when Node `fetch` fails waiting for headers (~300s class); this reduces false `network_error: fetch failed` on slow agents.
+- Runner has a case-level inactivity watchdog: `--inactivityTimeoutMs` (auto default `max(timeoutMs + 30000, 120000)`) plus heartbeat logs via `--heartbeatIntervalMs`.
+- Optional preflight before campaign start: `--preflightMode off|warn|strict` and `--preflightTimeoutMs`.
+- In `--preflightMode strict`, timeout-contract mismatches (runner/adapter/server) are treated as blocking failures before case execution.
+- Runner preflight canary now sends header `x-aq-preflight: 1`; `cli-agent-adapter` handles `case_id="__preflight__"` as a fast config/transport probe (no external CLI spawn), so strict preflight remains deterministic even for slow agents.
+- Preflight now retries transient transport failures (`/health` + `/run-case` canary) before declaring strict-mode failure, reducing false blocks on unstable local networks.
+- Optional fail-fast for infra meltdowns: `--failFastTransportStreak N` (stops after N consecutive transport-failed cases).
+- `cli-agent-adapter` returns structured transport reasons in `adapter_error.code`: `timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`.
+- `cli-agent-adapter` can return `adapter_error.code=busy` with HTTP `429` when `CLI_AGENT_MAX_CONCURRENCY` is reached.
+- `cli-agent-adapter` enforces timeout cap via `CLI_AGENT_TIMEOUT_CAP_MS` (default `120000`) and exposes effective runtime config in `/health`.
+- `cli-agent-adapter` aligns HTTP server request timeout with CLI timeout via `CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS` (default: `CLI_AGENT_TIMEOUT_MS/CLI_AGENT_TIMEOUT_CAP_MS` effective value + `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`).
+- Tune server timeout envelope with `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`, `CLI_AGENT_SERVER_HEADERS_TIMEOUT_MS`, and `CLI_AGENT_SERVER_KEEP_ALIVE_TIMEOUT_MS` to avoid 5-minute Node HTTP cutoff on long local-agent calls.
+- Optional adapter auth for production: set `CLI_AGENT_AUTH_TOKEN` (plus optional `CLI_AGENT_AUTH_HEADER`) to require a token on `/run-case` and `/handoff`.
+- Runtime handoff channel: `POST /handoff` (idempotent by `incident_id + handoff_id`, checksum validated).
+- Optional persistent runtime handoff store: set `CLI_AGENT_HANDOFF_STORE_PATH` to survive adapter restarts; retention is bounded by `CLI_AGENT_HANDOFF_TTL_MS` and `CLI_AGENT_HANDOFF_MAX_ITEMS_TOTAL`.
+- Runner propagates `run_meta` to `/run-case` (`run_id`, `incident_id`, `agent_id`) and can forward per-case `metadata.handoff`.
+- Runner preserves optional OTel anchors (`trace_anchor`) and enriches from response headers (`traceparent` / `b3` / `x-trace-id`) when available.
+- In `bundle:group`, each `--report <label=dir>` label is persisted as `agent_id` in the group index/manifest.
+- Group bundles remain the evidence aggregation layer; runtime transfer is handled by `/handoff`.
+- Keep adapter/agent timeout below runner timeout to avoid deterministic transport aborts (`runner timeout <= adapter timeout`).
+- `SIGINT/SIGTERM` are handled gracefully: partial artifacts are kept, `run.json` is finalized with interruption metadata, and exit code is deterministic.
+- Optional structured logs for machines: set `AQ_LOG_FORMAT=json`.
 
 Evaluator:
 ```bash
 npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest
 ```
+Safety limits:
+```bash
+npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest --maxCaseBytes 10000000 --maxMetaBytes 2000000
+```
+Execution-quality gate (for CI):
+```bash
+AQ_MIN_TRANSPORT_SUCCESS_RATE=0.95 AQ_MAX_WEAK_EXPECTED_RATE=0.20 \
+npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest --failOnExecutionDegraded
+```
+Report UX:
+- `report.html` uses client-side filtering + pagination (`25/50/100/200` rows/page) with incremental chunked rendering, debounced text filtering, and large-report mode (`1500+` rows).
 
 Tests:
 ```bash
 npm test
+npm run test:coverage
 ```
 
 ---
@@ -167,12 +372,27 @@ npm test
 - `apps/runner` — executes cases and writes run artifacts
 - `apps/evaluator` — evaluates artifacts, computes risk/gates, generates HTML
 - `packages/shared-types` — canonical contract types (runtime‑0)
-- `packages/cli-utils` — CLI helpers
+- `packages/cli-utils` — CLI helpers + shared trace-anchor normalization/extraction
 - `packages/redaction` — PII redaction engine
 - `packages/agent-sdk` — HTTP server + helpers for connecting your agent
+- `plugins/langchain-adapter` — LangChain runnable wrapper to `SimpleAgent`
+- `plugins/openai-responses-adapter` — OpenAI Responses wrapper to `SimpleAgent`
+- `plugins/otel-anchor-adapter` — trace-anchor enrichment wrapper (`trace_id`/`span_id`)
+- `plugins/vendor-bridge` — vendor-agnostic converters (`Promptfoo` / `DeepEval` / `Giskard`) + baseline/new gate diff
 
 ---
 
 ## Pilot Program
 We’re onboarding 5 teams in the pilot cohort.  
 Apply: https://github.com/Tanyayvr/agent-qa-toolkit/issues/new?template=pilot_request.yml
+
+---
+
+## Paid Tiers (Pro / Pro+)
+We keep the core self‑hosted toolkit open‑source. Paid tiers are **optional** and focused on advanced needs.
+
+- **Pro (later):** scanner rules library  
+- **Pro+ (later):** Historical Trending + retention management  
+
+Pilot access to paid tiers is **free for early teams**.  
+Details: `docs/pro.md`

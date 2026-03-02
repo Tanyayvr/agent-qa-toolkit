@@ -43,8 +43,13 @@ Output:
 - `apps/evaluator/reports/latest/compare-report.json`
 
 Notes:
+- This default command runs a one-shot `quickstart` service and exits when artifacts are ready.
 - Uses demo-agent fixture and `cases/all.json` (correctness + robustness).
 - Replace demo-agent with your real agent service for production.
+- Advanced 3-service stack (persistent `demo-agent` + `runner` + `evaluator`):
+```bash
+docker compose --profile stack up --build
+```
 
 ---
 
@@ -78,11 +83,16 @@ npm -w evaluator run dev -- \
 
 If your agent does not expose `/run-case`, use the SDK adapters:
 - TypeScript: `packages/agent-sdk/README.md`
-- Python: `scripts/agent-sdk-python/agent_sdk.py`
+- Python reference adapter (minimal stdlib example): `scripts/agent-sdk-python/agent_sdk.py`
+
+Reference plugin wrappers:
+- `plugins/langchain-adapter`
+- `plugins/openai-responses-adapter`
+- `plugins/otel-anchor-adapter`
+- `plugins/vendor-bridge`
 
 ---
 
 ## 5) CI Integration
 
 See `docs/ci.md` for CI pipeline examples and strict verification.
-

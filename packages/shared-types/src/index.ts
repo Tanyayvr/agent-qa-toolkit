@@ -16,6 +16,7 @@ export type NetErrorKind =
     | "tls"
     | "conn_refused"
     | "conn_reset"
+    | "headers_timeout"
     | "socket_hang_up"
     | "proxy"
     | "abort"
@@ -157,6 +158,95 @@ export type TokenUsage = {
 };
 
 /* ------------------------------------------------------------------ */
+/*  Trace anchors (OTel correlation)                                   */
+/* ------------------------------------------------------------------ */
+
+/** Optional trace correlation payload attached to a case response.
+ *  - `trace_id`/`span_id` follow W3C trace-context hex formats.
+ *  - `traceparent` and `baggage` are preserved for downstream tooling.
+ *  - `source` helps operators understand where anchors were derived. */
+export type TraceAnchor = {
+    trace_id?: string;
+    span_id?: string;
+    parent_span_id?: string;
+    traceparent?: string;
+    baggage?: string;
+    source?: "response_body" | "response_headers" | "derived";
+};
+
+/* ------------------------------------------------------------------ */
+/*  Runtime handoff contract (multi-agent)                             */
+/* ------------------------------------------------------------------ */
+
+/** Run-level routing metadata sent with /run-case requests. */
+export type RunMeta = {
+    run_id?: string;
+    incident_id?: string;
+    agent_id?: string;
+    parent_run_id?: string;
+};
+
+/** Runtime handoff payload transferred between agents/services.
+ *  `checksum` is sha256 over canonical payload without `checksum` field. */
+export type HandoffEnvelope = {
+    incident_id: string;
+    handoff_id: string;
+    from_agent_id: string;
+    to_agent_id: string;
+    objective: string;
+    constraints?: Record<string, unknown>;
+    decision_thresholds?: Record<string, unknown>;
+    state_delta?: Record<string, unknown>;
+    tool_result_refs?: string[];
+    retrieval_refs?: string[];
+    trace_anchor?: TraceAnchor;
+    parent_handoff_id?: string;
+    schema_version: string;
+    created_at: number;
+    checksum: string;
+};
+
+/** Input form accepted by runtime handoff endpoints.
+ *  `schema_version`, `created_at`, and `checksum` may be omitted and derived by adapter. */
+export type HandoffEnvelopeInput = {
+    incident_id: string;
+    handoff_id: string;
+    from_agent_id: string;
+    to_agent_id: string;
+    objective: string;
+    constraints?: Record<string, unknown>;
+    decision_thresholds?: Record<string, unknown>;
+    state_delta?: Record<string, unknown>;
+    tool_result_refs?: string[];
+    retrieval_refs?: string[];
+    trace_anchor?: TraceAnchor;
+    parent_handoff_id?: string;
+    schema_version?: string;
+    created_at?: number;
+    checksum?: string;
+};
+
+/** Adapter acknowledgement/visibility status for runtime handoffs. */
+export type HandoffReceipt = {
+    incident_id: string;
+    handoff_id: string;
+    from_agent_id: string;
+    to_agent_id: string;
+    checksum: string;
+    accepted_at: number;
+    status: "accepted" | "duplicate" | "available" | "consumed";
+};
+
+/** Canonical /run-case request payload used by runners and SDKs. */
+export type RunCaseRequestPayload = {
+    case_id: string;
+    version: Version;
+    input: { user: string; context?: unknown };
+    run_meta?: RunMeta;
+    handoff?: HandoffEnvelopeInput;
+};
+
+/* ------------------------------------------------------------------ */
 /*  Agent response (common shape read by evaluator + replay diff)      */
 /* ------------------------------------------------------------------ */
 
@@ -173,6 +263,18 @@ export type AgentResponse = {
     /** Optional: token cost data for this individual run. Populated by the agent
      *  when it has access to model usage metadata (e.g. OpenAI Usage object). */
     token_usage?: TokenUsage;
+
+    /** Optional OTel anchor fields for cross-linking evidence to traces. */
+    trace_anchor?: TraceAnchor;
+
+    /** Optional runtime routing metadata echoed by adapters/agents. */
+    run_meta?: RunMeta;
+
+    /** Optional: handoffs emitted by this run for downstream agents. */
+    handoff_emits?: HandoffEnvelope[];
+
+    /** Optional: handoffs available/consumed by this run. */
+    handoff_receipts?: HandoffReceipt[];
 };
 
 

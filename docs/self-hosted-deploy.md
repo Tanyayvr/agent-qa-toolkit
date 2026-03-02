@@ -32,9 +32,14 @@ When finished:
 ---
 
 ## Notes
+- Default compose target is a one-shot quickstart container and exits automatically after report generation.
 - `demo-agent` is a fixture. Replace it with a real agent service when integrating.
 - The compose file uses `cases/all.json` to run correctness + robustness suites.
 - The Dockerfile includes `dev` and `prod` targets. Compose uses `dev` (ts-node). For production packaging, build `prod`.
+- For legacy multi-container stack (`demo-agent` + `runner` + `evaluator`), use:
+```bash
+docker compose --profile stack up --build
+```
 
 ---
 
