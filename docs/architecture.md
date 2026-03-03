@@ -106,6 +106,17 @@ Product note:
 - This repository contains technical trend capabilities for pilot validation.
 - Commercial packaging/support for Historical Trending is positioned as Pro+.
 
+## Technical due diligence bridge
+
+To support independent verification, the repo keeps a direct bridge from code to artifacts:
+
+- commit/date timeline with measurable deltas: `docs/CHRONOLOGY.md`
+- deterministic verification checklist: `docs/VERIFY.md`
+- machine-readable CI truth: `compare-report.json` (`gate_recommendation`, `execution_quality`)
+- human triage truth: `report.html` + per-case replay pages
+
+This prevents "dashboard-only" claims and allows third parties to reproduce runs locally.
+
 ## Validator modes & conformance
 
 `pvip-verify` supports layered modes:
@@ -136,6 +147,16 @@ Runner `timeoutProfile=auto` consumes these timeout hints and constrains selecte
 `preflightMode=strict` treats timeout-contract mismatches as blocking errors to stop flaky long campaigns early.
 For production hardening, adapter auth can be enabled via `CLI_AGENT_AUTH_TOKEN` (optional `CLI_AGENT_AUTH_HEADER`).
 Persistent handoff retention is bounded by `CLI_AGENT_HANDOFF_TTL_MS` and `CLI_AGENT_HANDOFF_MAX_ITEMS_TOTAL`.
+
+## OSS hardening backlog (post-current release)
+
+Aligned with external production-agent lessons, the next OSS hardening items are:
+
+- deterministic eval expansion for objective tasks (`set similarity` / `sequence alignment` / optional layout-pixel comparators)
+- stronger pre-execution planning gate checks (`declared_end_state` vs mutation payload -> `require_approval` or `block`)
+- stricter REPL execution policy (allowlist, IO/time limits, risky syscall/path guardrails, explicit audit trail in evidence artifacts)
+
+These are product-hardening tasks, not paid-only features.
 
 
 ## Environment metadata

@@ -41,7 +41,8 @@
     "sbom": "node scripts/sbom.mjs",
     "manifest:sign": "node scripts/manifest-sign.mjs apps/evaluator/reports/latest",
     "trend": "ts-node packages/trending/src/cli.ts",
-    "quality:gate": "npm run lint -- --max-warnings=0 && npm run typecheck && npm run test:coverage && npm run docs:check-links && docker compose config --quiet && npm audit --audit-level=high"
+    "quality:gate": "npm run lint -- --max-warnings=0 && npm run typecheck && npm run test:coverage && npm run docs:check-links && docker compose config --quiet && npm audit --audit-level=high",
+    "metrics:dd": "node scripts/collect-dd-metrics.mjs"
   },
   "overrides": {
     "qs": "6.14.2",

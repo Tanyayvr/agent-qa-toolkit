@@ -7,14 +7,14 @@
 
 The only open‑source regression testing framework purpose‑built for tool‑using AI agents.
 Most tools measure model quality. We measure agent behavior:
-did it call the right tools, in the right order, with safe parameters — and can you  prive it?
+did it call the right tools, in the right order, with safe parameters — and can you prove it?
 
 Portable Evidence Packs · Regression Diffs · CI Gates · Security Signals
 
 Why this exists: most observability tools trace what happened, but do not produce a portable, signed, offline‑verifiable artifact you can attach to a ticket or gate in CI. This toolkit does - via Evidence Packs + per‑case CI gate decisions + offline artifacts.
 
-Quick links:
-[Quickstart](#quickstart) · [Live report](https://tanyayvr.github.io/agent-qa-toolkit/demo/report.html) · [Demo bundle](#demo-bundle) · [CI usage](docs/ci.md) · [Evidence Pack contract](#evidence-pack-format) · [Security scanners](docs/security-scanners.md) · [Architecture](docs/architecture.md)
+**Quick links:**
+[Quickstart](#quickstart) · [Live report](https://tanyayvr.github.io/agent-qa-toolkit/demo/report.html) · [Demo bundle](#demo-bundle) · [CI usage](docs/ci.md) · [Evidence Pack contract](#evidence-pack-format) · [Security scanners](docs/security-scanners.md) · [Architecture](docs/architecture.md) · [Chronology](docs/CHRONOLOGY.md) · [Verify](docs/VERIFY.md)
 
 ## Table of Contents
 1. [What You Get](#what-you-get)
@@ -154,6 +154,22 @@ AQ_RECON_MINUTES_PER_REMOVED_RISK_UNIT=45 npm --workspace evaluator run dev -- .
 
 ---
 
+## Technical Due Diligence Bridge
+For independent technical review, we map:
+- immutable commit -> measurable metric delta
+- command -> expected artifact path
+- report id -> reproducible evidence files
+
+Core docs:
+- `docs/CHRONOLOGY.md` (date/commit/capability gain/metric before-after)
+- `docs/VERIFY.md` (step-by-step reproducibility checklist)
+
+Design note:
+- this is implemented in OSS in this repository.
+- paid tiers (`docs/pro.md`) are packaging/support layers, not hidden core evaluator logic.
+
+---
+
 ## Security Scanners
 Six scanners run in the pipeline:
 - PII/secret detection
@@ -226,6 +242,9 @@ Note:
 - Self‑hosted policy: `docs/self-hosted.md`
 - Threat model: `docs/threat-model.md`
 - Security FAQ: `docs/security-faq.md`
+- Capability chronology (due diligence): `docs/CHRONOLOGY.md`
+- Repro checklist (due diligence): `docs/VERIFY.md`
+- Post-release hardening plan: `docs/roadmap/2026-03-03-production-hardening-from-research-log.md`
 
 ---
 
@@ -363,6 +382,7 @@ Tests:
 ```bash
 npm test
 npm run test:coverage
+npm run metrics:dd
 ```
 
 ---
