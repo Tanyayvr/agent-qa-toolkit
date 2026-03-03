@@ -61,6 +61,10 @@ Runner and evaluator support additional scenarios for production drift:
   validates `/handoff` idempotency (endpoint mode) and optional `/run-case` receipt propagation (e2e mode).
 - **Adaptive timeout profile**: optional `--timeoutProfile auto` adjusts `timeoutMs` using historical case latencies and adapter `/health` timeout hints;
   bounded by `--timeoutAutoCapMs` to avoid unbounded waits.
+- **Agent onboarding phases** (recommended for new external agents):
+  - calibration runs: high cap + no fail-fast to learn runtime distribution
+  - validation runs: restore retries/fail-fast and confirm `execution_quality`
+  - production: cap derived from observed p99 (commonly ~2x p99) with watchdog + trend enabled
 - **Long-request transport fallback**: runner retries via Node HTTP transport for the known Node `fetch` long-header wait failure pattern
   (the `fetch failed` ~300s class), reducing false network failures for slow local agents.
 - **Fail-fast transport guard**: optional `--failFastTransportStreak N` stops campaigns after N consecutive transport-failed cases

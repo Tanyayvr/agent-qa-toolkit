@@ -16,12 +16,14 @@ Portable Evidence Packs для tool-using AI агентов
 - assets/ + manifest.json с sha256 целостностью
 - Strict verify: portability + integrity checks
 - НОВОЕ: Historical Trending (локальная SQLite) для дрейфа регрессий и костов во времени
+- НОВОЕ: data-driven timeout onboarding profile (калибровка -> валидация -> прод) для медленных внешних агентов
 
 Как работает
 - Runner запускает кейсы
 - Evaluator сравнивает baseline vs new
 - Выдаёт Evidence Pack (offline, shareable)
 - CI читает gate decision per-case
+- Auto timeout profile учится на истории прогонов, а не на фиксированном timeout "на глаз"
 
 Что даёт
 - Regression diffs по кейсам

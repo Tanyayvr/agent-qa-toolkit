@@ -70,3 +70,40 @@ npm --workspace runner run dev -- \
   --agentId executor \
   --only cli_qa_001
 ```
+
+## 7) New-agent rollout profile (recommended)
+
+Phase 1: calibration (2-3 runs)
+- `TIMEOUT_PROFILE=auto`
+- `TIMEOUT_AUTO_CAP_MS=5400000`
+- `FAIL_FAST_TRANSPORT_STREAK=0`
+- `RETRIES=0`
+- `CONCURRENCY=1`
+
+Phase 2: validation (1-2 runs)
+- keep `TIMEOUT_PROFILE=auto`
+- set `RETRIES=1..2`
+- set `FAIL_FAST_TRANSPORT_STREAK=2..3`
+- check `summary.execution_quality` in report JSON
+
+Phase 3: production
+- keep auto profile enabled
+- tune cap from observed p99 (often around `2x p99`)
+- keep watchdog + trend ingestion enabled
+
+Command template:
+```bash
+BASE_URL=http://127.0.0.1:8788 \
+CASES=cases/agents/autonomous-cli-agent-quality.json \
+RUN_PREFIX=auto_prod_auto_rollout \
+REPORT_PREFIX=auto-prod-auto-rollout \
+TIMEOUT_PROFILE=auto \
+TIMEOUT_MS=120000 \
+TIMEOUT_AUTO_CAP_MS=5400000 \
+TIMEOUT_AUTO_LOOKBACK_RUNS=20 \
+RETRIES=0 \
+CONCURRENCY=1 \
+PREFLIGHT_MODE=off \
+FAIL_FAST_TRANSPORT_STREAK=0 \
+./scripts/run-local-campaign.sh
+```

@@ -16,12 +16,14 @@ Solution
 - assets/ + manifest.json with sha256 integrity
 - Strict verify: portability + integrity checks
 - NEW: Historical Trending (local SQLite) to catch regression and cost drift over time
+- NEW: data-driven timeout onboarding profile (calibration -> validation -> production) for slow external agents
 
 How It Works
 - Runner executes cases against the agent
 - Evaluator diffs baseline vs new
 - Outputs Evidence Pack (offline, shareable)
 - CI consumes per-case gate decisions
+- Timeout auto-profile learns from observed run history instead of fixed timeout guesses
 
 What You Get
 - Regression diffs per case

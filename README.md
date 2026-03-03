@@ -248,6 +248,28 @@ Note:
 
 ---
 
+## Agent Onboarding (Data-Driven Timeout Calibration)
+For a new external agent, use a 3-phase rollout instead of fixed timeout guesses.
+
+Phase 1: calibration (2-3 runs)
+- high cap, no early abort: `TIMEOUT_AUTO_CAP_MS=5400000`, `FAIL_FAST_TRANSPORT_STREAK=0`
+- low retry cost: `RETRIES=0`, `CONCURRENCY=1`
+- goal: collect realistic runtime latency history for auto profile
+
+Phase 2: validation (1-2 runs)
+- enable production-like controls: `RETRIES=1..2`, `FAIL_FAST_TRANSPORT_STREAK=2..3`
+- verify `summary.execution_quality` in `compare-report.json` before promotion
+
+Phase 3: production
+- keep `timeoutProfile=auto`
+- set cap from observed latency distribution (commonly about `2x p99`)
+- keep watchdog and trend ingestion enabled for drift/instability detection
+
+Operational note:
+- do not run manual long `/run-case` probes in parallel with campaign runs when adapter concurrency is 1 (`busy` 429 can skew transport metrics).
+
+---
+
 ## Development
 Runner:
 ```bash
