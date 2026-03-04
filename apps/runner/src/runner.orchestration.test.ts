@@ -650,6 +650,81 @@ describe("runner orchestration", () => {
     expect((globalThis.fetch as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBe(3);
   });
 
+  it("performs one adapter recovery retry on transient connection refusal even when retries=0", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const outDir = path.join(root, "runs");
+    await writeJson(casesPath, [{ id: "c1", title: "adapter recovery retry", input: { user: "hello" } }]);
+
+    let baselineCalls = 0;
+    let healthCalls = 0;
+    globalThis.fetch = vi.fn(async (input: unknown, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/health")) {
+        healthCalls += 1;
+        return new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+
+      const payload = JSON.parse(String(init?.body ?? "{}")) as { case_id: string; version: "baseline" | "new" };
+      if (payload.version === "baseline") {
+        baselineCalls += 1;
+        if (baselineCalls === 1) {
+          const err = new Error("connect ECONNREFUSED 127.0.0.1:8788");
+          err.name = "Error";
+          throw err;
+        }
+      }
+      return new Response(
+        JSON.stringify({
+          case_id: payload.case_id,
+          version: payload.version,
+          final_output: { content_type: "text", content: `ok:${payload.version}` },
+          events: [],
+          proposed_actions: [],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    }) as typeof fetch;
+
+    const mod = await loadRunnerWithArgv([
+      "node",
+      "runner",
+      "--repoRoot",
+      root,
+      "--baseUrl",
+      "http://127.0.0.1:8788",
+      "--cases",
+      casesPath,
+      "--outDir",
+      outDir,
+      "--runId",
+      "retry-network-recovery-zero-retries",
+      "--timeoutMs",
+      "2000",
+      "--retries",
+      "0",
+      "--backoffBaseMs",
+      "1",
+      "--concurrency",
+      "1",
+      "--preflightMode",
+      "off",
+    ]);
+    await mod.runRunner();
+
+    const baselineRaw = await readFile(
+      path.join(outDir, "baseline", "retry-network-recovery-zero-retries", "c1.json"),
+      "utf-8"
+    );
+    const baseline = JSON.parse(baselineRaw) as { runner_failure?: unknown };
+    expect(baseline.runner_failure).toBeUndefined();
+    expect(baselineCalls).toBe(2);
+    expect(healthCalls).toBe(1);
+    expect((globalThis.fetch as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBe(4);
+  });
+
   it("does not retry invalid JSON response", async () => {
     const casesPath = path.join(root, "cases.json");
     const outDir = path.join(root, "runs");
@@ -686,6 +761,52 @@ describe("runner orchestration", () => {
     expect(baseline.runner_failure?.class).toBe("invalid_json");
     expect(baseline.runner_failure?.attempt).toBe(1);
     expect((globalThis.fetch as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBe(2);
+  });
+
+  it("rejects reusing runId directories that already contain artifacts", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const outDir = path.join(root, "runs");
+    await writeJson(casesPath, [{ id: "c1", title: "reuse run id", input: { user: "hello" } }]);
+    await writeJson(path.join(outDir, "baseline", "reused-run-id", "c1.json"), { stale: true });
+
+    globalThis.fetch = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          case_id: "c1",
+          version: "baseline",
+          final_output: { content_type: "text", content: "ok" },
+          events: [],
+          proposed_actions: [],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )
+    ) as typeof fetch;
+
+    const mod = await loadRunnerWithArgv([
+      "node",
+      "runner",
+      "--repoRoot",
+      root,
+      "--baseUrl",
+      "http://127.0.0.1:8788",
+      "--cases",
+      casesPath,
+      "--outDir",
+      outDir,
+      "--runId",
+      "reused-run-id",
+      "--timeoutMs",
+      "2000",
+      "--retries",
+      "0",
+      "--concurrency",
+      "1",
+      "--preflightMode",
+      "off",
+    ]);
+
+    await expect(mod.runRunner()).rejects.toThrow("already contain JSON artifacts");
+    expect((globalThis.fetch as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBe(0);
   });
 
   it("blocks run on strict preflight failure before cases start", async () => {

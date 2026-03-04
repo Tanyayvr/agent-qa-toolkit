@@ -18,7 +18,7 @@ TIMEOUT_MS="${TIMEOUT_MS:-210000}"
 TIMEOUT_PROFILE="${TIMEOUT_PROFILE:-off}"
 TIMEOUT_AUTO_CAP_MS="${TIMEOUT_AUTO_CAP_MS:-3600000}"
 TIMEOUT_AUTO_LOOKBACK_RUNS="${TIMEOUT_AUTO_LOOKBACK_RUNS:-12}"
-RETRIES="${RETRIES:-0}"
+RETRIES="${RETRIES:-1}"
 CONCURRENCY="${CONCURRENCY:-1}"
 PREFLIGHT_MODE="${PREFLIGHT_MODE:-warn}"
 PREFLIGHT_TIMEOUT_MS="${PREFLIGHT_TIMEOUT_MS:-10000}"
@@ -32,6 +32,11 @@ RUNTIME_HANDOFF_MODE="${RUNTIME_HANDOFF_MODE:-endpoint}"
 RUNCASE_TIMEOUT_MS="${RUNCASE_TIMEOUT_MS:-30000}"
 ENFORCE_CASE_QUALITY="${ENFORCE_CASE_QUALITY:-1}"
 CASE_QUALITY_MAX_WEAK_EXPECTED_RATE="${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE:-0.2}"
+ALLOW_EXISTING_RUN_PREFIX="${ALLOW_EXISTING_RUN_PREFIX:-0}"
+LIBRARY_INGEST="${LIBRARY_INGEST:-0}"
+LIBRARY_DIR="${LIBRARY_DIR:-.agent-qa/library}"
+LIBRARY_AGENT_ID="${LIBRARY_AGENT_ID:-}"
+LIBRARY_SOURCE="${LIBRARY_SOURCE:-local-campaign}"
 
 RUN_BASE="${RUN_PREFIX}_base"
 RUN_NEW2="${RUN_PREFIX}_new2"
@@ -94,6 +99,24 @@ run_eval() {
     --reportId "${report_id}"
 }
 
+ingest_library() {
+  local report_id="$1"
+  if [[ "${LIBRARY_INGEST}" != "1" ]]; then
+    return 0
+  fi
+  local args=(
+    --reportDir "${REPORTS_DIR}/${report_id}"
+    --libraryDir "${LIBRARY_DIR}"
+    --suite "${AGENT_SUITE}"
+    --profile "${CAMPAIGN_PROFILE}"
+    --source "${LIBRARY_SOURCE}"
+  )
+  if [[ -n "${LIBRARY_AGENT_ID}" ]]; then
+    args+=(--agentId "${LIBRARY_AGENT_ID}")
+  fi
+  node scripts/library-ingest.mjs "${args[@]}"
+}
+
 check_adapter_ready() {
   local health_url="${BASE_URL%/}/health"
   local attempt=1
@@ -124,10 +147,51 @@ check_cases_quality() {
     --maxWeakExpectedRate "${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE}"
 }
 
+check_fresh_targets() {
+  if [[ "${ALLOW_EXISTING_RUN_PREFIX}" == "1" ]]; then
+    return 0
+  fi
+
+  local collisions=()
+  local targets=(
+    "${OUT_DIR}/baseline/${RUN_BASE}"
+    "${OUT_DIR}/new/${RUN_BASE}"
+    "${OUT_DIR}/baseline/${RUN_NEW2}"
+    "${OUT_DIR}/new/${RUN_NEW2}"
+    "${OUT_DIR}/baseline/${RUN_NEW3}"
+    "${OUT_DIR}/new/${RUN_NEW3}"
+    "${REPORTS_DIR}/${REPORT_PREFIX}"
+    "${REPORTS_DIR}/${REPORT_PREFIX}-2"
+    "${REPORTS_DIR}/${REPORT_PREFIX}-3"
+  )
+
+  for t in "${targets[@]}"; do
+    if [[ -e "${t}" ]]; then
+      collisions+=("${t}")
+    fi
+  done
+
+  if [[ "${#collisions[@]}" -gt 0 ]]; then
+    echo "ERROR: RUN_PREFIX/REPORT_PREFIX already exists. Use a new prefix to avoid mixed artifacts."
+    for c in "${collisions[@]}"; do
+      echo " - ${c}"
+    done
+    echo "Hint: set unique RUN_PREFIX/REPORT_PREFIX (for example with timestamp) or set ALLOW_EXISTING_RUN_PREFIX=1 if overwrite is intentional."
+    exit 3
+  fi
+}
+
 echo "Running baseline/new runs against ${BASE_URL}"
 echo "Runner timeout profile: ${TIMEOUT_PROFILE} (timeoutMs=${TIMEOUT_MS}, cap=${TIMEOUT_AUTO_CAP_MS}, lookback=${TIMEOUT_AUTO_LOOKBACK_RUNS})"
 echo "Campaign profile: suite=${AGENT_SUITE}, profile=${CAMPAIGN_PROFILE}, cases=${CASES}"
+if [[ "${LIBRARY_INGEST}" == "1" ]]; then
+  echo "Library ingest: enabled (dir=${LIBRARY_DIR}, agentId=${LIBRARY_AGENT_ID:-none}, source=${LIBRARY_SOURCE})"
+fi
+if [[ "${RETRIES}" == "0" ]]; then
+  echo "WARNING: RETRIES=0 disables transient transport recovery retries and can turn short adapter blips into failed runs."
+fi
 check_cases_quality
+check_fresh_targets
 check_adapter_ready
 run_runner "${RUN_BASE}"
 run_runner "${RUN_NEW2}"
@@ -135,8 +199,11 @@ run_runner "${RUN_NEW3}"
 
 echo "Evaluating reports"
 run_eval "${REPORT_PREFIX}" "${RUN_BASE}"
+ingest_library "${REPORT_PREFIX}"
 run_eval "${REPORT_PREFIX}-2" "${RUN_NEW2}"
+ingest_library "${REPORT_PREFIX}-2"
 run_eval "${REPORT_PREFIX}-3" "${RUN_NEW3}"
+ingest_library "${REPORT_PREFIX}-3"
 
 echo "Building trend HTML"
 npm run trend -- html --last 8 --out "${REPORTS_DIR}/${REPORT_PREFIX}"

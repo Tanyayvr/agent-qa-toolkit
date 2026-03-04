@@ -32,6 +32,48 @@ import {
   sleep,
 } from "./runnerReliability";
 
+const MID_RUN_ADAPTER_RECOVERY_EXTRA_RETRIES = 1;
+const MID_RUN_ADAPTER_HEALTH_ATTEMPTS = 5;
+const MID_RUN_ADAPTER_HEALTH_INTERVAL_MS = 1500;
+const MID_RUN_ADAPTER_HEALTH_TIMEOUT_MS = 2500;
+
+async function probeAdapterHealth(baseUrl: string, signal: AbortSignal): Promise<boolean> {
+  try {
+    const res = await fetchWithTimeout(
+      `${baseUrl}/health`,
+      { method: "GET" },
+      MID_RUN_ADAPTER_HEALTH_TIMEOUT_MS,
+      signal
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForAdapterRecovery(baseUrl: string, signal: AbortSignal): Promise<boolean> {
+  for (let attempt = 1; attempt <= MID_RUN_ADAPTER_HEALTH_ATTEMPTS; attempt += 1) {
+    if (signal.aborted) return false;
+    const ok = await probeAdapterHealth(baseUrl, signal);
+    if (ok) return true;
+    if (attempt < MID_RUN_ADAPTER_HEALTH_ATTEMPTS) {
+      try {
+        await sleep(MID_RUN_ADAPTER_HEALTH_INTERVAL_MS, signal);
+      } catch {
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
+function canUseMidRunRecovery(artifact: RunnerFailureArtifact): boolean {
+  if (artifact.class !== "network_error") return false;
+  if (artifact.is_transient !== true) return false;
+  const net = artifact.net_error_kind;
+  return net === "conn_refused" || net === "conn_reset" || net === "socket_hang_up";
+}
+
 export async function runOneCaseWithReliability(
   cfg: RunnerConfig,
   c: CaseFileItem,
@@ -57,8 +99,10 @@ export async function runOneCaseWithReliability(
   };
 
   const payload = JSON.stringify(reqBody);
+  const maxAttempts = Math.max(1, cfg.retries + 1) + MID_RUN_ADAPTER_RECOVERY_EXTRA_RETRIES;
+  let recoveryRetriesLeft = MID_RUN_ADAPTER_RECOVERY_EXTRA_RETRIES;
 
-  for (let attempt = 1; attempt <= Math.max(1, cfg.retries + 1); attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     if (signal.aborted) {
       throw new InterruptedRunError("Runner", getInterruptSignalName());
     }
@@ -392,6 +436,15 @@ export async function runOneCaseWithReliability(
         continue;
       }
 
+      if (recoveryRetriesLeft > 0 && canUseMidRunRecovery(artifact)) {
+        const recovered = await waitForAdapterRecovery(cfg.baseUrl, signal);
+        recoveryRetriesLeft -= 1;
+        if (recovered) {
+          await sleep(backoffMs(cfg.backoffBaseMs, attempt), signal);
+          continue;
+        }
+      }
+
       return mkFailureResponse(artifact, msg);
     }
   }
@@ -412,4 +465,3 @@ export async function runOneCaseWithReliability(
   };
   return mkFailureResponse(fallback, "runner: unreachable state");
 }
-

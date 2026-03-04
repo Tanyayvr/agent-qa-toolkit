@@ -313,6 +313,7 @@ export async function runRunner(): Promise<void> {
 
   await ensureDir(baselineDir);
   await ensureDir(newDir);
+  await assertRunDirectoriesAreFresh(baselineDir, newDir, cfg.runId);
   const useRaw = cfg.redactionPreset !== "none" && cfg.keepRaw;
   if (useRaw) {
     await ensureDir(baselineRawDir);
@@ -838,4 +839,36 @@ async function cleanupOldRuns(baseDir: string, retentionDays: number, component:
       }
     }
   }
+}
+
+async function assertRunDirectoriesAreFresh(
+  baselineDir: string,
+  newDir: string,
+  runId: string
+): Promise<void> {
+  const checkDir = async (dir: string): Promise<string[]> => {
+    let names: string[] = [];
+    try {
+      names = await readdir(dir);
+    } catch {
+      return [];
+    }
+    return names.filter((name) => name.endsWith(".json"));
+  };
+
+  const baselineJson = await checkDir(baselineDir);
+  const newJson = await checkDir(newDir);
+  if (baselineJson.length === 0 && newJson.length === 0) return;
+
+  const details = [
+    baselineJson.length > 0 ? `baseline=${baselineJson.length}` : "",
+    newJson.length > 0 ? `new=${newJson.length}` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  throw new CliUsageError(
+    `Run output directories already contain JSON artifacts for runId=${runId} (${details}). ` +
+      `Use a new --runId to avoid mixing artifacts from different executions.`
+  );
 }
