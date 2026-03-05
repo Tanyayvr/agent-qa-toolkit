@@ -40,6 +40,7 @@ You get:
 - Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
 - Conservative pass semantics: runner transport/runtime failures are recorded as evidence and counted as `pass=false` (not "green" by default)
 - Execution-quality summary (`summary.execution_quality`) with transport success and weak-assertion rate
+- Synthetic fault-matrix mode (`cases/matrix.json`) to validate transport/data failure classification before external pilots
 - Root cause attribution (RCA) and policy hints
 - Security signals (6 scanners + optional entropy scanner)
 
@@ -245,6 +246,7 @@ Note:
 - Capability chronology (due diligence): `docs/CHRONOLOGY.md`
 - Repro checklist (due diligence): `docs/VERIFY.md`
 - Post-release hardening plan: `docs/roadmap/2026-03-03-production-hardening-from-research-log.md`
+- Synthetic validation example: `docs/goose-synthetic-validation-mar04.md`
 
 ---
 

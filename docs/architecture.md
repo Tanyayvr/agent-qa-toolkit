@@ -69,6 +69,9 @@ Runner and evaluator support additional scenarios for production drift:
   (the `fetch failed` ~300s class), reducing false network failures for slow local agents.
 - **Fail-fast transport guard**: optional `--failFastTransportStreak N` stops campaigns after N consecutive transport-failed cases
   to avoid spending hours on known infra degradations.
+- **Synthetic fault-matrix validation**: `cases/matrix.json` (run with `CAMPAIGN_PROFILE=infra`) injects deterministic
+  HTTP/network/data failures through controllable adapters (for example `demo-agent`) so teams can verify
+  failure taxonomy (`http_error`, `timeout`, `network_error`, `invalid_json`) and gate behavior before customer pilots.
 - **Execution-quality gating**: evaluator emits `summary.execution_quality` (transport success + weak expected rate);
   CI can enforce non-zero exit with `--failOnExecutionDegraded` and thresholds:
   `AQ_MIN_TRANSPORT_SUCCESS_RATE`, `AQ_MAX_WEAK_EXPECTED_RATE`.
