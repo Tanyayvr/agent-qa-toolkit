@@ -84,7 +84,9 @@ Runner and evaluator support additional scenarios for production drift:
   (`expected.semantic.required_concepts`, `forbidden_concepts`, `reference_texts`, `profile|min_token_f1|min_lcs_ratio`, `synonyms`),
   so text checks are not limited to raw substring matching.
 - **Release-gate E2E in CI**: `scripts/e2e-policy-gate.mjs` verifies evaluator hard-gate behavior and
-  `scripts/e2e-soak-load.mjs` validates load/soak campaign stability + artifact integrity.
+  `scripts/e2e-soak-load.mjs` validates load/soak campaign stability + artifact integrity, including:
+  zero load real-failures, healthy execution-quality in each soak cycle, deterministic gate signatures across cycles,
+  and bounded runtime variance (`--maxRuntimeVariance`).
 - **Admissibility KPI (numeric)**: evaluator also emits
   `summary.execution_quality.admissibility_kpi` with:
   - `risk_mass_before`, `risk_mass_after`
