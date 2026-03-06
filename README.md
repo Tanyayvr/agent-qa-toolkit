@@ -464,6 +464,7 @@ npm test
 npm run test:coverage
 npm run metrics:dd
 npm run conformance:test:python
+npm run conformance:test:go
 ```
 
 ---
@@ -481,6 +482,7 @@ npm run conformance:test:python
 - `plugins/otel-anchor-adapter` — trace-anchor enrichment wrapper (`trace_id`/`span_id`)
 - `plugins/vendor-bridge` — vendor-agnostic converters (`Promptfoo` / `DeepEval` / `Giskard`) + baseline/new gate diff
 - `validators/python` — Python baseline validator (AEPF/PVIP mode parity track)
+- `validators/go` — Go baseline validator (AEPF/PVIP mode parity track)
 
 ---
 

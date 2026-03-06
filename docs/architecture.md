@@ -154,6 +154,8 @@ This prevents "dashboard-only" claims and allows third parties to reproduce runs
 Golden packs live in `conformance/` with `expected.json` per pack.
 Baseline multi-language validator track now includes Python CLI parity checks
 (`validators/python/aepf_validator/cli.py`, exercised via `scripts/conformance-test-python.mjs`).
+Go baseline is added in `validators/go/aepf-validator` with parity runner
+`scripts/conformance-test-go.mjs`.
 
 ## Optional adapters (plugin packages)
 
