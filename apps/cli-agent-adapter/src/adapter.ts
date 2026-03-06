@@ -4,10 +4,10 @@ import { accessSync, constants as fsConstants, readFileSync } from "node:fs";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import { stableStringify, normalizeRunMeta, validateAndNormalizeHandoffEnvelope } from "cli-utils";
 import { dirname, isAbsolute, resolve } from "node:path";
-import type { HandoffEnvelope, HandoffReceipt, ProposedAction, RunEvent, RunMeta } from "shared-types";
+import type { HandoffEnvelope, HandoffReceipt, ProposedAction, RunEvent, RunMeta, RuntimePolicy } from "shared-types";
 import { resolveServerTimeoutConfig } from "./serverConfig";
 
-type CliFailureReason = "timeout" | "spawn_error" | "non_zero_exit" | "aborted" | "invalid_config" | "busy";
+type CliFailureReason = "timeout" | "spawn_error" | "non_zero_exit" | "aborted" | "invalid_config" | "busy" | "policy_violation";
 
 type CliRunSuccess = {
   stdout: string;
@@ -48,6 +48,8 @@ const DEFAULT_HANDOFF_MAX_ITEMS_TOTAL = 2_000;
 const DEFAULT_AUTH_HEADER = "authorization";
 const DEFAULT_EXEC_TOOL_NAME = "cli_agent_exec";
 const DEFAULT_INFERRED_TOOL_CALLS_MAX = 32;
+const DEFAULT_MUTATION_TOOLS = ["write_file", "delete_file", "move_file", "run_shell", "exec", "commit_changes", "deploy"];
+const DEFAULT_REPL_TOOLS = ["run_shell", "bash", "terminal", "exec", "python_repl"];
 
 type AdapterAuthConfig = {
   enabled: boolean;
@@ -301,7 +303,19 @@ type ExecutionTelemetryParams = {
   statusMessage?: string;
 };
 
-function buildExecutionTelemetry(params: ExecutionTelemetryParams): { events: RunEvent[]; proposedActions: ProposedAction[] } {
+type RuntimePolicyViolation = {
+  scope: "planning_gate" | "repl_policy";
+  severity: "require_approval" | "block";
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
+};
+
+function buildExecutionTelemetry(params: ExecutionTelemetryParams): {
+  events: RunEvent[];
+  proposedActions: ProposedAction[];
+  telemetryMode: "wrapper_only" | "inferred";
+} {
   const baseTs = Number.isFinite(params.startedAtMs) ? Math.max(0, Math.floor(params.startedAtMs)) : Date.now();
   const endTs = Number.isFinite(params.finishedAtMs) ? Math.max(baseTs, Math.floor(params.finishedAtMs)) : baseTs;
   const latencyMs = Math.max(0, endTs - baseTs);
@@ -312,6 +326,7 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): { events: Ru
   const proposedActions: ProposedAction[] = [];
 
   const execArgs: Record<string, unknown> = {
+    _telemetry_source: "wrapper",
     prompt_chars: params.prompt.length,
     prompt_hash_hint: params.prompt.slice(0, 32),
     cmd: params.cmd,
@@ -362,7 +377,10 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): { events: Ru
       call_id: callId,
       action_id: callId,
       tool: item.tool,
-      args: item.args,
+      args: {
+        _telemetry_source: "inferred",
+        ...item.args,
+      },
     });
     events.push({
       type: "tool_result",
@@ -391,7 +409,223 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): { events: Ru
     content: params.finalOutputContent,
   });
 
-  return { events, proposedActions };
+  const telemetryMode: "wrapper_only" | "inferred" = inferred.length > 0 ? "inferred" : "wrapper_only";
+  return { events, proposedActions, telemetryMode };
+}
+
+function asStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((v) => String(v ?? "").trim()).filter((v) => v.length > 0);
+}
+
+function normalizeRuntimePolicy(raw: unknown): RuntimePolicy | undefined {
+  const obj = asRecord(raw);
+  if (!obj) return undefined;
+  const out: RuntimePolicy = {};
+
+  const planningRaw = asRecord(obj.planning_gate);
+  if (planningRaw) {
+    const mutationTools = asStringList(planningRaw.mutation_tools);
+    const highRiskTools = asStringList(planningRaw.high_risk_tools);
+    out.planning_gate = {
+      ...(planningRaw.required_for_mutations !== undefined
+        ? { required_for_mutations: Boolean(planningRaw.required_for_mutations) }
+        : {}),
+      ...(planningRaw.require_declared_end_state !== undefined
+        ? { require_declared_end_state: Boolean(planningRaw.require_declared_end_state) }
+        : {}),
+      ...(mutationTools.length > 0 ? { mutation_tools: mutationTools } : {}),
+      ...(highRiskTools.length > 0 ? { high_risk_tools: highRiskTools } : {}),
+    };
+  }
+
+  const replRaw = asRecord(obj.repl_policy);
+  if (replRaw) {
+    const allowlist = asStringList(replRaw.tool_allowlist);
+    const deniedPatterns = asStringList(replRaw.denied_command_patterns);
+    for (const pattern of deniedPatterns) {
+      try {
+        // Validate regex upfront to fail fast as invalid_config instead of runtime policy violation.
+        // Regex flags are fixed to "i" in evaluation, so syntax-only validation is enough here.
+        new RegExp(pattern);
+      } catch {
+        throw new CliAgentError({
+          reason: "invalid_config",
+          message: `policy.repl_policy.denied_command_patterns contains invalid regex: ${pattern}`,
+        });
+      }
+    }
+    const replPolicy: NonNullable<RuntimePolicy["repl_policy"]> = {
+      ...(allowlist.length > 0 ? { tool_allowlist: allowlist } : {}),
+      ...(deniedPatterns.length > 0 ? { denied_command_patterns: deniedPatterns } : {}),
+    };
+    if (replRaw.max_command_length !== undefined) {
+      const max = Number(replRaw.max_command_length);
+      if (!Number.isFinite(max) || max < 1) {
+        throw new CliAgentError({
+          reason: "invalid_config",
+          message: "policy.repl_policy.max_command_length must be a positive number",
+        });
+      }
+      replPolicy.max_command_length = Math.floor(max);
+    }
+    out.repl_policy = replPolicy;
+  }
+
+  if (!out.planning_gate && !out.repl_policy) return undefined;
+  return out;
+}
+
+function parsePlanEnvelopeFromOutput(output: string): Record<string, unknown> | null {
+  const trimmed = output.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return null;
+  try {
+    const parsed = JSON.parse(trimmed);
+    const root = asRecord(parsed);
+    if (!root) return null;
+    const plan = asRecord(root.plan_envelope ?? root.plan);
+    return plan ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function extractCommandText(args: Record<string, unknown>): string {
+  const cmd = typeof args.command === "string" ? args.command : undefined;
+  if (cmd) return cmd;
+  const rawCmd = typeof args.cmd === "string" ? args.cmd : undefined;
+  if (rawCmd) return rawCmd;
+  const script = typeof args.script === "string" ? args.script : undefined;
+  if (script) return script;
+  try {
+    return JSON.stringify(args);
+  } catch {
+    return String(args);
+  }
+}
+
+function evaluateRuntimePolicy(
+  policy: RuntimePolicy | undefined,
+  events: RunEvent[],
+  finalOutputText: string
+): RuntimePolicyViolation[] {
+  if (!policy) return [];
+  const violations: RuntimePolicyViolation[] = [];
+  const toolCalls = events.filter((e): e is Extract<RunEvent, { type: "tool_call" }> => e.type === "tool_call");
+
+  if (policy.planning_gate) {
+    const mutationTools = new Set((policy.planning_gate.mutation_tools ?? DEFAULT_MUTATION_TOOLS).map((x) => String(x)));
+    const highRiskTools = new Set((policy.planning_gate.high_risk_tools ?? []).map((x) => String(x)));
+    const mutationCalls = toolCalls.filter((c) => mutationTools.has(c.tool));
+    const hasMutations = mutationCalls.length > 0;
+    const plan = parsePlanEnvelopeFromOutput(finalOutputText);
+    const allowedTools = asStringList(plan?.allowed_tools);
+    const hasDeclaredEndState = Boolean(plan && plan.declared_end_state !== undefined && plan.declared_end_state !== null);
+
+    if (policy.planning_gate.required_for_mutations === true && hasMutations && !plan) {
+      violations.push({
+        scope: "planning_gate",
+        severity: mutationCalls.some((c) => highRiskTools.has(c.tool)) ? "block" : "require_approval",
+        code: "missing_plan_envelope",
+        message: "Mutating tool call executed without plan_envelope",
+        details: { tools: mutationCalls.map((c) => c.tool) },
+      });
+    }
+
+    if (policy.planning_gate.require_declared_end_state === true && hasMutations && !hasDeclaredEndState) {
+      violations.push({
+        scope: "planning_gate",
+        severity: "block",
+        code: "declared_end_state_missing",
+        message: "Plan envelope missing declared_end_state for mutating operation",
+      });
+    }
+
+    if (hasMutations && allowedTools.length > 0) {
+      const allowedSet = new Set(allowedTools);
+      const mismatched = mutationCalls.filter((c) => !allowedSet.has(c.tool)).map((c) => c.tool);
+      if (mismatched.length > 0) {
+        violations.push({
+          scope: "planning_gate",
+          severity: mismatched.some((tool) => highRiskTools.has(tool)) ? "block" : "require_approval",
+          code: "tool_outside_plan",
+          message: "Mutating tool call is not declared in plan_envelope.allowed_tools",
+          details: { tools: Array.from(new Set(mismatched)), allowed_tools: allowedTools },
+        });
+      }
+    }
+  }
+
+  if (policy.repl_policy) {
+    const replToolSet = new Set((policy.repl_policy.tool_allowlist ?? DEFAULT_REPL_TOOLS).map((x) => String(x)));
+    const replCalls = toolCalls.filter((c) => DEFAULT_REPL_TOOLS.includes(c.tool) || replToolSet.has(c.tool));
+    if (policy.repl_policy.tool_allowlist && policy.repl_policy.tool_allowlist.length > 0) {
+      const allowSet = new Set(policy.repl_policy.tool_allowlist.map((x) => String(x)));
+      const disallowed = replCalls.filter((c) => !allowSet.has(c.tool)).map((c) => c.tool);
+      if (disallowed.length > 0) {
+        violations.push({
+          scope: "repl_policy",
+          severity: "block",
+          code: "tool_not_allowlisted",
+          message: "REPL tool call is outside tool_allowlist",
+          details: { tools: Array.from(new Set(disallowed)) },
+        });
+      }
+    }
+
+    if (policy.repl_policy.denied_command_patterns && policy.repl_policy.denied_command_patterns.length > 0) {
+      for (const pattern of policy.repl_policy.denied_command_patterns) {
+        let re: RegExp;
+        try {
+          re = new RegExp(pattern, "i");
+        } catch {
+          violations.push({
+            scope: "repl_policy",
+            severity: "block",
+            code: "invalid_denied_pattern",
+            message: `Invalid denied command regex: ${pattern}`,
+          });
+          continue;
+        }
+        for (const call of replCalls) {
+          const text = extractCommandText(call.args);
+          if (re.test(text)) {
+            violations.push({
+              scope: "repl_policy",
+              severity: "block",
+              code: "denied_command_pattern",
+              message: `REPL command matches denied pattern: ${pattern}`,
+              details: { tool: call.tool },
+            });
+          }
+        }
+      }
+    }
+
+    if (typeof policy.repl_policy.max_command_length === "number" && policy.repl_policy.max_command_length > 0) {
+      const maxLen = policy.repl_policy.max_command_length;
+      for (const call of replCalls) {
+        const text = extractCommandText(call.args);
+        if (text.length > maxLen) {
+          violations.push({
+            scope: "repl_policy",
+            severity: "require_approval",
+            code: "command_too_long",
+            message: `REPL command length ${text.length} exceeds max_command_length=${maxLen}`,
+            details: { tool: call.tool, length: text.length, max: maxLen },
+          });
+        }
+      }
+    }
+  }
+
+  return violations;
+}
+
+function formatPolicyViolationMessage(violations: RuntimePolicyViolation[]): string {
+  if (violations.length === 0) return "Runtime policy violation";
+  const parts = violations.map((v) => `${v.scope}.${v.code}`);
+  return `Runtime policy violation: ${Array.from(new Set(parts)).join(", ")}`;
 }
 
 function formatHandoffContext(
@@ -969,6 +1203,25 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
     const version = req.body?.version === "baseline" || req.body?.version === "new" ? req.body.version : "baseline";
     const basePrompt = buildPrompt(req.body?.input);
     const runMeta = normalizeRunMeta(req.body?.run_meta);
+    let runtimePolicy: RuntimePolicy | undefined;
+    try {
+      runtimePolicy = normalizeRuntimePolicy(req.body?.policy);
+    } catch (err) {
+      const adapterError = createCliErrorPayload(err, stderrSnippetChars);
+      res.status(400).json({
+        case_id: caseId || "__policy__",
+        version,
+        workflow_id: "cli_agent_v1",
+        proposed_actions: [],
+        final_output: {
+          content_type: "text",
+          content: `[adapter:${adapterError.code}] ${adapterError.message}`,
+        },
+        events: [],
+        adapter_error: adapterError,
+      });
+      return;
+    }
     const preflightHeader = req.header("x-aq-preflight");
     const isPreflightProbe = caseId === "__preflight__" || preflightHeader === "1";
 
@@ -1106,6 +1359,28 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
         useStdin: executable.useStdin,
         ...(executable.cwd ? { cwd: executable.cwd } : {}),
       });
+      const policyViolations = evaluateRuntimePolicy(runtimePolicy, telemetry.events, output);
+      if (policyViolations.length > 0) {
+        const message = formatPolicyViolationMessage(policyViolations);
+        const adapterError: CliErrorPayload = {
+          code: "policy_violation",
+          message,
+        };
+        res.status(409).json({
+          case_id: caseId,
+          version,
+          workflow_id: "cli_agent_v1",
+          proposed_actions: telemetry.proposedActions,
+          final_output: { content_type: "text", content: `[adapter:policy_violation] ${message}` },
+          events: telemetry.events,
+          telemetry_mode: telemetry.telemetryMode,
+          policy_violations: policyViolations,
+          ...(runMeta ? { run_meta: runMeta } : {}),
+          ...(handoffReceipts.length > 0 ? { handoff_receipts: handoffReceipts } : {}),
+          adapter_error: adapterError,
+        });
+        return;
+      }
 
       res.json({
         case_id: caseId,
@@ -1114,6 +1389,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
         proposed_actions: telemetry.proposedActions,
         final_output: { content_type: "text", content: output },
         events: telemetry.events,
+        telemetry_mode: telemetry.telemetryMode,
         ...(runMeta ? { run_meta: runMeta } : {}),
         ...(handoffReceipts.length > 0 ? { handoff_receipts: handoffReceipts } : {}),
       });
@@ -1156,6 +1432,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
         proposed_actions: telemetry.proposedActions,
         final_output: { content_type: "text", content: output },
         events: telemetry.events,
+        telemetry_mode: telemetry.telemetryMode,
         ...(runMeta ? { run_meta: runMeta } : {}),
         ...(handoffReceipts.length > 0 ? { handoff_receipts: handoffReceipts } : {}),
         adapter_error: adapterError,

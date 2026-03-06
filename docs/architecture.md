@@ -146,7 +146,7 @@ Reference plugin adapters are shipped in-repo under `plugins/*`:
 - `plugins/vendor-bridge` (Promptfoo / DeepEval / Giskard import + canonical baseline/new gate diff)
 
 They are optional and not required for the core pipeline to function.
-The local CLI adapter surfaces normalized failure causes (`timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`, `busy`)
+The local CLI adapter surfaces normalized failure causes (`timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`, `busy`, `policy_violation`)
 in `adapter_error.code` for fast root-cause triage.
 Telemetry normalization follows three levels:
 - **native**: adapter/plugin receives structured `events/proposed_actions` from agent runtime (highest fidelity).
@@ -161,6 +161,8 @@ Runner `timeoutProfile=auto` consumes these timeout hints and constrains selecte
 For production hardening, adapter auth can be enabled via `CLI_AGENT_AUTH_TOKEN` (optional `CLI_AGENT_AUTH_HEADER`).
 Persistent handoff retention is bounded by `CLI_AGENT_HANDOFF_TTL_MS` and `CLI_AGENT_HANDOFF_MAX_ITEMS_TOTAL`.
 Runner can also forward optional per-case runtime policy (`metadata.policy`) with `planning_gate` and `repl_policy` blocks.
+CLI adapter validates and enforces this runtime policy against emitted telemetry and can block response with
+`adapter_error.code=policy_violation` plus structured `policy_violations`.
 Evaluator enforces deterministic `planning_gate` / `repl_policy` assertions from case expectations and emits `policy_tampering`
 signals that map to gate escalation (`require_approval` / `block`).
 
@@ -169,7 +171,7 @@ signals that map to gate escalation (`require_approval` / `block`).
 Aligned with external production-agent lessons, the next OSS hardening items are:
 
 - deterministic eval expansion for objective tasks (`set similarity` / `sequence alignment` / optional layout-pixel comparators)
-- planning/repl runtime hardening phase 2: enforce policy at execution layer (mutation broker, REPL allow/deny, IO/time/path caps)
+- planning/repl runtime hardening phase 2: extend current adapter-level enforcement to stricter execution-layer controls (mutation broker, REPL allow/deny, IO/time/path caps)
 - stricter REPL execution policy audit trail in artifacts (including deny reasons and bounded command telemetry)
 
 These are product-hardening tasks, not paid-only features.

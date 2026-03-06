@@ -276,14 +276,14 @@ export type CompareReport = {
     assertions?: ItemAssertion[];
     assertions_baseline?: ItemAssertion[];
     assertions_new?: ItemAssertion[];
-    policy_evaluation?: {
-      baseline?: {
-        planning_gate_pass?: boolean;
-        repl_policy_pass?: boolean;
+    policy_evaluation: {
+      baseline: {
+        planning_gate_pass: boolean;
+        repl_policy_pass: boolean;
       };
-      new?: {
-        planning_gate_pass?: boolean;
-        repl_policy_pass?: boolean;
+      new: {
+        planning_gate_pass: boolean;
+        repl_policy_pass: boolean;
       };
     };
 

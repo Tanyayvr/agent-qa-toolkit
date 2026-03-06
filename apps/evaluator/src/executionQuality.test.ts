@@ -27,6 +27,10 @@ function mkItem(params: Partial<CompareReport["items"][number]> & { case_id: str
       baseline: { signals: [], requires_gate_recommendation: false },
       new: { signals: [], requires_gate_recommendation: false },
     },
+    policy_evaluation: params.policy_evaluation ?? {
+      baseline: { planning_gate_pass: true, repl_policy_pass: true },
+      new: { planning_gate_pass: true, repl_policy_pass: true },
+    },
     risk_level: params.risk_level ?? "low",
     risk_tags: params.risk_tags ?? [],
     gate_recommendation: params.gate_recommendation ?? "none",

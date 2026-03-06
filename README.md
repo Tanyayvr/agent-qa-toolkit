@@ -383,10 +383,10 @@ Note:
 - Runner preflight canary now sends header `x-aq-preflight: 1`; `cli-agent-adapter` handles `case_id="__preflight__"` as a fast config/transport probe (no external CLI spawn), so strict preflight remains deterministic even for slow agents.
 - Preflight now retries transient transport failures (`/health` + `/run-case` canary) before declaring strict-mode failure, reducing false blocks on unstable local networks.
 - Optional fail-fast for infra meltdowns: `--failFastTransportStreak N` (stops after N consecutive transport-failed cases).
-- `cli-agent-adapter` returns structured transport reasons in `adapter_error.code`: `timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`.
+- `cli-agent-adapter` returns structured adapter reasons in `adapter_error.code`: `timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`, `policy_violation`.
 - `cli-agent-adapter` can return `adapter_error.code=busy` with HTTP `429` when `CLI_AGENT_MAX_CONCURRENCY` is reached.
 - `cli-agent-adapter` enforces timeout cap via `CLI_AGENT_TIMEOUT_CAP_MS` (default `120000`) and exposes effective runtime config in `/health`.
-- `cli-agent-adapter` emits wrapper telemetry (`tool_call/tool_result/final_output`) and supports best-effort extra tool extraction from text stdout (JSON lines + `▸ tool ...` traces, e.g. Goose-style).
+- `cli-agent-adapter` emits wrapper telemetry (`tool_call/tool_result/final_output`) and supports best-effort extra tool extraction from text stdout (JSON lines + `▸ tool ...` traces, e.g. Goose-style); response includes `telemetry_mode=wrapper_only|inferred`.
 - `cli-agent-adapter` aligns HTTP server request timeout with CLI timeout via `CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS` (default: `CLI_AGENT_TIMEOUT_MS/CLI_AGENT_TIMEOUT_CAP_MS` effective value + `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`).
 - Tune server timeout envelope with `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`, `CLI_AGENT_SERVER_HEADERS_TIMEOUT_MS`, and `CLI_AGENT_SERVER_KEEP_ALIVE_TIMEOUT_MS` to avoid 5-minute Node HTTP cutoff on long local-agent calls.
 - Optional adapter auth for production: set `CLI_AGENT_AUTH_TOKEN` (plus optional `CLI_AGENT_AUTH_HEADER`) to require a token on `/run-case` and `/handoff`.
@@ -394,6 +394,7 @@ Note:
 - Optional persistent runtime handoff store: set `CLI_AGENT_HANDOFF_STORE_PATH` to survive adapter restarts; retention is bounded by `CLI_AGENT_HANDOFF_TTL_MS` and `CLI_AGENT_HANDOFF_MAX_ITEMS_TOTAL`.
 - Runner propagates `run_meta` to `/run-case` (`run_id`, `incident_id`, `agent_id`), forwards per-case `metadata.handoff`, and can forward optional per-case `metadata.policy` (`planning_gate`, `repl_policy`).
 - Evaluator supports deterministic policy assertions via case `expected.planning_gate` and `expected.repl_policy`; failed checks emit `policy_tampering` security signals and can escalate gate recommendation (`require_approval` / `block`).
+- Compare report items now include required `policy_evaluation` block (`baseline/new` with `planning_gate_pass` and `repl_policy_pass`) for hard-contract policy auditing.
 - Runner preserves optional OTel anchors (`trace_anchor`) and enriches from response headers (`traceparent` / `b3` / `x-trace-id`) when available.
 - In `bundle:group`, each `--report <label=dir>` label is persisted as `agent_id` in the group index/manifest.
 - Group bundles remain the evidence aggregation layer; runtime transfer is handled by `/handoff`.

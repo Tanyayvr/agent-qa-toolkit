@@ -91,6 +91,10 @@ const baseReport: CompareReport = {
       recommended_policy_rules: [],
       trace_integrity: { baseline: { status: "ok", issues: [] }, new: { status: "ok", issues: [] } },
       security: { baseline: { signals: [], requires_gate_recommendation: false }, new: { signals: [], requires_gate_recommendation: false } },
+      policy_evaluation: {
+        baseline: { planning_gate_pass: true, repl_policy_pass: true },
+        new: { planning_gate_pass: true, repl_policy_pass: true },
+      },
       risk_level: "low",
       risk_tags: [],
       gate_recommendation: "none",

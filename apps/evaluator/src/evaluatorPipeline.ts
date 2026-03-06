@@ -701,6 +701,16 @@ export async function runEvaluator(): Promise<void> {
       artifacts: artifactLinks,
       trace_integrity: trace,
       security,
+      policy_evaluation: {
+        baseline: {
+          planning_gate_pass: true,
+          repl_policy_pass: true,
+        },
+        new: {
+          planning_gate_pass: true,
+          repl_policy_pass: true,
+        },
+      },
       risk_level: riskLevel,
       risk_tags: riskTags,
       gate_recommendation: gateRecommendation,
@@ -709,26 +719,16 @@ export async function runEvaluator(): Promise<void> {
     const newPlanning = nEval?.assertions?.find((a) => a.name === "planning_gate");
     const baselineRepl = bEval?.assertions?.find((a) => a.name === "repl_policy");
     const newRepl = nEval?.assertions?.find((a) => a.name === "repl_policy");
-    if (baselinePlanning || newPlanning || baselineRepl || newRepl) {
-      item.policy_evaluation = {
-        ...(baselinePlanning || baselineRepl
-          ? {
-              baseline: {
-                ...(baselinePlanning ? { planning_gate_pass: baselinePlanning.pass } : {}),
-                ...(baselineRepl ? { repl_policy_pass: baselineRepl.pass } : {}),
-              },
-            }
-          : {}),
-        ...(newPlanning || newRepl
-          ? {
-              new: {
-                ...(newPlanning ? { planning_gate_pass: newPlanning.pass } : {}),
-                ...(newRepl ? { repl_policy_pass: newRepl.pass } : {}),
-              },
-            }
-          : {}),
-      };
-    }
+    item.policy_evaluation = {
+      baseline: {
+        planning_gate_pass: baselinePlanning ? baselinePlanning.pass : true,
+        repl_policy_pass: baselineRepl ? baselineRepl.pass : true,
+      },
+      new: {
+        planning_gate_pass: newPlanning ? newPlanning.pass : true,
+        repl_policy_pass: newRepl ? newRepl.pass : true,
+      },
+    };
     if (baselineTraceAnchor || newTraceAnchor) {
       item.trace_anchors = {
         ...(baselineTraceAnchor ? { baseline: baselineTraceAnchor } : {}),

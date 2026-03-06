@@ -278,6 +278,7 @@ describe("cli-agent-adapter helpers", () => {
     expect(telemetry.events.some((e) => e.type === "tool_call")).toBe(true);
     expect(telemetry.events.some((e) => e.type === "tool_result")).toBe(true);
     expect(telemetry.events.some((e) => e.type === "final_output")).toBe(true);
+    expect(telemetry.telemetryMode).toBe("wrapper_only");
   });
 });
 
@@ -438,6 +439,7 @@ describe("cli-agent-adapter app", () => {
       expect(events.some((e) => e.type === "tool_call" && e.tool === "cli_agent_exec")).toBe(true);
       expect(events.some((e) => e.type === "tool_result")).toBe(true);
       expect(events.some((e) => e.type === "final_output")).toBe(true);
+      expect(["wrapper_only", "inferred"]).toContain((json.telemetry_mode as string | undefined) ?? "");
 
       const receipts = (json.handoff_receipts as Array<{ status?: string }> | undefined) ?? [];
       expect(receipts).toHaveLength(1);
@@ -464,8 +466,54 @@ describe("cli-agent-adapter app", () => {
         expect(output).toBe("stdin prompt");
         const events = (json.events as Array<{ type?: string; tool?: string }> | undefined) ?? [];
         expect(events.some((e) => e.type === "tool_call" && e.tool === "cli_agent_exec")).toBe(true);
+        expect(json.telemetry_mode).toBe("wrapper_only");
       }
     );
+  });
+
+  it("rejects invalid runtime policy payload with invalid_config", async () => {
+    await withAdapter(baseEnv, async (baseUrl) => {
+      const response = await postJson(baseUrl, "/run-case", {
+        case_id: "policy-invalid",
+        version: "new",
+        input: { user: "ping" },
+        policy: {
+          repl_policy: {
+            denied_command_patterns: ["[broken"],
+          },
+        },
+      });
+      expect(response.status).toBe(400);
+      const json = (await response.json()) as { adapter_error?: { code?: string; message?: string } };
+      expect(json.adapter_error?.code).toBe("invalid_config");
+      expect(String(json.adapter_error?.message ?? "")).toContain("invalid regex");
+    });
+  });
+
+  it("blocks request when runtime policy is violated", async () => {
+    await withAdapter(baseEnv, async (baseUrl) => {
+      const response = await postJson(baseUrl, "/run-case", {
+        case_id: "policy-block",
+        version: "new",
+        input: { user: "{\"name\":\"localhost_3001_mcp__run_shell\",\"arguments\":{\"command\":\"rm -rf /tmp/demo\"}}" },
+        policy: {
+          repl_policy: {
+            tool_allowlist: ["run_shell"],
+            denied_command_patterns: ["rm\\s+-rf"],
+          },
+        },
+      });
+      expect(response.status).toBe(409);
+      const json = (await response.json()) as {
+        adapter_error?: { code?: string; message?: string };
+        policy_violations?: Array<{ code?: string }>;
+        telemetry_mode?: string;
+      };
+      expect(json.adapter_error?.code).toBe("policy_violation");
+      expect(json.telemetry_mode).toBe("inferred");
+      const codes = (json.policy_violations ?? []).map((v) => v.code);
+      expect(codes).toContain("denied_command_pattern");
+    });
   });
 
   it("run-case preflight probe bypasses CLI execution and returns deterministic response", async () => {
