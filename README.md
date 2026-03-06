@@ -374,6 +374,9 @@ Release-gate E2E checks:
 # verifies evaluator hard gate behavior (--failOnExecutionDegraded)
 npm run e2e:policy-gate
 
+# verifies runtime policy/tool-broker allowlist enforcement + policy audit evidence
+npm run e2e:runtime-policy -- --ci
+
 # CI-sized soak/load + artifact integrity + quality gate
 npm run e2e:soak-load -- --ci
 
@@ -384,6 +387,7 @@ Proof notes:
 - `proof:otel` is expected to fail when the selected report has no `trace_id`/`span_id` anchors (for example, runs without anchor-enabled adapter/plugin).
 - `proof:runtime-handoff` requires a running adapter at `--baseUrl`; if adapter is down, the command fails with an explicit health hint.
 - `proof:p1` writes `p1-claim-proof.json` (default: inside `--reportDir`) and fails non-zero if any sub-proof fails (OTel anchors, runtime endpoint idempotency, runtime e2e receipt unless `--skipRuntimeE2E`).
+- `e2e:runtime-policy` enforces near-term runtime controls in shipped path: blocked denied commands, wrapper-only telemetry escalation (`telemetry_untrusted`), and policy-audit log persistence.
 - `e2e:soak-load` now enforces: zero transport real-failures in load summary, healthy execution-quality across soak cycles, deterministic gate signatures across cycles, and bounded campaign runtime variance.
 
 Note:
