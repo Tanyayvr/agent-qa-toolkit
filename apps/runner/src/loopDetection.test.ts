@@ -162,6 +162,12 @@ describe("analyzeLoops", () => {
         expect(result.loop_details).toBeUndefined();
     });
 
+    it("returns no loop for malformed non-array events", () => {
+        const result = analyzeLoops({ type: "tool_call" } as unknown);
+        expect(result.loop_detected).toBe(false);
+        expect(result.loop_details).toBeUndefined();
+    });
+
     it("detects loop when both similarity and hash match", () => {
         const events: RunEvent[] = [
             { type: "tool_call", ts: 1, call_id: "c1", tool: "api", args: { q: "test" } },

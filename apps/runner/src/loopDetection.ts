@@ -171,16 +171,18 @@ export function detectOutputHashDuplicates(events: RunEvent[]): LoopDetails["out
 
 /** Run both loop detection analyses on an AgentResponse's events.
  *  Returns LoopDetails if any loops are detected, undefined otherwise. */
-export function analyzeLoops(events: RunEvent[] | undefined): {
+export function analyzeLoops(events: unknown): {
     loop_detected: boolean;
     loop_details: LoopDetails | undefined;
 } {
-    if (!events || events.length === 0) {
+    if (!Array.isArray(events) || events.length === 0) {
         return { loop_detected: false, loop_details: undefined };
     }
 
-    const similaritySuspects = detectSimilarityLoops(events);
-    const outputHashDuplicates = detectOutputHashDuplicates(events);
+    const safeEvents = events as RunEvent[];
+
+    const similaritySuspects = detectSimilarityLoops(safeEvents);
+    const outputHashDuplicates = detectOutputHashDuplicates(safeEvents);
 
     const hasLoops = !!similaritySuspects || !!outputHashDuplicates;
 

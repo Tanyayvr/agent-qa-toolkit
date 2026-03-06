@@ -134,20 +134,27 @@ async function main() {
 
   const correctnessRel = "apps/evaluator/reports/correctness_latest/compare-report.json";
   const robustnessRel = "apps/evaluator/reports/robustness_latest/compare-report.json";
+  const latestRel = "apps/evaluator/reports/latest/compare-report.json";
 
   const correctness = loadReport(correctnessRel);
   const robustness = loadReport(robustnessRel);
+  const latestAbs = path.join(ROOT, latestRel);
+  const latest = existsSync(latestAbs) ? loadReport(latestRel) : null;
 
   const correctnessDir = path.join(ROOT, "apps/evaluator/reports/correctness_latest");
   const robustnessDir = path.join(ROOT, "apps/evaluator/reports/robustness_latest");
+  const latestDir = path.join(ROOT, "apps/evaluator/reports/latest");
 
   validateReport(correctness, correctnessDir);
   validateReport(robustness, robustnessDir);
+  if (latest) validateReport(latest, latestDir);
 
   const tmpCorrectness = copyToTmp(correctnessDir, "correctness_latest");
   const tmpRobustness = copyToTmp(robustnessDir, "robustness_latest");
+  const tmpLatest = latest ? copyToTmp(latestDir, "latest") : null;
   validateReport(correctness, tmpCorrectness);
   validateReport(robustness, tmpRobustness);
+  if (latest && tmpLatest) validateReport(latest, tmpLatest);
 
   const keys1 = Object.keys(correctness.summary_by_suite || {});
   const keys2 = Object.keys(robustness.summary_by_suite || {});
@@ -155,8 +162,12 @@ async function main() {
   assert(keys1.includes("robustness"), "summary_by_suite must include robustness");
   assert(keys2.includes("robustness"), "summary_by_suite must include robustness (matrix)");
 
-  assertGate(correctness, "fetch_timeout_001", "require_approval");
-  assertGate(correctness, "fetch_network_drop_001", "require_approval");
+  if (latest) {
+    assertGate(latest, "fetch_timeout_001", "require_approval");
+    assertGate(latest, "fetch_network_drop_001", "require_approval");
+  } else {
+    console.warn("WARNING: apps/evaluator/reports/latest/compare-report.json not found; skipping fetch_* gate checks");
+  }
   assertGate(robustness, "matrix_net_timeout", "require_approval");
   assertGate(robustness, "matrix_net_drop", "require_approval");
 

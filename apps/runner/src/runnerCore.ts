@@ -45,10 +45,10 @@ export function aggregateTokenUsage(usages: (TokenUsage | undefined)[]): TokenUs
 
 export function enrichResponseWithLoopAnalysis(resp: unknown): void {
   if (!resp || typeof resp !== "object") return;
-  const r = resp as { events?: RunEvent[]; token_usage?: TokenUsage };
-  if (!r.events || r.events.length === 0) return;
+  const r = resp as { events?: unknown; token_usage?: TokenUsage };
+  if (!Array.isArray(r.events) || r.events.length === 0) return;
 
-  const { loop_detected, loop_details } = analyzeLoops(r.events);
+  const { loop_detected, loop_details } = analyzeLoops(r.events as RunEvent[]);
   if (!loop_detected) return;
 
   if (!r.token_usage) r.token_usage = {};
