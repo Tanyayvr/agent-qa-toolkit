@@ -313,6 +313,18 @@ describe("runner orchestration", () => {
         input: { user: "hello" },
         metadata: {
           handoff,
+          policy: {
+            planning_gate: {
+              required_for_mutations: true,
+              mutation_tools: ["run_shell"],
+              high_risk_tools: ["run_shell"],
+            },
+            repl_policy: {
+              tool_allowlist: ["run_shell"],
+              denied_command_patterns: ["rm\\s+-rf"],
+              max_command_length: 256,
+            },
+          },
         },
       },
     ]);
@@ -323,12 +335,20 @@ describe("runner orchestration", () => {
         version: "baseline" | "new";
         run_meta?: { run_id?: string; incident_id?: string; agent_id?: string };
         handoff?: { handoff_id?: string; checksum?: string };
+        policy?: {
+          planning_gate?: { required_for_mutations?: boolean; high_risk_tools?: string[] };
+          repl_policy?: { tool_allowlist?: string[]; max_command_length?: number };
+        };
       };
       expect(payload.run_meta?.run_id).toBe("handoff-run");
       expect(payload.run_meta?.incident_id).toBe("inc-01");
       expect(payload.run_meta?.agent_id).toBe("agent-executor");
       expect(payload.handoff?.handoff_id).toBe("h-01");
       expect(payload.handoff?.checksum).toBe(handoff.checksum);
+      expect(payload.policy?.planning_gate?.required_for_mutations).toBe(true);
+      expect(payload.policy?.planning_gate?.high_risk_tools).toEqual(["run_shell"]);
+      expect(payload.policy?.repl_policy?.tool_allowlist).toEqual(["run_shell"]);
+      expect(payload.policy?.repl_policy?.max_command_length).toBe(256);
       return new Response(
         JSON.stringify({
           case_id: payload.case_id,

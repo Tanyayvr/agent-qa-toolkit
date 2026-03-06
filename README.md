@@ -392,7 +392,8 @@ Note:
 - Optional adapter auth for production: set `CLI_AGENT_AUTH_TOKEN` (plus optional `CLI_AGENT_AUTH_HEADER`) to require a token on `/run-case` and `/handoff`.
 - Runtime handoff channel: `POST /handoff` (idempotent by `incident_id + handoff_id`, checksum validated).
 - Optional persistent runtime handoff store: set `CLI_AGENT_HANDOFF_STORE_PATH` to survive adapter restarts; retention is bounded by `CLI_AGENT_HANDOFF_TTL_MS` and `CLI_AGENT_HANDOFF_MAX_ITEMS_TOTAL`.
-- Runner propagates `run_meta` to `/run-case` (`run_id`, `incident_id`, `agent_id`) and can forward per-case `metadata.handoff`.
+- Runner propagates `run_meta` to `/run-case` (`run_id`, `incident_id`, `agent_id`), forwards per-case `metadata.handoff`, and can forward optional per-case `metadata.policy` (`planning_gate`, `repl_policy`).
+- Evaluator supports deterministic policy assertions via case `expected.planning_gate` and `expected.repl_policy`; failed checks emit `policy_tampering` security signals and can escalate gate recommendation (`require_approval` / `block`).
 - Runner preserves optional OTel anchors (`trace_anchor`) and enriches from response headers (`traceparent` / `b3` / `x-trace-id`) when available.
 - In `bundle:group`, each `--report <label=dir>` label is persisted as `agent_id` in the group index/manifest.
 - Group bundles remain the evidence aggregation layer; runtime transfer is handled by `/handoff`.

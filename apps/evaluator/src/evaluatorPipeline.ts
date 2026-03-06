@@ -80,6 +80,7 @@ import {
   computeTraceIntegritySide,
   missingTraceSide,
   computeSecuritySide,
+  derivePolicySignals,
   deriveGateRecommendation,
   deriveRiskLevel,
   deriveRiskTags,
@@ -643,13 +644,16 @@ export async function runEvaluator(): Promise<void> {
     const baselineExtra = baseResp ? await runSecurityScanners(baseResp, scanners) : [];
     const newExtra = newResp ? await runSecurityScanners(newResp, scanners) : [];
 
+    const baselinePolicySignals = baseResp ? derivePolicySignals(baseResp, bEval) : [];
+    const newPolicySignals = newResp ? derivePolicySignals(newResp, nEval) : [];
+
     const baselineSecurity = {
       ...baselineSecurityBase,
-      signals: [...baselineSecurityBase.signals, ...baselineExtra],
+      signals: [...baselineSecurityBase.signals, ...baselineExtra, ...baselinePolicySignals],
     };
     const newSecurity = {
       ...newSecurityBase,
-      signals: [...newSecurityBase.signals, ...newExtra],
+      signals: [...newSecurityBase.signals, ...newExtra, ...newPolicySignals],
     };
 
     const regression = baselinePassFlag && !newPassFlag;
@@ -701,6 +705,30 @@ export async function runEvaluator(): Promise<void> {
       risk_tags: riskTags,
       gate_recommendation: gateRecommendation,
     };
+    const baselinePlanning = bEval?.assertions?.find((a) => a.name === "planning_gate");
+    const newPlanning = nEval?.assertions?.find((a) => a.name === "planning_gate");
+    const baselineRepl = bEval?.assertions?.find((a) => a.name === "repl_policy");
+    const newRepl = nEval?.assertions?.find((a) => a.name === "repl_policy");
+    if (baselinePlanning || newPlanning || baselineRepl || newRepl) {
+      item.policy_evaluation = {
+        ...(baselinePlanning || baselineRepl
+          ? {
+              baseline: {
+                ...(baselinePlanning ? { planning_gate_pass: baselinePlanning.pass } : {}),
+                ...(baselineRepl ? { repl_policy_pass: baselineRepl.pass } : {}),
+              },
+            }
+          : {}),
+        ...(newPlanning || newRepl
+          ? {
+              new: {
+                ...(newPlanning ? { planning_gate_pass: newPlanning.pass } : {}),
+                ...(newRepl ? { repl_policy_pass: newRepl.pass } : {}),
+              },
+            }
+          : {}),
+      };
+    }
     if (baselineTraceAnchor || newTraceAnchor) {
       item.trace_anchors = {
         ...(baselineTraceAnchor ? { baseline: baselineTraceAnchor } : {}),

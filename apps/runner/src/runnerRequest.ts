@@ -22,7 +22,7 @@ import {
   snippetFromBytes,
   toRel,
 } from "./runnerArtifacts";
-import { extractCaseHandoff, extractCaseRunMeta, isRecord } from "./runnerCli";
+import { extractCaseHandoff, extractCasePolicy, extractCaseRunMeta, isRecord } from "./runnerCli";
 import {
   backoffMs,
   httpIsTransient,
@@ -90,12 +90,14 @@ export async function runOneCaseWithReliability(
     ...(caseRunMeta?.parent_run_id ? { parent_run_id: caseRunMeta.parent_run_id } : {}),
   };
   const caseHandoff = extractCaseHandoff(c.id, c.metadata);
+  const casePolicy = extractCasePolicy(c.id, c.metadata);
   const reqBody: RunCaseRequest = {
     case_id: c.id,
     version,
     input: { user: c.input.user, context: c.input.context },
     run_meta: requestRunMeta,
     ...(caseHandoff ? { handoff: caseHandoff } : {}),
+    ...(casePolicy ? { policy: casePolicy } : {}),
   };
 
   const payload = JSON.stringify(reqBody);

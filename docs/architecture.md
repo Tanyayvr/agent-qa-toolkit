@@ -160,14 +160,17 @@ Runner `timeoutProfile=auto` consumes these timeout hints and constrains selecte
 `preflightMode=strict` treats timeout-contract mismatches as blocking errors to stop flaky long campaigns early.
 For production hardening, adapter auth can be enabled via `CLI_AGENT_AUTH_TOKEN` (optional `CLI_AGENT_AUTH_HEADER`).
 Persistent handoff retention is bounded by `CLI_AGENT_HANDOFF_TTL_MS` and `CLI_AGENT_HANDOFF_MAX_ITEMS_TOTAL`.
+Runner can also forward optional per-case runtime policy (`metadata.policy`) with `planning_gate` and `repl_policy` blocks.
+Evaluator enforces deterministic `planning_gate` / `repl_policy` assertions from case expectations and emits `policy_tampering`
+signals that map to gate escalation (`require_approval` / `block`).
 
 ## OSS hardening backlog (post-current release)
 
 Aligned with external production-agent lessons, the next OSS hardening items are:
 
 - deterministic eval expansion for objective tasks (`set similarity` / `sequence alignment` / optional layout-pixel comparators)
-- stronger pre-execution planning gate checks (`declared_end_state` vs mutation payload -> `require_approval` or `block`)
-- stricter REPL execution policy (allowlist, IO/time limits, risky syscall/path guardrails, explicit audit trail in evidence artifacts)
+- planning/repl runtime hardening phase 2: enforce policy at execution layer (mutation broker, REPL allow/deny, IO/time/path caps)
+- stricter REPL execution policy audit trail in artifacts (including deny reasons and bounded command telemetry)
 
 These are product-hardening tasks, not paid-only features.
 

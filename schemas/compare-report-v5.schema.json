@@ -311,6 +311,28 @@
               }
             }
           },
+          "policy_evaluation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "baseline": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "planning_gate_pass": { "type": "boolean" },
+                  "repl_policy_pass": { "type": "boolean" }
+                }
+              },
+              "new": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "planning_gate_pass": { "type": "boolean" },
+                  "repl_policy_pass": { "type": "boolean" }
+                }
+              }
+            }
+          },
           "trace_anchors": {
             "type": "object",
             "properties": {

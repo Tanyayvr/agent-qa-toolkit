@@ -276,6 +276,16 @@ export type CompareReport = {
     assertions?: ItemAssertion[];
     assertions_baseline?: ItemAssertion[];
     assertions_new?: ItemAssertion[];
+    policy_evaluation?: {
+      baseline?: {
+        planning_gate_pass?: boolean;
+        repl_policy_pass?: boolean;
+      };
+      new?: {
+        planning_gate_pass?: boolean;
+        repl_policy_pass?: boolean;
+      };
+    };
 
     failure_summary?: {
       baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string };

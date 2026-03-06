@@ -186,6 +186,34 @@ export type RunMeta = {
     parent_run_id?: string;
 };
 
+/** Deterministic planning gate config for mutating operations. */
+export type PlanningGatePolicy = {
+    /** When true, mutating tool calls require a machine-readable plan envelope. */
+    required_for_mutations?: boolean;
+    /** Tool names treated as mutating for this run. */
+    mutation_tools?: string[];
+    /** Subset of mutation tools considered high-risk (mismatch => block). */
+    high_risk_tools?: string[];
+    /** Require declared_end_state to be present in the plan envelope. */
+    require_declared_end_state?: boolean;
+};
+
+/** REPL/runtime controls expected by the caller. */
+export type ReplRuntimePolicy = {
+    /** Allowed REPL tools. If provided, any other REPL tool is a violation. */
+    tool_allowlist?: string[];
+    /** Regex patterns (as strings) that must not match command text. */
+    denied_command_patterns?: string[];
+    /** Maximum command length for REPL command payloads. */
+    max_command_length?: number;
+};
+
+/** Runtime policy contract optionally propagated with /run-case calls. */
+export type RuntimePolicy = {
+    planning_gate?: PlanningGatePolicy;
+    repl_policy?: ReplRuntimePolicy;
+};
+
 /** Runtime handoff payload transferred between agents/services.
  *  `checksum` is sha256 over canonical payload without `checksum` field. */
 export type HandoffEnvelope = {
@@ -244,6 +272,7 @@ export type RunCaseRequestPayload = {
     input: { user: string; context?: unknown };
     run_meta?: RunMeta;
     handoff?: HandoffEnvelopeInput;
+    policy?: RuntimePolicy;
 };
 
 /* ------------------------------------------------------------------ */

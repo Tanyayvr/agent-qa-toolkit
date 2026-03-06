@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { HandoffEnvelope, RunMeta } from "shared-types";
+import type { HandoffEnvelope, ReplRuntimePolicy, RunMeta, RuntimePolicy, PlanningGatePolicy } from "shared-types";
 import {
   CliUsageError,
   normalizeRunMeta,
@@ -110,6 +110,87 @@ export function extractCaseHandoff(caseId: string, metadata: unknown): HandoffEn
   } catch (err) {
     throw new CliUsageError(
       `Invalid handoff in case "${caseId}": ${err instanceof Error ? err.message : String(err)}.\n\n${RUNNER_HELP_TEXT}`
+    );
+  }
+}
+
+function normalizeStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const out = value
+    .map((item) => String(item ?? "").trim())
+    .filter((item) => item.length > 0);
+  if (out.length === 0) return undefined;
+  return Array.from(new Set(out));
+}
+
+function normalizePlanningGatePolicy(candidate: unknown): PlanningGatePolicy | undefined {
+  if (!isRecord(candidate)) return undefined;
+  const policy: PlanningGatePolicy = {};
+
+  if (candidate.required_for_mutations !== undefined) {
+    policy.required_for_mutations = Boolean(candidate.required_for_mutations);
+  }
+  if (candidate.require_declared_end_state !== undefined) {
+    policy.require_declared_end_state = Boolean(candidate.require_declared_end_state);
+  }
+
+  const mutationTools = normalizeStringArray(candidate.mutation_tools);
+  if (mutationTools) policy.mutation_tools = mutationTools;
+
+  const highRiskTools = normalizeStringArray(candidate.high_risk_tools);
+  if (highRiskTools) policy.high_risk_tools = highRiskTools;
+
+  if (
+    policy.required_for_mutations === undefined &&
+    policy.require_declared_end_state === undefined &&
+    !policy.mutation_tools &&
+    !policy.high_risk_tools
+  ) {
+    return undefined;
+  }
+  return policy;
+}
+
+function normalizeReplRuntimePolicy(candidate: unknown): ReplRuntimePolicy | undefined {
+  if (!isRecord(candidate)) return undefined;
+  const policy: ReplRuntimePolicy = {};
+
+  const allowlist = normalizeStringArray(candidate.tool_allowlist);
+  if (allowlist) policy.tool_allowlist = allowlist;
+
+  const denied = normalizeStringArray(candidate.denied_command_patterns);
+  if (denied) policy.denied_command_patterns = denied;
+
+  if (candidate.max_command_length !== undefined) {
+    const num = Number(candidate.max_command_length);
+    if (!Number.isFinite(num) || num < 1) {
+      throw new Error("repl_policy.max_command_length must be a positive number");
+    }
+    policy.max_command_length = Math.floor(num);
+  }
+
+  if (!policy.tool_allowlist && !policy.denied_command_patterns && policy.max_command_length === undefined) {
+    return undefined;
+  }
+  return policy;
+}
+
+export function extractCasePolicy(caseId: string, metadata: unknown): RuntimePolicy | undefined {
+  if (!isRecord(metadata)) return undefined;
+  const candidate = metadata.policy ?? metadata.runtime_policy;
+  if (!isRecord(candidate)) return undefined;
+
+  try {
+    const planning = normalizePlanningGatePolicy(candidate.planning_gate);
+    const repl = normalizeReplRuntimePolicy(candidate.repl_policy);
+    if (!planning && !repl) return undefined;
+    return {
+      ...(planning ? { planning_gate: planning } : {}),
+      ...(repl ? { repl_policy: repl } : {}),
+    };
+  } catch (err) {
+    throw new CliUsageError(
+      `Invalid policy in case "${caseId}": ${err instanceof Error ? err.message : String(err)}.\n\n${RUNNER_HELP_TEXT}`
     );
   }
 }
