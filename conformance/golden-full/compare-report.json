@@ -42,6 +42,21 @@
       "missing_new_artifacts": 0,
       "broken_baseline_artifacts": 0,
       "broken_new_artifacts": 0
+    },
+    "execution_quality": {
+      "status": "healthy",
+      "reasons": [],
+      "total_executed_cases": 1,
+      "baseline_transport_success_rate": 1,
+      "new_transport_success_rate": 1,
+      "baseline_runner_failures": 0,
+      "new_runner_failures": 0,
+      "weak_expected_cases": 0,
+      "weak_expected_rate": 0
+    },
+    "trace_anchor_coverage": {
+      "cases_with_anchor_baseline": 0,
+      "cases_with_anchor_new": 0
     }
   },
   "quality_flags": {
@@ -103,7 +118,17 @@
             ]
           }
         }
-      ]
+      ],
+      "policy_evaluation": {
+        "baseline": {
+          "planning_gate_pass": true,
+          "repl_policy_pass": true
+        },
+        "new": {
+          "planning_gate_pass": true,
+          "repl_policy_pass": true
+        }
+      }
     }
   ],
   "environment": {
