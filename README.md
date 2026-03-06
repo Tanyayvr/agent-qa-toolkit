@@ -40,6 +40,7 @@ You get:
 - Machine report (`compare-report.json`) as the **source of truth** for CI dashboards and gating
 - Conservative pass semantics: runner transport/runtime failures are recorded as evidence and counted as `pass=false` (not "green" by default)
 - Execution-quality summary (`summary.execution_quality`) with transport success and weak-assertion rate
+- Explicit tool-telemetry assertion with deterministic reason code (`tool_telemetry_missing`) when tool trace is required but absent
 - Synthetic fault-matrix mode (`cases/matrix.json`) to validate transport/data failure classification before external pilots
 - Root cause attribution (RCA) and policy hints
 - Security signals (6 scanners + optional entropy scanner)
@@ -289,6 +290,10 @@ One-command local campaign (baseline/new2/new3 + evaluator + trend):
 ```bash
 BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod ./scripts/run-local-campaign.sh
 ```
+Strict release campaign gate (fail fast on degraded execution quality):
+```bash
+BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod EVAL_FAIL_ON_EXECUTION_DEGRADED=1 ./scripts/run-local-campaign.sh
+```
 Slow-agent profile (auto timeout tuning):
 ```bash
 BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=autonomous CAMPAIGN_PROFILE=quality RUN_PREFIX=auto_prod REPORT_PREFIX=auto-prod TIMEOUT_PROFILE=auto TIMEOUT_MS=120000 TIMEOUT_AUTO_CAP_MS=1800000 TIMEOUT_AUTO_LOOKBACK_RUNS=20 RETRIES=0 PREFLIGHT_MODE=off ./scripts/run-local-campaign.sh
@@ -353,6 +358,14 @@ npm run proof:runtime-handoff -- --baseUrl http://127.0.0.1:8788 --mode endpoint
 # Optional e2e receipt check (calls /run-case; use on fast adapters)
 npm run proof:runtime-handoff -- --baseUrl http://127.0.0.1:8788 --mode e2e --runCaseTimeoutMs 30000
 ```
+Release-gate E2E checks:
+```bash
+# verifies evaluator hard gate behavior (--failOnExecutionDegraded)
+npm run e2e:policy-gate
+
+# CI-sized soak/load + artifact integrity + quality gate
+npm run e2e:soak-load -- --ci
+```
 Proof notes:
 - `proof:otel` is expected to fail when the selected report has no `trace_id`/`span_id` anchors (for example, runs without anchor-enabled adapter/plugin).
 - `proof:runtime-handoff` requires a running adapter at `--baseUrl`; if adapter is down, the command fails with an explicit health hint.
@@ -373,6 +386,7 @@ Note:
 - `cli-agent-adapter` returns structured transport reasons in `adapter_error.code`: `timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`.
 - `cli-agent-adapter` can return `adapter_error.code=busy` with HTTP `429` when `CLI_AGENT_MAX_CONCURRENCY` is reached.
 - `cli-agent-adapter` enforces timeout cap via `CLI_AGENT_TIMEOUT_CAP_MS` (default `120000`) and exposes effective runtime config in `/health`.
+- `cli-agent-adapter` emits wrapper telemetry (`tool_call/tool_result/final_output`) and supports best-effort extra tool extraction from text stdout (JSON lines + `▸ tool ...` traces, e.g. Goose-style).
 - `cli-agent-adapter` aligns HTTP server request timeout with CLI timeout via `CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS` (default: `CLI_AGENT_TIMEOUT_MS/CLI_AGENT_TIMEOUT_CAP_MS` effective value + `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`).
 - Tune server timeout envelope with `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`, `CLI_AGENT_SERVER_HEADERS_TIMEOUT_MS`, and `CLI_AGENT_SERVER_KEEP_ALIVE_TIMEOUT_MS` to avoid 5-minute Node HTTP cutoff on long local-agent calls.
 - Optional adapter auth for production: set `CLI_AGENT_AUTH_TOKEN` (plus optional `CLI_AGENT_AUTH_HEADER`) to require a token on `/run-case` and `/handoff`.

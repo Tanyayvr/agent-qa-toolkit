@@ -17,6 +17,8 @@ Portable Evidence Packs для tool-using AI агентов
 - Strict verify: portability + integrity checks
 - НОВОЕ: Historical Trending (локальная SQLite) для дрейфа регрессий и костов во времени
 - НОВОЕ: data-driven timeout onboarding profile (калибровка -> валидация -> прод) для медленных внешних агентов
+- НОВОЕ: уровни нормализации телеметрии (native -> inferred из stdout -> wrapper fallback), чтобы не было "тихих" прогонов без trace
+- НОВОЕ: release-gate E2E в CI (policy-gate + soak/load проверка стабильности)
 
 Как работает
 - Runner запускает кейсы

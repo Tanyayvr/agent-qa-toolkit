@@ -9,6 +9,7 @@ import {
     checkRunnerTransport,
     checkToolExecution,
     checkHallucinationSignal,
+    checkToolTelemetryAvailability,
     toolCalls,
     toolResults,
     retrievalEvents,
@@ -262,6 +263,26 @@ describe("transport/tool/hallucination checks", () => {
     });
 });
 
+describe("tool telemetry assertion", () => {
+    it("passes when tool telemetry is not required by case", () => {
+        const res = checkToolTelemetryAvailability({}, mkResp({ events: [] }));
+        expect(res.pass).toBe(true);
+        expect(res.details).toMatchObject({ note: "not_required" });
+    });
+
+    it("fails with explicit reason_code when telemetry is required but missing", () => {
+        const res = checkToolTelemetryAvailability(
+            { tool_required: ["search"] },
+            mkResp({ events: [] })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            required_by: ["tool_required"],
+            reason_code: "tool_telemetry_missing",
+        });
+    });
+});
+
 /* ------------------------------------------------------------------ */
 /*  evaluateOne                                                        */
 /* ------------------------------------------------------------------ */
@@ -291,6 +312,14 @@ describe("evaluateOne", () => {
         const toolAssertion = result.assertions.find((a) => a.name === "tool_required");
         expect(toolAssertion?.pass).toBe(false);
         expect((toolAssertion?.details as Record<string, unknown>)?.missing_tools).toEqual(["write"]);
+    });
+
+    it("records tool_telemetry assertion failure when tool expectations exist but events are empty", () => {
+        const c = mkCase({ expected: { tool_required: ["search"] } });
+        const result = evaluateOne(c, mkResp({ events: [] }), ajv);
+        const telemetry = result.assertions.find((a) => a.name === "tool_telemetry");
+        expect(telemetry?.pass).toBe(false);
+        expect(result.root_cause).toBe("missing_required_data");
     });
 
     it("evaluates action_required and tool_sequence assertions", () => {

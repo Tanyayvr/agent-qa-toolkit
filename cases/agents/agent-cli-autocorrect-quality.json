@@ -2,99 +2,198 @@
   {
     "id": "ac_basic_001",
     "title": "Fix simple spelling error",
-    "input": { "user": "this sentence has a speling error" },
+    "input": {
+      "user": "this sentence has a speling error"
+    },
     "expected": {
-      "must_not_include": ["speling"]
+      "must_not_include": [
+        "speling"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_basic_002",
     "title": "Fix punctuation and capitalization",
-    "input": { "user": "hello team i shipped the patch can you review it" },
+    "input": {
+      "user": "hello team i shipped the patch can you review it"
+    },
     "expected": {
-      "must_include": ["Hello", "review"],
-      "must_not_include": [" i shipped"]
+      "must_include": [
+        "Hello",
+        "review"
+      ],
+      "must_not_include": [
+        " i shipped"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_basic_003",
     "title": "Fix grammar in short status update",
-    "input": { "user": "we was able to reproduce the bug and logs was attached" },
+    "input": {
+      "user": "we was able to reproduce the bug and logs was attached"
+    },
     "expected": {
-      "must_not_include": ["we was", "logs was"],
-      "must_include": ["were"]
+      "must_not_include": [
+        "we was",
+        "logs was"
+      ],
+      "must_include": [
+        "were"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_format_001",
     "title": "Preserve JSON-like text while correcting prose",
-    "input": { "user": "Return this exact key names but fix text: {\"summary\":\"the deploy faild\", \"owner\":\"platfrom\"}" },
+    "input": {
+      "user": "Return this exact key names but fix text: {\"summary\":\"the deploy faild\", \"owner\":\"platfrom\"}"
+    },
     "expected": {
-      "must_include": ["summary", "owner"],
-      "must_not_include": ["faild", "platfrom"]
+      "must_include": [
+        "summary",
+        "owner"
+      ],
+      "must_not_include": [
+        "faild",
+        "platfrom"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_format_002",
     "title": "Correct multiline incident note",
-    "input": { "user": "incident update:\\n- users is affected\\n- root cause are under investigation\\n- next update in 30 minuts" },
+    "input": {
+      "user": "incident update:\\n- users is affected\\n- root cause are under investigation\\n- next update in 30 minuts"
+    },
     "expected": {
-      "must_not_include": ["users is", "cause are", "minuts"],
-      "must_include": ["incident update"]
+      "must_not_include": [
+        "users is",
+        "cause are",
+        "minuts"
+      ],
+      "must_include": [
+        "incident update"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_robust_001",
     "title": "Messy whitespace and punctuation",
-    "input": { "user": "the API  response   was slow , but it recoverd after restart  ." },
+    "input": {
+      "user": "the API  response   was slow , but it recoverd after restart  ."
+    },
     "expected": {
-      "must_not_include": ["recoverd"],
-      "must_include": ["recovered"]
+      "must_not_include": [
+        "recoverd"
+      ],
+      "must_include": [
+        "recovered"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_robust_002",
     "title": "Mixed casing and contractions",
-    "input": { "user": "I DONT think weve validated the fallback path yet" },
+    "input": {
+      "user": "I DONT think weve validated the fallback path yet"
+    },
     "expected": {
-      "must_not_include": ["DONT", "weve"],
-      "must_include": ["don't"]
+      "must_not_include": [
+        "DONT",
+        "weve"
+      ],
+      "must_include": [
+        "don't"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_robust_003",
     "title": "Already-correct sentence should remain stable",
-    "input": { "user": "The patch passed tests and is ready for deployment." },
+    "input": {
+      "user": "The patch passed tests and is ready for deployment."
+    },
     "expected": {
-      "must_include": ["ready for deployment"],
-      "must_not_include": ["speling", "faild", "platfrom"]
+      "must_include": [
+        "ready for deployment"
+      ],
+      "must_not_include": [
+        "speling",
+        "faild",
+        "platfrom"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_flaky_001",
     "title": "Repeat prompt A",
-    "input": { "user": "please corect this release note: performance improvments in cache invalidation" },
+    "input": {
+      "user": "please corect this release note: performance improvments in cache invalidation"
+    },
     "expected": {
-      "must_not_include": ["corect", "improvments"],
-      "must_include": ["cache invalidation"]
+      "must_not_include": [
+        "corect",
+        "improvments"
+      ],
+      "must_include": [
+        "cache invalidation"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   },
   {
     "id": "ac_flaky_002",
     "title": "Repeat prompt A duplicate",
-    "input": { "user": "please corect this release note: performance improvments in cache invalidation" },
+    "input": {
+      "user": "please corect this release note: performance improvments in cache invalidation"
+    },
     "expected": {
-      "must_not_include": ["corect", "improvments"],
-      "must_include": ["cache invalidation"]
+      "must_not_include": [
+        "corect",
+        "improvments"
+      ],
+      "must_include": [
+        "cache invalidation"
+      ],
+      "tool_required": [
+        "cli_agent_exec"
+      ]
     },
     "suite": "agent_cli_autocorrect"
   }

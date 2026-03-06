@@ -91,4 +91,66 @@ describe("validate-cases-quality", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("fails quality profile when tool evidence is required but missing", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-tool-evidence-missing-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            { id: "c1", expected: { must_include: ["ok"] } },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireToolEvidence",
+        "1",
+      ]);
+      expect(res.code).toBe(2);
+      expect(res.stderr).toContain("requires tool evidence assertions");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("passes quality profile when required tool evidence is present", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-tool-evidence-ok-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            { id: "c1", expected: { tool_required: ["cli_agent_exec"] } },
+            { id: "c2", expected: { tool_sequence: ["cli_agent_exec"] } },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireToolEvidence",
+        "1",
+      ]);
+      expect(res.code).toBe(0);
+      const parsed = JSON.parse(res.stdout.trim()) as { tool_evidence_missing_cases?: number };
+      expect(parsed.tool_evidence_missing_cases).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });

@@ -79,6 +79,10 @@ function asEvents(events: RunEvent[] | undefined | null): RunEvent[] {
     return Array.isArray(events) ? events : [];
 }
 
+function hasNonEmptyList(v: unknown): boolean {
+    return Array.isArray(v) && v.length > 0;
+}
+
 export function toolCalls(events: RunEvent[] | undefined | null): ToolCallEvent[] {
     return asEvents(events).filter((e): e is ToolCallEvent => e.type === "tool_call");
 }
@@ -139,6 +143,32 @@ export function extractToolResultsWithToolName(events: RunEvent[]): ToolResultWi
         out.push(base);
     }
     return out;
+}
+
+export function checkToolTelemetryAvailability(expected: Expected, resp: AgentResponse): AssertionResult {
+    const reasons: string[] = [];
+    if (hasNonEmptyList(expected.tool_required)) reasons.push("tool_required");
+    if (hasNonEmptyList(expected.tool_sequence)) reasons.push("tool_sequence");
+    if (expected.evidence_required_for_actions === true) reasons.push("evidence_required_for_actions");
+    if (hasNonEmptyList(expected.action_required)) reasons.push("action_required");
+    if (reasons.length === 0) {
+        return { name: "tool_telemetry", pass: true, details: { note: "not_required" } };
+    }
+
+    const events = asEvents(resp.events);
+    const calls = toolCalls(events);
+    const results = toolResults(events);
+    const pass = calls.length > 0 || results.length > 0;
+    return {
+        name: "tool_telemetry",
+        pass,
+        details: {
+            required_by: reasons,
+            tool_call_count: calls.length,
+            tool_result_count: results.length,
+            reason_code: pass ? undefined : "tool_telemetry_missing",
+        },
+    };
 }
 
 export function stringifyOutput(out: FinalOutput | undefined | null): string {
@@ -301,6 +331,9 @@ export function chooseRootCause(assertions: AssertionResult[], resp: AgentRespon
     const retrieval = assertions.find((a) => a.name === "retrieval_required");
     if (retrieval && retrieval.pass === false) return "missing_required_data";
 
+    const telemetry = assertions.find((a) => a.name === "tool_telemetry");
+    if (telemetry && telemetry.pass === false) return "missing_required_data";
+
     const wrongTool = ["action_required", "tool_required", "tool_sequence"].some((n) => {
         const a = assertions.find((x) => x.name === n);
         return a ? a.pass === false : false;
@@ -347,6 +380,7 @@ export function evaluateOne(c: Case, resp: AgentResponse, ajv: Ajv): EvaluationR
 
     const ev = resp.events ?? [];
     const calls = extractToolCallNames(ev);
+    assertions.push(checkToolTelemetryAvailability(exp, resp));
 
     if (exp.tool_required?.length) {
         const missing = exp.tool_required.filter((t) => !calls.includes(t));

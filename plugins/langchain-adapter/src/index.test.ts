@@ -28,10 +28,22 @@ describe("langchain-adapter", () => {
     });
   });
 
+  it("extracts tool traces from common LangChain tool_calls shape", () => {
+    const traces = __test__.extractLangChainToolTraces({
+      tool_calls: [
+        { id: "c1", name: "search", args: { query: "latency" } },
+      ],
+    });
+    expect(traces).toEqual([
+      { tool: "search", call_id: "c1", args: { query: "latency" }, status: "ok" },
+    ]);
+  });
+
   it("wraps runnable and maps user/context to input payload", async () => {
     const runnable = {
       invoke: async (input: Record<string, unknown>) => ({
         content: `Echo:${String(input.question)}:${String(input.context)}`,
+        tool_calls: [{ id: "c1", name: "search", args: { query: "agent qa" } }],
       }),
     };
 
@@ -40,6 +52,10 @@ describe("langchain-adapter", () => {
     expect(out.workflow_id).toBe("langchain_runnable_v1");
     expect(out.final_output.content_type).toBe("text");
     expect(out.final_output.content).toBe("Echo:hello:ctx");
+    expect(out.events?.some((e) => e.type === "tool_call")).toBe(true);
+    expect(out.events?.some((e) => e.type === "tool_result")).toBe(true);
+    expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
+    expect(out.proposed_actions?.[0]?.tool_name).toBe("search");
   });
 
   it("omits context from default mapped input when context is undefined", async () => {
@@ -52,6 +68,7 @@ describe("langchain-adapter", () => {
     const agent = wrapLangChainRunnable(runnable, { inputKey: "query", outputMode: "text" });
     const out = await agent({ user: "hello" });
     expect(out.final_output).toEqual({ content_type: "text", content: "ok" });
+    expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
   });
 
   it("supports custom mapInput/mapOutput and workflow id", async () => {

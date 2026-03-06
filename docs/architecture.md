@@ -75,6 +75,8 @@ Runner and evaluator support additional scenarios for production drift:
 - **Execution-quality gating**: evaluator emits `summary.execution_quality` (transport success + weak expected rate);
   CI can enforce non-zero exit with `--failOnExecutionDegraded` and thresholds:
   `AQ_MIN_TRANSPORT_SUCCESS_RATE`, `AQ_MAX_WEAK_EXPECTED_RATE`.
+- **Release-gate E2E in CI**: `scripts/e2e-policy-gate.mjs` verifies evaluator hard-gate behavior and
+  `scripts/e2e-soak-load.mjs` validates load/soak campaign stability + artifact integrity.
 - **Admissibility KPI (numeric)**: evaluator also emits
   `summary.execution_quality.admissibility_kpi` with:
   - `risk_mass_before`, `risk_mass_after`
@@ -146,6 +148,10 @@ Reference plugin adapters are shipped in-repo under `plugins/*`:
 They are optional and not required for the core pipeline to function.
 The local CLI adapter surfaces normalized failure causes (`timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`, `busy`)
 in `adapter_error.code` for fast root-cause triage.
+Telemetry normalization follows three levels:
+- **native**: adapter/plugin receives structured `events/proposed_actions` from agent runtime (highest fidelity).
+- **inferred**: CLI adapter infers extra tool calls from stdout traces (JSON line / `▸ tool ...`) when native telemetry is absent.
+- **wrapper**: deterministic fallback wrapper telemetry (`cli_agent_exec` tool_call/tool_result + final_output) is always emitted.
 It also applies a runtime timeout cap (`CLI_AGENT_TIMEOUT_CAP_MS`) and reports effective runtime settings via `/health`.
 To prevent long-running agent requests from being cut at Node's HTTP-server layer, the adapter configures
 server-side timeouts from CLI runtime budget (`CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS`, `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`,

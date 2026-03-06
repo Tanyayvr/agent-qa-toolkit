@@ -25,6 +25,8 @@
     "demo:robustness": "node scripts/demo.mjs --suite robustness",
     "demo:e2e": "node scripts/demo-e2e.mjs",
     "test:toolkit": "node scripts/toolkit-tests.mjs",
+    "e2e:policy-gate": "node scripts/e2e-policy-gate.mjs",
+    "e2e:soak-load": "node scripts/e2e-soak-load.mjs",
     "bundle:group": "node scripts/group-bundle.mjs",
     "bundle:group:verify": "node scripts/group-bundle-verify.mjs",
     "proof:otel": "node scripts/proof-otel-anchors.mjs",

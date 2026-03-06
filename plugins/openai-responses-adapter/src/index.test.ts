@@ -33,6 +33,27 @@ describe("openai-responses-adapter", () => {
     expect(__test__.extractTokenUsage({})).toBeUndefined();
   });
 
+  it("extracts tool telemetry from Responses function_call items", () => {
+    const telemetry = __test__.extractToolTelemetry({
+      output: [
+        {
+          type: "function_call",
+          call_id: "call_1",
+          name: "search_docs",
+          arguments: "{\"query\":\"latency\"}",
+        },
+        {
+          type: "function_call_output",
+          call_id: "call_1",
+          output: "{\"hits\":2}",
+        },
+      ],
+    });
+    expect(telemetry.events.some((e) => e.type === "tool_call")).toBe(true);
+    expect(telemetry.events.some((e) => e.type === "tool_result")).toBe(true);
+    expect(telemetry.proposed_actions[0]?.tool_name).toBe("search_docs");
+  });
+
   it("wraps client.responses.create and returns final_output + token_usage", async () => {
     const calls: Record<string, unknown>[] = [];
     const client = {
@@ -63,6 +84,7 @@ describe("openai-responses-adapter", () => {
     expect(out.workflow_id).toBe("openai_responses_v1");
     expect(out.final_output).toEqual({ content_type: "text", content: "response text" });
     expect(out.token_usage?.total_tokens).toBe(5);
+    expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
   });
 
   it("falls back to json final_output when text is unavailable", async () => {
@@ -75,6 +97,7 @@ describe("openai-responses-adapter", () => {
     const out = await agent({ user: "hello", context: { ignored: true } });
     expect(out.final_output.content_type).toBe("json");
     expect(out.token_usage).toBeUndefined();
+    expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
   });
 
   it("respects custom workflow id", async () => {

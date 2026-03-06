@@ -247,6 +247,38 @@ describe("cli-agent-adapter helpers", () => {
     const block = __test__.formatHandoffContext({ incident_id: "inc-1", agent_id: "executor" }, handoffs, 80);
     expect(block).toContain("...[truncated]");
   });
+
+  it("extractInferredToolCalls parses Goose-like tool traces from output", () => {
+    const calls = __test__.extractInferredToolCalls([
+      "some prefix",
+      "{\"name\":\"localhost_3001_mcp__register_agent\",\"arguments\":{\"team\":\"alpha\"}}",
+      "▸ list_agents localhost_3001_mcp",
+    ].join("\n"));
+    expect(calls).toEqual([
+      { tool: "register_agent", args: { team: "alpha" } },
+      { tool: "list_agents", args: { raw: "localhost_3001_mcp" } },
+    ]);
+  });
+
+  it("buildExecutionTelemetry always records adapter exec tool and final_output event", () => {
+    const telemetry = __test__.buildExecutionTelemetry({
+      caseId: "c1",
+      prompt: "hello",
+      finalOutputContent: "DONE",
+      outputContentType: "text",
+      startedAtMs: 100,
+      finishedAtMs: 130,
+      status: "ok",
+      execToolName: "cli_agent_exec",
+      cmd: "goose",
+      args: ["run"],
+      useStdin: false,
+    });
+    expect(telemetry.proposedActions[0]?.tool_name).toBe("cli_agent_exec");
+    expect(telemetry.events.some((e) => e.type === "tool_call")).toBe(true);
+    expect(telemetry.events.some((e) => e.type === "tool_result")).toBe(true);
+    expect(telemetry.events.some((e) => e.type === "final_output")).toBe(true);
+  });
 });
 
 describe("cli-agent-adapter app", () => {
@@ -402,6 +434,10 @@ describe("cli-agent-adapter app", () => {
       const output = (json.final_output as { content?: string } | undefined)?.content ?? "";
       expect(output).toContain("[runtime_handoff_context]");
       expect(output).toContain("\"handoff_id\":\"h-1\"");
+      const events = (json.events as Array<{ type?: string; tool?: string }> | undefined) ?? [];
+      expect(events.some((e) => e.type === "tool_call" && e.tool === "cli_agent_exec")).toBe(true);
+      expect(events.some((e) => e.type === "tool_result")).toBe(true);
+      expect(events.some((e) => e.type === "final_output")).toBe(true);
 
       const receipts = (json.handoff_receipts as Array<{ status?: string }> | undefined) ?? [];
       expect(receipts).toHaveLength(1);
@@ -426,6 +462,8 @@ describe("cli-agent-adapter app", () => {
         const json = (await response.json()) as Record<string, unknown>;
         const output = (json.final_output as { content?: string } | undefined)?.content ?? "";
         expect(output).toBe("stdin prompt");
+        const events = (json.events as Array<{ type?: string; tool?: string }> | undefined) ?? [];
+        expect(events.some((e) => e.type === "tool_call" && e.tool === "cli_agent_exec")).toBe(true);
       }
     );
   });
@@ -515,6 +553,8 @@ describe("cli-agent-adapter app", () => {
         expect(timeoutRes.status).toBe(500);
         const timeoutJson = (await timeoutRes.json()) as Record<string, unknown>;
         expect((timeoutJson.adapter_error as { code?: string } | undefined)?.code).toBe("timeout");
+        const timeoutEvents = (timeoutJson.events as Array<{ type?: string }> | undefined) ?? [];
+        expect(timeoutEvents.some((e) => e.type === "tool_result")).toBe(true);
       }
     );
 

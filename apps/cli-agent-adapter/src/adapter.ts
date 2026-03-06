@@ -4,7 +4,7 @@ import { accessSync, constants as fsConstants, readFileSync } from "node:fs";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import { stableStringify, normalizeRunMeta, validateAndNormalizeHandoffEnvelope } from "cli-utils";
 import { dirname, isAbsolute, resolve } from "node:path";
-import type { HandoffEnvelope, HandoffReceipt, RunMeta } from "shared-types";
+import type { HandoffEnvelope, HandoffReceipt, ProposedAction, RunEvent, RunMeta } from "shared-types";
 import { resolveServerTimeoutConfig } from "./serverConfig";
 
 type CliFailureReason = "timeout" | "spawn_error" | "non_zero_exit" | "aborted" | "invalid_config" | "busy";
@@ -46,6 +46,8 @@ const DEFAULT_HANDOFF_MAX_ITEMS = 20;
 const DEFAULT_HANDOFF_TTL_MS = 7 * 24 * 60 * 60 * 1_000;
 const DEFAULT_HANDOFF_MAX_ITEMS_TOTAL = 2_000;
 const DEFAULT_AUTH_HEADER = "authorization";
+const DEFAULT_EXEC_TOOL_NAME = "cli_agent_exec";
+const DEFAULT_INFERRED_TOOL_CALLS_MAX = 32;
 
 type AdapterAuthConfig = {
   enabled: boolean;
@@ -206,6 +208,190 @@ export function buildPrompt(input: { user?: string; context?: unknown } | undefi
   const ctx = input?.context;
   if (ctx === undefined) return user;
   return `${user}\n\nContext:\n${JSON.stringify(ctx, null, 2)}`;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
+function parseObjectJson(value: unknown): Record<string, unknown> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  if (typeof value !== "string") return {};
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return { value: parsed };
+  } catch {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return {};
+    return { raw: trimmed };
+  }
+}
+
+function normalizeToolName(raw: string): string {
+  const trimmed = raw.trim();
+  if (trimmed.includes("__")) {
+    const parts = trimmed.split("__");
+    const last = parts[parts.length - 1];
+    if (last && last.trim().length > 0) return last.trim();
+  }
+  return trimmed;
+}
+
+type InferredToolCall = {
+  tool: string;
+  args: Record<string, unknown>;
+};
+
+function extractInferredToolCalls(output: string, maxCalls = DEFAULT_INFERRED_TOOL_CALLS_MAX): InferredToolCall[] {
+  if (!output || output.trim().length === 0) return [];
+  const out: InferredToolCall[] = [];
+  const lines = output.split(/\r?\n/);
+  for (const rawLine of lines) {
+    if (out.length >= maxCalls) break;
+    const line = rawLine.trim();
+    if (line.length === 0) continue;
+
+    if (line.startsWith("{") && line.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(line);
+        const obj = asRecord(parsed);
+        const rawName = typeof obj?.name === "string" ? obj.name : null;
+        if (rawName && rawName.trim().length > 0) {
+          out.push({
+            tool: normalizeToolName(rawName),
+            args: parseObjectJson(obj?.arguments),
+          });
+          continue;
+        }
+      } catch {
+        // best-effort extraction; ignore malformed line
+      }
+    }
+
+    const bulletMatch = /^▸\s+([^\s]+)(?:\s+(.+))?$/u.exec(line);
+    if (bulletMatch && bulletMatch[1]) {
+      out.push({
+        tool: normalizeToolName(bulletMatch[1]),
+        args: bulletMatch[2] ? { raw: bulletMatch[2].trim() } : {},
+      });
+    }
+  }
+  return out;
+}
+
+type ExecutionTelemetryParams = {
+  caseId: string;
+  prompt: string;
+  finalOutputContent: unknown;
+  outputContentType: "text" | "json";
+  startedAtMs: number;
+  finishedAtMs: number;
+  status: "ok" | "error" | "timeout";
+  execToolName: string;
+  cmd: string;
+  args: string[];
+  useStdin: boolean;
+  cwd?: string;
+  statusMessage?: string;
+};
+
+function buildExecutionTelemetry(params: ExecutionTelemetryParams): { events: RunEvent[]; proposedActions: ProposedAction[] } {
+  const baseTs = Number.isFinite(params.startedAtMs) ? Math.max(0, Math.floor(params.startedAtMs)) : Date.now();
+  const endTs = Number.isFinite(params.finishedAtMs) ? Math.max(baseTs, Math.floor(params.finishedAtMs)) : baseTs;
+  const latencyMs = Math.max(0, endTs - baseTs);
+  const caseKey = params.caseId && params.caseId.trim().length > 0 ? params.caseId.trim() : "case";
+  const execCallId = `cli_exec_${caseKey}_${baseTs}`;
+
+  const events: RunEvent[] = [];
+  const proposedActions: ProposedAction[] = [];
+
+  const execArgs: Record<string, unknown> = {
+    prompt_chars: params.prompt.length,
+    prompt_hash_hint: params.prompt.slice(0, 32),
+    cmd: params.cmd,
+    argv: params.args,
+    use_stdin: params.useStdin,
+    ...(params.cwd ? { cwd: params.cwd } : {}),
+  };
+
+  events.push({
+    type: "tool_call",
+    ts: baseTs,
+    call_id: execCallId,
+    action_id: execCallId,
+    tool: params.execToolName,
+    args: execArgs,
+  });
+  events.push({
+    type: "tool_result",
+    ts: endTs,
+    call_id: execCallId,
+    action_id: execCallId,
+    status: params.status,
+    latency_ms: latencyMs,
+    payload_summary: {
+      ...(params.statusMessage ? { message: params.statusMessage } : {}),
+      output_preview: String(params.finalOutputContent ?? "").slice(0, 240),
+    },
+  });
+  proposedActions.push({
+    action_id: execCallId,
+    action_type: "tool_call",
+    tool_name: params.execToolName,
+    params: execArgs,
+    risk_level: "low",
+    evidence_refs: [{ kind: "tool_result", call_id: execCallId }],
+  });
+
+  const inferred = extractInferredToolCalls(String(params.finalOutputContent ?? ""));
+  const inferredStatus: "ok" | "error" | "timeout" = params.status === "ok" ? "ok" : "error";
+  for (let idx = 0; idx < inferred.length; idx += 1) {
+    const ts = Math.min(endTs, baseTs + idx + 1);
+    const callId = `${execCallId}_tool_${idx + 1}`;
+    const item = inferred[idx];
+    if (!item) continue;
+    events.push({
+      type: "tool_call",
+      ts,
+      call_id: callId,
+      action_id: callId,
+      tool: item.tool,
+      args: item.args,
+    });
+    events.push({
+      type: "tool_result",
+      ts: Math.min(endTs, ts + 1),
+      call_id: callId,
+      action_id: callId,
+      status: inferredStatus,
+      payload_summary: {
+        inferred_from_output: true,
+      },
+    });
+    proposedActions.push({
+      action_id: callId,
+      action_type: "tool_call",
+      tool_name: item.tool,
+      params: item.args,
+      risk_level: "low",
+      evidence_refs: [{ kind: "tool_result", call_id: callId }],
+    });
+  }
+
+  events.push({
+    type: "final_output",
+    ts: Math.max(endTs, baseTs + inferred.length + 1),
+    content_type: params.outputContentType,
+    content: params.finalOutputContent,
+  });
+
+  return { events, proposedActions };
 }
 
 function formatHandoffContext(
@@ -696,6 +882,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
   const useStdin = boolEnv(env, "CLI_AGENT_USE_STDIN", false);
   const maxConcurrency = intEnv(env, "CLI_AGENT_MAX_CONCURRENCY", DEFAULT_MAX_CONCURRENCY);
   const busyRetryAfterMs = intEnv(env, "CLI_AGENT_BUSY_RETRY_AFTER_MS", DEFAULT_BUSY_RETRY_AFTER_MS);
+  const execToolName = env.CLI_AGENT_EXEC_TOOL_NAME?.trim() || DEFAULT_EXEC_TOOL_NAME;
   const includeHandoffContext = boolEnv(env, "CLI_AGENT_INCLUDE_HANDOFF_CONTEXT", true);
   const handoffContextMaxChars = intEnv(env, "CLI_AGENT_HANDOFF_CONTEXT_MAX_CHARS", DEFAULT_HANDOFF_CONTEXT_MAX_CHARS);
   const handoffMaxItems = intEnv(env, "CLI_AGENT_HANDOFF_MAX_ITEMS", DEFAULT_HANDOFF_MAX_ITEMS);
@@ -739,6 +926,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
         kill_grace_ms: killGraceMs,
         stderr_snippet_chars: stderrSnippetChars,
         use_stdin: useStdin,
+        exec_tool_name: execToolName,
         busy_retry_after_ms: busyRetryAfterMs,
         include_handoff_context: includeHandoffContext,
         handoff_context_max_chars: handoffContextMaxChars,
@@ -898,31 +1086,76 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
     }
 
     activeCliProcesses += 1;
+    const startedAtMs = Date.now();
     try {
       const result = await runCliAgent(prompt, env, requestAbort.signal);
+      const finishedAtMs = Date.now();
       const output = (result.stdout || result.stderr || "").trim();
+      const executable = getExecutable(env);
+      const telemetry = buildExecutionTelemetry({
+        caseId,
+        prompt,
+        finalOutputContent: output,
+        outputContentType: "text",
+        startedAtMs,
+        finishedAtMs,
+        status: "ok",
+        execToolName,
+        cmd: executable.cmd,
+        args: executable.args,
+        useStdin: executable.useStdin,
+        ...(executable.cwd ? { cwd: executable.cwd } : {}),
+      });
 
       res.json({
         case_id: caseId,
         version,
         workflow_id: "cli_agent_v1",
-        proposed_actions: [],
+        proposed_actions: telemetry.proposedActions,
         final_output: { content_type: "text", content: output },
-        events: [],
+        events: telemetry.events,
         ...(runMeta ? { run_meta: runMeta } : {}),
         ...(handoffReceipts.length > 0 ? { handoff_receipts: handoffReceipts } : {}),
       });
     } catch (err) {
       if (requestAbort.signal.aborted) return;
+      const finishedAtMs = Date.now();
       const adapterError = createCliErrorPayload(err, stderrSnippetChars);
       const output = `[adapter:${adapterError.code}] ${adapterError.message}${adapterError.stderr_snippet ? ` | stderr: ${adapterError.stderr_snippet}` : ""}`;
+      let executable: { cmd: string; args: string[]; useStdin: boolean; cwd?: string };
+      try {
+        executable = getExecutable(env);
+      } catch {
+        executable = {
+          cmd: env.CLI_AGENT_CMD ?? "unknown",
+          args: parseArgs(env.CLI_AGENT_ARGS),
+          useStdin,
+          ...(env.CLI_AGENT_WORKDIR ? { cwd: env.CLI_AGENT_WORKDIR } : {}),
+        };
+      }
+      const errorStatus: "error" | "timeout" = adapterError.code === "timeout" ? "timeout" : "error";
+      const telemetry = buildExecutionTelemetry({
+        caseId,
+        prompt,
+        finalOutputContent: output,
+        outputContentType: "text",
+        startedAtMs,
+        finishedAtMs,
+        status: errorStatus,
+        execToolName,
+        cmd: executable.cmd,
+        args: executable.args,
+        useStdin: executable.useStdin,
+        ...(executable.cwd ? { cwd: executable.cwd } : {}),
+        statusMessage: adapterError.message,
+      });
       res.status(500).json({
         case_id: caseId,
         version,
         workflow_id: "cli_agent_v1",
-        proposed_actions: [],
+        proposed_actions: telemetry.proposedActions,
         final_output: { content_type: "text", content: output },
-        events: [],
+        events: telemetry.events,
         ...(runMeta ? { run_meta: runMeta } : {}),
         ...(handoffReceipts.length > 0 ? { handoff_receipts: handoffReceipts } : {}),
         adapter_error: adapterError,
@@ -950,4 +1183,6 @@ export const __test__ = {
   loadHandoffStoreFromFile,
   persistHandoffStoreToFile,
   getIncidentHandoffs,
+  extractInferredToolCalls,
+  buildExecutionTelemetry,
 };

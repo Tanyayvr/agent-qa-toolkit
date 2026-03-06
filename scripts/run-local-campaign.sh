@@ -32,11 +32,13 @@ RUNTIME_HANDOFF_MODE="${RUNTIME_HANDOFF_MODE:-endpoint}"
 RUNCASE_TIMEOUT_MS="${RUNCASE_TIMEOUT_MS:-30000}"
 ENFORCE_CASE_QUALITY="${ENFORCE_CASE_QUALITY:-1}"
 CASE_QUALITY_MAX_WEAK_EXPECTED_RATE="${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE:-0.2}"
+CASE_QUALITY_REQUIRE_TOOL_EVIDENCE="${CASE_QUALITY_REQUIRE_TOOL_EVIDENCE:-1}"
 ALLOW_EXISTING_RUN_PREFIX="${ALLOW_EXISTING_RUN_PREFIX:-0}"
 LIBRARY_INGEST="${LIBRARY_INGEST:-0}"
 LIBRARY_DIR="${LIBRARY_DIR:-.agent-qa/library}"
 LIBRARY_AGENT_ID="${LIBRARY_AGENT_ID:-}"
 LIBRARY_SOURCE="${LIBRARY_SOURCE:-local-campaign}"
+EVAL_FAIL_ON_EXECUTION_DEGRADED="${EVAL_FAIL_ON_EXECUTION_DEGRADED:-0}"
 
 RUN_BASE="${RUN_PREFIX}_base"
 RUN_NEW2="${RUN_PREFIX}_new2"
@@ -91,12 +93,17 @@ run_eval() {
   local report_id="$1"
   local new_run="$2"
   local report_dir="${REPORTS_DIR}/${report_id}"
-  npm --workspace evaluator run dev -- \
-    --cases "${CASES}" \
-    --baselineDir "${OUT_DIR}/baseline/${RUN_BASE}" \
-    --newDir "${OUT_DIR}/new/${new_run}" \
-    --outDir "${report_dir}" \
+  local args=(
+    --cases "${CASES}"
+    --baselineDir "${OUT_DIR}/baseline/${RUN_BASE}"
+    --newDir "${OUT_DIR}/new/${new_run}"
+    --outDir "${report_dir}"
     --reportId "${report_id}"
+  )
+  if [[ "${EVAL_FAIL_ON_EXECUTION_DEGRADED}" == "1" ]]; then
+    args+=(--failOnExecutionDegraded)
+  fi
+  npm --workspace evaluator run dev -- "${args[@]}"
 }
 
 ingest_library() {
@@ -144,7 +151,8 @@ check_cases_quality() {
   node scripts/validate-cases-quality.mjs \
     --cases "${CASES}" \
     --profile "${CAMPAIGN_PROFILE}" \
-    --maxWeakExpectedRate "${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE}"
+    --maxWeakExpectedRate "${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE}" \
+    --requireToolEvidence "${CASE_QUALITY_REQUIRE_TOOL_EVIDENCE}"
 }
 
 check_fresh_targets() {
@@ -186,6 +194,9 @@ echo "Runner timeout profile: ${TIMEOUT_PROFILE} (timeoutMs=${TIMEOUT_MS}, cap=$
 echo "Campaign profile: suite=${AGENT_SUITE}, profile=${CAMPAIGN_PROFILE}, cases=${CASES}"
 if [[ "${LIBRARY_INGEST}" == "1" ]]; then
   echo "Library ingest: enabled (dir=${LIBRARY_DIR}, agentId=${LIBRARY_AGENT_ID:-none}, source=${LIBRARY_SOURCE})"
+fi
+if [[ "${EVAL_FAIL_ON_EXECUTION_DEGRADED}" == "1" ]]; then
+  echo "Execution quality gate: enabled (--failOnExecutionDegraded)"
 fi
 if [[ "${RETRIES}" == "0" ]]; then
   echo "WARNING: RETRIES=0 disables transient transport recovery retries and can turn short adapter blips into failed runs."

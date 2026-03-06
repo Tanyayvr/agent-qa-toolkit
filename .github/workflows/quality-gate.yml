@@ -25,3 +25,9 @@ jobs:
 
       - name: Full Quality Gate
         run: npm run quality:gate
+
+      - name: Policy Gate E2E
+        run: npm run e2e:policy-gate
+
+      - name: Soak/Load E2E (CI)
+        run: npm run e2e:soak-load -- --ci
