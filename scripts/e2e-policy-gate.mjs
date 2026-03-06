@@ -103,6 +103,33 @@ async function main() {
     const report = JSON.parse(await readFile(path.join(healthyOut, "compare-report.json"), "utf-8"));
     assert(report?.summary?.execution_quality?.status === "healthy", "healthy gate run must produce execution_quality=healthy");
 
+    const kpiGateOut = path.join(root, "reports", "kpi-gate");
+    const kpiDegraded = await run("npm", [
+      "--workspace",
+      "evaluator",
+      "run",
+      "dev",
+      "--",
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--outDir",
+      kpiGateOut,
+      "--reportId",
+      "policy-gate-kpi",
+      "--failOnExecutionDegraded",
+      "--no-trend",
+    ], {
+      env: {
+        ...process.env,
+        AQ_MIN_PRE_ACTION_ENTROPY_REMOVED: "0.1",
+      },
+    });
+    assert(kpiDegraded.code !== 0, "expected KPI threshold gate to fail when pre-action entropy removed is below threshold");
+
     console.log("e2e-policy-gate: PASS");
   } finally {
     await rm(root, { recursive: true, force: true });

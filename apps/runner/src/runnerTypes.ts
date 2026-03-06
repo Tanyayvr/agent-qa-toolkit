@@ -32,6 +32,8 @@ export type RunnerConfig = {
   timeoutProfile: "off" | "auto";
   timeoutAutoCapMs: number;
   timeoutAutoLookbackRuns: number;
+  timeoutAutoMinSuccessSamples: number;
+  timeoutAutoMaxIncreaseFactor: number;
   retries: number;
   backoffBaseMs: number;
   concurrency: number;
@@ -54,7 +56,13 @@ export type TimeoutAutoResolution = {
   base_timeout_ms: number;
   selected_case_count: number;
   history_sample_count: number;
+  history_success_sample_count?: number;
+  history_failure_sample_count?: number;
+  history_candidate_raw_timeout_ms?: number;
   history_candidate_timeout_ms?: number;
+  history_candidate_ignored_reason?: "failure_only_history" | "insufficient_success_samples";
+  history_candidate_growth_cap_ms?: number;
+  clamped_by_growth?: boolean;
   adapter_timeout_ms?: number;
   adapter_candidate_timeout_ms?: number;
   server_request_timeout_ms?: number;

@@ -13,17 +13,21 @@ export function percentile(values: number[], q: number): number | undefined {
   return sorted[pos];
 }
 
-export function summarizeHistoryCandidate(successLatencies: number[], failureLatencies: number[]): number | undefined {
+export const DEFAULT_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES = 3;
+
+export function summarizeHistoryCandidate(
+  successLatencies: number[],
+  _failureLatencies: number[],
+  options: { minSuccessSamples?: number } = {}
+): number | undefined {
+  const minSuccessSamples = Math.max(
+    1,
+    Math.floor(options.minSuccessSamples ?? DEFAULT_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES)
+  );
   const p95Success = percentile(successLatencies, 0.95);
-  if (typeof p95Success === "number") {
+  if (typeof p95Success === "number" && successLatencies.length >= minSuccessSamples) {
     // Keep headroom for model variance + command execution jitter.
     return Math.ceil(p95Success * 1.4 + 30_000);
-  }
-
-  const p95Failure = percentile(failureLatencies, 0.95);
-  if (typeof p95Failure === "number") {
-    // Fall back to failed-attempt latencies when no successful samples exist yet.
-    return Math.ceil(p95Failure * 1.25 + 30_000);
   }
 
   return undefined;

@@ -142,8 +142,31 @@ export async function resolveTimeoutProfileAuto(params: {
     cfg.timeoutAutoLookbackRuns,
     cfg.runId
   );
-  const historySampleCount = history.successLatenciesMs.length + history.failureLatenciesMs.length;
-  const historyCandidate = summarizeHistoryCandidate(history.successLatenciesMs, history.failureLatenciesMs);
+  const historySuccessSampleCount = history.successLatenciesMs.length;
+  const historyFailureSampleCount = history.failureLatenciesMs.length;
+  const historySampleCount = historySuccessSampleCount + historyFailureSampleCount;
+  const historyCandidateRaw = summarizeHistoryCandidate(history.successLatenciesMs, history.failureLatenciesMs, {
+    minSuccessSamples: cfg.timeoutAutoMinSuccessSamples,
+  });
+  const historyGrowthCapMs = Math.max(
+    baseTimeoutMs,
+    Math.ceil(baseTimeoutMs * cfg.timeoutAutoMaxIncreaseFactor)
+  );
+  let historyCandidate = historyCandidateRaw;
+  const clampedByGrowth =
+    typeof historyCandidateRaw === "number" && historyCandidateRaw > historyGrowthCapMs;
+  if (typeof historyCandidateRaw === "number") {
+    historyCandidate = Math.min(historyCandidateRaw, historyGrowthCapMs);
+  }
+  let historyCandidateIgnoredReason: "failure_only_history" | "insufficient_success_samples" | undefined;
+  if (historySuccessSampleCount === 0 && historyFailureSampleCount > 0) {
+    historyCandidateIgnoredReason = "failure_only_history";
+  } else if (
+    historySuccessSampleCount > 0 &&
+    historySuccessSampleCount < cfg.timeoutAutoMinSuccessSamples
+  ) {
+    historyCandidateIgnoredReason = "insufficient_success_samples";
+  }
 
   const runtimeHints = await readAdapterRuntimeHints(
     cfg.baseUrl,
@@ -183,7 +206,15 @@ export async function resolveTimeoutProfileAuto(params: {
     base_timeout_ms: baseTimeoutMs,
     selected_case_count: selectedCaseIds.length,
     history_sample_count: historySampleCount,
+    history_success_sample_count: historySuccessSampleCount,
+    history_failure_sample_count: historyFailureSampleCount,
+    ...(typeof historyCandidateRaw === "number" ? { history_candidate_raw_timeout_ms: historyCandidateRaw } : {}),
     ...(typeof historyCandidate === "number" ? { history_candidate_timeout_ms: historyCandidate } : {}),
+    ...(typeof historyCandidateIgnoredReason === "string"
+      ? { history_candidate_ignored_reason: historyCandidateIgnoredReason }
+      : {}),
+    ...(typeof historyCandidateRaw === "number" ? { history_candidate_growth_cap_ms: historyGrowthCapMs } : {}),
+    ...(typeof historyCandidateRaw === "number" ? { clamped_by_growth: clampedByGrowth } : {}),
     ...(typeof adapterTimeoutMs === "number" ? { adapter_timeout_ms: adapterTimeoutMs } : {}),
     ...(typeof adapterCandidate === "number" ? { adapter_candidate_timeout_ms: adapterCandidate } : {}),
     ...(typeof serverRequestTimeoutMs === "number" ? { server_request_timeout_ms: serverRequestTimeoutMs } : {}),

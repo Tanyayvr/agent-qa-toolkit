@@ -61,6 +61,7 @@ import { ExecutionQualityGateError } from "./evaluatorErrors";
 
 import {
   computeExecutionQuality,
+  parseNonNegativeThreshold,
   parseRateThreshold,
   type ExecutionQualitySummary,
 } from "./executionQuality";
@@ -116,6 +117,11 @@ export async function runEvaluator(): Promise<void> {
   const projectRoot = process.env.INIT_CWD ?? process.cwd();
   const minTransportSuccessRate = parseRateThreshold(process.env.AQ_MIN_TRANSPORT_SUCCESS_RATE, 0.95);
   const maxWeakExpectedRate = parseRateThreshold(process.env.AQ_MAX_WEAK_EXPECTED_RATE, 0.2);
+  const minPreActionEntropyRemoved = parseRateThreshold(process.env.AQ_MIN_PRE_ACTION_ENTROPY_REMOVED, 0);
+  const minReconstructionMinutesSavedPerBlock = parseNonNegativeThreshold(
+    process.env.AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK,
+    0
+  );
 
   let interruptedBy: { signal: "SIGINT" | "SIGTERM"; at: number } | null = null;
   const interruptController = new AbortController();
@@ -278,6 +284,10 @@ export async function runEvaluator(): Promise<void> {
     out_dir: normRel(projectRoot, reportDirAbs),
     transfer_class: transferClass,
     fail_on_execution_degraded: failOnExecutionDegraded,
+    min_transport_success_rate: minTransportSuccessRate,
+    max_weak_expected_rate: maxWeakExpectedRate,
+    min_pre_action_entropy_removed: minPreActionEntropyRemoved,
+    min_recon_minutes_saved_per_block: minReconstructionMinutesSavedPerBlock,
     warn_body_bytes: warnBodyBytes,
     retention_days: retentionDays,
   });
@@ -289,6 +299,10 @@ export async function runEvaluator(): Promise<void> {
     out_dir: normRel(projectRoot, reportDirAbs),
     transfer_class: transferClass,
     fail_on_execution_degraded: failOnExecutionDegraded,
+    min_transport_success_rate: minTransportSuccessRate,
+    max_weak_expected_rate: maxWeakExpectedRate,
+    min_pre_action_entropy_removed: minPreActionEntropyRemoved,
+    min_recon_minutes_saved_per_block: minReconstructionMinutesSavedPerBlock,
     max_case_bytes: maxCaseBytes,
     max_meta_bytes: maxMetaBytes,
   });
@@ -865,6 +879,8 @@ export async function runEvaluator(): Promise<void> {
     expectedById,
     minTransportSuccessRate,
     maxWeakExpectedRate,
+    minPreActionEntropyRemoved,
+    minReconstructionMinutesSavedPerBlock,
     ...(interruptedBy ? { interruptedBySignal: interruptedBy.signal } : {}),
   });
   if (getFlag("--strictPortability") && !quality_flags.portable_paths) {

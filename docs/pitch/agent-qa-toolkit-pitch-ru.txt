@@ -19,6 +19,12 @@ Portable Evidence Packs для tool-using AI агентов
 - НОВОЕ: data-driven timeout onboarding profile (калибровка -> валидация -> прод) для медленных внешних агентов
 - НОВОЕ: уровни нормализации телеметрии (native -> inferred из stdout -> wrapper fallback), чтобы не было "тихих" прогонов без trace
 - НОВОЕ: release-gate E2E в CI (policy-gate + soak/load проверка стабильности)
+- СДЕЛАНО: runtime policy hardening (enforcement `planning_gate`/`repl_policy` в адаптере + детерминированные проверки в evaluator)
+- СДЕЛАНО: quality-профиль требует сильную tool-телеметрию (`native|inferred`); wrapper-only считается недостаточным доказательством
+- СДЕЛАНО: semantic quality проверки для текстовых задач (`required/forbidden concepts` + калиброванные profile/thresholds + custom synonyms)
+- СДЕЛАНО: release gate кампаний включен по умолчанию и поддерживает KPI-пороги (`pre-action entropy removed`, `reconstruction min saved/block`)
+- СДЕЛАНО: guardrails для auto-timeout (обучение только на успешных сэмплах, минимальный порог успехов, ограничение роста относительно базового timeout)
+- СДЕЛАНО: campaign-прогоны по умолчанию попадают в локальную evidence-библиотеку (можно отключить флагом)
 
 Как работает
 - Runner запускает кейсы

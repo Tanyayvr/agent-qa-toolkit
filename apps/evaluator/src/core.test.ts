@@ -10,6 +10,7 @@ import {
     checkToolExecution,
     checkHallucinationSignal,
     checkToolTelemetryAvailability,
+    checkSemanticQuality,
     checkPlanningGate,
     checkReplPolicy,
     toolCalls,
@@ -284,6 +285,98 @@ describe("tool telemetry assertion", () => {
             reason_code: "tool_telemetry_missing",
         });
     });
+
+    it("fails when non-wrapper telemetry is required but only wrapper calls are present", () => {
+        const res = checkToolTelemetryAvailability(
+            { tool_telemetry: { require_non_wrapper_calls: true, allowed_modes: ["native", "inferred"] } },
+            mkResp({
+                telemetry_mode: "wrapper_only",
+                events: [
+                    {
+                        type: "tool_call",
+                        ts: 1,
+                        call_id: "c1",
+                        tool: "cli_agent_exec",
+                        args: { _telemetry_source: "wrapper" },
+                    },
+                    { type: "tool_result", ts: 2, call_id: "c1", status: "ok" },
+                ],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            reason_code: "wrapper_only_telemetry",
+            telemetry_mode: "wrapper_only",
+            non_wrapper_tool_call_count: 0,
+        });
+    });
+});
+
+describe("semantic quality assertion", () => {
+    it("passes when semantic assertion is not required", () => {
+        const res = checkSemanticQuality({}, mkResp({ final_output: { content_type: "text", content: "hello" } }));
+        expect(res.pass).toBe(true);
+        expect(res.details).toMatchObject({ note: "not_required" });
+    });
+
+    it("passes required concepts via semantic normalization", () => {
+        const res = checkSemanticQuality(
+            {
+                semantic: {
+                    required_concepts: [["self-hosted"], ["evidence"]],
+                },
+            },
+            mkResp({ final_output: { content_type: "text", content: "This is self hosted with trace proof." } })
+        );
+        expect(res.pass).toBe(true);
+    });
+
+    it("fails when semantic reference similarity is below threshold", () => {
+        const res = checkSemanticQuality(
+            {
+                semantic: {
+                    reference_texts: ["agent runs offline with evidence pack"],
+                    min_token_f1: 0.8,
+                    min_lcs_ratio: 0.8,
+                },
+            },
+            mkResp({ final_output: { content_type: "text", content: "unrelated response" } })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({ reason_code: "semantic_token_f1_below_threshold" });
+    });
+
+    it("passes semantic concept via custom multi-token synonym mapping", () => {
+        const res = checkSemanticQuality(
+            {
+                semantic: {
+                    required_concepts: [["offline"]],
+                    synonyms: { offline: ["self hosted"] },
+                },
+            },
+            mkResp({ final_output: { content_type: "text", content: "This agent is self hosted." } })
+        );
+        expect(res.pass).toBe(true);
+    });
+
+    it("uses strict semantic profile defaults for reference similarity", () => {
+        const res = checkSemanticQuality(
+            {
+                semantic: {
+                    reference_texts: ["offline evidence pack with manifest"],
+                    profile: "strict",
+                },
+            },
+            mkResp({ final_output: { content_type: "text", content: "offline pack" } })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            reason_code: "semantic_token_f1_below_threshold",
+            semantic_profile: "strict",
+            min_token_f1: 0.7,
+            min_lcs_ratio: 0.45,
+        });
+    });
 });
 
 describe("planning gate assertion", () => {
@@ -313,6 +406,27 @@ describe("planning gate assertion", () => {
         expect(res.pass).toBe(false);
         expect(res.details).toMatchObject({ reason_code: "tool_outside_plan", mismatch_tools: ["run_shell"] });
     });
+
+    it("fails from adapter policy violations when runtime enforcement blocked execution", () => {
+        const res = checkPlanningGate(
+            { planning_gate: { required_for_mutations: true } },
+            mkResp({
+                policy_violations: [
+                    {
+                        scope: "planning_gate",
+                        severity: "require_approval",
+                        code: "telemetry_untrusted",
+                        message: "Only wrapper telemetry is available",
+                    },
+                ],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            reason_code: "telemetry_untrusted",
+            source: "adapter_runtime_policy",
+        });
+    });
 });
 
 describe("repl policy assertion", () => {
@@ -337,6 +451,39 @@ describe("repl policy assertion", () => {
             })
         );
         expect(res.pass).toBe(true);
+    });
+
+    it("fails when command path is outside allowed prefixes", () => {
+        const res = checkReplPolicy(
+            { repl_policy: { tool_allowlist: ["run_shell"], allowed_path_prefixes: ["/tmp/"] } },
+            mkResp({
+                events: [{ type: "tool_call", ts: 1, call_id: "c1", tool: "run_shell", args: { cmd: "cat /etc/passwd" } }],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({ reason_code: "repl_policy_violation", high_risk_violation: true });
+    });
+
+    it("fails from adapter policy violations when runtime enforcement blocks repl", () => {
+        const res = checkReplPolicy(
+            { repl_policy: { tool_allowlist: ["run_shell"] } },
+            mkResp({
+                policy_violations: [
+                    {
+                        scope: "repl_policy",
+                        severity: "block",
+                        code: "path_outside_allowlist",
+                        message: "Path is outside allowlist",
+                    },
+                ],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            reason_code: "path_outside_allowlist",
+            source: "adapter_runtime_policy",
+            high_risk_violation: true,
+        });
     });
 });
 

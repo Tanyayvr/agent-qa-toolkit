@@ -11,7 +11,24 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "forbidden_concepts": [
+          [
+            "speling"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -31,7 +48,32 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "Hello"
+          ],
+          [
+            "review"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "i shipped"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -51,7 +93,32 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "were"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "we was"
+          ],
+          [
+            "logs was"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -72,7 +139,35 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "summary"
+          ],
+          [
+            "owner"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "faild"
+          ],
+          [
+            "platfrom"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -93,7 +188,35 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "incident update"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "users is"
+          ],
+          [
+            "cause are"
+          ],
+          [
+            "minuts"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -112,7 +235,29 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "recovered"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "recoverd"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -132,7 +277,32 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "don't"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "DONT"
+          ],
+          [
+            "weve"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -153,7 +323,35 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "ready for deployment"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "speling"
+          ],
+          [
+            "faild"
+          ],
+          [
+            "platfrom"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -173,7 +371,32 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "cache invalidation"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "corect"
+          ],
+          [
+            "improvments"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   },
@@ -193,7 +416,32 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "cache invalidation"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "corect"
+          ],
+          [
+            "improvments"
+          ]
+        ]
+      }
     },
     "suite": "agent_cli_autocorrect"
   }

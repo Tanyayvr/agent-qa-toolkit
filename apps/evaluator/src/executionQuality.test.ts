@@ -3,6 +3,7 @@ import type { CompareReport } from "./htmlReport";
 import {
   computeExecutionQuality,
   isWeakExpected,
+  parseNonNegativeThreshold,
   parseRateThreshold,
 } from "./executionQuality";
 
@@ -52,6 +53,8 @@ describe("executionQuality", () => {
       expectedById,
       minTransportSuccessRate: 0.95,
       maxWeakExpectedRate: 0.2,
+      minPreActionEntropyRemoved: 0,
+      minReconstructionMinutesSavedPerBlock: 0,
     });
 
     expect(q.status).toBe("healthy");
@@ -85,6 +88,8 @@ describe("executionQuality", () => {
       expectedById,
       minTransportSuccessRate: 0.95,
       maxWeakExpectedRate: 0.2,
+      minPreActionEntropyRemoved: 0,
+      minReconstructionMinutesSavedPerBlock: 0,
       interruptedBySignal: "SIGINT",
     });
 
@@ -107,8 +112,28 @@ describe("executionQuality", () => {
     expect(parseRateThreshold("1.2", 0.9)).toBe(1);
     expect(parseRateThreshold("-2", 0.9)).toBe(0);
     expect(parseRateThreshold("bad", 0.9)).toBe(0.9);
+    expect(parseNonNegativeThreshold("-5", 1)).toBe(0);
+    expect(parseNonNegativeThreshold("bad", 1)).toBe(1);
 
     expect(isWeakExpected({})).toBe(true);
     expect(isWeakExpected({ tool_sequence: ["a", "b"] })).toBe(false);
+  });
+
+  it("marks degraded when KPI thresholds are configured and missed", () => {
+    const items = [mkItem({ case_id: "c1", gate_recommendation: "none", risk_level: "low" })];
+    const expectedById = new Map([["c1", { must_include: ["ok"] }]]);
+
+    const q = computeExecutionQuality({
+      items,
+      expectedById,
+      minTransportSuccessRate: 0.95,
+      maxWeakExpectedRate: 0.2,
+      minPreActionEntropyRemoved: 0.1,
+      minReconstructionMinutesSavedPerBlock: 0,
+    });
+
+    expect(q.status).toBe("degraded");
+    expect(q.reasons.some((r) => r.includes("pre-action entropy removed"))).toBe(true);
+    expect(q.thresholds.min_pre_action_entropy_removed).toBe(0.1);
   });
 });

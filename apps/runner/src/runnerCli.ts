@@ -12,7 +12,7 @@ export const RUNNER_HELP_TEXT = `
 Usage:
   runner [--repoRoot <path>] [--baseUrl <url>] [--cases <path>] [--outDir <dir>] [--runId <id>] [--incidentId <id>] [--agentId <id>] [--only <ids>] [--dryRun]
          [--timeoutMs <ms>] [--retries <n>] [--backoffBaseMs <ms>] [--concurrency <n>]
-         [--timeoutProfile <off|auto>] [--timeoutAutoCapMs <ms>] [--timeoutAutoLookbackRuns <n>]
+         [--timeoutProfile <off|auto>] [--timeoutAutoCapMs <ms>] [--timeoutAutoLookbackRuns <n>] [--timeoutAutoMinSuccessSamples <n>] [--timeoutAutoMaxIncreaseFactor <n>]
          [--inactivityTimeoutMs <ms>] [--heartbeatIntervalMs <ms>]
          [--preflightMode <off|warn|strict>] [--preflightTimeoutMs <ms>]
          [--failFastTransportStreak <n>]
@@ -35,6 +35,10 @@ Reliability (benchmark mode; defaults are conservative):
   --timeoutProfile          Timeout strategy: off | auto (default: off)
   --timeoutAutoCapMs        Max timeout when --timeoutProfile=auto (default: 3600000)
   --timeoutAutoLookbackRuns Number of previous run dirs to sample in auto profile (default: 12)
+  --timeoutAutoMinSuccessSamples
+                            Min successful historical samples required before using auto-learned timeout (default: 3)
+  --timeoutAutoMaxIncreaseFactor
+                            Max growth factor for history-derived timeout vs base --timeoutMs (default: 3)
   --retries                 Retries per request (default: 2)
   --backoffBaseMs           Base backoff in ms (default: 250)
   --concurrency             Max concurrent cases (default: 1)
@@ -161,6 +165,12 @@ function normalizeReplRuntimePolicy(candidate: unknown): ReplRuntimePolicy | und
   const denied = normalizeStringArray(candidate.denied_command_patterns);
   if (denied) policy.denied_command_patterns = denied;
 
+  const deniedPaths = normalizeStringArray(candidate.denied_path_patterns);
+  if (deniedPaths) policy.denied_path_patterns = deniedPaths;
+
+  const allowedPathPrefixes = normalizeStringArray(candidate.allowed_path_prefixes);
+  if (allowedPathPrefixes) policy.allowed_path_prefixes = allowedPathPrefixes;
+
   if (candidate.max_command_length !== undefined) {
     const num = Number(candidate.max_command_length);
     if (!Number.isFinite(num) || num < 1) {
@@ -169,7 +179,22 @@ function normalizeReplRuntimePolicy(candidate: unknown): ReplRuntimePolicy | und
     policy.max_command_length = Math.floor(num);
   }
 
-  if (!policy.tool_allowlist && !policy.denied_command_patterns && policy.max_command_length === undefined) {
+  if (candidate.max_tool_calls !== undefined) {
+    const num = Number(candidate.max_tool_calls);
+    if (!Number.isFinite(num) || num < 1) {
+      throw new Error("repl_policy.max_tool_calls must be a positive number");
+    }
+    policy.max_tool_calls = Math.floor(num);
+  }
+
+  if (
+    !policy.tool_allowlist &&
+    !policy.denied_command_patterns &&
+    !policy.denied_path_patterns &&
+    !policy.allowed_path_prefixes &&
+    policy.max_command_length === undefined &&
+    policy.max_tool_calls === undefined
+  ) {
     return undefined;
   }
   return policy;

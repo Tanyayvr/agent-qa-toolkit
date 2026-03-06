@@ -154,12 +154,14 @@ export type CompareReport = {
       broken_new_artifacts: number;
     };
 
-    execution_quality?: {
+    execution_quality: {
       status: "healthy" | "degraded";
       reasons: string[];
       thresholds: {
         min_transport_success_rate: number;
         max_weak_expected_rate: number;
+        min_pre_action_entropy_removed: number;
+        min_reconstruction_minutes_saved_per_block: number;
       };
       total_executed_cases: number;
       baseline_runner_failures: number;

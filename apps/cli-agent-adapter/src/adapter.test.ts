@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { chmodSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -254,10 +254,24 @@ describe("cli-agent-adapter helpers", () => {
       "{\"name\":\"localhost_3001_mcp__register_agent\",\"arguments\":{\"team\":\"alpha\"}}",
       "▸ list_agents localhost_3001_mcp",
     ].join("\n"));
-    expect(calls).toEqual([
-      { tool: "register_agent", args: { team: "alpha" } },
-      { tool: "list_agents", args: { raw: "localhost_3001_mcp" } },
-    ]);
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toMatchObject({ tool: "register_agent", args: { team: "alpha" }, sourceLineNo: 2 });
+    expect(calls[1]).toMatchObject({ tool: "list_agents", args: { raw: "localhost_3001_mcp" }, sourceLineNo: 3 });
+    expect(calls[0]?.sourceLineHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(calls[1]?.sourceLineHash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("extractInferredToolCalls ignores malformed lines and keeps valid ones", () => {
+    const calls = __test__.extractInferredToolCalls([
+      "{\"name\":\"localhost_3001_mcp__register_agent\",\"arguments\":{\"team\":\"alpha\"}}",
+      "{\"name\":", // malformed JSON
+      "▸", // malformed bullet
+      "▸ list_agents", // valid bullet without args
+      "{\"no_name\":true}", // valid JSON but no tool name
+    ].join("\n"));
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toMatchObject({ tool: "register_agent", args: { team: "alpha" } });
+    expect(calls[1]).toMatchObject({ tool: "list_agents", args: {} });
   });
 
   it("buildExecutionTelemetry always records adapter exec tool and final_output event", () => {
@@ -503,7 +517,7 @@ describe("cli-agent-adapter app", () => {
           },
         },
       });
-      expect(response.status).toBe(409);
+      expect(response.status).toBe(200);
       const json = (await response.json()) as {
         adapter_error?: { code?: string; message?: string };
         policy_violations?: Array<{ code?: string }>;
@@ -514,6 +528,97 @@ describe("cli-agent-adapter app", () => {
       const codes = (json.policy_violations ?? []).map((v) => v.code);
       expect(codes).toContain("denied_command_pattern");
     });
+  });
+
+  it("flags telemetry_untrusted when policy exists but only wrapper telemetry is available", async () => {
+    await withAdapter(baseEnv, async (baseUrl) => {
+      const response = await postJson(baseUrl, "/run-case", {
+        case_id: "policy-wrapper-only",
+        version: "new",
+        input: { user: "plain text answer only" },
+        policy: {
+          planning_gate: {
+            required_for_mutations: true,
+          },
+        },
+      });
+      expect(response.status).toBe(200);
+      const json = (await response.json()) as {
+        adapter_error?: { code?: string };
+        policy_violations?: Array<{ code?: string }>;
+        telemetry_mode?: string;
+      };
+      expect(json.telemetry_mode).toBe("wrapper_only");
+      expect(json.adapter_error?.code).toBe("policy_violation");
+      expect((json.policy_violations ?? []).some((v) => v.code === "telemetry_untrusted")).toBe(true);
+    });
+  });
+
+  it("enforces repl path and max_tool_calls constraints", async () => {
+    await withAdapter(baseEnv, async (baseUrl) => {
+      const response = await postJson(baseUrl, "/run-case", {
+        case_id: "policy-path-max-calls",
+        version: "new",
+        input: {
+          user: [
+            "{\"name\":\"localhost_3001_mcp__run_shell\",\"arguments\":{\"command\":\"cat /etc/passwd\"}}",
+            "{\"name\":\"localhost_3001_mcp__run_shell\",\"arguments\":{\"command\":\"cat /tmp/ok\"}}",
+          ].join("\n"),
+        },
+        policy: {
+          repl_policy: {
+            tool_allowlist: ["run_shell"],
+            allowed_path_prefixes: ["/tmp/"],
+            max_tool_calls: 1,
+          },
+        },
+      });
+      expect(response.status).toBe(200);
+      const json = (await response.json()) as {
+        adapter_error?: { code?: string };
+        policy_violations?: Array<{ code?: string }>;
+      };
+      expect(json.adapter_error?.code).toBe("policy_violation");
+      const codes = (json.policy_violations ?? []).map((v) => v.code);
+      expect(codes).toContain("too_many_repl_calls");
+      expect(codes).toContain("path_outside_allowlist");
+    });
+  });
+
+  it("writes policy violation audit entry when runtime policy blocks execution", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "adapter-policy-audit-"));
+    const auditPath = join(dir, "policy-violations.ndjson");
+    try {
+      await withAdapter(
+        {
+          ...baseEnv,
+          CLI_AGENT_POLICY_AUDIT_PATH: auditPath,
+        },
+        async (baseUrl) => {
+          const response = await postJson(baseUrl, "/run-case", {
+            case_id: "audit-case",
+            version: "new",
+            input: { user: "plain output" },
+            policy: {
+              planning_gate: { required_for_mutations: true },
+            },
+          });
+          expect(response.status).toBe(200);
+          const payload = readFileSync(auditPath, "utf8").trim();
+          expect(payload.length).toBeGreaterThan(0);
+          const row = JSON.parse(payload.split("\n").at(-1) ?? "{}") as {
+            case_id?: string;
+            violation_count?: number;
+            telemetry_mode?: string;
+          };
+          expect(row.case_id).toBe("audit-case");
+          expect(row.violation_count).toBeGreaterThan(0);
+          expect(row.telemetry_mode).toBe("wrapper_only");
+        }
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("run-case preflight probe bypasses CLI execution and returns deterministic response", async () => {

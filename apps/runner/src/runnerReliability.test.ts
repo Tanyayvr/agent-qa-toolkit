@@ -48,6 +48,8 @@ function mkCfg(overrides: Partial<RunnerConfig> = {}): RunnerConfig {
     timeoutProfile: "off",
     timeoutAutoCapMs: 600000,
     timeoutAutoLookbackRuns: 8,
+    timeoutAutoMinSuccessSamples: 3,
+    timeoutAutoMaxIncreaseFactor: 3,
     retries: 1,
     backoffBaseMs: 100,
     concurrency: 1,
@@ -223,10 +225,79 @@ describe("runPreflight / auto-timeout profile", () => {
 
     expect(out.profile).toBe("auto");
     expect(out.history_sample_count).toBe(3);
+    expect(out.history_success_sample_count).toBe(2);
+    expect(out.history_failure_sample_count).toBe(1);
     expect(out.adapter_timeout_ms).toBe(20000);
     expect(out.server_request_timeout_ms).toBe(30000);
     expect(cfg.timeoutMs).toBeLessThanOrEqual(25000); // server-safe clamp
     expect(cfg.preflightTimeoutMs).toBeLessThanOrEqual(60000);
     expect(cfg.inactivityTimeoutMs).toBeGreaterThan(cfg.timeoutMs);
+  });
+
+  it("does not learn timeout from failure-only history", async () => {
+    vi.mocked(fetchWithTimeout).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true, runtime: {} }),
+    } as unknown as Response);
+    vi.mocked(collectTimeoutHistorySamples).mockResolvedValueOnce({
+      successLatenciesMs: [],
+      failureLatenciesMs: [600_000, 900_000],
+    });
+    vi.mocked(summarizeHistoryCandidate).mockReturnValueOnce(undefined);
+
+    const cfg = mkCfg({
+      timeoutProfile: "auto",
+      timeoutMs: 120_000,
+      timeoutAutoCapMs: 1_800_000,
+      preflightTimeoutMs: 5_000,
+      inactivityTimeoutMs: 120_000,
+    });
+
+    const out = await resolveTimeoutProfileAuto({
+      cfg,
+      selectedCaseIds: ["c1"],
+      inactivityExplicit: false,
+      preflightExplicit: false,
+    });
+
+    expect(out.history_candidate_timeout_ms).toBeUndefined();
+    expect(out.history_candidate_ignored_reason).toBe("failure_only_history");
+    expect(cfg.timeoutMs).toBe(120_000);
+  });
+
+  it("caps history-derived timeout growth by factor", async () => {
+    vi.mocked(fetchWithTimeout).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true, runtime: {} }),
+    } as unknown as Response);
+    vi.mocked(collectTimeoutHistorySamples).mockResolvedValueOnce({
+      successLatenciesMs: [500_000, 600_000, 700_000],
+      failureLatenciesMs: [],
+    });
+    vi.mocked(summarizeHistoryCandidate).mockReturnValueOnce(1_200_000);
+
+    const cfg = mkCfg({
+      timeoutProfile: "auto",
+      timeoutMs: 120_000,
+      timeoutAutoMaxIncreaseFactor: 3,
+      timeoutAutoCapMs: 1_800_000,
+      preflightTimeoutMs: 5_000,
+      inactivityTimeoutMs: 120_000,
+    });
+
+    const out = await resolveTimeoutProfileAuto({
+      cfg,
+      selectedCaseIds: ["c1"],
+      inactivityExplicit: false,
+      preflightExplicit: false,
+    });
+
+    expect(out.clamped_by_growth).toBe(true);
+    expect(out.history_candidate_growth_cap_ms).toBe(360_000);
+    expect(out.history_candidate_raw_timeout_ms).toBe(1_200_000);
+    expect(out.history_candidate_timeout_ms).toBe(360_000);
+    expect(cfg.timeoutMs).toBe(360_000);
   });
 });

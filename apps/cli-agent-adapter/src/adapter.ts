@@ -1,10 +1,19 @@
 import express, { type Express, type Request, type Response } from "express";
 import { spawn, type ChildProcess } from "node:child_process";
+import { createHash } from "node:crypto";
 import { accessSync, constants as fsConstants, readFileSync } from "node:fs";
-import { mkdir, rename, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, rename, writeFile } from "node:fs/promises";
 import { stableStringify, normalizeRunMeta, validateAndNormalizeHandoffEnvelope } from "cli-utils";
 import { dirname, isAbsolute, resolve } from "node:path";
-import type { HandoffEnvelope, HandoffReceipt, ProposedAction, RunEvent, RunMeta, RuntimePolicy } from "shared-types";
+import type {
+  HandoffEnvelope,
+  HandoffReceipt,
+  ProposedAction,
+  RunEvent,
+  RunMeta,
+  RuntimePolicy,
+  RuntimePolicyViolation,
+} from "shared-types";
 import { resolveServerTimeoutConfig } from "./serverConfig";
 
 type CliFailureReason = "timeout" | "spawn_error" | "non_zero_exit" | "aborted" | "invalid_config" | "busy" | "policy_violation";
@@ -48,6 +57,7 @@ const DEFAULT_HANDOFF_MAX_ITEMS_TOTAL = 2_000;
 const DEFAULT_AUTH_HEADER = "authorization";
 const DEFAULT_EXEC_TOOL_NAME = "cli_agent_exec";
 const DEFAULT_INFERRED_TOOL_CALLS_MAX = 32;
+const DEFAULT_POLICY_AUDIT_LOG = ".agent-qa/policy-violations.ndjson";
 const DEFAULT_MUTATION_TOOLS = ["write_file", "delete_file", "move_file", "run_shell", "exec", "commit_changes", "deploy"];
 const DEFAULT_REPL_TOOLS = ["run_shell", "bash", "terminal", "exec", "python_repl"];
 
@@ -248,13 +258,20 @@ function normalizeToolName(raw: string): string {
 type InferredToolCall = {
   tool: string;
   args: Record<string, unknown>;
+  sourceLineNo: number;
+  sourceLineHash: string;
 };
+
+function hashLine(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
 
 function extractInferredToolCalls(output: string, maxCalls = DEFAULT_INFERRED_TOOL_CALLS_MAX): InferredToolCall[] {
   if (!output || output.trim().length === 0) return [];
   const out: InferredToolCall[] = [];
   const lines = output.split(/\r?\n/);
-  for (const rawLine of lines) {
+  for (let idx = 0; idx < lines.length; idx += 1) {
+    const rawLine = lines[idx] ?? "";
     if (out.length >= maxCalls) break;
     const line = rawLine.trim();
     if (line.length === 0) continue;
@@ -268,6 +285,8 @@ function extractInferredToolCalls(output: string, maxCalls = DEFAULT_INFERRED_TO
           out.push({
             tool: normalizeToolName(rawName),
             args: parseObjectJson(obj?.arguments),
+            sourceLineNo: idx + 1,
+            sourceLineHash: hashLine(rawLine),
           });
           continue;
         }
@@ -281,6 +300,8 @@ function extractInferredToolCalls(output: string, maxCalls = DEFAULT_INFERRED_TO
       out.push({
         tool: normalizeToolName(bulletMatch[1]),
         args: bulletMatch[2] ? { raw: bulletMatch[2].trim() } : {},
+        sourceLineNo: idx + 1,
+        sourceLineHash: hashLine(rawLine),
       });
     }
   }
@@ -301,14 +322,6 @@ type ExecutionTelemetryParams = {
   useStdin: boolean;
   cwd?: string;
   statusMessage?: string;
-};
-
-type RuntimePolicyViolation = {
-  scope: "planning_gate" | "repl_policy";
-  severity: "require_approval" | "block";
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
 };
 
 function buildExecutionTelemetry(params: ExecutionTelemetryParams): {
@@ -379,6 +392,8 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): {
       tool: item.tool,
       args: {
         _telemetry_source: "inferred",
+        _inferred_source_line_no: item.sourceLineNo,
+        _inferred_source_line_hash: item.sourceLineHash,
         ...item.args,
       },
     });
@@ -443,6 +458,8 @@ function normalizeRuntimePolicy(raw: unknown): RuntimePolicy | undefined {
   if (replRaw) {
     const allowlist = asStringList(replRaw.tool_allowlist);
     const deniedPatterns = asStringList(replRaw.denied_command_patterns);
+    const deniedPathPatterns = asStringList(replRaw.denied_path_patterns);
+    const allowedPathPrefixes = asStringList(replRaw.allowed_path_prefixes);
     for (const pattern of deniedPatterns) {
       try {
         // Validate regex upfront to fail fast as invalid_config instead of runtime policy violation.
@@ -455,9 +472,21 @@ function normalizeRuntimePolicy(raw: unknown): RuntimePolicy | undefined {
         });
       }
     }
+    for (const pattern of deniedPathPatterns) {
+      try {
+        new RegExp(pattern);
+      } catch {
+        throw new CliAgentError({
+          reason: "invalid_config",
+          message: `policy.repl_policy.denied_path_patterns contains invalid regex: ${pattern}`,
+        });
+      }
+    }
     const replPolicy: NonNullable<RuntimePolicy["repl_policy"]> = {
       ...(allowlist.length > 0 ? { tool_allowlist: allowlist } : {}),
       ...(deniedPatterns.length > 0 ? { denied_command_patterns: deniedPatterns } : {}),
+      ...(deniedPathPatterns.length > 0 ? { denied_path_patterns: deniedPathPatterns } : {}),
+      ...(allowedPathPrefixes.length > 0 ? { allowed_path_prefixes: allowedPathPrefixes } : {}),
     };
     if (replRaw.max_command_length !== undefined) {
       const max = Number(replRaw.max_command_length);
@@ -468,6 +497,16 @@ function normalizeRuntimePolicy(raw: unknown): RuntimePolicy | undefined {
         });
       }
       replPolicy.max_command_length = Math.floor(max);
+    }
+    if (replRaw.max_tool_calls !== undefined) {
+      const max = Number(replRaw.max_tool_calls);
+      if (!Number.isFinite(max) || max < 1) {
+        throw new CliAgentError({
+          reason: "invalid_config",
+          message: "policy.repl_policy.max_tool_calls must be a positive number",
+        });
+      }
+      replPolicy.max_tool_calls = Math.floor(max);
     }
     out.repl_policy = replPolicy;
   }
@@ -504,14 +543,41 @@ function extractCommandText(args: Record<string, unknown>): string {
   }
 }
 
+function extractCommandPaths(commandText: string): string[] {
+  if (!commandText || commandText.trim().length === 0) return [];
+  const quoted = commandText.match(/"(?:\\.|[^"])*"|'(?:\\.|[^'])*'/g) ?? [];
+  const unquoted = commandText.split(/\s+/);
+  const tokens = [...quoted, ...unquoted]
+    .map((t) => t.replace(/^['"]|['"]$/g, "").trim())
+    .filter((t) => t.length > 0);
+  const candidates = tokens.filter((t) => t.startsWith("/") || t.startsWith("./") || t.startsWith("../") || t.startsWith("~"));
+  return Array.from(new Set(candidates));
+}
+
 function evaluateRuntimePolicy(
   policy: RuntimePolicy | undefined,
   events: RunEvent[],
-  finalOutputText: string
+  finalOutputText: string,
+  telemetryMode: "wrapper_only" | "inferred"
 ): RuntimePolicyViolation[] {
   if (!policy) return [];
   const violations: RuntimePolicyViolation[] = [];
   const toolCalls = events.filter((e): e is Extract<RunEvent, { type: "tool_call" }> => e.type === "tool_call");
+
+  if (telemetryMode === "wrapper_only") {
+    const scopes: Array<"planning_gate" | "repl_policy"> = [];
+    if (policy.planning_gate) scopes.push("planning_gate");
+    if (policy.repl_policy) scopes.push("repl_policy");
+    for (const scope of scopes) {
+      violations.push({
+        scope,
+        severity: "require_approval",
+        code: "telemetry_untrusted",
+        message: "Only wrapper telemetry is available; runtime policy cannot be reliably verified",
+        details: { telemetry_mode: telemetryMode },
+      });
+    }
+  }
 
   if (policy.planning_gate) {
     const mutationTools = new Set((policy.planning_gate.mutation_tools ?? DEFAULT_MUTATION_TOOLS).map((x) => String(x)));
@@ -559,6 +625,17 @@ function evaluateRuntimePolicy(
   if (policy.repl_policy) {
     const replToolSet = new Set((policy.repl_policy.tool_allowlist ?? DEFAULT_REPL_TOOLS).map((x) => String(x)));
     const replCalls = toolCalls.filter((c) => DEFAULT_REPL_TOOLS.includes(c.tool) || replToolSet.has(c.tool));
+    if (typeof policy.repl_policy.max_tool_calls === "number" && policy.repl_policy.max_tool_calls > 0) {
+      if (replCalls.length > policy.repl_policy.max_tool_calls) {
+        violations.push({
+          scope: "repl_policy",
+          severity: "require_approval",
+          code: "too_many_repl_calls",
+          message: `REPL call count ${replCalls.length} exceeds max_tool_calls=${policy.repl_policy.max_tool_calls}`,
+          details: { count: replCalls.length, max: policy.repl_policy.max_tool_calls },
+        });
+      }
+    }
     if (policy.repl_policy.tool_allowlist && policy.repl_policy.tool_allowlist.length > 0) {
       const allowSet = new Set(policy.repl_policy.tool_allowlist.map((x) => String(x)));
       const disallowed = replCalls.filter((c) => !allowSet.has(c.tool)).map((c) => c.tool);
@@ -617,6 +694,51 @@ function evaluateRuntimePolicy(
         }
       }
     }
+
+    if (policy.repl_policy.denied_path_patterns && policy.repl_policy.denied_path_patterns.length > 0) {
+      const patterns = policy.repl_policy.denied_path_patterns.flatMap((pattern) => {
+        try {
+          return [new RegExp(pattern, "i")];
+        } catch {
+          return [];
+        }
+      });
+      for (const call of replCalls) {
+        const text = extractCommandText(call.args);
+        const paths = extractCommandPaths(text);
+        for (const p of paths) {
+          for (const re of patterns) {
+            if (re.test(p)) {
+              violations.push({
+                scope: "repl_policy",
+                severity: "block",
+                code: "denied_path_pattern",
+                message: `REPL path matches denied pattern: ${re.source}`,
+                details: { tool: call.tool, path: p },
+              });
+            }
+          }
+        }
+      }
+    }
+
+    if (policy.repl_policy.allowed_path_prefixes && policy.repl_policy.allowed_path_prefixes.length > 0) {
+      const prefixes = policy.repl_policy.allowed_path_prefixes;
+      for (const call of replCalls) {
+        const text = extractCommandText(call.args);
+        const paths = extractCommandPaths(text);
+        const disallowedPaths = paths.filter((p) => !prefixes.some((prefix) => p.startsWith(prefix)));
+        if (disallowedPaths.length > 0) {
+          violations.push({
+            scope: "repl_policy",
+            severity: "block",
+            code: "path_outside_allowlist",
+            message: "REPL command references paths outside allowed_path_prefixes",
+            details: { tool: call.tool, disallowed_paths: disallowedPaths, allowed_path_prefixes: prefixes },
+          });
+        }
+      }
+    }
   }
 
   return violations;
@@ -626,6 +748,30 @@ function formatPolicyViolationMessage(violations: RuntimePolicyViolation[]): str
   if (violations.length === 0) return "Runtime policy violation";
   const parts = violations.map((v) => `${v.scope}.${v.code}`);
   return `Runtime policy violation: ${Array.from(new Set(parts)).join(", ")}`;
+}
+
+function resolvePolicyAuditPath(env: NodeJS.ProcessEnv): string {
+  const raw = env.CLI_AGENT_POLICY_AUDIT_PATH?.trim();
+  if (!raw || raw.length === 0) return DEFAULT_POLICY_AUDIT_LOG;
+  return raw;
+}
+
+async function appendPolicyAuditEntry(
+  auditPath: string,
+  entry: {
+    ts: number;
+    case_id: string;
+    version: string;
+    telemetry_mode: "wrapper_only" | "inferred";
+    violation_count: number;
+    violations: RuntimePolicyViolation[];
+    run_meta?: RunMeta;
+  }
+): Promise<void> {
+  const absPath = isAbsolute(auditPath) ? auditPath : resolve(process.cwd(), auditPath);
+  await mkdir(dirname(absPath), { recursive: true });
+  const line = `${stableStringify(entry)}\n`;
+  await appendFile(absPath, line, "utf8");
 }
 
 function formatHandoffContext(
@@ -1117,6 +1263,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
   const maxConcurrency = intEnv(env, "CLI_AGENT_MAX_CONCURRENCY", DEFAULT_MAX_CONCURRENCY);
   const busyRetryAfterMs = intEnv(env, "CLI_AGENT_BUSY_RETRY_AFTER_MS", DEFAULT_BUSY_RETRY_AFTER_MS);
   const execToolName = env.CLI_AGENT_EXEC_TOOL_NAME?.trim() || DEFAULT_EXEC_TOOL_NAME;
+  const policyAuditPath = resolvePolicyAuditPath(env);
   const includeHandoffContext = boolEnv(env, "CLI_AGENT_INCLUDE_HANDOFF_CONTEXT", true);
   const handoffContextMaxChars = intEnv(env, "CLI_AGENT_HANDOFF_CONTEXT_MAX_CHARS", DEFAULT_HANDOFF_CONTEXT_MAX_CHARS);
   const handoffMaxItems = intEnv(env, "CLI_AGENT_HANDOFF_MAX_ITEMS", DEFAULT_HANDOFF_MAX_ITEMS);
@@ -1359,14 +1506,23 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
         useStdin: executable.useStdin,
         ...(executable.cwd ? { cwd: executable.cwd } : {}),
       });
-      const policyViolations = evaluateRuntimePolicy(runtimePolicy, telemetry.events, output);
+      const policyViolations = evaluateRuntimePolicy(runtimePolicy, telemetry.events, output, telemetry.telemetryMode);
       if (policyViolations.length > 0) {
         const message = formatPolicyViolationMessage(policyViolations);
         const adapterError: CliErrorPayload = {
           code: "policy_violation",
           message,
         };
-        res.status(409).json({
+        await appendPolicyAuditEntry(policyAuditPath, {
+          ts: Date.now(),
+          case_id: caseId,
+          version,
+          telemetry_mode: telemetry.telemetryMode,
+          violation_count: policyViolations.length,
+          violations: policyViolations,
+          ...(runMeta ? { run_meta: runMeta } : {}),
+        });
+        res.json({
           case_id: caseId,
           version,
           workflow_id: "cli_agent_v1",

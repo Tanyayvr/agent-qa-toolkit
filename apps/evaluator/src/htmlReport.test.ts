@@ -35,6 +35,28 @@ const baseReport: CompareReport = {
       broken_baseline_artifacts: 0,
       broken_new_artifacts: 0,
     },
+    execution_quality: {
+      status: "healthy",
+      reasons: [],
+      thresholds: {
+        min_transport_success_rate: 0.95,
+        max_weak_expected_rate: 0.2,
+        min_pre_action_entropy_removed: 0,
+        min_reconstruction_minutes_saved_per_block: 0,
+      },
+      total_executed_cases: 1,
+      baseline_runner_failures: 0,
+      new_runner_failures: 0,
+      baseline_runner_failure_rate: 0,
+      new_runner_failure_rate: 0,
+      baseline_transport_success_rate: 1,
+      new_transport_success_rate: 1,
+      baseline_runner_failure_kinds: {},
+      new_runner_failure_kinds: {},
+      weak_expected_cases: 0,
+      weak_expected_rate: 0,
+      model_quality_inconclusive: false,
+    },
   },
   summary_by_suite: {
     correctness: {
@@ -140,6 +162,8 @@ describe("htmlReport", () => {
       thresholds: {
         min_transport_success_rate: 0.95,
         max_weak_expected_rate: 0.2,
+        min_pre_action_entropy_removed: 0,
+        min_reconstruction_minutes_saved_per_block: 0,
       },
       total_executed_cases: 3,
       baseline_runner_failures: 0,
@@ -212,7 +236,7 @@ describe("htmlReport", () => {
   it("renders fallback sections when optional blocks are absent", () => {
     const report = cloneReport(baseReport);
     report.summary.root_cause_breakdown = {};
-    delete report.summary.execution_quality;
+    delete (report.summary as { execution_quality?: unknown }).execution_quality;
     delete report.summary.trace_anchor_coverage;
     delete report.environment;
     report.compliance_mapping = [];
@@ -236,6 +260,8 @@ describe("htmlReport", () => {
       thresholds: {
         min_transport_success_rate: 0.95,
         max_weak_expected_rate: 0.2,
+        min_pre_action_entropy_removed: 0,
+        min_reconstruction_minutes_saved_per_block: 0,
       },
       total_executed_cases: 1,
       baseline_runner_failures: 0,

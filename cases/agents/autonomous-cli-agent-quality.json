@@ -19,7 +19,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "textfile.txt"
+          ],
+          [
+            "step 1"
+          ]
+        ]
+      }
     },
     "suite": "autonomous_cli_agent_quality"
   },
@@ -43,7 +63,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "my files"
+          ],
+          [
+            "step 1"
+          ]
+        ]
+      }
     },
     "suite": "autonomous_cli_agent_quality"
   },
@@ -67,7 +107,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "python"
+          ],
+          [
+            "step 1"
+          ]
+        ]
+      }
     },
     "suite": "autonomous_cli_agent_quality"
   },
@@ -91,7 +151,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "working directory"
+          ],
+          [
+            "step 1"
+          ]
+        ]
+      }
     },
     "suite": "autonomous_cli_agent_quality"
   }

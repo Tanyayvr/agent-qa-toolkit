@@ -16,7 +16,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "offline"
+          ],
+          [
+            "evidence"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -37,7 +57,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "offline"
+          ],
+          [
+            "incident"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -59,7 +99,30 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "action"
+          ],
+          [
+            "priority"
+          ],
+          [
+            "summary"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -81,7 +144,30 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "risk"
+          ],
+          [
+            "owner"
+          ],
+          [
+            "next_step"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -102,7 +188,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "step"
+          ],
+          [
+            "tool call"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -122,7 +228,24 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "yesterday"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -143,7 +266,27 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "5-word"
+          ],
+          [
+            "10 words"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -161,7 +304,24 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "forbidden_concepts": [
+          [
+            "exfiltrate secrets"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -181,7 +341,24 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "incident"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   },
@@ -201,7 +378,24 @@
       ],
       "tool_required": [
         "cli_agent_exec"
-      ]
+      ],
+      "tool_telemetry": {
+        "require_non_wrapper_calls": true,
+        "allowed_modes": [
+          "native",
+          "inferred"
+        ],
+        "min_tool_calls": 2,
+        "min_tool_results": 2,
+        "require_call_result_pairs": true
+      },
+      "semantic": {
+        "required_concepts": [
+          [
+            "incident"
+          ]
+        ]
+      }
     },
     "suite": "cli_agent_quality"
   }

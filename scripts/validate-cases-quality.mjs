@@ -8,6 +8,8 @@ function parseArgs(argv) {
     profile: "quality",
     maxWeakExpectedRate: 0.2,
     requireToolEvidence: false,
+    requireStrongTelemetry: false,
+    requireSemanticQuality: true,
   };
   for (let i = 2; i < argv.length; i += 1) {
     const a = argv[i];
@@ -33,11 +35,23 @@ function parseArgs(argv) {
       i += 1;
       continue;
     }
+    if (a === "--requireStrongTelemetry") {
+      const raw = String(argv[i + 1] ?? "0").toLowerCase();
+      out.requireStrongTelemetry = raw === "1" || raw === "true" || raw === "yes";
+      i += 1;
+      continue;
+    }
+    if (a === "--requireSemanticQuality") {
+      const raw = String(argv[i + 1] ?? "0").toLowerCase();
+      out.requireSemanticQuality = raw === "1" || raw === "true" || raw === "yes";
+      i += 1;
+      continue;
+    }
     if (a === "--help" || a === "-h") {
       console.log(
         [
           "Usage:",
-          "  node scripts/validate-cases-quality.mjs --cases <path> [--profile quality|infra] [--maxWeakExpectedRate <0..1>] [--requireToolEvidence 0|1]",
+          "  node scripts/validate-cases-quality.mjs --cases <path> [--profile quality|infra] [--maxWeakExpectedRate <0..1>] [--requireToolEvidence 0|1] [--requireStrongTelemetry 0|1] [--requireSemanticQuality 0|1]",
         ].join("\n")
       );
       process.exit(0);
@@ -62,6 +76,59 @@ function hasToolEvidence(exp) {
   if (hasList(exp.tool_required)) return true;
   if (hasList(exp.tool_sequence)) return true;
   if (exp.evidence_required_for_actions === true) return true;
+  if (exp.tool_telemetry && typeof exp.tool_telemetry === "object") return true;
+  return false;
+}
+
+function hasStrongTelemetryContract(exp) {
+  if (!exp || typeof exp !== "object") return false;
+  const t = exp.tool_telemetry;
+  if (!t || typeof t !== "object") return false;
+  if (t.require_non_wrapper_calls !== true) return false;
+  const allowed = Array.isArray(t.allowed_modes) ? t.allowed_modes.map((x) => String(x)) : [];
+  if (allowed.length === 0) return false;
+  if (allowed.includes("wrapper_only")) return false;
+  if (!allowed.includes("native") && !allowed.includes("inferred")) return false;
+  if (typeof t.min_tool_calls !== "number" || t.min_tool_calls < 1) return false;
+  if (typeof t.min_tool_results !== "number" || t.min_tool_results < 1) return false;
+  if (t.require_call_result_pairs !== true) return false;
+  return true;
+}
+
+function hasLexicalTextExpectation(exp) {
+  if (!exp || typeof exp !== "object") return false;
+  const include = hasList(exp.must_include);
+  const filteredMustNot = Array.isArray(exp.must_not_include)
+    ? exp.must_not_include
+      .map((v) => String(v ?? "").trim())
+      .filter((v) => v.length > 0 && !v.startsWith("[adapter:"))
+    : [];
+  return include || filteredMustNot.length > 0;
+}
+
+function hasSemanticQualityContract(exp) {
+  if (!exp || typeof exp !== "object") return false;
+  const semantic = exp.semantic;
+  if (!semantic || typeof semantic !== "object") return false;
+  const required = Array.isArray(semantic.required_concepts) && semantic.required_concepts.length > 0;
+  const forbidden = Array.isArray(semantic.forbidden_concepts) && semantic.forbidden_concepts.length > 0;
+  const refs = Array.isArray(semantic.reference_texts) && semantic.reference_texts.length > 0;
+  const hasAny = required || forbidden || refs;
+  if (!hasAny) return false;
+  if (!refs) return true;
+
+  const hasProfile = typeof semantic.profile === "string"
+    && ["strict", "balanced", "lenient"].includes(semantic.profile);
+  const hasMinToken = typeof semantic.min_token_f1 === "number"
+    && semantic.min_token_f1 >= 0
+    && semantic.min_token_f1 <= 1;
+  const hasMinLcs = typeof semantic.min_lcs_ratio === "number"
+    && semantic.min_lcs_ratio >= 0
+    && semantic.min_lcs_ratio <= 1;
+
+  if (hasMinToken !== hasMinLcs) return false;
+  if (hasProfile) return true;
+  if (hasMinToken && hasMinLcs) return true;
   return false;
 }
 
@@ -78,6 +145,7 @@ function isWeakExpected(exp) {
   if (exp.evidence_required_for_actions === true) return false;
   if (hasList(exp.tool_required)) return false;
   if (hasList(exp.tool_sequence)) return false;
+  if (exp.tool_telemetry && typeof exp.tool_telemetry === "object") return false;
   if (exp.json_schema !== undefined && exp.json_schema !== null) return false;
   if (hasRetrievalDocs) return false;
   if (hasList(exp.must_include)) return false;
@@ -101,11 +169,17 @@ function main() {
 
   const weak = [];
   const toolEvidenceMissing = [];
+  const strongTelemetryMissing = [];
+  const semanticQualityMissing = [];
   for (const c of cases) {
     const id = typeof c?.id === "string" && c.id.length > 0 ? c.id : "<unknown>";
     const expected = c?.expected && typeof c.expected === "object" ? c.expected : {};
     if (isWeakExpected(expected)) weak.push(id);
     if (args.requireToolEvidence && !hasToolEvidence(expected)) toolEvidenceMissing.push(id);
+    if (args.requireStrongTelemetry && !hasStrongTelemetryContract(expected)) strongTelemetryMissing.push(id);
+    if (args.requireSemanticQuality && hasLexicalTextExpectation(expected) && !hasSemanticQualityContract(expected)) {
+      semanticQualityMissing.push(id);
+    }
   }
 
   const total = cases.length;
@@ -121,6 +195,10 @@ function main() {
     max_weak_expected_rate: args.maxWeakExpectedRate,
     tool_evidence_required: args.requireToolEvidence,
     tool_evidence_missing_cases: toolEvidenceMissing.length,
+    strong_telemetry_required: args.requireStrongTelemetry,
+    strong_telemetry_missing_cases: strongTelemetryMissing.length,
+    semantic_quality_required: args.requireSemanticQuality,
+    semantic_quality_missing_cases: semanticQualityMissing.length,
   };
 
   if (args.profile === "quality" && weakRate > args.maxWeakExpectedRate) {
@@ -146,6 +224,37 @@ function main() {
         JSON.stringify(summary),
         sample ? `missing_tool_evidence_case_ids_sample: ${sample}` : "",
         "Add expected.tool_required/tool_sequence/evidence_required_for_actions or disable via --requireToolEvidence 0.",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    );
+    process.exit(2);
+  }
+
+  if (args.profile === "quality" && args.requireStrongTelemetry && strongTelemetryMissing.length > 0) {
+    const sample = strongTelemetryMissing.slice(0, 12).join(", ");
+    console.error(
+      [
+        "ERROR: quality campaign requires strong telemetry contract, but some cases are missing expected.tool_telemetry hard requirements.",
+        JSON.stringify(summary),
+        sample ? `missing_strong_telemetry_case_ids_sample: ${sample}` : "",
+        "Add expected.tool_telemetry with non-wrapper requirement and allowed_modes native/inferred.",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    );
+    process.exit(2);
+  }
+
+  if (args.profile === "quality" && args.requireSemanticQuality && semanticQualityMissing.length > 0) {
+    const sample = semanticQualityMissing.slice(0, 12).join(", ");
+    console.error(
+      [
+        "ERROR: quality campaign requires semantic quality contract for lexical text expectations, but some cases are missing expected.semantic.",
+        JSON.stringify(summary),
+        sample ? `missing_semantic_quality_case_ids_sample: ${sample}` : "",
+        "Add expected.semantic.required_concepts/forbidden_concepts/reference_texts to text-eval cases.",
+        "If reference_texts are used, include either semantic.profile (strict|balanced|lenient) or both semantic.min_token_f1 + semantic.min_lcs_ratio.",
       ]
         .filter(Boolean)
         .join("\n")

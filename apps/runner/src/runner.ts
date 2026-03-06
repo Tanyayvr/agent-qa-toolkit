@@ -130,6 +130,8 @@ export async function runRunner(): Promise<void> {
       "--timeoutProfile",
       "--timeoutAutoCapMs",
       "--timeoutAutoLookbackRuns",
+      "--timeoutAutoMinSuccessSamples",
+      "--timeoutAutoMaxIncreaseFactor",
       "--retries",
       "--backoffBaseMs",
       "--concurrency",
@@ -162,6 +164,8 @@ export async function runRunner(): Promise<void> {
   assertHasValueOrThrow("--timeoutProfile");
   assertHasValueOrThrow("--timeoutAutoCapMs");
   assertHasValueOrThrow("--timeoutAutoLookbackRuns");
+  assertHasValueOrThrow("--timeoutAutoMinSuccessSamples");
+  assertHasValueOrThrow("--timeoutAutoMaxIncreaseFactor");
   assertHasValueOrThrow("--retries");
   assertHasValueOrThrow("--backoffBaseMs");
   assertHasValueOrThrow("--concurrency");
@@ -186,6 +190,8 @@ export async function runRunner(): Promise<void> {
   const timeoutProfile = parseTimeoutProfile(getArg("--timeoutProfile"));
   const timeoutAutoCapMs = parseIntFlagOrThrow("--timeoutAutoCapMs", 3_600_000);
   const timeoutAutoLookbackRuns = parseIntFlagOrThrow("--timeoutAutoLookbackRuns", 12);
+  const timeoutAutoMinSuccessSamples = parseIntFlagOrThrow("--timeoutAutoMinSuccessSamples", 3);
+  const timeoutAutoMaxIncreaseFactor = parseIntFlagOrThrow("--timeoutAutoMaxIncreaseFactor", 3);
   const inactivityExplicit = getArg("--inactivityTimeoutMs") !== null;
   const preflightExplicit = getArg("--preflightTimeoutMs") !== null;
 
@@ -215,6 +221,8 @@ export async function runRunner(): Promise<void> {
     timeoutProfile,
     timeoutAutoCapMs,
     timeoutAutoLookbackRuns,
+    timeoutAutoMinSuccessSamples,
+    timeoutAutoMaxIncreaseFactor,
     retries: parseIntFlagOrThrow("--retries", 2),
     backoffBaseMs: parseIntFlagOrThrow("--backoffBaseMs", 250),
     concurrency: parseIntFlagOrThrow("--concurrency", 1),
@@ -242,6 +250,16 @@ export async function runRunner(): Promise<void> {
   }
   if (cfg.timeoutAutoLookbackRuns <= 0) {
     throw new CliUsageError(`Invalid --timeoutAutoLookbackRuns value: ${cfg.timeoutAutoLookbackRuns}. Must be > 0.\n\n${RUNNER_HELP_TEXT}`);
+  }
+  if (cfg.timeoutAutoMinSuccessSamples <= 0) {
+    throw new CliUsageError(
+      `Invalid --timeoutAutoMinSuccessSamples value: ${cfg.timeoutAutoMinSuccessSamples}. Must be > 0.\n\n${RUNNER_HELP_TEXT}`
+    );
+  }
+  if (cfg.timeoutAutoMaxIncreaseFactor <= 0) {
+    throw new CliUsageError(
+      `Invalid --timeoutAutoMaxIncreaseFactor value: ${cfg.timeoutAutoMaxIncreaseFactor}. Must be > 0.\n\n${RUNNER_HELP_TEXT}`
+    );
   }
   if (cfg.retries < 0) {
     throw new CliUsageError(`Invalid --retries value: ${cfg.retries}. Must be >= 0.\n\n${RUNNER_HELP_TEXT}`);
@@ -342,6 +360,8 @@ export async function runRunner(): Promise<void> {
       timeout_ms: cfg.timeoutMs,
       timeout_profile: cfg.timeoutProfile,
       timeout_auto: timeoutAutoResolution,
+      timeout_auto_min_success_samples: cfg.timeoutAutoMinSuccessSamples,
+      timeout_auto_max_increase_factor: cfg.timeoutAutoMaxIncreaseFactor,
       retries: cfg.retries,
       backoff_base_ms: cfg.backoffBaseMs,
       concurrency: cfg.concurrency,
@@ -413,6 +433,23 @@ export async function runRunner(): Promise<void> {
   console.log("timeoutProfile:", cfg.timeoutProfile);
   if (cfg.timeoutProfile === "auto") {
     console.log("timeoutProfileAuto:", JSON.stringify(timeoutAutoResolution));
+    if (timeoutAutoResolution.history_candidate_ignored_reason === "failure_only_history") {
+      console.warn(
+        "WARNING: auto timeout ignored failure-only history (no successful samples); using base timeout + adapter hints."
+      );
+    }
+    if (timeoutAutoResolution.history_candidate_ignored_reason === "insufficient_success_samples") {
+      console.warn(
+        `WARNING: auto timeout ignored history candidate due to insufficient successful samples ` +
+        `(success=${timeoutAutoResolution.history_success_sample_count ?? 0}, required=${cfg.timeoutAutoMinSuccessSamples}).`
+      );
+    }
+    if (timeoutAutoResolution.clamped_by_growth) {
+      console.warn(
+        `WARNING: auto timeout history candidate was capped by growth guard (factor=${cfg.timeoutAutoMaxIncreaseFactor}x, ` +
+        `cap=${timeoutAutoResolution.history_candidate_growth_cap_ms}ms).`
+      );
+    }
     if (timeoutAutoResolution.clamped_by_cap) {
       console.warn(
         `WARNING: auto timeout recommendation was clamped by --timeoutAutoCapMs (${cfg.timeoutAutoCapMs}ms).`

@@ -51,6 +51,8 @@ describe("runner helpers", () => {
       timeoutProfile: "off",
       timeoutAutoCapMs: 3_600_000,
       timeoutAutoLookbackRuns: 12,
+      timeoutAutoMinSuccessSamples: 3,
+      timeoutAutoMaxIncreaseFactor: 3,
       retries: 2,
       backoffBaseMs: 100,
       concurrency: 2,
@@ -81,10 +83,9 @@ describe("runner helpers", () => {
     expect(fromSuccess).toBe(198_000);
   });
 
-  it("summarizeHistoryCandidate falls back to failure latency history", () => {
-    const fromFailure = summarizeHistoryCandidate([], [300_000, 330_000]);
-    // p95=330000 => ceil(330000*1.25 + 30000) = 442500
-    expect(fromFailure).toBe(442_500);
+  it("summarizeHistoryCandidate does not learn from failure-only history", () => {
+    const fromFailure = summarizeHistoryCandidate([], [300_000, 330_000], { minSuccessSamples: 1 });
+    expect(fromFailure).toBeUndefined();
   });
 
   it("parseTraceparent extracts trace_id and span_id", () => {

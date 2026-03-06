@@ -130,6 +130,8 @@ describe("evaluatorSummary", () => {
         thresholds: {
           min_transport_success_rate: 0.95,
           max_weak_expected_rate: 0.2,
+          min_pre_action_entropy_removed: 0,
+          min_reconstruction_minutes_saved_per_block: 0,
         },
         total_executed_cases: 1,
         baseline_runner_failures: 0,

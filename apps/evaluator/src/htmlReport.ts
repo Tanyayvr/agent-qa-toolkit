@@ -298,7 +298,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
             <div class="k"><div class="v">${escHtml(pct(eq.weak_expected_rate))}</div><div class="l">weak expected rate</div></div>
           </div>
           <div class="muted" style="margin-top:10px;">
-            thresholds: min transport success ${escHtml(pct(eq.thresholds.min_transport_success_rate))} · max weak expected ${escHtml(pct(eq.thresholds.max_weak_expected_rate))}
+            thresholds: min transport success ${escHtml(pct(eq.thresholds.min_transport_success_rate))} · max weak expected ${escHtml(pct(eq.thresholds.max_weak_expected_rate))} · min pre-action entropy removed ${escHtml(pct(eq.thresholds.min_pre_action_entropy_removed))} · min recon min saved/block ${escHtml(String(eq.thresholds.min_reconstruction_minutes_saved_per_block))}
           </div>
           <div class="muted" style="margin-top:6px;">
             failure kinds: baseline ${escHtml(fmtFailureKinds(eq.baseline_runner_failure_kinds))} · new ${escHtml(fmtFailureKinds(eq.new_runner_failure_kinds))}

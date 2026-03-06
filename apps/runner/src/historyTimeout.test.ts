@@ -12,8 +12,9 @@ describe("historyTimeout helpers", () => {
   it("percentile and summarizeHistoryCandidate compute p95-based recommendations", () => {
     expect(percentile([], 0.95)).toBeUndefined();
     expect(percentile([10, 20, 30, 40, 50], 0.95)).toBe(50);
-    expect(summarizeHistoryCandidate([100_000, 110_000, 120_000], [300_000])).toBe(198_000);
-    expect(summarizeHistoryCandidate([], [300_000, 330_000])).toBe(442_500);
+    expect(summarizeHistoryCandidate([100_000, 110_000, 120_000], [300_000], { minSuccessSamples: 3 })).toBe(198_000);
+    expect(summarizeHistoryCandidate([100_000, 110_000], [300_000], { minSuccessSamples: 3 })).toBeUndefined();
+    expect(summarizeHistoryCandidate([], [300_000, 330_000], { minSuccessSamples: 1 })).toBeUndefined();
   });
 
   it("collectTimeoutHistorySamples reads baseline/new run history and ignores current run", async () => {

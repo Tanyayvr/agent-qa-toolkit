@@ -34,7 +34,16 @@ describe("validate-cases-quality", () => {
         ),
         "utf8"
       );
-      const res = await runValidate(["--cases", casesPath, "--profile", "quality", "--maxWeakExpectedRate", "0.2"]);
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--maxWeakExpectedRate",
+        "0.2",
+        "--requireSemanticQuality",
+        "0",
+      ]);
       expect(res.code).toBe(0);
       const parsed = JSON.parse(res.stdout.trim()) as { weak_expected_rate?: number };
       expect(parsed.weak_expected_rate).toBe(0);
@@ -59,7 +68,16 @@ describe("validate-cases-quality", () => {
         ),
         "utf8"
       );
-      const res = await runValidate(["--cases", casesPath, "--profile", "quality", "--maxWeakExpectedRate", "0.2"]);
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--maxWeakExpectedRate",
+        "0.2",
+        "--requireSemanticQuality",
+        "0",
+      ]);
       expect(res.code).toBe(2);
       expect(res.stderr).toContain("quality campaign uses weak expectations above threshold");
     } finally {
@@ -114,6 +132,8 @@ describe("validate-cases-quality", () => {
         "quality",
         "--requireToolEvidence",
         "1",
+        "--requireSemanticQuality",
+        "0",
       ]);
       expect(res.code).toBe(2);
       expect(res.stderr).toContain("requires tool evidence assertions");
@@ -132,6 +152,7 @@ describe("validate-cases-quality", () => {
           [
             { id: "c1", expected: { tool_required: ["cli_agent_exec"] } },
             { id: "c2", expected: { tool_sequence: ["cli_agent_exec"] } },
+            { id: "c3", expected: { tool_telemetry: { require_non_wrapper_calls: true } } },
           ],
           null,
           2
@@ -145,10 +166,216 @@ describe("validate-cases-quality", () => {
         "quality",
         "--requireToolEvidence",
         "1",
+        "--requireSemanticQuality",
+        "0",
       ]);
       expect(res.code).toBe(0);
       const parsed = JSON.parse(res.stdout.trim()) as { tool_evidence_missing_cases?: number };
       expect(parsed.tool_evidence_missing_cases).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("fails quality profile when strong telemetry contract is required but missing", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-strong-telemetry-missing-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            { id: "c1", expected: { tool_required: ["cli_agent_exec"] } },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireStrongTelemetry",
+        "1",
+        "--requireSemanticQuality",
+        "0",
+      ]);
+      expect(res.code).toBe(2);
+      expect(res.stderr).toContain("requires strong telemetry contract");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("passes quality profile when strong telemetry contract is present", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-strong-telemetry-ok-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            {
+              id: "c1",
+              expected: {
+                tool_telemetry: {
+                  require_non_wrapper_calls: true,
+                  allowed_modes: ["native", "inferred"],
+                  min_tool_calls: 2,
+                  min_tool_results: 2,
+                  require_call_result_pairs: true,
+                },
+              },
+            },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireStrongTelemetry",
+        "1",
+        "--requireSemanticQuality",
+        "0",
+      ]);
+      expect(res.code).toBe(0);
+      const parsed = JSON.parse(res.stdout.trim()) as { strong_telemetry_missing_cases?: number };
+      expect(parsed.strong_telemetry_missing_cases).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("fails quality profile when semantic quality is required for lexical expectations but missing", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-semantic-missing-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            {
+              id: "c1",
+              expected: {
+                must_include: ["offline evidence"],
+              },
+            },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireSemanticQuality",
+        "1",
+      ]);
+      expect(res.code).toBe(2);
+      expect(res.stderr).toContain("requires semantic quality contract");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("passes quality profile when semantic quality contract is present", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-semantic-ok-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            {
+              id: "c1",
+              expected: {
+                must_include: ["offline evidence"],
+                semantic: {
+                  required_concepts: [["offline"], ["evidence"]],
+                },
+              },
+            },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireSemanticQuality",
+        "1",
+      ]);
+      expect(res.code).toBe(0);
+      const parsed = JSON.parse(res.stdout.trim()) as { semantic_quality_missing_cases?: number };
+      expect(parsed.semantic_quality_missing_cases).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("fails by default when lexical expectations have no semantic contract", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-semantic-default-missing-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            { id: "c1", expected: { must_include: ["offline"] } },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate(["--cases", casesPath, "--profile", "quality"]);
+      expect(res.code).toBe(2);
+      expect(res.stderr).toContain("requires semantic quality contract");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("fails semantic contract when reference_texts has no profile or thresholds", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-semantic-reference-calib-missing-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            {
+              id: "c1",
+              expected: {
+                must_include: ["offline"],
+                semantic: {
+                  reference_texts: ["agent works offline with evidence"],
+                },
+              },
+            },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate(["--cases", casesPath, "--profile", "quality"]);
+      expect(res.code).toBe(2);
+      expect(res.stderr).toContain("requires semantic quality contract");
     } finally {
       await rm(root, { recursive: true, force: true });
     }

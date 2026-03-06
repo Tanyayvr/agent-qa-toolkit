@@ -41,6 +41,8 @@ You get:
 - Conservative pass semantics: runner transport/runtime failures are recorded as evidence and counted as `pass=false` (not "green" by default)
 - Execution-quality summary (`summary.execution_quality`) with transport success and weak-assertion rate
 - Explicit tool-telemetry assertion with deterministic reason code (`tool_telemetry_missing`) when tool trace is required but absent
+- Runtime policy enforcement (`planning_gate` + `repl_policy`) with deterministic `policy_violation` evidence and required per-item `policy_evaluation`
+- Semantic quality assertion (`semantic_quality`) for text tasks: required/forbidden concepts + calibrated similarity (`profile` or `token_f1`/`lcs_ratio`) + custom synonyms
 - Synthetic fault-matrix mode (`cases/matrix.json`) to validate transport/data failure classification before external pilots
 - Root cause attribution (RCA) and policy hints
 - Security signals (6 scanners + optional entropy scanner)
@@ -246,7 +248,6 @@ Note:
 - Security FAQ: `docs/security-faq.md`
 - Capability chronology (due diligence): `docs/CHRONOLOGY.md`
 - Repro checklist (due diligence): `docs/VERIFY.md`
-- Post-release hardening plan: `docs/roadmap/2026-03-03-production-hardening-from-research-log.md`
 - Synthetic validation example: `docs/goose-synthetic-validation-mar04.md`
 
 ---
@@ -290,9 +291,16 @@ One-command local campaign (baseline/new2/new3 + evaluator + trend):
 ```bash
 BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod ./scripts/run-local-campaign.sh
 ```
-Strict release campaign gate (fail fast on degraded execution quality):
+By default this script ingests each generated report into local library (`.agent-qa/library`). Set `LIBRARY_INGEST=0` to disable.
+Execution quality release gate is ON by default in `run-local-campaign.sh` (`EVAL_FAIL_ON_EXECUTION_DEGRADED=1`).
+To disable explicitly (not recommended for release):
 ```bash
-BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod EVAL_FAIL_ON_EXECUTION_DEGRADED=1 ./scripts/run-local-campaign.sh
+BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod EVAL_FAIL_ON_EXECUTION_DEGRADED=0 ./scripts/run-local-campaign.sh
+```
+Optional KPI hard-gate thresholds:
+```bash
+AQ_MIN_PRE_ACTION_ENTROPY_REMOVED=0.05 AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK=10 \
+BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod ./scripts/run-local-campaign.sh
 ```
 Slow-agent profile (auto timeout tuning):
 ```bash
@@ -374,7 +382,7 @@ Note:
 - Runner executes both `baseline` and `new` per case.
 - CLI flags that take values require a delimiter: use `--timeoutMs 210000` or `--timeoutMs=210000` (not `--timeoutMs210000`).
 - Effective runtime grows with `timeoutMs * (retries + 1)`; for slow local agents start with `--retries 0` and tune `--timeoutMs` intentionally.
-- For slow/variable agents, prefer `--timeoutProfile auto` with `--timeoutAutoCapMs` to auto-tune timeout from historical latencies + adapter `/health` timeout hints.
+- For slow/variable agents, prefer `--timeoutProfile auto` with `--timeoutAutoCapMs`; auto mode now learns only from successful history (failure-only history is ignored), requires `--timeoutAutoMinSuccessSamples` (default `3`), and bounds history growth via `--timeoutAutoMaxIncreaseFactor` (default `3`).
 - `--timeoutProfile auto` now also constrains runner timeout by adapter server timeout safe window (`server_request_timeout_ms - 5000ms`) when `/health` exposes it.
 - Runner now has a built-in Node HTTP fallback for long-running local calls when Node `fetch` fails waiting for headers (~300s class); this reduces false `network_error: fetch failed` on slow agents.
 - Runner has a case-level inactivity watchdog: `--inactivityTimeoutMs` (auto default `max(timeoutMs + 30000, 120000)`) plus heartbeat logs via `--heartbeatIntervalMs`.
@@ -395,6 +403,8 @@ Note:
 - Runner propagates `run_meta` to `/run-case` (`run_id`, `incident_id`, `agent_id`), forwards per-case `metadata.handoff`, and can forward optional per-case `metadata.policy` (`planning_gate`, `repl_policy`).
 - Evaluator supports deterministic policy assertions via case `expected.planning_gate` and `expected.repl_policy`; failed checks emit `policy_tampering` security signals and can escalate gate recommendation (`require_approval` / `block`).
 - Compare report items now include required `policy_evaluation` block (`baseline/new` with `planning_gate_pass` and `repl_policy_pass`) for hard-contract policy auditing.
+- Campaign quality validation now enforces strong telemetry contracts by default (`CASE_QUALITY_REQUIRE_STRONG_TELEMETRY=1` in `scripts/run-local-campaign.sh`), so wrapper-only telemetry is rejected for quality profile runs unless explicitly relaxed.
+- Campaign quality validation now also enforces semantic text-eval contracts by default (`CASE_QUALITY_REQUIRE_SEMANTIC=1`): lexical text expectations must define `expected.semantic` rules; `reference_texts` must include either `semantic.profile` (`strict|balanced|lenient`) or both `semantic.min_token_f1` + `semantic.min_lcs_ratio`.
 - Runner preserves optional OTel anchors (`trace_anchor`) and enriches from response headers (`traceparent` / `b3` / `x-trace-id`) when available.
 - In `bundle:group`, each `--report <label=dir>` label is persisted as `agent_id` in the group index/manifest.
 - Group bundles remain the evidence aggregation layer; runtime transfer is handled by `/handoff`.
@@ -413,6 +423,11 @@ npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps
 Execution-quality gate (for CI):
 ```bash
 AQ_MIN_TRANSPORT_SUCCESS_RATE=0.95 AQ_MAX_WEAK_EXPECTED_RATE=0.20 \
+npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest --failOnExecutionDegraded
+```
+KPI thresholds can also be included in the same gate:
+```bash
+AQ_MIN_TRANSPORT_SUCCESS_RATE=0.95 AQ_MAX_WEAK_EXPECTED_RATE=0.20 AQ_MIN_PRE_ACTION_ENTROPY_REMOVED=0.05 AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK=10 \
 npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest --failOnExecutionDegraded
 ```
 Report UX:

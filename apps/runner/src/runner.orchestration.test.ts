@@ -134,6 +134,28 @@ describe("runner orchestration", () => {
         transport_ok: true,
       },
     });
+    await writeJson(path.join(outDir, "new", "seed-run", "c1.run2.json"), {
+      case_id: "c1",
+      version: "new",
+      final_output: { content_type: "text", content: "ok" },
+      events: [],
+      proposed_actions: [],
+      runner_transport: {
+        latency_ms: 100_000,
+        transport_ok: true,
+      },
+    });
+    await writeJson(path.join(outDir, "new", "seed-run", "c1.run3.json"), {
+      case_id: "c1",
+      version: "new",
+      final_output: { content_type: "text", content: "ok" },
+      events: [],
+      proposed_actions: [],
+      runner_transport: {
+        latency_ms: 100_000,
+        transport_ok: true,
+      },
+    });
 
     globalThis.fetch = vi.fn(async (_input: unknown, init?: RequestInit) => {
       const payload = JSON.parse(String(init?.body ?? "{}")) as {
@@ -169,6 +191,8 @@ describe("runner orchestration", () => {
       "auto",
       "--timeoutMs",
       "15000",
+      "--timeoutAutoMaxIncreaseFactor",
+      "20",
       "--retries",
       "0",
       "--backoffBaseMs",
@@ -323,6 +347,9 @@ describe("runner orchestration", () => {
               tool_allowlist: ["run_shell"],
               denied_command_patterns: ["rm\\s+-rf"],
               max_command_length: 256,
+              denied_path_patterns: ["^/etc/"],
+              allowed_path_prefixes: ["/tmp/"],
+              max_tool_calls: 3,
             },
           },
         },
@@ -337,7 +364,13 @@ describe("runner orchestration", () => {
         handoff?: { handoff_id?: string; checksum?: string };
         policy?: {
           planning_gate?: { required_for_mutations?: boolean; high_risk_tools?: string[] };
-          repl_policy?: { tool_allowlist?: string[]; max_command_length?: number };
+          repl_policy?: {
+            tool_allowlist?: string[];
+            max_command_length?: number;
+            denied_path_patterns?: string[];
+            allowed_path_prefixes?: string[];
+            max_tool_calls?: number;
+          };
         };
       };
       expect(payload.run_meta?.run_id).toBe("handoff-run");
@@ -349,6 +382,9 @@ describe("runner orchestration", () => {
       expect(payload.policy?.planning_gate?.high_risk_tools).toEqual(["run_shell"]);
       expect(payload.policy?.repl_policy?.tool_allowlist).toEqual(["run_shell"]);
       expect(payload.policy?.repl_policy?.max_command_length).toBe(256);
+      expect(payload.policy?.repl_policy?.denied_path_patterns).toEqual(["^/etc/"]);
+      expect(payload.policy?.repl_policy?.allowed_path_prefixes).toEqual(["/tmp/"]);
+      expect(payload.policy?.repl_policy?.max_tool_calls).toBe(3);
       return new Response(
         JSON.stringify({
           case_id: payload.case_id,

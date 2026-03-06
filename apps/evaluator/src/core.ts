@@ -38,6 +38,22 @@ export type Expected = {
     retrieval_required?: { doc_ids?: string[] };
     must_include?: string[];
     must_not_include?: string[];
+    semantic?: {
+        required_concepts?: Array<string | string[]>;
+        forbidden_concepts?: Array<string | string[]>;
+        reference_texts?: string[];
+        min_token_f1?: number;
+        min_lcs_ratio?: number;
+        profile?: "strict" | "balanced" | "lenient";
+        synonyms?: Record<string, string[]>;
+    };
+    tool_telemetry?: {
+        require_non_wrapper_calls?: boolean;
+        min_tool_calls?: number;
+        min_tool_results?: number;
+        allowed_modes?: Array<"native" | "inferred" | "wrapper_only">;
+        require_call_result_pairs?: boolean;
+    };
     planning_gate?: PlanningGatePolicy;
     repl_policy?: ReplRuntimePolicy;
 };
@@ -155,6 +171,11 @@ export function checkToolTelemetryAvailability(expected: Expected, resp: AgentRe
     if (hasNonEmptyList(expected.tool_sequence)) reasons.push("tool_sequence");
     if (expected.evidence_required_for_actions === true) reasons.push("evidence_required_for_actions");
     if (hasNonEmptyList(expected.action_required)) reasons.push("action_required");
+    const telemetryPolicy = expected.tool_telemetry && typeof expected.tool_telemetry === "object"
+        ? expected.tool_telemetry
+        : undefined;
+    const policyEnabled = telemetryPolicy !== undefined;
+    if (policyEnabled) reasons.push("tool_telemetry_policy");
     if (reasons.length === 0) {
         return { name: "tool_telemetry", pass: true, details: { note: "not_required" } };
     }
@@ -162,7 +183,57 @@ export function checkToolTelemetryAvailability(expected: Expected, resp: AgentRe
     const events = asEvents(resp.events);
     const calls = toolCalls(events);
     const results = toolResults(events);
-    const pass = calls.length > 0 || results.length > 0;
+    const byCall = new Map<string, ToolCallEvent>();
+    for (const call of calls) byCall.set(call.call_id, call);
+
+    const wrapperCalls = calls.filter((call) => {
+        const src = (call.args as Record<string, unknown>)?._telemetry_source;
+        return src === "wrapper";
+    });
+    const nonWrapperCalls = calls.length - wrapperCalls.length;
+    const responseMode = (() => {
+        const raw = (resp as Record<string, unknown>).telemetry_mode;
+        return raw === "native" || raw === "inferred" || raw === "wrapper_only" ? raw : undefined;
+    })();
+    const inferredMode: "native" | "inferred" | "wrapper_only" = (() => {
+        if (calls.length === 0) return "wrapper_only";
+        if (nonWrapperCalls === 0) return "wrapper_only";
+        const hasInferred = calls.some((call) => {
+            const src = (call.args as Record<string, unknown>)?._telemetry_source;
+            return src === "inferred";
+        });
+        return hasInferred ? "inferred" : "native";
+    })();
+    const mode = responseMode ?? inferredMode;
+
+    const violations: string[] = [];
+    if (!(calls.length > 0 || results.length > 0)) violations.push("tool_telemetry_missing");
+
+    if (policyEnabled) {
+        if (telemetryPolicy.require_non_wrapper_calls === true && nonWrapperCalls <= 0) {
+            violations.push("wrapper_only_telemetry");
+        }
+        if (typeof telemetryPolicy.min_tool_calls === "number" && calls.length < telemetryPolicy.min_tool_calls) {
+            violations.push("tool_call_count_below_min");
+        }
+        if (typeof telemetryPolicy.min_tool_results === "number" && results.length < telemetryPolicy.min_tool_results) {
+            violations.push("tool_result_count_below_min");
+        }
+        if (Array.isArray(telemetryPolicy.allowed_modes) && telemetryPolicy.allowed_modes.length > 0) {
+            const allowed = new Set(telemetryPolicy.allowed_modes);
+            if (!allowed.has(mode)) {
+                violations.push("telemetry_mode_not_allowed");
+            }
+        }
+        if (telemetryPolicy.require_call_result_pairs === true) {
+            const resultByCallId = new Set(results.map((r) => r.call_id));
+            const missingPairs = calls.filter((c) => !resultByCallId.has(c.call_id)).map((c) => c.call_id);
+            if (missingPairs.length > 0) {
+                violations.push("tool_call_without_result");
+            }
+        }
+    }
+    const pass = violations.length === 0;
     return {
         name: "tool_telemetry",
         pass,
@@ -170,7 +241,12 @@ export function checkToolTelemetryAvailability(expected: Expected, resp: AgentRe
             required_by: reasons,
             tool_call_count: calls.length,
             tool_result_count: results.length,
-            reason_code: pass ? undefined : "tool_telemetry_missing",
+            wrapper_tool_call_count: wrapperCalls.length,
+            non_wrapper_tool_call_count: nonWrapperCalls,
+            telemetry_mode: mode,
+            reason_code: pass ? undefined : violations[0],
+            violations: pass ? [] : violations,
+            known_tool_call_ids: Array.from(byCall.keys()),
         },
     };
 }
@@ -183,6 +259,278 @@ export function stringifyOutput(out: FinalOutput | undefined | null): string {
     } catch {
         return String(out.content ?? "");
     }
+}
+
+const SEMANTIC_STOP_WORDS = new Set<string>([
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "have",
+    "in", "is", "it", "of", "on", "or", "that", "the", "to", "was", "were", "will", "with",
+]);
+
+const SEMANTIC_SYNONYMS: Record<string, string[]> = {
+    offline: ["local", "selfhosted", "self-hosted", "onprem", "on-prem", "airgapped", "air-gapped"],
+    local: ["offline", "onprem", "on-prem"],
+    evidence: ["proof", "trace", "artifact"],
+    incident: ["issue", "ticket", "case"],
+    timeout: ["timelimit", "time-limit", "latency"],
+    fail: ["failure", "error", "broken"],
+    policy: ["guardrail", "rule"],
+};
+
+type SemanticSynonymMap = Record<string, string[]>;
+
+const SEMANTIC_PROFILES: Record<"strict" | "balanced" | "lenient", { minTokenF1: number; minLcsRatio: number }> = {
+    strict: { minTokenF1: 0.7, minLcsRatio: 0.45 },
+    balanced: { minTokenF1: 0.45, minLcsRatio: 0.25 },
+    lenient: { minTokenF1: 0.35, minLcsRatio: 0.2 },
+};
+
+function normalizeSemanticText(input: string): string {
+    return input
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+}
+
+function stemToken(token: string): string {
+    if (token.length > 5 && token.endsWith("ing")) return token.slice(0, -3);
+    if (token.length > 4 && token.endsWith("ed")) return token.slice(0, -2);
+    if (token.length > 4 && token.endsWith("es")) return token.slice(0, -2);
+    if (token.length > 3 && token.endsWith("s")) return token.slice(0, -1);
+    return token;
+}
+
+function semanticTokens(input: string): string[] {
+    const norm = normalizeSemanticText(input);
+    if (!norm) return [];
+    const tokens = norm.split(/\s+/).filter((t) => t.length > 0 && !SEMANTIC_STOP_WORDS.has(t));
+    return tokens.map((t) => stemToken(t));
+}
+
+function normalizeSemanticKey(value: string): string {
+    const tokens = semanticTokens(value);
+    return tokens[0] ?? "";
+}
+
+function buildSemanticSynonymMap(semantic: Expected["semantic"] | undefined): SemanticSynonymMap {
+    const merged = new Map<string, Set<string>>();
+    const add = (keyRaw: string, synonymRaw: string): void => {
+        const key = normalizeSemanticKey(keyRaw);
+        const synonym = String(synonymRaw ?? "").trim();
+        if (!key || !synonym) return;
+        if (!merged.has(key)) merged.set(key, new Set<string>());
+        merged.get(key)!.add(synonym);
+    };
+
+    for (const [key, values] of Object.entries(SEMANTIC_SYNONYMS)) {
+        for (const value of values) add(key, value);
+    }
+
+    const custom = semantic?.synonyms;
+    if (custom && typeof custom === "object") {
+        for (const [key, values] of Object.entries(custom)) {
+            if (!Array.isArray(values)) continue;
+            for (const value of values) add(key, String(value ?? ""));
+        }
+    }
+
+    const normalized: SemanticSynonymMap = {};
+    for (const [key, values] of merged.entries()) {
+        normalized[key] = Array.from(values);
+    }
+    return normalized;
+}
+
+function semanticAlternativeTokenGroups(token: string, synonyms: SemanticSynonymMap): string[][] {
+    const base = normalizeSemanticKey(token);
+    if (!base) return [];
+    const groups = new Set<string>();
+    groups.add(JSON.stringify([base]));
+    const alternatives = synonyms[base] ?? [];
+    for (const phrase of alternatives) {
+        const tokens = semanticTokens(phrase);
+        if (tokens.length === 0) continue;
+        groups.add(JSON.stringify(tokens));
+    }
+    return Array.from(groups).map((raw) => JSON.parse(raw) as string[]);
+}
+
+function semanticTokenMatches(outputTokenSet: Set<string>, token: string, synonyms: SemanticSynonymMap): boolean {
+    const groups = semanticAlternativeTokenGroups(token, synonyms);
+    return groups.some((group) => group.every((part) => outputTokenSet.has(part)));
+}
+
+function tokenSet(tokens: string[]): Set<string> {
+    return new Set(tokens);
+}
+
+function conceptToAlternatives(value: string | string[]): string[] {
+    if (Array.isArray(value)) {
+        return value.map((v) => String(v ?? "").trim()).filter((v) => v.length > 0);
+    }
+    const single = String(value ?? "").trim();
+    return single ? [single] : [];
+}
+
+type PhraseSemanticMatch = {
+    pass: boolean;
+    mode: "lexical" | "semantic" | "none";
+    coverage: number;
+};
+
+function matchPhraseSemantically(
+    outputNorm: string,
+    outputTokenSet: Set<string>,
+    phrase: string,
+    synonyms: SemanticSynonymMap = SEMANTIC_SYNONYMS
+): PhraseSemanticMatch {
+    const normalizedPhrase = normalizeSemanticText(phrase);
+    if (!normalizedPhrase) return { pass: false, mode: "none", coverage: 0 };
+    if (outputNorm.includes(normalizedPhrase)) {
+        return { pass: true, mode: "lexical", coverage: 1 };
+    }
+    const phraseTokens = semanticTokens(normalizedPhrase);
+    if (phraseTokens.length === 0) return { pass: false, mode: "none", coverage: 0 };
+
+    let matched = 0;
+    for (const token of phraseTokens) {
+        if (semanticTokenMatches(outputTokenSet, token, synonyms)) matched += 1;
+    }
+    const coverage = matched / phraseTokens.length;
+    const minCoverage = phraseTokens.length <= 2 ? 1 : 0.67;
+    if (coverage >= minCoverage) {
+        return { pass: true, mode: "semantic", coverage };
+    }
+    return { pass: false, mode: "none", coverage };
+}
+
+function longestCommonSubsequence(a: string[], b: string[]): number {
+    const n = Math.min(a.length, 256);
+    const m = Math.min(b.length, 256);
+    if (n === 0 || m === 0) return 0;
+    const dp: number[] = new Array(m + 1).fill(0);
+    for (let i = 1; i <= n; i += 1) {
+        let prev = 0;
+        for (let j = 1; j <= m; j += 1) {
+            const tmp = dp[j] ?? 0;
+            if (a[i - 1] === b[j - 1]) {
+                dp[j] = prev + 1;
+            } else {
+                dp[j] = Math.max(dp[j] ?? 0, dp[j - 1] ?? 0);
+            }
+            prev = tmp;
+        }
+    }
+    return dp[m] ?? 0;
+}
+
+function tokenF1(reference: string[], output: string[]): number {
+    if (reference.length === 0 || output.length === 0) return 0;
+    const refSet = tokenSet(reference);
+    const outSet = tokenSet(output);
+    let intersection = 0;
+    for (const t of refSet) {
+        if (outSet.has(t)) intersection += 1;
+    }
+    if (intersection === 0) return 0;
+    const precision = intersection / outSet.size;
+    const recall = intersection / refSet.size;
+    return (2 * precision * recall) / (precision + recall);
+}
+
+export function checkSemanticQuality(expected: Expected, resp: AgentResponse): AssertionResult {
+    const semantic = expected.semantic && typeof expected.semantic === "object" ? expected.semantic : {};
+    const synonymMap = buildSemanticSynonymMap(semantic);
+    const requiredConcepts = Array.isArray(semantic.required_concepts) ? semantic.required_concepts : [];
+    const forbiddenConcepts = Array.isArray(semantic.forbidden_concepts) ? semantic.forbidden_concepts : [];
+    const referenceTexts = Array.isArray(semantic.reference_texts)
+        ? semantic.reference_texts.map((r) => String(r ?? "").trim()).filter((r) => r.length > 0)
+        : [];
+
+    const hasSemanticRules = requiredConcepts.length > 0 || forbiddenConcepts.length > 0 || referenceTexts.length > 0;
+    if (!hasSemanticRules) {
+        return { name: "semantic_quality", pass: true, details: { note: "not_required" } };
+    }
+
+    const outputRaw = stringifyOutput(resp.final_output);
+    const outputNorm = normalizeSemanticText(outputRaw);
+    const outputTokens = semanticTokens(outputRaw);
+    const outputTokenSet = tokenSet(outputTokens);
+
+    const missingRequiredConcepts: string[][] = [];
+    const hitForbiddenConcepts: string[][] = [];
+    const semanticMatches: string[] = [];
+
+    for (const concept of requiredConcepts) {
+        const alternatives = conceptToAlternatives(concept);
+        if (alternatives.length === 0) continue;
+        const matched = alternatives.some((alt) => {
+            const m = matchPhraseSemantically(outputNorm, outputTokenSet, alt, synonymMap);
+            if (m.pass && m.mode === "semantic") semanticMatches.push(alt);
+            return m.pass;
+        });
+        if (!matched) missingRequiredConcepts.push(alternatives);
+    }
+
+    for (const concept of forbiddenConcepts) {
+        const alternatives = conceptToAlternatives(concept);
+        if (alternatives.length === 0) continue;
+        const matched = alternatives.some((alt) => matchPhraseSemantically(outputNorm, outputTokenSet, alt, synonymMap).pass);
+        if (matched) hitForbiddenConcepts.push(alternatives);
+    }
+
+    let bestTokenF1 = 0;
+    let bestLcsRatio = 0;
+    if (referenceTexts.length > 0) {
+        for (const ref of referenceTexts) {
+            const refTokens = semanticTokens(ref);
+            if (refTokens.length === 0) continue;
+            const f1 = tokenF1(refTokens, outputTokens);
+            const lcs = longestCommonSubsequence(refTokens, outputTokens);
+            const lcsRatio = lcs / refTokens.length;
+            bestTokenF1 = Math.max(bestTokenF1, f1);
+            bestLcsRatio = Math.max(bestLcsRatio, lcsRatio);
+        }
+    }
+
+    const semanticProfile = semantic.profile === "strict" || semantic.profile === "balanced" || semantic.profile === "lenient"
+        ? semantic.profile
+        : "balanced";
+    const profileDefaults = SEMANTIC_PROFILES[semanticProfile];
+    const minTokenF1 = typeof semantic.min_token_f1 === "number"
+        ? semantic.min_token_f1
+        : (referenceTexts.length > 0 ? profileDefaults.minTokenF1 : undefined);
+    const minLcsRatio = typeof semantic.min_lcs_ratio === "number"
+        ? semantic.min_lcs_ratio
+        : (referenceTexts.length > 0 ? profileDefaults.minLcsRatio : undefined);
+
+    const violations: string[] = [];
+    if (missingRequiredConcepts.length > 0) violations.push("semantic_required_concepts_missing");
+    if (hitForbiddenConcepts.length > 0) violations.push("semantic_forbidden_concept_present");
+    if (typeof minTokenF1 === "number" && bestTokenF1 < minTokenF1) violations.push("semantic_token_f1_below_threshold");
+    if (typeof minLcsRatio === "number" && bestLcsRatio < minLcsRatio) violations.push("semantic_lcs_below_threshold");
+
+    const pass = violations.length === 0;
+    return {
+        name: "semantic_quality",
+        pass,
+        details: {
+            reason_code: pass ? undefined : violations[0],
+            violations: pass ? [] : violations,
+            required_concepts_count: requiredConcepts.length,
+            forbidden_concepts_count: forbiddenConcepts.length,
+            missing_required_concepts: missingRequiredConcepts,
+            hit_forbidden_concepts: hitForbiddenConcepts,
+            semantic_phrase_matches: Array.from(new Set(semanticMatches)),
+            reference_count: referenceTexts.length,
+            best_token_f1: Number(bestTokenF1.toFixed(3)),
+            best_lcs_ratio: Number(bestLcsRatio.toFixed(3)),
+            semantic_profile: semanticProfile,
+            min_token_f1: minTokenF1,
+            min_lcs_ratio: minLcsRatio,
+        },
+    };
 }
 
 type PlanEnvelope = {
@@ -248,10 +596,75 @@ function commandTextFromArgs(args: Record<string, unknown>): string {
     }
 }
 
+function extractCommandPaths(commandText: string): string[] {
+    if (!commandText || commandText.trim().length === 0) return [];
+    const quoted = commandText.match(/"(?:\\.|[^"])*"|'(?:\\.|[^'])*'/g) ?? [];
+    const unquoted = commandText.split(/\s+/);
+    const tokens = [...quoted, ...unquoted]
+        .map((t) => t.replace(/^['"]|['"]$/g, "").trim())
+        .filter((t) => t.length > 0);
+    const candidates = tokens.filter((t) => t.startsWith("/") || t.startsWith("./") || t.startsWith("../") || t.startsWith("~"));
+    return Array.from(new Set(candidates));
+}
+
+type RuntimePolicyViolation = {
+    scope: "planning_gate" | "repl_policy";
+    severity: "require_approval" | "block";
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+};
+
+function runtimePolicyViolations(resp: AgentResponse): RuntimePolicyViolation[] {
+    const raw = (resp as Record<string, unknown>).policy_violations;
+    if (!Array.isArray(raw)) return [];
+    const out: RuntimePolicyViolation[] = [];
+    for (const item of raw) {
+        if (!item || typeof item !== "object") continue;
+        const rec = item as Record<string, unknown>;
+        const scope = rec.scope;
+        const severity = rec.severity;
+        const code = rec.code;
+        const message = rec.message;
+        if (
+            (scope === "planning_gate" || scope === "repl_policy") &&
+            (severity === "require_approval" || severity === "block") &&
+            typeof code === "string" &&
+            typeof message === "string"
+        ) {
+            out.push({
+                scope,
+                severity,
+                code,
+                message,
+                ...(rec.details && typeof rec.details === "object" ? { details: rec.details as Record<string, unknown> } : {}),
+            });
+        }
+    }
+    return out;
+}
+
 export function checkPlanningGate(expected: Expected, resp: AgentResponse): AssertionResult {
     const policy = expected.planning_gate;
     if (!policy) {
         return { name: "planning_gate", pass: true, details: { note: "not_required" } };
+    }
+
+    const adapterViolations = runtimePolicyViolations(resp).filter((v) => v.scope === "planning_gate");
+    if (adapterViolations.length > 0) {
+        return {
+            name: "planning_gate",
+            pass: false,
+            details: {
+                reason_code: adapterViolations[0]?.code ?? "planning_gate_violation",
+                source: "adapter_runtime_policy",
+                violations: adapterViolations.map((v) => ({
+                    code: v.code,
+                    severity: v.severity,
+                    ...(v.details ? { details: v.details } : {}),
+                })),
+            },
+        };
     }
 
     const mutationTools = normalizeToolSet(policy.mutation_tools, DEFAULT_MUTATION_TOOLS);
@@ -321,6 +734,24 @@ export function checkReplPolicy(expected: Expected, resp: AgentResponse): Assert
         return { name: "repl_policy", pass: true, details: { note: "not_required" } };
     }
 
+    const adapterViolations = runtimePolicyViolations(resp).filter((v) => v.scope === "repl_policy");
+    if (adapterViolations.length > 0) {
+        return {
+            name: "repl_policy",
+            pass: false,
+            details: {
+                reason_code: adapterViolations[0]?.code ?? "repl_policy_violation",
+                source: "adapter_runtime_policy",
+                violations: adapterViolations.map((v) => ({
+                    code: v.code,
+                    severity: v.severity,
+                    ...(v.details ? { details: v.details } : {}),
+                })),
+                high_risk_violation: adapterViolations.some((v) => v.severity === "block"),
+            },
+        };
+    }
+
     const replToolNames = normalizeToolSet(policy.tool_allowlist, DEFAULT_REPL_TOOLS);
     const calls = toolCalls(resp.events ?? []);
     const replCalls = calls.filter((c) => DEFAULT_REPL_TOOLS.has(c.tool) || replToolNames.has(c.tool));
@@ -364,6 +795,46 @@ export function checkReplPolicy(expected: Expected, resp: AgentResponse): Assert
             const text = commandTextFromArgs(call.args);
             if (text.length > policy.max_command_length) {
                 violations.push(`command_too_long:${call.tool}:${text.length}`);
+            }
+        }
+    }
+
+    if (typeof policy.max_tool_calls === "number" && policy.max_tool_calls > 0) {
+        if (replCalls.length > policy.max_tool_calls) {
+            violations.push(`too_many_repl_calls:${replCalls.length}`);
+        }
+    }
+
+    if (Array.isArray(policy.denied_path_patterns) && policy.denied_path_patterns.length > 0) {
+        const patterns = policy.denied_path_patterns
+            .map((p) => {
+                try {
+                    return new RegExp(p, "i");
+                } catch {
+                    return null;
+                }
+            })
+            .filter((p): p is RegExp => p !== null);
+        for (const call of replCalls) {
+            const paths = extractCommandPaths(commandTextFromArgs(call.args));
+            for (const p of paths) {
+                for (const re of patterns) {
+                    if (re.test(p)) {
+                        violations.push(`denied_path_pattern:${call.tool}:${re.source}`);
+                        highRisk = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if (Array.isArray(policy.allowed_path_prefixes) && policy.allowed_path_prefixes.length > 0) {
+        for (const call of replCalls) {
+            const paths = extractCommandPaths(commandTextFromArgs(call.args));
+            const disallowed = paths.filter((p) => !policy.allowed_path_prefixes?.some((prefix) => p.startsWith(prefix)));
+            if (disallowed.length > 0) {
+                violations.push(`path_outside_allowlist:${call.tool}:${disallowed[0] ?? "unknown"}`);
+                highRisk = true;
             }
         }
     }
@@ -611,17 +1082,39 @@ export function evaluateOne(c: Case, resp: AgentResponse, ajv: Ajv): EvaluationR
         assertions.push({ name: "tool_sequence", pass, details: { expected: exp.tool_sequence, actual: calls } });
     }
 
+    const outText = stringifyOutput(resp.final_output);
+    const outNorm = normalizeSemanticText(outText);
+    const outTokenSet = tokenSet(semanticTokens(outText));
+    const semanticSynonyms = buildSemanticSynonymMap(exp.semantic);
+
     if (exp.must_include?.length) {
-        const out = stringifyOutput(resp.final_output).toLowerCase();
-        const missing = exp.must_include.filter((p) => !out.includes(p.toLowerCase()));
-        assertions.push({ name: "must_include", pass: missing.length === 0, details: { missing_phrases: missing } });
+        const missing: string[] = [];
+        const semanticPhraseMatches: string[] = [];
+        for (const phrase of exp.must_include) {
+            const matched = matchPhraseSemantically(outNorm, outTokenSet, phrase, semanticSynonyms);
+            if (!matched.pass) {
+                missing.push(phrase);
+            } else if (matched.mode === "semantic") {
+                semanticPhraseMatches.push(phrase);
+            }
+        }
+        assertions.push({
+            name: "must_include",
+            pass: missing.length === 0,
+            details: {
+                missing_phrases: missing,
+                semantic_phrase_matches: semanticPhraseMatches,
+            },
+        });
     }
 
     if (exp.must_not_include?.length) {
-        const out = stringifyOutput(resp.final_output).toLowerCase();
+        const out = outText.toLowerCase();
         const found = exp.must_not_include.filter((p) => out.includes(p.toLowerCase()));
         assertions.push({ name: "must_not_include", pass: found.length === 0, details: { found_phrases: found } });
     }
+
+    assertions.push(checkSemanticQuality(exp, resp));
 
     if (exp.retrieval_required?.doc_ids?.length) {
         const docs = extractRetrievalDocIds(ev);

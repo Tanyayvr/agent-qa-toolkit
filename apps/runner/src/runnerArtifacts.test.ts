@@ -21,6 +21,8 @@ function mkCfg(root: string): RunnerConfig {
     timeoutProfile: "off",
     timeoutAutoCapMs: 60_000,
     timeoutAutoLookbackRuns: 5,
+    timeoutAutoMinSuccessSamples: 3,
+    timeoutAutoMaxIncreaseFactor: 3,
     retries: 0,
     backoffBaseMs: 100,
     concurrency: 1,

@@ -7,6 +7,8 @@ export type ExecutionQualitySummary = {
   thresholds: {
     min_transport_success_rate: number;
     max_weak_expected_rate: number;
+    min_pre_action_entropy_removed: number;
+    min_reconstruction_minutes_saved_per_block: number;
   };
   total_executed_cases: number;
   baseline_runner_failures: number;
@@ -73,6 +75,12 @@ export function parseRateThreshold(raw: string | undefined, fallback: number): n
   return Math.max(0, Math.min(1, n));
 }
 
+export function parseNonNegativeThreshold(raw: string | undefined, fallback: number): number {
+  const n = raw === undefined ? fallback : Number(raw);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(0, n);
+}
+
 export function isWeakExpected(exp: Expected): boolean {
   const hasList = (v: unknown) => Array.isArray(v) && v.length > 0;
   const hasRetrievalDocs = Array.isArray(exp.retrieval_required?.doc_ids) && exp.retrieval_required.doc_ids.length > 0;
@@ -92,6 +100,8 @@ export function computeExecutionQuality(params: {
   expectedById: Map<string, Expected>;
   minTransportSuccessRate: number;
   maxWeakExpectedRate: number;
+  minPreActionEntropyRemoved: number;
+  minReconstructionMinutesSavedPerBlock: number;
   interruptedBySignal?: "SIGINT" | "SIGTERM";
 }): ExecutionQualitySummary {
   const {
@@ -99,6 +109,8 @@ export function computeExecutionQuality(params: {
     expectedById,
     minTransportSuccessRate,
     maxWeakExpectedRate,
+    minPreActionEntropyRemoved,
+    minReconstructionMinutesSavedPerBlock,
     interruptedBySignal,
   } = params;
   const executedItems = items.filter((it) => it.case_status === "executed");
@@ -175,6 +187,16 @@ export function computeExecutionQuality(params: {
       `weak expected rate ${weakExpectedRate.toFixed(3)} is above threshold ${maxWeakExpectedRate.toFixed(3)}`
     );
   }
+  if (preActionEntropyRemoved < minPreActionEntropyRemoved) {
+    executionReasons.push(
+      `pre-action entropy removed ${preActionEntropyRemoved.toFixed(3)} is below threshold ${minPreActionEntropyRemoved.toFixed(3)}`
+    );
+  }
+  if (blockedCases > 0 && reconstructionMinutesSavedPerBlock < minReconstructionMinutesSavedPerBlock) {
+    executionReasons.push(
+      `reconstruction minutes saved per block ${reconstructionMinutesSavedPerBlock.toFixed(3)} is below threshold ${minReconstructionMinutesSavedPerBlock.toFixed(3)}`
+    );
+  }
   if (interruptedBySignal) {
     executionReasons.push(`interrupted by ${interruptedBySignal}`);
   }
@@ -185,6 +207,8 @@ export function computeExecutionQuality(params: {
     thresholds: {
       min_transport_success_rate: minTransportSuccessRate,
       max_weak_expected_rate: maxWeakExpectedRate,
+      min_pre_action_entropy_removed: minPreActionEntropyRemoved,
+      min_reconstruction_minutes_saved_per_block: minReconstructionMinutesSavedPerBlock,
     },
     total_executed_cases: executedTotal,
     baseline_runner_failures: baselineRunnerFailures,

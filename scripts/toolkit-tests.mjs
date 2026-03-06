@@ -70,6 +70,17 @@ function validateReport(report, reportDir) {
   assert(q.portable_paths === true, "quality_flags.portable_paths must be true");
   assert((q.missing_assets_count ?? 0) === 0, "quality_flags.missing_assets_count must be 0");
 
+  const eq = report.summary?.execution_quality;
+  assert(eq && typeof eq === "object", "summary.execution_quality must be present");
+  assert(eq.thresholds && typeof eq.thresholds === "object", "execution_quality.thresholds must be present");
+  assert(typeof eq.thresholds.min_transport_success_rate === "number", "missing threshold min_transport_success_rate");
+  assert(typeof eq.thresholds.max_weak_expected_rate === "number", "missing threshold max_weak_expected_rate");
+  assert(typeof eq.thresholds.min_pre_action_entropy_removed === "number", "missing threshold min_pre_action_entropy_removed");
+  assert(
+    typeof eq.thresholds.min_reconstruction_minutes_saved_per_block === "number",
+    "missing threshold min_reconstruction_minutes_saved_per_block"
+  );
+
   const required = [
     "case_id",
     "title",

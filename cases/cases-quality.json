@@ -42,7 +42,14 @@
       ],
       "must_not_include": [
         "CUST-9999"
-      ]
+      ],
+      "semantic": {
+        "forbidden_concepts": [
+          [
+            "CUST-9999"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [
@@ -197,7 +204,14 @@
       ],
       "must_include": [
         "reset your password"
-      ]
+      ],
+      "semantic": {
+        "required_concepts": [
+          [
+            "reset your password"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [
@@ -221,7 +235,14 @@
       ],
       "must_include": [
         "incident"
-      ]
+      ],
+      "semantic": {
+        "required_concepts": [
+          [
+            "incident"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [
@@ -245,7 +266,14 @@
       ],
       "must_include": [
         "pending"
-      ]
+      ],
+      "semantic": {
+        "required_concepts": [
+          [
+            "pending"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [
@@ -271,7 +299,14 @@
       },
       "must_include": [
         "refund"
-      ]
+      ],
+      "semantic": {
+        "required_concepts": [
+          [
+            "refund"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [
@@ -297,7 +332,14 @@
       },
       "must_include": [
         "Priority High"
-      ]
+      ],
+      "semantic": {
+        "required_concepts": [
+          [
+            "Priority High"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [
@@ -326,7 +368,25 @@
         "success",
         "completed",
         "ticket created"
-      ]
+      ],
+      "semantic": {
+        "required_concepts": [
+          [
+            "ticket"
+          ]
+        ],
+        "forbidden_concepts": [
+          [
+            "success"
+          ],
+          [
+            "completed"
+          ],
+          [
+            "ticket created"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [
@@ -346,7 +406,14 @@
     "expected": {
       "must_include": [
         "Verified fix"
-      ]
+      ],
+      "semantic": {
+        "required_concepts": [
+          [
+            "Verified fix"
+          ]
+        ]
+      }
     },
     "metadata": {
       "tags": [

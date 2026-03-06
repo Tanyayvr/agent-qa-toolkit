@@ -9,6 +9,7 @@
   HTML report renders the cases table lazily from embedded rows JSON, applies client-side pagination,
   and uses incremental chunked page rendering + debounced text filtering to stay responsive on large runs.
 3) **Evidence pack** is the report directory (manifest + assets + report.html + compare-report.json).
+   Local campaign script (`scripts/run-local-campaign.sh`) ingests generated reports into the local library by default (`.agent-qa/library`, opt-out via `LIBRARY_INGEST=0`).
 4) **Group bundle (`P1`)** can aggregate multiple report directories under one incident:
    `npm run bundle:group -- --report a=<reportDirA> --report b=<reportDirB> ...`
    producing `index.html`, `group-index.json`, and `group-manifest.json` with checksum verification via
@@ -60,7 +61,9 @@ Runner and evaluator support additional scenarios for production drift:
 - **Runtime handoff proof checks**: `node scripts/proof-runtime-handoff.mjs --baseUrl <adapter> --mode endpoint|e2e`
   validates `/handoff` idempotency (endpoint mode) and optional `/run-case` receipt propagation (e2e mode).
 - **Adaptive timeout profile**: optional `--timeoutProfile auto` adjusts `timeoutMs` using historical case latencies and adapter `/health` timeout hints;
-  bounded by `--timeoutAutoCapMs` to avoid unbounded waits.
+  bounded by `--timeoutAutoCapMs` to avoid unbounded waits. Auto-learning uses successful history only,
+  ignores failure-only history, requires `--timeoutAutoMinSuccessSamples`, and caps history-driven growth
+  with `--timeoutAutoMaxIncreaseFactor`.
 - **Agent onboarding phases** (recommended for new external agents):
   - calibration runs: high cap + no fail-fast to learn runtime distribution
   - validation runs: restore retries/fail-fast and confirm `execution_quality`
@@ -74,7 +77,12 @@ Runner and evaluator support additional scenarios for production drift:
   failure taxonomy (`http_error`, `timeout`, `network_error`, `invalid_json`) and gate behavior before customer pilots.
 - **Execution-quality gating**: evaluator emits `summary.execution_quality` (transport success + weak expected rate);
   CI can enforce non-zero exit with `--failOnExecutionDegraded` and thresholds:
-  `AQ_MIN_TRANSPORT_SUCCESS_RATE`, `AQ_MAX_WEAK_EXPECTED_RATE`.
+  `AQ_MIN_TRANSPORT_SUCCESS_RATE`, `AQ_MAX_WEAK_EXPECTED_RATE`,
+  `AQ_MIN_PRE_ACTION_ENTROPY_REMOVED`, `AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK`.
+  `scripts/run-local-campaign.sh` enables this gate by default (`EVAL_FAIL_ON_EXECUTION_DEGRADED=1`).
+- **Semantic text-eval layer**: evaluator supports deterministic semantic assertions
+  (`expected.semantic.required_concepts`, `forbidden_concepts`, `reference_texts`, `profile|min_token_f1|min_lcs_ratio`, `synonyms`),
+  so text checks are not limited to raw substring matching.
 - **Release-gate E2E in CI**: `scripts/e2e-policy-gate.mjs` verifies evaluator hard-gate behavior and
   `scripts/e2e-soak-load.mjs` validates load/soak campaign stability + artifact integrity.
 - **Admissibility KPI (numeric)**: evaluator also emits
@@ -152,6 +160,8 @@ Telemetry normalization follows three levels:
 - **native**: adapter/plugin receives structured `events/proposed_actions` from agent runtime (highest fidelity).
 - **inferred**: CLI adapter infers extra tool calls from stdout traces (JSON line / `▸ tool ...`) when native telemetry is absent.
 - **wrapper**: deterministic fallback wrapper telemetry (`cli_agent_exec` tool_call/tool_result + final_output) is always emitted.
+  Runtime responses expose this as `telemetry_mode=wrapper_only`; quality profiles can reject this mode.
+Inferred tool calls carry attestation fields (`_inferred_source_line_no`, `_inferred_source_line_hash`) so evaluator can audit provenance.
 It also applies a runtime timeout cap (`CLI_AGENT_TIMEOUT_CAP_MS`) and reports effective runtime settings via `/health`.
 To prevent long-running agent requests from being cut at Node's HTTP-server layer, the adapter configures
 server-side timeouts from CLI runtime budget (`CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS`, `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`,
@@ -162,9 +172,15 @@ For production hardening, adapter auth can be enabled via `CLI_AGENT_AUTH_TOKEN`
 Persistent handoff retention is bounded by `CLI_AGENT_HANDOFF_TTL_MS` and `CLI_AGENT_HANDOFF_MAX_ITEMS_TOTAL`.
 Runner can also forward optional per-case runtime policy (`metadata.policy`) with `planning_gate` and `repl_policy` blocks.
 CLI adapter validates and enforces this runtime policy against emitted telemetry and can block response with
-`adapter_error.code=policy_violation` plus structured `policy_violations`.
+`adapter_error.code=policy_violation` plus structured `policy_violations` (returned as a non-transport response to preserve deterministic evaluator handling).
+Policy violations are also appended to an audit log (`.agent-qa/policy-violations.ndjson`, configurable via `CLI_AGENT_POLICY_AUDIT_PATH`).
 Evaluator enforces deterministic `planning_gate` / `repl_policy` assertions from case expectations and emits `policy_tampering`
 signals that map to gate escalation (`require_approval` / `block`).
+`compare-report` item schema requires `policy_evaluation`, making policy pass/fail contract-mandatory per case.
+Quality campaign validation (`scripts/validate-cases-quality.mjs`) can require semantic contracts for lexical text expectations
+(`--requireSemanticQuality 1`, enabled by default in `scripts/run-local-campaign.sh` via `CASE_QUALITY_REQUIRE_SEMANTIC=1`).
+For `reference_texts`, validation requires calibrated thresholds via either `semantic.profile` or explicit
+`semantic.min_token_f1` + `semantic.min_lcs_ratio`.
 
 ## OSS hardening backlog (post-current release)
 
@@ -172,7 +188,7 @@ Aligned with external production-agent lessons, the next OSS hardening items are
 
 - deterministic eval expansion for objective tasks (`set similarity` / `sequence alignment` / optional layout-pixel comparators)
 - planning/repl runtime hardening phase 2: extend current adapter-level enforcement to stricter execution-layer controls (mutation broker, REPL allow/deny, IO/time/path caps)
-- stricter REPL execution policy audit trail in artifacts (including deny reasons and bounded command telemetry)
+- richer REPL artifact evidence (command-level deny reasons, bounded command payloads, signed policy audit exports)
 
 These are product-hardening tasks, not paid-only features.
 

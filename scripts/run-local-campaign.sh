@@ -18,6 +18,8 @@ TIMEOUT_MS="${TIMEOUT_MS:-210000}"
 TIMEOUT_PROFILE="${TIMEOUT_PROFILE:-off}"
 TIMEOUT_AUTO_CAP_MS="${TIMEOUT_AUTO_CAP_MS:-3600000}"
 TIMEOUT_AUTO_LOOKBACK_RUNS="${TIMEOUT_AUTO_LOOKBACK_RUNS:-12}"
+TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES:-3}"
+TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${TIMEOUT_AUTO_MAX_INCREASE_FACTOR:-3}"
 RETRIES="${RETRIES:-1}"
 CONCURRENCY="${CONCURRENCY:-1}"
 PREFLIGHT_MODE="${PREFLIGHT_MODE:-warn}"
@@ -33,12 +35,16 @@ RUNCASE_TIMEOUT_MS="${RUNCASE_TIMEOUT_MS:-30000}"
 ENFORCE_CASE_QUALITY="${ENFORCE_CASE_QUALITY:-1}"
 CASE_QUALITY_MAX_WEAK_EXPECTED_RATE="${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE:-0.2}"
 CASE_QUALITY_REQUIRE_TOOL_EVIDENCE="${CASE_QUALITY_REQUIRE_TOOL_EVIDENCE:-1}"
+CASE_QUALITY_REQUIRE_STRONG_TELEMETRY="${CASE_QUALITY_REQUIRE_STRONG_TELEMETRY:-1}"
+CASE_QUALITY_REQUIRE_SEMANTIC="${CASE_QUALITY_REQUIRE_SEMANTIC:-1}"
 ALLOW_EXISTING_RUN_PREFIX="${ALLOW_EXISTING_RUN_PREFIX:-0}"
-LIBRARY_INGEST="${LIBRARY_INGEST:-0}"
+LIBRARY_INGEST="${LIBRARY_INGEST:-1}"
 LIBRARY_DIR="${LIBRARY_DIR:-.agent-qa/library}"
 LIBRARY_AGENT_ID="${LIBRARY_AGENT_ID:-}"
 LIBRARY_SOURCE="${LIBRARY_SOURCE:-local-campaign}"
-EVAL_FAIL_ON_EXECUTION_DEGRADED="${EVAL_FAIL_ON_EXECUTION_DEGRADED:-0}"
+EVAL_FAIL_ON_EXECUTION_DEGRADED="${EVAL_FAIL_ON_EXECUTION_DEGRADED:-1}"
+AQ_MIN_PRE_ACTION_ENTROPY_REMOVED="${AQ_MIN_PRE_ACTION_ENTROPY_REMOVED:-0}"
+AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK="${AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK:-0}"
 
 RUN_BASE="${RUN_PREFIX}_base"
 RUN_NEW2="${RUN_PREFIX}_new2"
@@ -75,6 +81,8 @@ run_runner() {
     --timeoutProfile "${TIMEOUT_PROFILE}"
     --timeoutAutoCapMs "${TIMEOUT_AUTO_CAP_MS}"
     --timeoutAutoLookbackRuns "${TIMEOUT_AUTO_LOOKBACK_RUNS}"
+    --timeoutAutoMinSuccessSamples "${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
+    --timeoutAutoMaxIncreaseFactor "${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}"
     --retries "${RETRIES}"
     --concurrency "${CONCURRENCY}"
     --preflightMode "${PREFLIGHT_MODE}"
@@ -152,7 +160,9 @@ check_cases_quality() {
     --cases "${CASES}" \
     --profile "${CAMPAIGN_PROFILE}" \
     --maxWeakExpectedRate "${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE}" \
-    --requireToolEvidence "${CASE_QUALITY_REQUIRE_TOOL_EVIDENCE}"
+    --requireToolEvidence "${CASE_QUALITY_REQUIRE_TOOL_EVIDENCE}" \
+    --requireStrongTelemetry "${CASE_QUALITY_REQUIRE_STRONG_TELEMETRY}" \
+    --requireSemanticQuality "${CASE_QUALITY_REQUIRE_SEMANTIC}"
 }
 
 check_fresh_targets() {
@@ -190,13 +200,13 @@ check_fresh_targets() {
 }
 
 echo "Running baseline/new runs against ${BASE_URL}"
-echo "Runner timeout profile: ${TIMEOUT_PROFILE} (timeoutMs=${TIMEOUT_MS}, cap=${TIMEOUT_AUTO_CAP_MS}, lookback=${TIMEOUT_AUTO_LOOKBACK_RUNS})"
+echo "Runner timeout profile: ${TIMEOUT_PROFILE} (timeoutMs=${TIMEOUT_MS}, cap=${TIMEOUT_AUTO_CAP_MS}, lookback=${TIMEOUT_AUTO_LOOKBACK_RUNS}, minSuccess=${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}, maxFactor=${TIMEOUT_AUTO_MAX_INCREASE_FACTOR})"
 echo "Campaign profile: suite=${AGENT_SUITE}, profile=${CAMPAIGN_PROFILE}, cases=${CASES}"
 if [[ "${LIBRARY_INGEST}" == "1" ]]; then
   echo "Library ingest: enabled (dir=${LIBRARY_DIR}, agentId=${LIBRARY_AGENT_ID:-none}, source=${LIBRARY_SOURCE})"
 fi
 if [[ "${EVAL_FAIL_ON_EXECUTION_DEGRADED}" == "1" ]]; then
-  echo "Execution quality gate: enabled (--failOnExecutionDegraded)"
+  echo "Execution quality gate: enabled (--failOnExecutionDegraded, minTransport=${AQ_MIN_TRANSPORT_SUCCESS_RATE:-0.95}, maxWeakExpected=${AQ_MAX_WEAK_EXPECTED_RATE:-0.2}, minPreActionEntropy=${AQ_MIN_PRE_ACTION_ENTROPY_REMOVED}, minReconMinutesPerBlock=${AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK})"
 fi
 if [[ "${RETRIES}" == "0" ]]; then
   echo "WARNING: RETRIES=0 disables transient transport recovery retries and can turn short adapter blips into failed runs."

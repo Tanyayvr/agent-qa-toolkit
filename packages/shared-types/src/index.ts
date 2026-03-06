@@ -204,14 +204,28 @@ export type ReplRuntimePolicy = {
     tool_allowlist?: string[];
     /** Regex patterns (as strings) that must not match command text. */
     denied_command_patterns?: string[];
+    /** Regex patterns that must not match extracted command paths. */
+    denied_path_patterns?: string[];
+    /** Allowed absolute path prefixes for extracted command paths. */
+    allowed_path_prefixes?: string[];
     /** Maximum command length for REPL command payloads. */
     max_command_length?: number;
+    /** Maximum number of REPL commands allowed per single run-case execution. */
+    max_tool_calls?: number;
 };
 
 /** Runtime policy contract optionally propagated with /run-case calls. */
 export type RuntimePolicy = {
     planning_gate?: PlanningGatePolicy;
     repl_policy?: ReplRuntimePolicy;
+};
+
+export type RuntimePolicyViolation = {
+    scope: "planning_gate" | "repl_policy";
+    severity: "require_approval" | "block";
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
 };
 
 /** Runtime handoff payload transferred between agents/services.
@@ -295,6 +309,12 @@ export type AgentResponse = {
 
     /** Optional OTel anchor fields for cross-linking evidence to traces. */
     trace_anchor?: TraceAnchor;
+
+    /** Optional telemetry quality marker emitted by adapters/plugins. */
+    telemetry_mode?: "native" | "inferred" | "wrapper_only";
+
+    /** Optional runtime-policy violations detected by adapter/plugin. */
+    policy_violations?: RuntimePolicyViolation[];
 
     /** Optional runtime routing metadata echoed by adapters/agents. */
     run_meta?: RunMeta;

@@ -72,6 +72,16 @@ describe("runner cli validation", () => {
     await expect(mod.runRunner()).rejects.toThrow("Invalid --timeoutAutoLookbackRuns value");
   });
 
+  it("fails when --timeoutAutoMinSuccessSamples <= 0", async () => {
+    const mod = await loadRunnerWithArgv(["node", "runner", "--timeoutAutoMinSuccessSamples", "0"]);
+    await expect(mod.runRunner()).rejects.toThrow("Invalid --timeoutAutoMinSuccessSamples value");
+  });
+
+  it("fails when --timeoutAutoMaxIncreaseFactor <= 0", async () => {
+    const mod = await loadRunnerWithArgv(["node", "runner", "--timeoutAutoMaxIncreaseFactor", "0"]);
+    await expect(mod.runRunner()).rejects.toThrow("Invalid --timeoutAutoMaxIncreaseFactor value");
+  });
+
   it("fails when --bodySnippetBytes < 0", async () => {
     const mod = await loadRunnerWithArgv(["node", "runner", "--bodySnippetBytes", "-1"]);
     await expect(mod.runRunner()).rejects.toThrow("Invalid --bodySnippetBytes value");
