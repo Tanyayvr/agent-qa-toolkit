@@ -25,6 +25,7 @@
     "demo:robustness": "node scripts/demo.mjs --suite robustness",
     "demo:e2e": "node scripts/demo-e2e.mjs",
     "test:toolkit": "node scripts/toolkit-tests.mjs",
+    "conformance:test:python": "node scripts/conformance-test-python.mjs",
     "e2e:policy-gate": "node scripts/e2e-policy-gate.mjs",
     "e2e:runtime-policy": "node scripts/e2e-runtime-policy.mjs",
     "e2e:soak-load": "node scripts/e2e-soak-load.mjs",

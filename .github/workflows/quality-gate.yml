@@ -26,6 +26,9 @@ jobs:
       - name: Full Quality Gate
         run: npm run quality:gate
 
+      - name: Python Conformance Parity
+        run: npm run conformance:test:python
+
       - name: Policy Gate E2E
         run: npm run e2e:policy-gate
 

@@ -152,6 +152,8 @@ This prevents "dashboard-only" claims and allows third parties to reproduce runs
 - **Strict** — signature + zero violations
 
 Golden packs live in `conformance/` with `expected.json` per pack.
+Baseline multi-language validator track now includes Python CLI parity checks
+(`validators/python/aepf_validator/cli.py`, exercised via `scripts/conformance-test-python.mjs`).
 
 ## Optional adapters (plugin packages)
 
