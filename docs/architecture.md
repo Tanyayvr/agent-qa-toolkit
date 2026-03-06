@@ -163,6 +163,9 @@ Reference plugin adapters are shipped in-repo under `plugins/*`:
 - `plugins/vendor-bridge` (Promptfoo / DeepEval / Giskard import + canonical baseline/new gate diff)
 
 They are optional and not required for the core pipeline to function.
+Plugin release-readiness (P1.2 M3/M4 baseline) is validated by `npm run plugins:release-readiness`,
+which enforces plugin workspace typecheck, plugin tests, and required README sections
+(`Usage`, `Reliability`, `Security`, `Limitations`).
 The local CLI adapter surfaces normalized failure causes (`timeout`, `spawn_error`, `non_zero_exit`, `aborted`, `invalid_config`, `busy`, `policy_violation`)
 in `adapter_error.code` for fast root-cause triage.
 Telemetry normalization follows three levels:

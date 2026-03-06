@@ -377,6 +377,9 @@ npm run e2e:policy-gate
 # verifies runtime policy/tool-broker allowlist enforcement + policy audit evidence
 npm run e2e:runtime-policy -- --ci
 
+# validates plugin M3/M4 release-readiness (typecheck + tests + README contract sections)
+npm run plugins:release-readiness
+
 # CI-sized soak/load + artifact integrity + quality gate
 npm run e2e:soak-load -- --ci
 
@@ -388,6 +391,7 @@ Proof notes:
 - `proof:runtime-handoff` requires a running adapter at `--baseUrl`; if adapter is down, the command fails with an explicit health hint.
 - `proof:p1` writes `p1-claim-proof.json` (default: inside `--reportDir`) and fails non-zero if any sub-proof fails (OTel anchors, runtime endpoint idempotency, runtime e2e receipt unless `--skipRuntimeE2E`).
 - `e2e:runtime-policy` enforces near-term runtime controls in shipped path: blocked denied commands, wrapper-only telemetry escalation (`telemetry_untrusted`), and policy-audit log persistence.
+- `plugins:release-readiness` writes `apps/evaluator/reports/plugins-release-readiness.json` and fails non-zero when plugin typecheck/tests fail or required README sections are missing (`Usage`, `Reliability`, `Security`, `Limitations`).
 - `e2e:soak-load` now enforces: zero transport real-failures in load summary, healthy execution-quality across soak cycles, deterministic gate signatures across cycles, and bounded campaign runtime variance.
 
 Note:

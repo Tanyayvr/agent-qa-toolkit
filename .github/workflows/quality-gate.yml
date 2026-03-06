@@ -32,5 +32,8 @@ jobs:
       - name: Runtime Policy E2E
         run: npm run e2e:runtime-policy -- --ci
 
+      - name: Plugins Release Readiness
+        run: npm run plugins:release-readiness
+
       - name: Soak/Load E2E (CI)
         run: npm run e2e:soak-load -- --ci

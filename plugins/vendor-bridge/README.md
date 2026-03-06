@@ -31,3 +31,19 @@ Gate semantics are conservative:
 - failing case -> `block`
 - passing case with high risk or weak assertions -> `require_approval`
 - passing case with strong assertions -> `none`
+
+## Reliability
+
+- Deterministic normalization: all supported vendor payloads are mapped into one canonical run schema before diffing.
+- Case-level gate behavior is deterministic (`block` / `require_approval` / `none`) from normalized risk metadata.
+- Diff output is stable for the same baseline/candidate inputs and run metadata.
+
+## Security
+
+- Bridge only parses and compares JSON payloads; it does not execute external tools or network calls.
+- Upstream scanner/policy gates remain authoritative for runtime/tool security decisions.
+
+## Limitations
+
+- Only documented connector shapes are supported (`Promptfoo`, `DeepEval`, `Giskard`); custom exports may need pre-normalization.
+- This bridge provides evaluation import/diff logic, not live runtime telemetry capture.
