@@ -32,6 +32,7 @@
     "proof:otel": "node scripts/proof-otel-anchors.mjs",
     "proof:otel:demo": "npm run demo:correctness && npm run proof:otel -- --reportDir apps/evaluator/reports/correctness_latest --minCases 1",
     "proof:runtime-handoff": "node scripts/proof-runtime-handoff.mjs",
+    "proof:p1": "node scripts/proof-p1-claim-pack.mjs",
     "bridge": "ts-node plugins/vendor-bridge/src/cli.ts",
     "pvip:pack": "node scripts/pvip-pack.mjs --reportDir apps/evaluator/reports/latest",
     "pvip:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest",

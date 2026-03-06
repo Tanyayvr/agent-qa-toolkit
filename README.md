@@ -365,6 +365,9 @@ npm run proof:runtime-handoff -- --baseUrl http://127.0.0.1:8788 --mode endpoint
 
 # Optional e2e receipt check (calls /run-case; use on fast adapters)
 npm run proof:runtime-handoff -- --baseUrl http://127.0.0.1:8788 --mode e2e --runCaseTimeoutMs 30000
+
+# P1 claim-proof pack (OTel + runtime handoff endpoint+e2e in one artifact)
+npm run proof:p1 -- --reportDir apps/evaluator/reports/latest --baseUrl http://127.0.0.1:8788
 ```
 Release-gate E2E checks:
 ```bash
@@ -380,6 +383,7 @@ npm run e2e:soak-load -- --caseCount 12 --loadConcurrency 6 --loadIterations 6 -
 Proof notes:
 - `proof:otel` is expected to fail when the selected report has no `trace_id`/`span_id` anchors (for example, runs without anchor-enabled adapter/plugin).
 - `proof:runtime-handoff` requires a running adapter at `--baseUrl`; if adapter is down, the command fails with an explicit health hint.
+- `proof:p1` writes `p1-claim-proof.json` (default: inside `--reportDir`) and fails non-zero if any sub-proof fails (OTel anchors, runtime endpoint idempotency, runtime e2e receipt unless `--skipRuntimeE2E`).
 - `e2e:soak-load` now enforces: zero transport real-failures in load summary, healthy execution-quality across soak cycles, deterministic gate signatures across cycles, and bounded campaign runtime variance.
 
 Note:

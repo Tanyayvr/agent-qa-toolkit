@@ -60,6 +60,8 @@ Runner and evaluator support additional scenarios for production drift:
   Preflight requests retry transient transport failures before strict-mode blocking.
 - **Runtime handoff proof checks**: `node scripts/proof-runtime-handoff.mjs --baseUrl <adapter> --mode endpoint|e2e`
   validates `/handoff` idempotency (endpoint mode) and optional `/run-case` receipt propagation (e2e mode).
+- **P1 claim-proof pack**: `node scripts/proof-p1-claim-pack.mjs --reportDir <report> --baseUrl <adapter>`
+  produces one machine-readable artifact (`p1-claim-proof.json`) that combines OTel anchor proof + runtime handoff endpoint/e2e checks.
 - **Adaptive timeout profile**: optional `--timeoutProfile auto` adjusts `timeoutMs` using historical case latencies and adapter `/health` timeout hints;
   bounded by `--timeoutAutoCapMs` to avoid unbounded waits. Auto-learning uses successful history only,
   ignores failure-only history, requires `--timeoutAutoMinSuccessSamples`, and caps history-driven growth
