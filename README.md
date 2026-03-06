@@ -442,6 +442,15 @@ KPI thresholds can also be included in the same gate:
 AQ_MIN_TRANSPORT_SUCCESS_RATE=0.95 AQ_MAX_WEAK_EXPECTED_RATE=0.20 AQ_MIN_PRE_ACTION_ENTROPY_REMOVED=0.05 AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK=10 \
 npm --workspace evaluator run dev -- --cases cases/cases.json --baselineDir apps/runner/runs/baseline/latest --newDir apps/runner/runs/new/latest --outDir apps/evaluator/reports/latest --reportId latest --failOnExecutionDegraded
 ```
+KPI calibration command (derive recommended env thresholds from historical reports):
+```bash
+npm run kpi:calibrate -- --reportsRoot apps/evaluator/reports --last 50 --minReports 12 --out apps/evaluator/reports/kpi-calibration.json --json
+```
+Calibration notes:
+- `kpi:calibrate` writes a machine-readable artifact with recommended values for:
+  `AQ_MIN_PRE_ACTION_ENTROPY_REMOVED`, `AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK`, `AQ_RECON_MINUTES_PER_REMOVED_RISK_UNIT`.
+- For low-sample windows, command fails by default; use `--allowLowSample` only for provisional baselines.
+
 Report UX:
 - `report.html` uses client-side filtering + pagination (`25/50/100/200` rows/page) with incremental chunked rendering, debounced text filtering, and large-report mode (`1500+` rows).
 

@@ -99,6 +99,9 @@ Runner and evaluator support additional scenarios for production drift:
   This keeps probability-space (risk mass) separate from cost-space (human minutes).
   Risk model assumptions are persisted in the same object for auditability.
   `AQ_RECON_MINUTES_PER_REMOVED_RISK_UNIT` can tune minutes conversion without changing report shape.
+  `scripts/kpi-calibrate.mjs` derives recommended KPI env thresholds from historical compare reports
+  (`AQ_MIN_PRE_ACTION_ENTROPY_REMOVED`, `AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK`, `AQ_RECON_MINUTES_PER_REMOVED_RISK_UNIT`)
+  and fails on low-sample windows unless explicitly overridden.
 - **Structured logs (optional)**: set `AQ_LOG_FORMAT=json` to emit machine-ingestable JSON events in runner/evaluator while keeping human-readable console output.
 
 ## Security scanners

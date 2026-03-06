@@ -28,6 +28,7 @@
     "e2e:policy-gate": "node scripts/e2e-policy-gate.mjs",
     "e2e:runtime-policy": "node scripts/e2e-runtime-policy.mjs",
     "e2e:soak-load": "node scripts/e2e-soak-load.mjs",
+    "kpi:calibrate": "node scripts/kpi-calibrate.mjs",
     "bundle:group": "node scripts/group-bundle.mjs",
     "bundle:group:verify": "node scripts/group-bundle-verify.mjs",
     "proof:otel": "node scripts/proof-otel-anchors.mjs",
