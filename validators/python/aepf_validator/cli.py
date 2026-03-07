@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import argparse
+import base64
 import hashlib
 import json
 import os
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -55,6 +58,60 @@ def push_check(checks: List[Dict[str, Any]], name: str, passed: bool, details: A
 def sha256_file(path: Path) -> str:
     data = path.read_bytes()
     return hashlib.sha256(data).hexdigest()
+
+
+def verify_signature_with_openssl(manifest_text: str, signature_b64: str, public_key_b64: str) -> Tuple[bool, str]:
+    try:
+        signature = base64.b64decode(signature_b64, validate=True)
+    except Exception:
+        return False, "manifest.sig is not valid base64"
+    try:
+        public_key_der = base64.b64decode(public_key_b64, validate=True)
+    except Exception:
+        return False, "AQ_MANIFEST_PUBLIC_KEY is not valid base64"
+
+    with tempfile.TemporaryDirectory(prefix="aepf-verify-signature-") as tmp:
+        tmpdir = Path(tmp)
+        key_der_path = tmpdir / "pub.der"
+        key_pem_path = tmpdir / "pub.pem"
+        sig_path = tmpdir / "manifest.sig"
+        msg_path = tmpdir / "manifest.txt"
+
+        key_der_path.write_bytes(public_key_der)
+        sig_path.write_bytes(signature)
+        msg_path.write_text(manifest_text, encoding="utf-8")
+
+        key_conv = subprocess.run(
+            ["openssl", "pkey", "-pubin", "-inform", "DER", "-in", str(key_der_path), "-out", str(key_pem_path)],
+            capture_output=True,
+            text=True,
+        )
+        if key_conv.returncode != 0:
+            stderr = (key_conv.stderr or "").strip()
+            return False, f"public key parse failed: {stderr or 'openssl pkey failed'}"
+
+        verify = subprocess.run(
+            [
+                "openssl",
+                "pkeyutl",
+                "-verify",
+                "-pubin",
+                "-inkey",
+                str(key_pem_path),
+                "-sigfile",
+                str(sig_path),
+                "-in",
+                str(msg_path),
+                "-rawin",
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if verify.returncode != 0:
+            stderr = (verify.stderr or "").strip()
+            return False, f"manifest.sig verification failed: {stderr or 'openssl verify failed'}"
+
+    return True, ""
 
 
 def validate_required_fields(obj: Dict[str, Any], fields: List[str], prefix: str, errors: List[Dict[str, str]]) -> None:
@@ -307,8 +364,12 @@ def run_validator(report_dir: Path, mode: str) -> Tuple[bool, Dict[str, Any]]:
         elif not os.getenv("AQ_MANIFEST_PUBLIC_KEY"):
             push_check(checks, "signature", False, None, "AQ_MANIFEST_PUBLIC_KEY is not set")
         else:
-            # Python baseline validator currently does not include crypto verification deps.
-            push_check(checks, "signature", False, None, "signature verification is not implemented in python baseline")
+            ok, message = verify_signature_with_openssl(
+                manifest_text=manifest_text,
+                signature_b64=sig_path.read_text(encoding="utf-8").strip(),
+                public_key_b64=os.getenv("AQ_MANIFEST_PUBLIC_KEY", ""),
+            )
+            push_check(checks, "signature", ok, None, None if ok else message)
 
     all_pass = all(check.get("pass") is True for check in checks)
     profiles_status = {

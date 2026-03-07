@@ -484,6 +484,9 @@ npm run conformance:test:go
 - `validators/python` — Python baseline validator (AEPF/PVIP mode parity track)
 - `validators/go` — Go baseline validator (AEPF/PVIP mode parity track)
 
+Validator note:
+- Python and Go validators both verify `manifest.sig` in `strict` mode when `AQ_MANIFEST_PUBLIC_KEY` is set.
+
 ---
 
 ## Pilot Program

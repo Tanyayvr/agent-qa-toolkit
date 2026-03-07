@@ -15,4 +15,4 @@ node scripts/conformance-test-python.mjs
 Notes:
 
 - This is M1 baseline for multi-language parity.
-- Strict mode currently requires `manifest.sig` + `AQ_MANIFEST_PUBLIC_KEY`; cryptographic signature verification is intentionally deferred to next milestone.
+- Strict mode verifies `manifest.sig` using `AQ_MANIFEST_PUBLIC_KEY` (base64 DER SPKI public key).

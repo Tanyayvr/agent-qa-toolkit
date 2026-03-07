@@ -156,6 +156,8 @@ Baseline multi-language validator track now includes Python CLI parity checks
 (`validators/python/aepf_validator/cli.py`, exercised via `scripts/conformance-test-python.mjs`).
 Go baseline is added in `validators/go/aepf-validator` with parity runner
 `scripts/conformance-test-go.mjs`.
+Both validators enforce strict-mode signature verification when
+`AQ_MANIFEST_PUBLIC_KEY` is provided.
 
 ## Optional adapters (plugin packages)
 

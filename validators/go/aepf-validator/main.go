@@ -1,7 +1,13 @@
 package main
 
 import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
@@ -215,6 +221,43 @@ func sha256File(path string) (string, error) {
 	return hex.EncodeToString(hash[:]), nil
 }
 
+func verifySignature(manifestText, sigB64, pubB64 string) (bool, string) {
+	sig, err := base64.StdEncoding.DecodeString(sigB64)
+	if err != nil {
+		return false, "manifest.sig is not valid base64"
+	}
+	pubDER, err := base64.StdEncoding.DecodeString(pubB64)
+	if err != nil {
+		return false, "AQ_MANIFEST_PUBLIC_KEY is not valid base64"
+	}
+	pub, err := x509.ParsePKIXPublicKey(pubDER)
+	if err != nil {
+		return false, "public key parse failed: " + err.Error()
+	}
+	msg := []byte(manifestText)
+	switch key := pub.(type) {
+	case ed25519.PublicKey:
+		if ed25519.Verify(key, msg, sig) {
+			return true, ""
+		}
+		return false, "manifest.sig verification failed"
+	case *rsa.PublicKey:
+		sum := sha256.Sum256(msg)
+		if err := rsa.VerifyPKCS1v15(key, crypto.SHA256, sum[:], sig); err != nil {
+			return false, "manifest.sig verification failed: " + err.Error()
+		}
+		return true, ""
+	case *ecdsa.PublicKey:
+		sum := sha256.Sum256(msg)
+		if ecdsa.VerifyASN1(key, sum[:], sig) {
+			return true, ""
+		}
+		return false, "manifest.sig verification failed"
+	default:
+		return false, "unsupported public key type for signature verification"
+	}
+}
+
 func runValidator(reportDir, mode string) ValidatorResult {
 	checks := []Check{}
 	result := ValidatorResult{
@@ -258,12 +301,14 @@ func runValidator(reportDir, mode string) ValidatorResult {
 	var manifest map[string]interface{}
 	var manifestItems []interface{}
 	manifestLoaded := false
+	manifestText := ""
 
 	if mode != "aepf" {
 		rawManifest, err := os.ReadFile(manifestPath)
 		if err != nil {
 			pushCheck(&checks, "manifest_present", false, nil, "Missing artifacts/manifest.json")
 		} else {
+			manifestText = string(rawManifest)
 			if err := json.Unmarshal(rawManifest, &manifest); err != nil {
 				pushCheck(&checks, "manifest_present", false, nil, "manifest parse error: "+err.Error())
 			} else {
@@ -391,15 +436,25 @@ func runValidator(reportDir, mode string) ValidatorResult {
 	}
 
 	if mode == "strict" {
+		signaturePass := false
 		sigPath := filepath.Join(reportDir, "artifacts", "manifest.sig")
 		if _, err := os.Stat(sigPath); err != nil {
 			pushCheck(&checks, "signature", false, nil, "manifest.sig is missing")
+		} else if manifestText == "" {
+			pushCheck(&checks, "signature", false, nil, "manifest.json required for signature verification")
 		} else if os.Getenv("AQ_MANIFEST_PUBLIC_KEY") == "" {
 			pushCheck(&checks, "signature", false, nil, "AQ_MANIFEST_PUBLIC_KEY is not set")
 		} else {
-			pushCheck(&checks, "signature", false, nil, "signature verification is not implemented in go baseline")
+			sigRaw, err := os.ReadFile(sigPath)
+			if err != nil {
+				pushCheck(&checks, "signature", false, nil, "failed to read manifest.sig")
+			} else {
+				ok, message := verifySignature(manifestText, strings.TrimSpace(string(sigRaw)), os.Getenv("AQ_MANIFEST_PUBLIC_KEY"))
+				pushCheck(&checks, "signature", ok, nil, map[bool]string{true: "", false: message}[ok])
+				signaturePass = ok
+			}
 		}
-		result.ProfilesStatus["signature"] = "fail"
+		result.ProfilesStatus["signature"] = map[bool]string{true: "pass", false: "fail"}[signaturePass]
 	}
 
 	allPass := true
