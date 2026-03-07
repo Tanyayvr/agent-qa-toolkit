@@ -483,6 +483,7 @@ npm run test:coverage
 npm run metrics:dd
 npm run conformance:test:python
 npm run conformance:test:go
+npm run conformance:test:signature
 ```
 
 ---
@@ -504,6 +505,8 @@ npm run conformance:test:go
 
 Validator note:
 - Python and Go validators both verify `manifest.sig` in `strict` mode when `AQ_MANIFEST_PUBLIC_KEY` is set.
+- `npm run conformance:test:signature` performs strict-signature parity checks:
+  signed-pack strict pass + tampered-manifest strict fail (Node/Python/Go validators).
 
 ---
 

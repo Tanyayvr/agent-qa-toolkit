@@ -15,6 +15,7 @@ Solution
 - report.html (human) + compare-report.json (CI contract)
 - assets/ + manifest.json with sha256 integrity
 - Strict verify: portability + integrity checks
+- NOW: strict-signature parity checks across Node/Python/Go validators (signed pack must pass, tampered manifest must fail)
 - NEW: Historical Trending (local SQLite) to catch regression and cost drift over time
 - NEW: data-driven timeout onboarding profile (calibration -> validation -> production) for slow external agents
 - NEW: telemetry normalization levels (native -> inferred from stdout -> wrapper fallback) to avoid "silent no-trace" runs

@@ -159,6 +159,8 @@ Go baseline is added in `validators/go/aepf-validator` with parity runner
 `scripts/conformance-test-go.mjs`.
 Both validators enforce strict-mode signature verification when
 `AQ_MANIFEST_PUBLIC_KEY` is provided.
+Strict-signature parity (signed pass + tampered fail) across Node/Python/Go
+is exercised by `scripts/conformance-test-signature.mjs`.
 
 ## Optional adapters (plugin packages)
 

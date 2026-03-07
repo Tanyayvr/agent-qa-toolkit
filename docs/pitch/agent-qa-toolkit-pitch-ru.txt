@@ -15,6 +15,7 @@ Portable Evidence Packs для tool-using AI агентов
 - report.html (человеку) + compare-report.json (CI контракт)
 - assets/ + manifest.json с sha256 целостностью
 - Strict verify: portability + integrity checks
+- СДЕЛАНО: strict-signature parity для валидаторов Node/Python/Go (подписанный пак проходит, tampered manifest детерминированно падает)
 - НОВОЕ: Historical Trending (локальная SQLite) для дрейфа регрессий и костов во времени
 - НОВОЕ: data-driven timeout onboarding profile (калибровка -> валидация -> прод) для медленных внешних агентов
 - НОВОЕ: уровни нормализации телеметрии (native -> inferred из stdout -> wrapper fallback), чтобы не было "тихих" прогонов без trace

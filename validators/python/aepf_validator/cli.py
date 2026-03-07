@@ -372,10 +372,17 @@ def run_validator(report_dir: Path, mode: str) -> Tuple[bool, Dict[str, Any]]:
             push_check(checks, "signature", ok, None, None if ok else message)
 
     all_pass = all(check.get("pass") is True for check in checks)
+    signature_check = next((c for c in checks if c.get("name") == "signature"), None)
+    signature_status = (
+        "skip"
+        if mode != "strict"
+        else ("pass" if isinstance(signature_check, dict) and signature_check.get("pass") is True else "fail")
+    )
+
     profiles_status = {
         "aepf_format": "pass" if any(c["name"] == "schema_valid" and c["pass"] for c in checks) else "fail",
         "pvip_integrity": "skip" if mode == "aepf" else ("pass" if all_pass else "fail"),
-        "signature": "fail" if mode == "strict" else "skip",
+        "signature": signature_status,
         "governance": "skip",
         "certification": "skip",
     }
