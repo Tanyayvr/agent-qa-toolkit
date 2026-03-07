@@ -20,6 +20,22 @@ function hasFlag(name) {
 
 const baseUrl = getArg("--baseUrl") || "http://localhost:8787";
 const skipDemo = hasFlag("--skipDemo");
+const runSuffix = getArg("--runSuffix") || `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+function resolveReportIds() {
+  if (skipDemo) {
+    return {
+      correctness: getArg("--correctnessReportId") || "correctness_latest",
+      robustness: getArg("--robustnessReportId") || "robustness_latest",
+      latest: getArg("--latestReportId") || "latest",
+    };
+  }
+  return {
+    correctness: `correctness_latest_${runSuffix}`,
+    robustness: `robustness_latest_${runSuffix}`,
+    latest: `latest_${runSuffix}`,
+  };
+}
 
 function run(cmd, args, label) {
   return new Promise((resolve, reject) => {
@@ -139,30 +155,35 @@ function assertGate(report, caseId, expected) {
 }
 
 async function main() {
+  const reportIds = resolveReportIds();
   if (!skipDemo) {
-    await run("node", ["scripts/demo-e2e.mjs", "--baseUrl", baseUrl, "--skipAudit", "--skipLint", "--skipTypecheck"], "demo:e2e");
+    await run(
+      "node",
+      ["scripts/demo-e2e.mjs", "--baseUrl", baseUrl, "--skipAudit", "--skipLint", "--skipTypecheck", "--reportSuffix", runSuffix],
+      "demo:e2e"
+    );
   }
 
-  const correctnessRel = "apps/evaluator/reports/correctness_latest/compare-report.json";
-  const robustnessRel = "apps/evaluator/reports/robustness_latest/compare-report.json";
-  const latestRel = "apps/evaluator/reports/latest/compare-report.json";
+  const correctnessRel = `apps/evaluator/reports/${reportIds.correctness}/compare-report.json`;
+  const robustnessRel = `apps/evaluator/reports/${reportIds.robustness}/compare-report.json`;
+  const latestRel = `apps/evaluator/reports/${reportIds.latest}/compare-report.json`;
 
   const correctness = loadReport(correctnessRel);
   const robustness = loadReport(robustnessRel);
   const latestAbs = path.join(ROOT, latestRel);
   const latest = existsSync(latestAbs) ? loadReport(latestRel) : null;
 
-  const correctnessDir = path.join(ROOT, "apps/evaluator/reports/correctness_latest");
-  const robustnessDir = path.join(ROOT, "apps/evaluator/reports/robustness_latest");
-  const latestDir = path.join(ROOT, "apps/evaluator/reports/latest");
+  const correctnessDir = path.join(ROOT, "apps/evaluator/reports", reportIds.correctness);
+  const robustnessDir = path.join(ROOT, "apps/evaluator/reports", reportIds.robustness);
+  const latestDir = path.join(ROOT, "apps/evaluator/reports", reportIds.latest);
 
   validateReport(correctness, correctnessDir);
   validateReport(robustness, robustnessDir);
   if (latest) validateReport(latest, latestDir);
 
-  const tmpCorrectness = copyToTmp(correctnessDir, "correctness_latest");
-  const tmpRobustness = copyToTmp(robustnessDir, "robustness_latest");
-  const tmpLatest = latest ? copyToTmp(latestDir, "latest") : null;
+  const tmpCorrectness = copyToTmp(correctnessDir, reportIds.correctness);
+  const tmpRobustness = copyToTmp(robustnessDir, reportIds.robustness);
+  const tmpLatest = latest ? copyToTmp(latestDir, reportIds.latest) : null;
   validateReport(correctness, tmpCorrectness);
   validateReport(robustness, tmpRobustness);
   if (latest && tmpLatest) validateReport(latest, tmpLatest);

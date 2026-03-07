@@ -87,11 +87,29 @@ function toFinalOutput(result: OpenAIResponsesResult): FinalOutput {
 type OpenAITelemetry = {
   events: RunEvent[];
   proposed_actions: ProposedAction[];
+  telemetry_mode: "native" | "wrapper_only";
 };
+
+function collectToolHintCount(result: OpenAIResponsesResult): number {
+  const output = Array.isArray(result.output) ? result.output : [];
+  let hints = 0;
+  for (const item of output) {
+    if (!isRecord(item)) continue;
+    if (
+      item.type === "function_call" ||
+      item.type === "function_call_output" ||
+      item.type === "tool_call" ||
+      item.type === "tool_result"
+    ) {
+      hints += 1;
+    }
+  }
+  return hints;
+}
 
 function extractToolTelemetry(result: OpenAIResponsesResult): OpenAITelemetry {
   const output = Array.isArray(result.output) ? result.output : [];
-  if (!output.length) return { events: [], proposed_actions: [] };
+  if (!output.length) return { events: [], proposed_actions: [], telemetry_mode: "wrapper_only" };
 
   const events: RunEvent[] = [];
   const proposedActions: ProposedAction[] = [];
@@ -171,7 +189,18 @@ function extractToolTelemetry(result: OpenAIResponsesResult): OpenAITelemetry {
     resultIds.add(callId);
   }
 
-  return { events, proposed_actions: proposedActions };
+  const hintedToolRecords = collectToolHintCount(result);
+  if (hintedToolRecords > 0 && events.length === 0) {
+    throw new Error(
+      `invalid_telemetry: detected ${hintedToolRecords} tool trace candidate(s) but extracted 0 tool events`
+    );
+  }
+
+  return {
+    events,
+    proposed_actions: proposedActions,
+    telemetry_mode: events.length > 0 ? "native" : "wrapper_only",
+  };
 }
 
 export function wrapOpenAIResponses(
@@ -206,6 +235,7 @@ export function wrapOpenAIResponses(
       workflow_id: workflowId,
       final_output,
       events,
+      telemetry_mode: telemetry.telemetry_mode,
       ...(telemetry.proposed_actions.length > 0 ? { proposed_actions: telemetry.proposed_actions } : {}),
       ...(tokenUsage ? { token_usage: tokenUsage } : {}),
     };
@@ -217,6 +247,7 @@ export const __test__ = {
   extractText,
   extractTokenUsage,
   toFinalOutput,
+  collectToolHintCount,
   extractToolTelemetry,
   parseToolArgs,
 };

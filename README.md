@@ -368,6 +368,12 @@ npm run proof:runtime-handoff -- --baseUrl http://127.0.0.1:8788 --mode e2e --ru
 
 # P1 claim-proof pack (OTel + runtime handoff endpoint+e2e in one artifact)
 npm run proof:p1 -- --reportDir apps/evaluator/reports/latest --baseUrl http://127.0.0.1:8788
+
+# P1 claim-proof pack in fully local/self-contained mode (auto-spawns demo-agent)
+npm run proof:p1 -- --reportDir apps/evaluator/reports/latest --selfContained --selfContainedPort 8798
+
+# Self-contained mode with port fallback window
+npm run proof:p1 -- --reportDir apps/evaluator/reports/latest --selfContained --selfContainedPort 8798 --selfContainedPortAttempts 5
 ```
 Release-gate E2E checks:
 ```bash
@@ -385,11 +391,22 @@ npm run e2e:soak-load -- --ci
 
 # Heavier local qualification profile (before external release)
 npm run e2e:soak-load -- --caseCount 12 --loadConcurrency 6 --loadIterations 6 --soakCycles 3 --maxRuntimeVariance 2.5
+
+# Full local toolkit regression (uses unique run/report IDs per launch; no manual cleanup)
+npm run test:toolkit -- --baseUrl http://127.0.0.1:8796
+
+# SBOM artifacts for supply-chain evidence (CycloneDX + SPDX)
+npm run sbom -- --format cyclonedx --out .agent-qa/sbom/cyclonedx.json
+npm run sbom -- --format spdx --out .agent-qa/sbom/spdx.json
+
+# High-confidence secret scan (fails on committed keys/tokens/private-key blocks)
+npm run security:secrets
 ```
 Proof notes:
 - `proof:otel` is expected to fail when the selected report has no `trace_id`/`span_id` anchors (for example, runs without anchor-enabled adapter/plugin).
 - `proof:runtime-handoff` requires a running adapter at `--baseUrl`; if adapter is down, the command fails with an explicit health hint.
-- `proof:p1` writes `p1-claim-proof.json` (default: inside `--reportDir`) and fails non-zero if any sub-proof fails (OTel anchors, runtime endpoint idempotency, runtime e2e receipt unless `--skipRuntimeE2E`).
+- `proof:p1` writes `p1-claim-proof.json` (default: inside `--reportDir`) and fails non-zero if any sub-proof fails (OTel anchors, runtime endpoint idempotency, runtime e2e receipt unless `--skipRuntimeE2E`). Use `--selfContained` when you need deterministic local proof without an external adapter process.
+- `proof:p1 --selfContained` now retries startup across a sequential port window (`--selfContainedPortAttempts`) to reduce false failures from local bind conflicts.
 - `e2e:runtime-policy` enforces near-term runtime controls in shipped path: blocked denied commands, wrapper-only telemetry escalation (`telemetry_untrusted`), and policy-audit log persistence.
 - `plugins:release-readiness` writes `apps/evaluator/reports/plugins-release-readiness.json` and fails non-zero when plugin typecheck/tests fail or required README sections are missing (`Usage`, `Reliability`, `Security`, `Limitations`).
 - `e2e:soak-load` now enforces: zero transport real-failures in load summary, healthy execution-quality across soak cycles, deterministic gate signatures across cycles, and bounded campaign runtime variance.
@@ -411,6 +428,7 @@ Note:
 - `cli-agent-adapter` can return `adapter_error.code=busy` with HTTP `429` when `CLI_AGENT_MAX_CONCURRENCY` is reached.
 - `cli-agent-adapter` enforces timeout cap via `CLI_AGENT_TIMEOUT_CAP_MS` (default `120000`) and exposes effective runtime config in `/health`.
 - `cli-agent-adapter` emits wrapper telemetry (`tool_call/tool_result/final_output`) and supports best-effort extra tool extraction from text stdout (JSON lines + `▸ tool ...` traces, e.g. Goose-style); response includes `telemetry_mode=wrapper_only|inferred`.
+- Plugin adapters (`langchain-adapter`, `openai-responses-adapter`) now fail fast with `adapter_error.code=invalid_telemetry` when upstream output indicates tool activity but no structured tool events can be extracted (prevents silent wrapper-only false confidence).
 - `cli-agent-adapter` aligns HTTP server request timeout with CLI timeout via `CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS` (default: `CLI_AGENT_TIMEOUT_MS/CLI_AGENT_TIMEOUT_CAP_MS` effective value + `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`).
 - Tune server timeout envelope with `CLI_AGENT_SERVER_TIMEOUT_BUFFER_MS`, `CLI_AGENT_SERVER_HEADERS_TIMEOUT_MS`, and `CLI_AGENT_SERVER_KEEP_ALIVE_TIMEOUT_MS` to avoid 5-minute Node HTTP cutoff on long local-agent calls.
 - Optional adapter auth for production: set `CLI_AGENT_AUTH_TOKEN` (plus optional `CLI_AGENT_AUTH_HEADER`) to require a token on `/run-case` and `/handoff`.

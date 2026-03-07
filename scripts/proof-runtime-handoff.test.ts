@@ -195,6 +195,35 @@ describe("proof-runtime-handoff helpers", () => {
     expect(out.payload.first_upsert_status).toBe(200);
   });
 
+  it("runRuntimeHandoffProof sends identical handoff envelope for duplicate upsert", async () => {
+    const handoffBodies: Array<Record<string, unknown>> = [];
+    const out = await runRuntimeHandoffProof(
+      {
+        baseUrl: "http://x",
+        incidentId: "inc",
+        handoffId: "h",
+        fromAgent: "a",
+        toAgent: "b",
+        mode: "endpoint",
+        runCaseTimeoutMs: 1234,
+      },
+      {
+        requestJson: async (url, _method, body) => {
+          if (String(url).endsWith("/health")) return { ok: true, status: 200, json: { ok: true } };
+          if (String(url).endsWith("/handoff")) {
+            handoffBodies.push(body as Record<string, unknown>);
+            return { ok: true, status: handoffBodies.length === 1 ? 201 : 200, json: { ok: true } };
+          }
+          return { ok: true, status: 200, json: { ok: true } };
+        },
+      }
+    );
+    expect(out.ok).toBe(true);
+    expect(handoffBodies).toHaveLength(2);
+    expect(typeof handoffBodies[0]?.created_at).toBe("number");
+    expect(handoffBodies[0]).toEqual(handoffBodies[1]);
+  });
+
   it("runRuntimeHandoffProof reports endpoint validation failure", async () => {
     const out = await runRuntimeHandoffProof(
       {
@@ -239,6 +268,37 @@ describe("proof-runtime-handoff helpers", () => {
     );
     expect(out.ok).toBe(false);
     expect(String(out.payload.error)).toContain("run-case failed");
+  });
+
+  it("runRuntimeHandoffProof accepts non-2xx run-case when matching receipt is present", async () => {
+    const out = await runRuntimeHandoffProof(
+      {
+        baseUrl: "http://x",
+        incidentId: "inc",
+        handoffId: "h",
+        fromAgent: "a",
+        toAgent: "b",
+        mode: "e2e",
+        runCaseTimeoutMs: 1234,
+      },
+      {
+        requestJson: async (url) => {
+          if (String(url).endsWith("/run-case")) {
+            return {
+              ok: false,
+              status: 404,
+              json: { handoff_receipts: [{ handoff_id: "h", status: "available" }] },
+              text: "not found",
+            };
+          }
+          return { ok: true, status: 200, json: { ok: true } };
+        },
+      }
+    );
+    expect(out.ok).toBe(true);
+    expect(out.payload.run_case_status).toBe(404);
+    expect(out.payload.run_case_ok).toBe(false);
+    expect(String(out.payload.run_case_warning)).toContain("handoff receipt was found");
   });
 
   it("runRuntimeHandoffProof fails when receipt is missing", async () => {

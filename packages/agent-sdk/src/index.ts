@@ -21,6 +21,8 @@ export type SimpleAgent = (input: { user: string; context?: unknown }) => Promis
   proposed_actions?: AgentResponse["proposed_actions"];
   events?: AgentResponse["events"];
   workflow_id?: string;
+  telemetry_mode?: AgentResponse["telemetry_mode"];
+  policy_violations?: AgentResponse["policy_violations"];
   trace_anchor?: AgentResponse["trace_anchor"];
   token_usage?: AgentResponse["token_usage"];
   run_meta?: AgentResponse["run_meta"];
@@ -167,6 +169,8 @@ export function wrapSimpleAgent(agent: SimpleAgent): RunCaseHandler {
       ...(out.workflow_id ? { workflow_id: out.workflow_id } : {}),
       ...(out.proposed_actions ? { proposed_actions: out.proposed_actions } : {}),
       ...(out.events ? { events: out.events } : {}),
+      ...(out.telemetry_mode ? { telemetry_mode: out.telemetry_mode } : {}),
+      ...(out.policy_violations ? { policy_violations: out.policy_violations } : {}),
       ...(out.trace_anchor ? { trace_anchor: out.trace_anchor } : {}),
       ...(out.token_usage ? { token_usage: out.token_usage } : {}),
       ...(out.run_meta ? { run_meta: out.run_meta } : {}),

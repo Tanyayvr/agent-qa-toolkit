@@ -142,6 +142,7 @@ To support independent verification, the repo keeps a direct bridge from code to
 - human triage truth: `report.html` + per-case replay pages
 
 This prevents "dashboard-only" claims and allows third parties to reproduce runs locally.
+Release-quality gate includes high-confidence secret scanning (`npm run security:secrets`) in addition to lint/type/test/docs/audit.
 
 ## Validator modes & conformance
 
@@ -177,8 +178,10 @@ in `adapter_error.code` for fast root-cause triage.
 Telemetry normalization follows three levels:
 - **native**: adapter/plugin receives structured `events/proposed_actions` from agent runtime (highest fidelity).
 - **inferred**: CLI adapter infers extra tool calls from stdout traces (JSON line / `▸ tool ...`) when native telemetry is absent.
-- **wrapper**: deterministic fallback wrapper telemetry (`cli_agent_exec` tool_call/tool_result + final_output) is always emitted.
+- **wrapper_only**: deterministic fallback wrapper telemetry (`cli_agent_exec` tool_call/tool_result + final_output) is always emitted.
   Runtime responses expose this as `telemetry_mode=wrapper_only`; quality profiles can reject this mode.
+Plugin adapters hard-fail with `adapter_error.code=invalid_telemetry` when upstream payload indicates tool activity
+but extracted structured tool events are empty; this prevents silent "wrapper-only" false positives in release gates.
 Inferred tool calls carry attestation fields (`_inferred_source_line_no`, `_inferred_source_line_hash`) so evaluator can audit provenance.
 It also applies a runtime timeout cap (`CLI_AGENT_TIMEOUT_CAP_MS`) and reports effective runtime settings via `/health`.
 To prevent long-running agent requests from being cut at Node's HTTP-server layer, the adapter configures

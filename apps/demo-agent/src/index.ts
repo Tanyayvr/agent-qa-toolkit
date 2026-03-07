@@ -538,7 +538,14 @@ app.post("/run-case", async (req: Request, res: Response) => {
 });
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8787;
+const host = process.env.HOST?.trim() || undefined;
 
-app.listen(port, () => {
-  console.log(`demo-agent listening on http://localhost:${port}`);
-});
+if (host) {
+  app.listen(port, host, () => {
+    console.log(`demo-agent listening on http://${host}:${port}`);
+  });
+} else {
+  app.listen(port, () => {
+    console.log(`demo-agent listening on http://localhost:${port}`);
+  });
+}

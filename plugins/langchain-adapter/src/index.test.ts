@@ -39,6 +39,28 @@ describe("langchain-adapter", () => {
     ]);
   });
 
+  it("counts raw tool telemetry hints from multiple LangChain shapes", () => {
+    expect(
+      __test__.collectToolHintCount({
+        tool_calls: [{ id: "1", name: "a" }],
+        intermediate_steps: [{ action: { tool: "b" } }],
+      })
+    ).toBe(2);
+    expect(
+      __test__.collectToolHintCount({
+        messages: [{ additional_kwargs: { tool_calls: [{ id: "m1", function: { name: "search" } }] } }],
+      })
+    ).toBe(1);
+  });
+
+  it("fails fast with invalid_telemetry when raw tool hints exist but extraction is empty", () => {
+    expect(() =>
+      __test__.buildTelemetry({
+        tool_calls: [{ id: "bad", args: { q: "x" } }],
+      })
+    ).toThrow(/invalid_telemetry/);
+  });
+
   it("wraps runnable and maps user/context to input payload", async () => {
     const runnable = {
       invoke: async (input: Record<string, unknown>) => ({
@@ -56,6 +78,7 @@ describe("langchain-adapter", () => {
     expect(out.events?.some((e) => e.type === "tool_result")).toBe(true);
     expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
     expect(out.proposed_actions?.[0]?.tool_name).toBe("search");
+    expect(out.telemetry_mode).toBe("native");
   });
 
   it("omits context from default mapped input when context is undefined", async () => {
@@ -68,6 +91,7 @@ describe("langchain-adapter", () => {
     const agent = wrapLangChainRunnable(runnable, { inputKey: "query", outputMode: "text" });
     const out = await agent({ user: "hello" });
     expect(out.final_output).toEqual({ content_type: "text", content: "ok" });
+    expect(out.telemetry_mode).toBe("wrapper_only");
     expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
   });
 

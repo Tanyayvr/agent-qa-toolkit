@@ -107,6 +107,15 @@ describe("agent-sdk helpers", () => {
         },
       ],
       events: [{ type: "final_output", ts: 1, content_type: "text", content: "ok" }],
+      telemetry_mode: "native",
+      policy_violations: [
+        {
+          scope: "planning_gate",
+          severity: "require_approval",
+          code: "missing_plan_envelope",
+          message: "missing",
+        },
+      ],
       trace_anchor: {
         trace_id: "0123456789abcdef0123456789abcdef",
         span_id: "0123456789abcdef",
@@ -131,6 +140,8 @@ describe("agent-sdk helpers", () => {
     expect(out.workflow_id).toBe("wf-1");
     expect(out.proposed_actions).toHaveLength(1);
     expect(out.events).toHaveLength(1);
+    expect(out.telemetry_mode).toBe("native");
+    expect(out.policy_violations?.[0]?.code).toBe("missing_plan_envelope");
     expect(out.trace_anchor?.source).toBe("response_body");
     expect(out.token_usage?.total_tokens).toBe(15);
   });

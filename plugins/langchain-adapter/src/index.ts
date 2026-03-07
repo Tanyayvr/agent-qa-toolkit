@@ -82,6 +82,50 @@ type ToolTrace = {
   payload_summary?: Record<string, unknown> | string;
 };
 
+function countToolHintsFromRecord(raw: Record<string, unknown>): number {
+  let count = 0;
+  const directToolCalls = Array.isArray(raw.tool_calls)
+    ? raw.tool_calls
+    : Array.isArray(raw.toolCalls)
+      ? raw.toolCalls
+      : [];
+  count += directToolCalls.length;
+
+  const directSteps = Array.isArray(raw.intermediate_steps)
+    ? raw.intermediate_steps
+    : Array.isArray(raw.intermediateSteps)
+      ? raw.intermediateSteps
+      : [];
+  count += directSteps.length;
+
+  const additionalKwargs = isRecord(raw.additional_kwargs)
+    ? raw.additional_kwargs
+    : isRecord(raw.additionalKwargs)
+      ? raw.additionalKwargs
+      : null;
+  if (additionalKwargs) {
+    const hinted = Array.isArray(additionalKwargs.tool_calls)
+      ? additionalKwargs.tool_calls
+      : Array.isArray(additionalKwargs.toolCalls)
+        ? additionalKwargs.toolCalls
+        : [];
+    count += hinted.length;
+  }
+
+  return count;
+}
+
+function collectToolHintCount(raw: unknown): number {
+  if (!isRecord(raw)) return 0;
+  let count = countToolHintsFromRecord(raw);
+  const messages = Array.isArray(raw.messages) ? raw.messages : [];
+  for (const msg of messages) {
+    if (!isRecord(msg)) continue;
+    count += countToolHintsFromRecord(msg);
+  }
+  return count;
+}
+
 function extractLangChainToolTraces(raw: unknown): ToolTrace[] {
   if (!isRecord(raw)) return [];
   const out: ToolTrace[] = [];
@@ -147,9 +191,17 @@ function extractLangChainToolTraces(raw: unknown): ToolTrace[] {
   return out;
 }
 
-function buildTelemetry(raw: unknown): { events: RunEvent[]; proposed_actions: ProposedAction[] } {
+function buildTelemetry(raw: unknown): { events: RunEvent[]; proposed_actions: ProposedAction[]; telemetry_mode: "native" | "wrapper_only" } {
   const traces = extractLangChainToolTraces(raw);
-  if (traces.length === 0) return { events: [], proposed_actions: [] };
+  if (traces.length === 0) {
+    const hintedToolRecords = collectToolHintCount(raw);
+    if (hintedToolRecords > 0) {
+      throw new Error(
+        `invalid_telemetry: detected ${hintedToolRecords} tool trace candidate(s) but extracted 0 tool events`
+      );
+    }
+    return { events: [], proposed_actions: [], telemetry_mode: "wrapper_only" };
+  }
   const baseTs = Date.now();
   const events: RunEvent[] = [];
   const proposedActions: ProposedAction[] = [];
@@ -184,7 +236,7 @@ function buildTelemetry(raw: unknown): { events: RunEvent[]; proposed_actions: P
     });
   }
 
-  return { events, proposed_actions: proposedActions };
+  return { events, proposed_actions: proposedActions, telemetry_mode: "native" };
 }
 
 export function wrapLangChainRunnable<TInput = unknown, TOutput = unknown, TConfig = unknown>(
@@ -220,6 +272,7 @@ export function wrapLangChainRunnable<TInput = unknown, TOutput = unknown, TConf
       final_output,
       events,
       ...(telemetry.proposed_actions.length > 0 ? { proposed_actions: telemetry.proposed_actions } : {}),
+      telemetry_mode: telemetry.telemetry_mode,
       workflow_id: workflowId,
     };
   };
@@ -229,6 +282,7 @@ export const __test__ = {
   textFromOutput,
   toFinalOutput,
   parseToolArgs,
+  collectToolHintCount,
   extractLangChainToolTraces,
   buildTelemetry,
 };

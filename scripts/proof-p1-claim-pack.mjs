@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { spawn } from "node:child_process";
 
 import { runRuntimeHandoffProof } from "./proof-runtime-handoff.mjs";
 
@@ -14,6 +15,9 @@ Options:
   --minCases <n>              Minimum anchored cases required on baseline and new (default: 1)
   --out <path>                Output proof artifact JSON (default: <reportDir>/p1-claim-proof.json)
   --skipRuntimeE2E            Skip /run-case receipt check and run endpoint-only runtime proof
+  --selfContained             Start/stop local demo adapter automatically for proof run
+  --selfContainedPort <port>  Port used by --selfContained mode (default: 8798)
+  --selfContainedPortAttempts Number of sequential ports to try in --selfContained mode (default: 5)
   --runCaseTimeoutMs <ms>     Timeout for runtime handoff e2e mode (default: 30000)
   --json                      Print machine-readable JSON
   --help, -h                  Show help
@@ -37,12 +41,125 @@ function asInt(raw, fallback) {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function stopProcess(proc, timeoutMs = 2500) {
+  if (!proc || proc.killed || proc.exitCode !== null || proc.signalCode !== null) return;
+  proc.kill("SIGTERM");
+  await new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      try {
+        proc.kill("SIGKILL");
+      } catch {
+        // ignore
+      }
+      resolve();
+    }, timeoutMs);
+    proc.once("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+}
+
+function buildSelfContainedPortCandidates(port, attempts) {
+  const first = Number.isFinite(port) && port > 0 ? Number(port) : 8798;
+  const n = Number.isFinite(attempts) && attempts > 0 ? Number(attempts) : 5;
+  return Array.from({ length: n }, (_, i) => first + i);
+}
+
+function buildSelfContainedAdapterEnv(port, parentEnv = process.env) {
+  return {
+    ...parentEnv,
+    PORT: String(port),
+    HOST: "127.0.0.1",
+    NO_PROXY: "127.0.0.1,localhost",
+    HTTP_PROXY: "",
+    HTTPS_PROXY: "",
+    ALL_PROXY: "",
+    http_proxy: "",
+    https_proxy: "",
+    all_proxy: "",
+  };
+}
+
+async function waitForHealthOrExit(baseUrl, proc, retries = 80, sleepMs = 250) {
+  let exited = false;
+  let exitCode = null;
+  let signal = null;
+  const onExit = (code, sig) => {
+    exited = true;
+    exitCode = code;
+    signal = sig;
+  };
+  proc.once("exit", onExit);
+  try {
+    const target = `${baseUrl.replace(/\/+$/, "")}/health`;
+    for (let i = 0; i < retries; i += 1) {
+      if (exited) {
+        throw new Error(`adapter exited before health became ready (code=${exitCode ?? "null"}, signal=${signal ?? "null"})`);
+      }
+      try {
+        const res = await fetch(target);
+        if (res.ok) {
+          const json = await res.json().catch(() => null);
+          if (json?.ok === true) return;
+        }
+      } catch {
+        // keep retrying
+      }
+      await sleep(sleepMs);
+    }
+    throw new Error(`health check failed: ${target}`);
+  } finally {
+    proc.off("exit", onExit);
+  }
+}
+
+async function startSelfContainedAdapterOnce(port) {
+  const baseUrl = `http://127.0.0.1:${port}`;
+  const proc = spawn("npm", ["--workspace", "demo-agent", "run", "dev"], {
+    cwd: process.cwd(),
+    env: buildSelfContainedAdapterEnv(port),
+    stdio: "inherit",
+  });
+  try {
+    await waitForHealthOrExit(baseUrl, proc);
+  } catch (err) {
+    await stopProcess(proc);
+    throw err;
+  }
+  return {
+    baseUrl,
+    stop: async () => {
+      await stopProcess(proc);
+    },
+  };
+}
+
+async function startSelfContainedAdapter(port, options = {}) {
+  const candidates = buildSelfContainedPortCandidates(port, options.portAttempts ?? 5);
+  const errors = [];
+  for (const candidate of candidates) {
+    try {
+      return await startSelfContainedAdapterOnce(candidate);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`port=${candidate} error=${msg}`);
+    }
+  }
+  throw new Error(`self-contained adapter failed on all candidate ports: ${errors.join(" | ")}`);
+}
+
 export function parseCliArgs(argv = process.argv) {
   const reportDir = getArg("--reportDir", argv) || "apps/evaluator/reports/latest";
   const baseUrl = (getArg("--baseUrl", argv) || "http://127.0.0.1:8788").replace(/\/+$/, "");
   const minCases = asInt(getArg("--minCases", argv), 1);
   const out = getArg("--out", argv) || path.join(reportDir, "p1-claim-proof.json");
   const runCaseTimeoutMs = asInt(getArg("--runCaseTimeoutMs", argv), 30000);
+  const selfContainedPortAttempts = asInt(getArg("--selfContainedPortAttempts", argv), 5);
   return {
     help: hasFlag("--help", argv) || hasFlag("-h", argv),
     jsonMode: hasFlag("--json", argv),
@@ -51,6 +168,9 @@ export function parseCliArgs(argv = process.argv) {
     minCases,
     out,
     skipRuntimeE2E: hasFlag("--skipRuntimeE2E", argv),
+    selfContained: hasFlag("--selfContained", argv),
+    selfContainedPort: asInt(getArg("--selfContainedPort", argv), 8798),
+    selfContainedPortAttempts,
     runCaseTimeoutMs,
   };
 }
@@ -152,11 +272,15 @@ export async function runP1ClaimProof(
     minCases,
     out,
     skipRuntimeE2E = false,
+    selfContained = false,
+    selfContainedPort = 8798,
+    selfContainedPortAttempts = 5,
     runCaseTimeoutMs = 30000,
   },
   deps = {}
 ) {
   const runtimeProof = deps.runRuntimeHandoffProofFn ?? runRuntimeHandoffProof;
+  const startSelfContainedAdapterFn = deps.startSelfContainedAdapterFn ?? startSelfContainedAdapter;
   const nowIso = deps.nowIso ?? new Date().toISOString();
 
   const otel = readOtelCoverageProof(reportDir, minCases);
@@ -164,79 +288,98 @@ export async function runP1ClaimProof(
     return { ok: false, payload: otel.payload };
   }
 
-  const incidentIdBase = `p1-proof-${Date.now()}`;
-  const endpoint = normalizeRuntimeResult(
-    await runtimeProof({
-      baseUrl,
-      incidentId: `${incidentIdBase}-endpoint`,
-      handoffId: `${incidentIdBase}-h-endpoint`,
-      fromAgent: "proof",
-      toAgent: "runtime",
-      mode: "endpoint",
-      runCaseTimeoutMs,
-    })
-  );
-  if (!endpoint.ok) {
-    return {
-      ok: false,
-      payload: {
-        stage: "runtime_endpoint",
-        ...endpoint.payload,
-      },
-    };
-  }
+  let managedAdapter = null;
+  let effectiveBaseUrl = baseUrl;
+  try {
+    if (selfContained) {
+      managedAdapter = await startSelfContainedAdapterFn(selfContainedPort, {
+        portAttempts: selfContainedPortAttempts,
+      });
+      effectiveBaseUrl = managedAdapter.baseUrl;
+    }
 
-  let e2e = { ok: true, payload: { skipped: true, reason: "--skipRuntimeE2E" } };
-  if (!skipRuntimeE2E) {
-    e2e = normalizeRuntimeResult(
+    const incidentIdBase = `p1-proof-${Date.now()}`;
+    const endpoint = normalizeRuntimeResult(
       await runtimeProof({
-        baseUrl,
-        incidentId: `${incidentIdBase}-e2e`,
-        handoffId: `${incidentIdBase}-h-e2e`,
+        baseUrl: effectiveBaseUrl,
+        incidentId: `${incidentIdBase}-endpoint`,
+        handoffId: `${incidentIdBase}-h-endpoint`,
         fromAgent: "proof",
         toAgent: "runtime",
-        mode: "e2e",
+        mode: "endpoint",
         runCaseTimeoutMs,
       })
     );
-    if (!e2e.ok) {
+    if (!endpoint.ok) {
       return {
         ok: false,
         payload: {
-          stage: "runtime_e2e",
-          ...e2e.payload,
+          stage: "runtime_endpoint",
+          ...endpoint.payload,
         },
       };
     }
+
+    let e2e = { ok: true, payload: { skipped: true, reason: "--skipRuntimeE2E" } };
+    if (!skipRuntimeE2E) {
+      e2e = normalizeRuntimeResult(
+        await runtimeProof({
+          baseUrl: effectiveBaseUrl,
+          incidentId: `${incidentIdBase}-e2e`,
+          handoffId: `${incidentIdBase}-h-e2e`,
+          fromAgent: "proof",
+          toAgent: "runtime",
+          mode: "e2e",
+          runCaseTimeoutMs,
+        })
+      );
+      if (!e2e.ok) {
+        return {
+          ok: false,
+          payload: {
+            stage: "runtime_e2e",
+            ...e2e.payload,
+          },
+        };
+      }
+    }
+
+    const artifact = {
+      ok: true,
+      generated_at: nowIso,
+      report_dir: reportDir,
+      config: {
+        base_url: effectiveBaseUrl,
+        base_url_requested: baseUrl,
+        min_cases: minCases,
+        skip_runtime_e2e: skipRuntimeE2E,
+        run_case_timeout_ms: runCaseTimeoutMs,
+        self_contained: selfContained,
+        self_contained_port: selfContained ? selfContainedPort : undefined,
+        self_contained_port_attempts: selfContained ? selfContainedPortAttempts : undefined,
+      },
+      checks: {
+        otel_anchor_proof: otel.payload,
+        runtime_handoff_endpoint: endpoint.payload,
+        runtime_handoff_e2e: e2e.payload,
+      },
+    };
+
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, JSON.stringify(artifact, null, 2), "utf8");
+
+    return {
+      ok: true,
+      payload: {
+        ...artifact,
+        artifact_path: out,
+      },
+    };
+  } finally {
+    if (managedAdapter?.stop) {
+      await managedAdapter.stop();
+    }
   }
-
-  const artifact = {
-    ok: true,
-    generated_at: nowIso,
-    report_dir: reportDir,
-    config: {
-      base_url: baseUrl,
-      min_cases: minCases,
-      skip_runtime_e2e: skipRuntimeE2E,
-      run_case_timeout_ms: runCaseTimeoutMs,
-    },
-    checks: {
-      otel_anchor_proof: otel.payload,
-      runtime_handoff_endpoint: endpoint.payload,
-      runtime_handoff_e2e: e2e.payload,
-    },
-  };
-
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, JSON.stringify(artifact, null, 2), "utf8");
-
-  return {
-    ok: true,
-    payload: {
-      ...artifact,
-      artifact_path: out,
-    },
-  };
 }
 
 export function renderCliMessages(result, jsonMode) {
@@ -297,3 +440,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
     process.exit(1);
   });
 }
+
+export const __test__ = {
+  buildSelfContainedPortCandidates,
+  buildSelfContainedAdapterEnv,
+  waitForHealthOrExit,
+};

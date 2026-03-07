@@ -52,6 +52,20 @@ describe("openai-responses-adapter", () => {
     expect(telemetry.events.some((e) => e.type === "tool_call")).toBe(true);
     expect(telemetry.events.some((e) => e.type === "tool_result")).toBe(true);
     expect(telemetry.proposed_actions[0]?.tool_name).toBe("search_docs");
+    expect(telemetry.telemetry_mode).toBe("native");
+  });
+
+  it("fails fast with invalid_telemetry when tool hints exist but no tool events can be extracted", () => {
+    expect(() =>
+      __test__.extractToolTelemetry({
+        output: [
+          {
+            type: "function_call",
+            arguments: "{\"query\":\"latency\"}",
+          },
+        ],
+      })
+    ).toThrow(/invalid_telemetry/);
   });
 
   it("wraps client.responses.create and returns final_output + token_usage", async () => {
@@ -84,6 +98,7 @@ describe("openai-responses-adapter", () => {
     expect(out.workflow_id).toBe("openai_responses_v1");
     expect(out.final_output).toEqual({ content_type: "text", content: "response text" });
     expect(out.token_usage?.total_tokens).toBe(5);
+    expect(out.telemetry_mode).toBe("wrapper_only");
     expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
   });
 
@@ -97,6 +112,7 @@ describe("openai-responses-adapter", () => {
     const out = await agent({ user: "hello", context: { ignored: true } });
     expect(out.final_output.content_type).toBe("json");
     expect(out.token_usage).toBeUndefined();
+    expect(out.telemetry_mode).toBe("wrapper_only");
     expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
   });
 
@@ -112,5 +128,21 @@ describe("openai-responses-adapter", () => {
     });
     const out = await agent({ user: "hello" });
     expect(out.workflow_id).toBe("custom-openai-workflow");
+  });
+
+  it("emits native telemetry mode when function call traces are present", async () => {
+    const client = {
+      responses: {
+        create: async () => ({
+          output: [
+            { type: "function_call", call_id: "call_1", name: "lookup", arguments: "{\"q\":\"x\"}" },
+            { type: "function_call_output", call_id: "call_1", output: "{\"ok\":true}" },
+          ],
+        }),
+      },
+    };
+    const agent = wrapOpenAIResponses(client, { model: "gpt-4.1-mini" });
+    const out = await agent({ user: "hello" });
+    expect(out.telemetry_mode).toBe("native");
   });
 });

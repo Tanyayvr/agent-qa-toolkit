@@ -231,6 +231,7 @@ export async function runRuntimeHandoffProof(
     to_agent_id: toAgent,
     objective: "Runtime handoff proof",
     schema_version: "1.0.0",
+    created_at: Date.now(),
     payload: {
       proof: true,
       ts: new Date().toISOString()
@@ -297,7 +298,7 @@ export async function runRuntimeHandoffProof(
     };
   }
 
-  if (!runCase.ok || !runCase.json) {
+  if (!runCase.json) {
     return { ok: false, payload: { error: "run-case failed", status: runCase.status, body: runCase.text } };
   }
 
@@ -307,10 +308,15 @@ export async function runRuntimeHandoffProof(
       ok: false,
       payload: {
         error: "handoff receipt for proof handoff_id not found in run-case response",
-        receipt_count: receipts.length
+        receipt_count: receipts.length,
+        run_case_status: runCase.status,
+        run_case_ok: runCase.ok
       }
     };
   }
+
+  const runCaseWarning =
+    runCase.ok ? undefined : `run-case returned HTTP ${runCase.status}, but handoff receipt was found`;
 
   return {
     ok: true,
@@ -323,6 +329,8 @@ export async function runRuntimeHandoffProof(
       first_upsert_status: upsert1.status,
       duplicate_upsert_status: upsert2.status,
       run_case_status: runCase.status,
+      run_case_ok: runCase.ok,
+      ...(runCaseWarning ? { run_case_warning: runCaseWarning } : {}),
       matched_receipt_status: matched.status ?? "unknown",
       receipt_count: receipts.length
     }

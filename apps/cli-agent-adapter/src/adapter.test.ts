@@ -344,8 +344,32 @@ describe("cli-agent-adapter app", () => {
     fn: (baseUrl: string) => Promise<void>
   ): Promise<void> {
     const app = createCliAgentAdapterApp(env);
-    const server = app.listen(0);
-    await once(server, "listening");
+    let server: ReturnType<typeof app.listen> | null = null;
+    let lastListenError: unknown = null;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      try {
+        server = app.listen(0, "127.0.0.1");
+        await Promise.race([
+          once(server, "listening"),
+          once(server, "error").then(([err]) => Promise.reject(err)),
+        ]);
+        break;
+      } catch (err) {
+        lastListenError = err;
+        const code = typeof err === "object" && err && "code" in err ? String((err as { code?: string }).code) : "";
+        if (server) {
+          await new Promise<void>((resolve) => server!.close(() => resolve()));
+          server = null;
+        }
+        if (code !== "EPERM" && code !== "EADDRINUSE") {
+          throw err;
+        }
+        await sleep(25 * (attempt + 1));
+      }
+    }
+    if (!server) {
+      throw lastListenError instanceof Error ? lastListenError : new Error("Failed to bind test server");
+    }
     const addr = server.address();
     if (!addr || typeof addr === "string") {
       await new Promise<void>((resolve) => server.close(() => resolve()));
@@ -359,20 +383,32 @@ describe("cli-agent-adapter app", () => {
     }
   }
 
+  async function sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function requestWithRetry(url: string, request: RequestInit, retries = 3): Promise<Response> {
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
+      try {
+        return await fetch(url, request);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!/fetch failed|socket|econnreset|other side closed/i.test(msg) || attempt === retries) {
+          throw err;
+        }
+        await sleep(25 * (attempt + 1));
+      }
+    }
+    throw new Error("unreachable");
+  }
+
   async function postJson(baseUrl: string, path: string, body: unknown): Promise<Response> {
     const request = {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     } as const;
-    try {
-      return await fetch(`${baseUrl}${path}`, request);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (!/fetch failed|socket/i.test(msg)) throw err;
-      await new Promise((resolve) => setTimeout(resolve, 25));
-      return await fetch(`${baseUrl}${path}`, request);
-    }
+    return await requestWithRetry(`${baseUrl}${path}`, request);
   }
 
   async function postJsonWithHeaders(
@@ -386,14 +422,20 @@ describe("cli-agent-adapter app", () => {
       headers: { "content-type": "application/json", ...headers },
       body: JSON.stringify(body),
     } as const;
-    try {
-      return await fetch(`${baseUrl}${path}`, request);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (!/fetch failed|socket/i.test(msg)) throw err;
-      await new Promise((resolve) => setTimeout(resolve, 25));
-      return await fetch(`${baseUrl}${path}`, request);
+    return await requestWithRetry(`${baseUrl}${path}`, request);
+  }
+
+  async function waitForActiveCli(baseUrl: string, minActive: number, timeoutMs = 2000): Promise<void> {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      const res = await requestWithRetry(`${baseUrl}/health`, { method: "GET" });
+      if (res.ok) {
+        const json = (await res.json()) as { active_cli_processes?: number };
+        if ((json.active_cli_processes ?? 0) >= minActive) return;
+      }
+      await sleep(25);
     }
+    throw new Error(`Timed out waiting for active_cli_processes >= ${minActive}`);
   }
 
   it("health returns runtime fields and handoff counters", async () => {
@@ -672,7 +714,7 @@ describe("cli-agent-adapter app", () => {
           version: "new",
           input: { user: "hold slot" },
         });
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await waitForActiveCli(baseUrl, 1, 3000);
 
         const busy = await postJson(baseUrl, "/run-case", {
           case_id: "busy",
@@ -684,7 +726,8 @@ describe("cli-agent-adapter app", () => {
         const busyJson = (await busy.json()) as Record<string, unknown>;
         expect((busyJson.adapter_error as { code?: string } | undefined)?.code).toBe("busy");
 
-        await longRequest;
+        const long = await longRequest;
+        expect(long.status).toBe(200);
       }
     );
   });

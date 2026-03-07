@@ -1,5 +1,6 @@
 {
   "name": "agent-qa-toolkit",
+  "version": "0.1.0",
   "private": true,
   "engines": {
     "node": ">=20"
@@ -38,6 +39,7 @@
     "proof:otel:demo": "npm run demo:correctness && npm run proof:otel -- --reportDir apps/evaluator/reports/correctness_latest --minCases 1",
     "proof:runtime-handoff": "node scripts/proof-runtime-handoff.mjs",
     "proof:p1": "node scripts/proof-p1-claim-pack.mjs",
+    "security:secrets": "node scripts/security-secrets-scan.mjs",
     "bridge": "ts-node plugins/vendor-bridge/src/cli.ts",
     "pvip:pack": "node scripts/pvip-pack.mjs --reportDir apps/evaluator/reports/latest",
     "pvip:verify": "node scripts/pvip-verify.mjs --reportDir apps/evaluator/reports/latest",
@@ -49,7 +51,7 @@
     "sbom": "node scripts/sbom.mjs",
     "manifest:sign": "node scripts/manifest-sign.mjs apps/evaluator/reports/latest",
     "trend": "ts-node packages/trending/src/cli.ts",
-    "quality:gate": "npm run lint -- --max-warnings=0 && npm run typecheck && npm run test:coverage && npm run docs:check-links && docker compose config --quiet && npm audit --audit-level=high",
+    "quality:gate": "npm run lint -- --max-warnings=0 && npm run typecheck && npm run test:coverage && npm run docs:check-links && npm run security:secrets && docker compose config --quiet && npm audit --audit-level=high",
     "metrics:dd": "node scripts/collect-dd-metrics.mjs",
     "library:ingest": "node scripts/library-ingest.mjs"
   },

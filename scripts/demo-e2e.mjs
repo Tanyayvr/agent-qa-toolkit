@@ -16,6 +16,7 @@ function hasFlag(name) {
 }
 
 const baseUrl = getArg("--baseUrl") || "http://localhost:8787";
+const reportSuffix = getArg("--reportSuffix");
 const skipAudit = hasFlag("--skipAudit") || process.env.SKIP_AUDIT === "1";
 const skipLint = hasFlag("--skipLint") || process.env.SKIP_LINT === "1";
 const skipTypecheck = hasFlag("--skipTypecheck") || process.env.SKIP_TYPECHECK === "1";
@@ -30,15 +31,20 @@ function run(cmd, args, label, extraEnv = {}) {
   });
 }
 
+function withSuffix(id) {
+  if (!reportSuffix || reportSuffix.trim().length === 0) return id;
+  return `${id}_${reportSuffix.trim()}`;
+}
+
 async function main() {
   if (!skipLint) await run("npm", ["run", "lint"], "lint");
   if (!skipTypecheck) await run("npm", ["run", "typecheck"], "typecheck");
   if (!skipAudit) await run("npm", ["run", "audit"], "audit");
 
   const common = ["scripts/demo.mjs", "--baseUrl", baseUrl, "--skipAudit", "--skipLint", "--skipTypecheck"];
-  await run("node", [...common, "--suite", "correctness", "--reportId", "correctness_latest"], "demo:correctness");
-  await run("node", [...common, "--suite", "robustness", "--reportId", "robustness_latest"], "demo:robustness");
-  await run("node", [...common, "--cases", "cases/all.json", "--reportId", "latest"], "demo:latest");
+  await run("node", [...common, "--suite", "correctness", "--reportId", withSuffix("correctness_latest")], "demo:correctness");
+  await run("node", [...common, "--suite", "robustness", "--reportId", withSuffix("robustness_latest")], "demo:robustness");
+  await run("node", [...common, "--cases", "cases/all.json", "--reportId", withSuffix("latest")], "demo:latest");
 }
 
 main().catch((err) => {

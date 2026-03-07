@@ -21,8 +21,10 @@ Solution
 - NEW: release-gate E2E in CI (policy-gate + soak/load stability checks)
 - NOW: runtime policy hardening shipped (planning/repl policy enforcement in adapter + deterministic evaluator checks)
 - NOW: quality profile requires strong tool telemetry (`native|inferred`; wrapper-only is treated as insufficient evidence)
+- NOW: plugin adapters fail fast on telemetry mismatch (`invalid_telemetry`) when tool activity is hinted but structured tool events are missing
 - NOW: semantic quality checks shipped for text tasks (`required/forbidden concepts` + calibrated profile/thresholds + custom synonyms)
 - NOW: release campaign gate is ON by default and can enforce KPI thresholds (`pre-action entropy removed`, `reconstruction min saved/block`)
+- NOW: quality gate includes high-confidence repository secret scan (keys/tokens/private-key markers)
 - NOW: auto-timeout guardrails shipped (success-only learning, min successful samples, bounded growth vs base timeout)
 - NOW: campaign runs are ingested into local evidence library by default (opt-out flag only)
 
