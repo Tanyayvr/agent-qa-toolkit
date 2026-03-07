@@ -484,6 +484,7 @@ npm run metrics:dd
 npm run conformance:test:python
 npm run conformance:test:go
 npm run conformance:test:signature
+npm run release:gate:ci
 ```
 
 ---
@@ -507,6 +508,8 @@ Validator note:
 - Python and Go validators both verify `manifest.sig` in `strict` mode when `AQ_MANIFEST_PUBLIC_KEY` is set.
 - `npm run conformance:test:signature` performs strict-signature parity checks:
   signed-pack strict pass + tampered-manifest strict fail (Node/Python/Go validators).
+- `npm run release:gate:ci` is the mandatory bundled release gate used in CI; it writes
+  `apps/evaluator/reports/release-gate-ci.json` with step-by-step PASS/FAIL status.
 
 ---
 

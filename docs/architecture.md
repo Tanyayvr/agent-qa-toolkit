@@ -161,6 +161,9 @@ Both validators enforce strict-mode signature verification when
 `AQ_MANIFEST_PUBLIC_KEY` is provided.
 Strict-signature parity (signed pass + tampered fail) across Node/Python/Go
 is exercised by `scripts/conformance-test-signature.mjs`.
+CI release entrypoint is `npm run release:gate:ci`, which bundles quality, conformance,
+policy/runtime e2e, soak/load, toolkit compatibility, and `proof:p1` self-contained checks,
+and writes a machine-readable summary at `apps/evaluator/reports/release-gate-ci.json`.
 
 ## Optional adapters (plugin packages)
 

@@ -12,6 +12,7 @@
 - [ ] `npm test` (unit)
 - [ ] `SKIP_AUDIT=1 node scripts/demo-e2e.mjs --baseUrl http://localhost:8788 --skipAudit`
 - [ ] `npm run test:toolkit`
+- [ ] `npm run release:gate:ci` (mandatory bundled release gate)
 
 ## Report Validation
 - [ ] `npm run pvip:verify`

@@ -10,6 +10,7 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,23 +29,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Full Quality Gate
-        run: npm run quality:gate
+      - name: Release Gate Bundle (mandatory)
+        run: npm run release:gate:ci
 
-      - name: Python Conformance Parity
-        run: npm run conformance:test:python
-
-      - name: Go Conformance Parity
-        run: npm run conformance:test:go
-
-      - name: Policy Gate E2E
-        run: npm run e2e:policy-gate
-
-      - name: Runtime Policy E2E
-        run: npm run e2e:runtime-policy -- --ci
-
-      - name: Plugins Release Readiness
-        run: npm run plugins:release-readiness
-
-      - name: Soak/Load E2E (CI)
-        run: npm run e2e:soak-load -- --ci
+      - name: Upload release gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-report
+          path: apps/evaluator/reports/release-gate-ci.json
+          if-no-files-found: warn

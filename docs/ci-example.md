@@ -15,8 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
       - run: npm install
-      - run: npm run pilot
-      - run: npm run pvip:verify:strict -- --reportDir apps/evaluator/reports/latest
+      - run: npm run release:gate:ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-gate-report
+          path: apps/evaluator/reports/release-gate-ci.json
 ```
-
