@@ -281,6 +281,7 @@
           "trace_integrity",
           "security",
           "policy_evaluation",
+          "assumption_state",
           "risk_level",
           "gate_recommendation"
         ],
@@ -353,6 +354,37 @@
               }
             }
           },
+          "assumption_state": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["baseline", "new"],
+            "properties": {
+              "baseline": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["status", "selected_count", "rejected_count"],
+                "properties": {
+                  "status": { "enum": ["present", "missing", "not_required"] },
+                  "source": { "enum": ["response", "derived", "missing"] },
+                  "selected_count": { "type": "integer", "minimum": 0 },
+                  "rejected_count": { "type": "integer", "minimum": 0 },
+                  "reason_code": { "type": "string" }
+                }
+              },
+              "new": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["status", "selected_count", "rejected_count"],
+                "properties": {
+                  "status": { "enum": ["present", "missing", "not_required"] },
+                  "source": { "enum": ["response", "derived", "missing"] },
+                  "selected_count": { "type": "integer", "minimum": 0 },
+                  "rejected_count": { "type": "integer", "minimum": 0 },
+                  "reason_code": { "type": "string" }
+                }
+              }
+            }
+          },
           "trace_anchors": {
             "type": "object",
             "properties": {
@@ -400,6 +432,15 @@
                       "abort",
                       "unknown"
                     ]
+                  },
+                  "timeout_cause": {
+                    "enum": [
+                      "timeout_budget_too_small",
+                      "agent_stuck_or_loop",
+                      "waiting_for_input",
+                      "transport_failure",
+                      "unknown_timeout"
+                    ]
                   }
                 }
               },
@@ -422,6 +463,15 @@
                       "proxy",
                       "abort",
                       "unknown"
+                    ]
+                  },
+                  "timeout_cause": {
+                    "enum": [
+                      "timeout_budget_too_small",
+                      "agent_stuck_or_loop",
+                      "waiting_for_input",
+                      "transport_failure",
+                      "unknown_timeout"
                     ]
                   }
                 }

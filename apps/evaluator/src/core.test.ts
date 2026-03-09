@@ -13,6 +13,7 @@ import {
     checkSemanticQuality,
     checkPlanningGate,
     checkReplPolicy,
+    checkAssumptionState,
     toolCalls,
     toolResults,
     retrievalEvents,
@@ -483,8 +484,43 @@ describe("repl policy assertion", () => {
             reason_code: "path_outside_allowlist",
             source: "adapter_runtime_policy",
             high_risk_violation: true,
+  });
+});
+
+describe("assumption state assertion", () => {
+    it("returns not_required when case has no expectation signal", () => {
+        const res = checkAssumptionState({}, mkResp());
+        expect(res.pass).toBe(true);
+        expect(res.details).toMatchObject({ note: "not_required" });
+    });
+
+    it("derives assumption candidates from telemetry when response assumption_state is absent", () => {
+        const res = checkAssumptionState(
+            { tool_required: ["search"] },
+            mkResp({
+                events: [{ type: "tool_call", ts: 1, call_id: "c1", tool: "search", args: { q: "latency" } }],
+            })
+        );
+        expect(res.pass).toBe(true);
+        expect(res.details).toMatchObject({
+            source: "derived",
+            selected_count: 1,
+            rejected_count: 0,
         });
     });
+
+    it("fails with deterministic reason when required assumption_state is missing", () => {
+        const res = checkAssumptionState(
+            { assumption_state: { required: true, min_selected_candidates: 1 } },
+            mkResp({ events: [] })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            reason_code: "assumption_state_missing",
+            source: "missing",
+        });
+    });
+});
 });
 
 /* ------------------------------------------------------------------ */
@@ -725,6 +761,14 @@ describe("chooseRootCause", () => {
         });
         expect(chooseRootCause(assertions, resp)).toBe("missing_required_data");
     });
+
+    it("maps assumption_state failures to missing_required_data", () => {
+        const assertions = [
+            { name: "assumption_state", pass: false, details: { reason_code: "assumption_state_missing" } },
+            { name: "must_include", pass: true },
+        ];
+        expect(chooseRootCause(assertions, mkResp())).toBe("missing_required_data");
+    });
 });
 
 /* ------------------------------------------------------------------ */
@@ -930,6 +974,7 @@ describe("deriveFailureSummarySide", () => {
             type: "runner_fetch_failure",
             class: "timeout",
             net_error_kind: "headers_timeout",
+            timeout_cause: "timeout_budget_too_small",
             case_id: "c1",
             version: "new",
             url: "http://localhost",
@@ -943,6 +988,7 @@ describe("deriveFailureSummarySide", () => {
         expect(result?.timeout_ms).toBe(5000);
         expect(result?.attempts).toBe(3);
         expect(result?.net_error_kind).toBe("headers_timeout");
+        expect(result?.timeout_cause).toBe("timeout_budget_too_small");
     });
 });
 

@@ -88,6 +88,18 @@ Fields:
     { "type": "tool_result", "ts": 1738044000456, "call_id": "c1", "status": "ok", "latency_ms": 333, "payload_summary": { "ticket_id": "T-1234" } },
     { "type": "final_output", "ts": 1738044001300, "content_type": "json", "content": { "action": "create_ticket", "ticket_id": "T-1234" } }
   ],
+  "assumption_state": {
+    "selected": [
+      {
+        "kind": "tool",
+        "candidate_id": "c1",
+        "decision": "selected",
+        "reason_code": "selected_by_agent",
+        "tool_name": "create_ticket"
+      }
+    ],
+    "rejected": []
+  },
   "trace_anchor": {
     "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
     "span_id": "00f067aa0ba902b7",
@@ -122,6 +134,7 @@ Recommended (for full checks):
 - `workflow_id` (string)
 - `proposed_actions` (array)
 - `events` (array; used for tool trace integrity + security signals)
+- `assumption_state` (object; decision-legibility state for selected/rejected candidates)
 - `token_usage` (object; optional cost + loop signals)
 
 Optional `token_usage` (if available):

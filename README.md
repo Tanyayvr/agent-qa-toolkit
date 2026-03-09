@@ -42,6 +42,7 @@ You get:
 - Execution-quality summary (`summary.execution_quality`) with transport success and weak-assertion rate
 - Explicit tool-telemetry assertion with deterministic reason code (`tool_telemetry_missing`) when tool trace is required but absent
 - Runtime policy enforcement (`planning_gate` + `repl_policy`) with deterministic `policy_violation` evidence and required per-item `policy_evaluation`
+- Decision-legibility contract (`assumption_state`) with selected/rejected candidate counts and deterministic missing/derived reason codes
 - Semantic quality assertion (`semantic_quality`) for text tasks: required/forbidden concepts + calibrated similarity (`profile` or `token_f1`/`lcs_ratio`) + custom synonyms
 - Synthetic fault-matrix mode (`cases/matrix.json`) to validate transport/data failure classification before external pilots
 - Root cause attribution (RCA) and policy hints
@@ -291,6 +292,86 @@ One-command local campaign (baseline/new2/new3 + evaluator + trend):
 ```bash
 BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod ./scripts/run-local-campaign.sh
 ```
+Profile-based agent run (recommended for external agents):
+```bash
+./scripts/run-agent-profile.sh --list
+./scripts/run-agent-profile.sh goose-ollama
+./scripts/run-agent-profile.sh --full goose-ollama
+./scripts/run-agent-profile.sh --diagnostic goose-ollama
+./scripts/run-agent-profile.sh gooseteam-ollama
+./scripts/run-agent-profile.sh autonomous-cli
+```
+Same command via npm:
+```bash
+npm run campaign:agent -- goose-ollama
+```
+Launcher writes active prefixes to `/tmp/aq_run_prefix` and `/tmp/aq_report_prefix` for quick post-run summaries.
+Launcher default is now buyer-friendly `quick` mode: it runs `calibration`/`smoke` and stops after green smoke.
+Use `--full` when you explicitly want auto-promotion into the full quality campaign.
+Default behavior is now staged (`STAGED_MODE=1`): the script runs `smoke` first (`infra` + small subset), and auto-promotes to full quality campaign only on green smoke.
+When timeout auto-tuning is enabled and history is insufficient, the script can auto-run a `calibration` stage first to collect initial latency samples before `smoke`.
+Implemented operator modes:
+- `quick` (default): optional `calibration`, then `smoke`, then stop. Interpret green quick as `ready_for_full`, not as final quality proof.
+- `full`: explicit opt-in via `--full`; runs the full quality campaign only after green smoke.
+- `diagnostic`: explicit opt-in via `--diagnostic`; keeps the same full suite, but uses a more generous envelope for known slow but live agents.
+- raw/manual: call `scripts/run-local-campaign.sh` directly when you intentionally need low-level campaign control.
+What `quick` proves:
+- adapter/agent path starts and responds;
+- transport/runtime path is healthy enough for smoke;
+- timeout budget for the quick envelope is sufficient or clearly classified;
+- telemetry/evidence contract is present on smoke cases.
+What `quick` does not prove:
+- full-suite quality;
+- long-run stability;
+- final release readiness.
+Before execution, the launcher now prints an operator runtime estimate:
+- `estimatedRequestTimeoutMs`
+- `estimatedStageUpperBoundMinutes`
+- `recommendedMode`
+- `confidence`
+This estimate is advisory, not a guarantee; it exists to prevent "manual timeout tuning by small increments".
+On staged failures it emits machine-readable stage output with typed reason and action:
+- `stage=calibration|smoke|full`
+- `reason=transport|timeout_budget|agent_stuck_or_loop|waiting_for_input|policy|semantic|unknown`
+- `next_action=<deterministic recommendation>`
+For DevOps handoff, each stage/report also records effective runtime envelope:
+- console: `DevOps envelope (...)`
+- JSON artifact: `apps/evaluator/reports/<reportId>/devops-envelope.json`
+- owner model: DevOps sets limits (`TIMEOUT_MS`, `TIMEOUT_AUTO_CAP_MS`, `RETRIES`, `CONCURRENCY`, etc.); runner auto-tunes only inside these bounds.
+To run the legacy single-stage flow explicitly:
+```bash
+BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality STAGED_MODE=0 RUN_PREFIX=cli_prod REPORT_PREFIX=cli-prod ./scripts/run-local-campaign.sh
+```
+Operator helpers:
+```bash
+# adapter liveness / effective runtime envelope
+npm run campaign:agent:health -- --baseUrl http://127.0.0.1:8788
+
+# latest report summary from /tmp/aq_report_prefix
+npm run campaign:agent:status
+
+# explicit report prefix
+npm run campaign:agent:status -- --reportPrefix goose-ollama-20260308_121554
+```
+`campaign:agent:status` now also prints:
+- next recommended mode (`full` vs `diagnostic`)
+- recommended timeout/cap after a budget failure
+- timed-out case ids when the failure is localized
+
+Recommended external-agent flow:
+```bash
+# 1) quick readiness check
+npm run campaign:agent -- goose-ollama
+
+# 2) inspect status / stage result
+npm run campaign:agent:status
+
+# 3) run full only intentionally
+npm run campaign:agent:full -- goose-ollama
+
+# 4) if full says timeout_budget for a slow but live agent, use diagnostic
+npm run campaign:agent:diagnostic -- goose-ollama
+```
 By default this script ingests each generated report into local library (`.agent-qa/library`). Set `LIBRARY_INGEST=0` to disable.
 Execution quality release gate is ON by default in `run-local-campaign.sh` (`EVAL_FAIL_ON_EXECUTION_DEGRADED=1`).
 To disable explicitly (not recommended for release):
@@ -306,6 +387,18 @@ Slow-agent profile (auto timeout tuning):
 ```bash
 BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=autonomous CAMPAIGN_PROFILE=quality RUN_PREFIX=auto_prod REPORT_PREFIX=auto-prod TIMEOUT_PROFILE=auto TIMEOUT_MS=120000 TIMEOUT_AUTO_CAP_MS=1800000 TIMEOUT_AUTO_LOOKBACK_RUNS=20 RETRIES=0 PREFLIGHT_MODE=off ./scripts/run-local-campaign.sh
 ```
+Timeout failures now include machine-readable root cause in runner artifacts and compare report summaries:
+- `timeout_budget_too_small`
+- `agent_stuck_or_loop`
+- `waiting_for_input`
+- `transport_failure`
+- `unknown_timeout`
+Interpretation:
+- `timeout_budget_too_small`: the configured envelope was too small for this agent/profile; this is not the same as "agent is broken".
+- `agent_stuck_or_loop`: the agent appears alive but not making useful progress.
+- `waiting_for_input`: the agent looks interactive and needs a different execution mode.
+- `transport_failure`: adapter/network/runtime path failed before usable agent evidence was produced.
+When staged/full failures happen, report directories now also carry `next-envelope.json` with the recommended next mode and envelope.
 Infra-only smoke profile (weak assertions allowed):
 ```bash
 BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=autonomous CAMPAIGN_PROFILE=infra RUN_PREFIX=auto_infra REPORT_PREFIX=auto-infra ./scripts/run-local-campaign.sh
@@ -439,6 +532,8 @@ Note:
 - Compare report items now include required `policy_evaluation` block (`baseline/new` with `planning_gate_pass` and `repl_policy_pass`) for hard-contract policy auditing.
 - Campaign quality validation now enforces strong telemetry contracts by default (`CASE_QUALITY_REQUIRE_STRONG_TELEMETRY=1` in `scripts/run-local-campaign.sh`), so wrapper-only telemetry is rejected for quality profile runs unless explicitly relaxed.
 - Campaign quality validation now also enforces semantic text-eval contracts by default (`CASE_QUALITY_REQUIRE_SEMANTIC=1`): lexical text expectations must define `expected.semantic` rules; `reference_texts` must include either `semantic.profile` (`strict|balanced|lenient`) or both `semantic.min_token_f1` + `semantic.min_lcs_ratio`.
+- Compare report items now include required `assumption_state` block (`baseline/new` with status/source/selected_count/rejected_count/reason_code) for decision-legibility auditing.
+- Campaign quality validation now enforces assumption-state contracts by default (`CASE_QUALITY_REQUIRE_ASSUMPTION_STATE=1` in `scripts/run-local-campaign.sh`; `--requireAssumptionState` defaults to `1` in `scripts/validate-cases-quality.mjs`): expectation-bearing cases must define `expected.assumption_state` with `required=true` and `min_selected_candidates>=1`.
 - Runner preserves optional OTel anchors (`trace_anchor`) and enriches from response headers (`traceparent` / `b3` / `x-trace-id`) when available.
 - In `bundle:group`, each `--report <label=dir>` label is persisted as `agent_id` in the group index/manifest.
 - Group bundles remain the evidence aggregation layer; runtime transfer is handled by `/handoff`.

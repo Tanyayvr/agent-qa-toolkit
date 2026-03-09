@@ -117,6 +117,10 @@ const baseReport: CompareReport = {
         baseline: { planning_gate_pass: true, repl_policy_pass: true },
         new: { planning_gate_pass: true, repl_policy_pass: true },
       },
+      assumption_state: {
+        baseline: { status: "not_required", selected_count: 0, rejected_count: 0 },
+        new: { status: "not_required", selected_count: 0, rejected_count: 0 },
+      },
       risk_level: "low",
       risk_tags: [],
       gate_recommendation: "none",

@@ -11,6 +11,13 @@ export type Version = "baseline" | "new";
 
 export type FetchFailureClass = "http_error" | "timeout" | "network_error" | "invalid_json";
 
+export type TimeoutCause =
+    | "timeout_budget_too_small"
+    | "agent_stuck_or_loop"
+    | "waiting_for_input"
+    | "transport_failure"
+    | "unknown_timeout";
+
 export type NetErrorKind =
     | "dns"
     | "tls"
@@ -83,6 +90,52 @@ export type ProposedAction = {
 export type FinalOutput = { content_type: "text" | "json"; content: unknown };
 
 /* ------------------------------------------------------------------ */
+/*  Assumption state (decision-legibility contract)                    */
+/* ------------------------------------------------------------------ */
+
+export type AssumptionCandidateKind = "retrieval" | "tool" | "action";
+
+export type AssumptionReasonCode =
+    | "selected_by_agent"
+    | "policy_deny"
+    | "score_below_threshold"
+    | "budget_exceeded"
+    | "timeout"
+    | "tool_unavailable"
+    | "not_selected"
+    | "unknown";
+
+export type AssumptionCandidate = {
+    kind: AssumptionCandidateKind;
+    candidate_id: string;
+    decision: "selected" | "rejected";
+    reason_code: AssumptionReasonCode;
+    score?: number;
+    tool_name?: string;
+    source_ref?: string;
+    details?: Record<string, unknown>;
+};
+
+export type AssumptionThresholdSnapshot = {
+    retrieval_min_score?: number;
+    action_min_confidence?: number;
+    risk_block_threshold?: number;
+};
+
+export type AssumptionBudgetSnapshot = {
+    token_budget_remaining?: number;
+    time_budget_ms_remaining?: number;
+    tool_call_budget_remaining?: number;
+};
+
+export type AssumptionState = {
+    selected: AssumptionCandidate[];
+    rejected: AssumptionCandidate[];
+    thresholds?: AssumptionThresholdSnapshot;
+    budgets?: AssumptionBudgetSnapshot;
+};
+
+/* ------------------------------------------------------------------ */
 /*  Runner failure                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -113,6 +166,11 @@ export type RunnerFailureArtifact = {
     body_truncated?: boolean;
     body_bytes_written?: number;
     max_body_bytes?: number;
+
+    /** Machine-readable timeout root-cause taxonomy (P0.3/P0.9). */
+    timeout_cause?: TimeoutCause;
+    /** Optional classifier evidence for timeout_cause attribution. */
+    timeout_cause_evidence?: Record<string, unknown>;
 };
 
 /* ------------------------------------------------------------------ */
@@ -324,6 +382,9 @@ export type AgentResponse = {
 
     /** Optional: handoffs available/consumed by this run. */
     handoff_receipts?: HandoffReceipt[];
+
+    /** Optional decision-legibility block: selected/rejected candidates with typed reasons. */
+    assumption_state?: AssumptionState;
 };
 
 

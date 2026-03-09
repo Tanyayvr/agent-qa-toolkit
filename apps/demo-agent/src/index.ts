@@ -155,6 +155,71 @@ function attachRuntimeMeta(payload: unknown, runMeta: RunMeta | undefined, hando
   };
 }
 
+function attachAssumptionState(payload: unknown): unknown {
+  if (!payload || typeof payload !== "object") return payload;
+  const rec = payload as Record<string, unknown>;
+  const existing = rec.assumption_state;
+  if (existing && typeof existing === "object") return payload;
+
+  const selected: Array<Record<string, unknown>> = [];
+  const rejected: Array<Record<string, unknown>> = [];
+
+  const proposedActions = Array.isArray(rec.proposed_actions) ? rec.proposed_actions : [];
+  for (const action of proposedActions) {
+    if (!action || typeof action !== "object") continue;
+    const obj = action as Record<string, unknown>;
+    const actionId = typeof obj.action_id === "string" ? obj.action_id : undefined;
+    const toolName = typeof obj.tool_name === "string" ? obj.tool_name : undefined;
+    selected.push({
+      kind: "action",
+      candidate_id: actionId ?? toolName ?? `action_${selected.length + 1}`,
+      decision: "selected",
+      reason_code: "selected_by_agent",
+      ...(toolName ? { tool_name: toolName } : {}),
+    });
+  }
+
+  const events = Array.isArray(rec.events) ? rec.events : [];
+  for (const event of events) {
+    if (!event || typeof event !== "object") continue;
+    const ev = event as Record<string, unknown>;
+    if (ev.type === "tool_call") {
+      const callId = typeof ev.call_id === "string" ? ev.call_id : `tool_${selected.length + 1}`;
+      const toolName = typeof ev.tool === "string" ? ev.tool : undefined;
+      selected.push({
+        kind: "tool",
+        candidate_id: callId,
+        decision: "selected",
+        reason_code: "selected_by_agent",
+        ...(toolName ? { tool_name: toolName } : {}),
+      });
+      continue;
+    }
+    if (ev.type === "retrieval") {
+      const docIds = Array.isArray(ev.doc_ids) ? ev.doc_ids : [];
+      for (const docId of docIds) {
+        const id = typeof docId === "string" ? docId : undefined;
+        if (!id) continue;
+        selected.push({
+          kind: "retrieval",
+          candidate_id: id,
+          decision: "selected",
+          reason_code: "selected_by_agent",
+          source_ref: id,
+        });
+      }
+    }
+  }
+
+  return {
+    ...rec,
+    assumption_state: {
+      selected,
+      rejected,
+    },
+  };
+}
+
 function bigString(bytes: number, seed = "X"): string {
   const chunk = seed.repeat(1024);
   const repeats = Math.ceil(bytes / chunk.length);
@@ -396,7 +461,8 @@ app.post("/run-case", async (req: Request, res: Response) => {
 
   const sendCaseJson = (payload: unknown): void => {
     const traced = withTraceAnchor(payload, caseId, version);
-    const enriched = attachRuntimeMeta(traced, runMeta, handoffReceipts);
+    const withAssumptions = attachAssumptionState(traced);
+    const enriched = attachRuntimeMeta(withAssumptions, runMeta, handoffReceipts);
     const trace = (traced as Record<string, unknown>).trace_anchor as Record<string, unknown> | undefined;
     if (trace) {
       const traceparent = typeof trace.traceparent === "string" ? trace.traceparent : undefined;
@@ -516,7 +582,7 @@ app.post("/run-case", async (req: Request, res: Response) => {
       version,
       res,
       redactionPreset,
-      (payload) => attachRuntimeMeta(payload, runMeta, handoffReceipts)
+      (payload) => attachRuntimeMeta(attachAssumptionState(payload), runMeta, handoffReceipts)
     )
   ) {
     return;

@@ -1,5 +1,5 @@
 import type { SimpleAgent } from "agent-sdk";
-import type { FinalOutput, ProposedAction, RunEvent } from "shared-types";
+import type { AssumptionState, FinalOutput, ProposedAction, RunEvent } from "shared-types";
 
 export type LangChainRunnable<TInput = unknown, TOutput = unknown, TConfig = unknown> = {
   invoke: (input: TInput, config?: TConfig) => Promise<TOutput> | TOutput;
@@ -191,7 +191,12 @@ function extractLangChainToolTraces(raw: unknown): ToolTrace[] {
   return out;
 }
 
-function buildTelemetry(raw: unknown): { events: RunEvent[]; proposed_actions: ProposedAction[]; telemetry_mode: "native" | "wrapper_only" } {
+function buildTelemetry(raw: unknown): {
+  events: RunEvent[];
+  proposed_actions: ProposedAction[];
+  telemetry_mode: "native" | "wrapper_only";
+  assumption_state: AssumptionState;
+} {
   const traces = extractLangChainToolTraces(raw);
   if (traces.length === 0) {
     const hintedToolRecords = collectToolHintCount(raw);
@@ -200,7 +205,12 @@ function buildTelemetry(raw: unknown): { events: RunEvent[]; proposed_actions: P
         `invalid_telemetry: detected ${hintedToolRecords} tool trace candidate(s) but extracted 0 tool events`
       );
     }
-    return { events: [], proposed_actions: [], telemetry_mode: "wrapper_only" };
+    return {
+      events: [],
+      proposed_actions: [],
+      telemetry_mode: "wrapper_only",
+      assumption_state: { selected: [], rejected: [] },
+    };
   }
   const baseTs = Date.now();
   const events: RunEvent[] = [];
@@ -236,7 +246,24 @@ function buildTelemetry(raw: unknown): { events: RunEvent[]; proposed_actions: P
     });
   }
 
-  return { events, proposed_actions: proposedActions, telemetry_mode: "native" };
+  const assumptionState: AssumptionState = {
+    selected: traces.map((t) => ({
+      kind: "tool",
+      candidate_id: t.call_id,
+      decision: "selected",
+      reason_code: "selected_by_agent",
+      tool_name: t.tool,
+      details: { args: t.args },
+    })),
+    rejected: [],
+  };
+
+  return {
+    events,
+    proposed_actions: proposedActions,
+    telemetry_mode: "native",
+    assumption_state: assumptionState,
+  };
 }
 
 export function wrapLangChainRunnable<TInput = unknown, TOutput = unknown, TConfig = unknown>(
@@ -273,6 +300,7 @@ export function wrapLangChainRunnable<TInput = unknown, TOutput = unknown, TConf
       events,
       ...(telemetry.proposed_actions.length > 0 ? { proposed_actions: telemetry.proposed_actions } : {}),
       telemetry_mode: telemetry.telemetry_mode,
+      assumption_state: telemetry.assumption_state,
       workflow_id: workflowId,
     };
   };

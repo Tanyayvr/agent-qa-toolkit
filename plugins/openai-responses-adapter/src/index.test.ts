@@ -52,6 +52,8 @@ describe("openai-responses-adapter", () => {
     expect(telemetry.events.some((e) => e.type === "tool_call")).toBe(true);
     expect(telemetry.events.some((e) => e.type === "tool_result")).toBe(true);
     expect(telemetry.proposed_actions[0]?.tool_name).toBe("search_docs");
+    expect(telemetry.assumption_state?.selected).toHaveLength(1);
+    expect(telemetry.assumption_state?.selected?.[0]?.reason_code).toBe("selected_by_agent");
     expect(telemetry.telemetry_mode).toBe("native");
   });
 
@@ -100,6 +102,8 @@ describe("openai-responses-adapter", () => {
     expect(out.token_usage?.total_tokens).toBe(5);
     expect(out.telemetry_mode).toBe("wrapper_only");
     expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
+    expect(out.assumption_state?.selected).toEqual([]);
+    expect(out.assumption_state?.rejected).toEqual([]);
   });
 
   it("falls back to json final_output when text is unavailable", async () => {
@@ -144,5 +148,6 @@ describe("openai-responses-adapter", () => {
     const agent = wrapOpenAIResponses(client, { model: "gpt-4.1-mini" });
     const out = await agent({ user: "hello" });
     expect(out.telemetry_mode).toBe("native");
+    expect(out.assumption_state?.selected).toHaveLength(1);
   });
 });

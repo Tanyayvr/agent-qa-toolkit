@@ -5,6 +5,8 @@
 
 import type Ajv from "ajv";
 import type {
+    AssumptionCandidate,
+    AssumptionState,
     RunEvent,
     ToolCallEvent,
     ToolResultEvent,
@@ -56,6 +58,13 @@ export type Expected = {
     };
     planning_gate?: PlanningGatePolicy;
     repl_policy?: ReplRuntimePolicy;
+    assumption_state?: {
+        required?: boolean;
+        min_selected_candidates?: number;
+        max_rejected_candidates?: number;
+        require_reason_codes_for_rejected?: boolean;
+        allowed_reason_codes?: string[];
+    };
 };
 
 export type Case = {
@@ -247,6 +256,171 @@ export function checkToolTelemetryAvailability(expected: Expected, resp: AgentRe
             reason_code: pass ? undefined : violations[0],
             violations: pass ? [] : violations,
             known_tool_call_ids: Array.from(byCall.keys()),
+        },
+    };
+}
+
+function hasExpectationSignal(exp: Expected): boolean {
+    if (!exp || typeof exp !== "object") return false;
+    if (hasNonEmptyList(exp.action_required)) return true;
+    if (exp.evidence_required_for_actions === true) return true;
+    if (hasNonEmptyList(exp.tool_required)) return true;
+    if (hasNonEmptyList(exp.tool_sequence)) return true;
+    if (exp.tool_telemetry && typeof exp.tool_telemetry === "object") return true;
+    if (exp.retrieval_required && typeof exp.retrieval_required === "object" && hasNonEmptyList(exp.retrieval_required.doc_ids)) return true;
+    if (hasNonEmptyList(exp.must_include)) return true;
+    if (hasNonEmptyList(exp.must_not_include)) return true;
+    if (exp.semantic && typeof exp.semantic === "object") return true;
+    if (exp.planning_gate && typeof exp.planning_gate === "object") return true;
+    if (exp.repl_policy && typeof exp.repl_policy === "object") return true;
+    return false;
+}
+
+function normalizeAssumptionState(raw: unknown): AssumptionState | null {
+    if (!raw || typeof raw !== "object") return null;
+    const obj = raw as Record<string, unknown>;
+    const selected = Array.isArray(obj.selected) ? obj.selected : null;
+    const rejected = Array.isArray(obj.rejected) ? obj.rejected : null;
+    if (!selected || !rejected) return null;
+
+    const castCandidate = (v: unknown): AssumptionCandidate | null => {
+        if (!v || typeof v !== "object") return null;
+        const c = v as Record<string, unknown>;
+        const kind = typeof c.kind === "string" ? c.kind : "";
+        const candidateId = typeof c.candidate_id === "string" ? c.candidate_id : "";
+        const decision = typeof c.decision === "string" ? c.decision : "";
+        const reasonCode = typeof c.reason_code === "string" ? c.reason_code : "";
+        if (!kind || !candidateId || !decision || !reasonCode) return null;
+        return {
+            kind: kind as AssumptionCandidate["kind"],
+            candidate_id: candidateId,
+            decision: decision as AssumptionCandidate["decision"],
+            reason_code: reasonCode as AssumptionCandidate["reason_code"],
+            ...(typeof c.score === "number" ? { score: c.score } : {}),
+            ...(typeof c.tool_name === "string" ? { tool_name: c.tool_name } : {}),
+            ...(typeof c.source_ref === "string" ? { source_ref: c.source_ref } : {}),
+            ...(c.details && typeof c.details === "object" ? { details: c.details as Record<string, unknown> } : {}),
+        };
+    };
+
+    const selectedOut = selected.map(castCandidate).filter((x): x is AssumptionCandidate => Boolean(x));
+    const rejectedOut = rejected.map(castCandidate).filter((x): x is AssumptionCandidate => Boolean(x));
+    return {
+        selected: selectedOut,
+        rejected: rejectedOut,
+        ...(obj.thresholds && typeof obj.thresholds === "object"
+            ? { thresholds: obj.thresholds as NonNullable<AssumptionState["thresholds"]> }
+            : {}),
+        ...(obj.budgets && typeof obj.budgets === "object"
+            ? { budgets: obj.budgets as NonNullable<AssumptionState["budgets"]> }
+            : {}),
+    };
+}
+
+function deriveAssumptionStateFromTelemetry(resp: AgentResponse): AssumptionState | null {
+    const selected: AssumptionCandidate[] = [];
+    const proposed = Array.isArray(resp.proposed_actions) ? resp.proposed_actions : [];
+    for (const action of proposed) {
+        const actionId = typeof action.action_id === "string" ? action.action_id : "";
+        const tool = typeof action.tool_name === "string" ? action.tool_name : undefined;
+        selected.push({
+            kind: "action",
+            candidate_id: actionId || tool || `action_${selected.length + 1}`,
+            decision: "selected",
+            reason_code: "selected_by_agent",
+            ...(tool ? { tool_name: tool } : {}),
+        });
+    }
+
+    const events = asEvents(resp.events);
+    for (const event of events) {
+        if (event.type === "tool_call") {
+            selected.push({
+                kind: "tool",
+                candidate_id: event.call_id,
+                decision: "selected",
+                reason_code: "selected_by_agent",
+                tool_name: event.tool,
+            });
+            continue;
+        }
+        if (event.type === "retrieval" && Array.isArray(event.doc_ids)) {
+            for (const docId of event.doc_ids) {
+                selected.push({
+                    kind: "retrieval",
+                    candidate_id: String(docId),
+                    decision: "selected",
+                    reason_code: "selected_by_agent",
+                    source_ref: String(docId),
+                });
+            }
+        }
+    }
+
+    if (selected.length === 0) return null;
+    return {
+        selected,
+        rejected: [],
+    };
+}
+
+export function checkAssumptionState(expected: Expected, resp: AgentResponse): AssertionResult {
+    const policy = expected.assumption_state && typeof expected.assumption_state === "object"
+        ? expected.assumption_state
+        : undefined;
+    const required = policy?.required === true || (policy?.required === undefined && hasExpectationSignal(expected));
+    if (!required) {
+        return { name: "assumption_state", pass: true, details: { note: "not_required" } };
+    }
+
+    const normalized = normalizeAssumptionState((resp as Record<string, unknown>).assumption_state);
+    const derived = normalized ?? deriveAssumptionStateFromTelemetry(resp);
+    if (!derived) {
+        return {
+            name: "assumption_state",
+            pass: false,
+            details: {
+                reason_code: "assumption_state_missing",
+                source: "missing",
+                selected_count: 0,
+                rejected_count: 0,
+            },
+        };
+    }
+
+    const minSelected = typeof policy?.min_selected_candidates === "number"
+        ? Math.max(0, policy.min_selected_candidates)
+        : 0;
+    const maxRejected = typeof policy?.max_rejected_candidates === "number"
+        ? Math.max(0, policy.max_rejected_candidates)
+        : 50;
+    const requireRejectedReasonCodes = policy?.require_reason_codes_for_rejected !== false;
+    const allowedReasonCodes = Array.isArray(policy?.allowed_reason_codes)
+        ? new Set(policy.allowed_reason_codes.map((x) => String(x)))
+        : undefined;
+
+    const violations: string[] = [];
+    if (derived.selected.length < minSelected) violations.push("selected_candidates_below_min");
+    if (derived.rejected.length > maxRejected) violations.push("rejected_candidates_above_max");
+    if (requireRejectedReasonCodes) {
+        const missingReason = derived.rejected.some((c) => typeof c.reason_code !== "string" || c.reason_code.length === 0);
+        if (missingReason) violations.push("rejected_reason_code_missing");
+    }
+    if (allowedReasonCodes && allowedReasonCodes.size > 0) {
+        const bad = [...derived.selected, ...derived.rejected].some((c) => !allowedReasonCodes.has(String(c.reason_code)));
+        if (bad) violations.push("reason_code_not_allowed");
+    }
+
+    const pass = violations.length === 0;
+    return {
+        name: "assumption_state",
+        pass,
+        details: {
+            source: normalized ? "response" : "derived",
+            selected_count: derived.selected.length,
+            rejected_count: derived.rejected.length,
+            reason_code: pass ? undefined : violations[0],
+            violations: pass ? [] : violations,
         },
     };
 }
@@ -1017,6 +1191,8 @@ export function chooseRootCause(assertions: AssertionResult[], resp: AgentRespon
     if (planning && planning.pass === false) return "wrong_tool_choice";
     const repl = assertions.find((a) => a.name === "repl_policy");
     if (repl && repl.pass === false) return "wrong_tool_choice";
+    const assumptions = assertions.find((a) => a.name === "assumption_state");
+    if (assumptions && assumptions.pass === false) return "missing_required_data";
 
     const wrongTool = ["action_required", "tool_required", "tool_sequence"].some((n) => {
         const a = assertions.find((x) => x.name === n);
@@ -1155,6 +1331,8 @@ export function evaluateOne(c: Case, resp: AgentResponse, ajv: Ajv): EvaluationR
 
     const replPolicy = checkReplPolicy(exp, resp);
     assertions.push(replPolicy);
+    const assumptionState = checkAssumptionState(exp, resp);
+    assertions.push(assumptionState);
 
     const passAll = assertions.every((a) => a.pass === true);
     const root = passAll ? undefined : chooseRootCause(assertions, resp);
@@ -1395,15 +1573,30 @@ export function deriveRiskTags(params: {
 
 export function deriveFailureSummarySide(
     rf: RunnerFailureArtifact | undefined
-): { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string } | undefined {
+): {
+    class: string;
+    http_status?: number;
+    timeout_ms?: number;
+    attempts?: number;
+    net_error_kind?: string;
+    timeout_cause?: string;
+} | undefined {
     if (!rf || rf.type !== "runner_fetch_failure") return undefined;
-    const out: { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string } = {
+    const out: {
+        class: string;
+        http_status?: number;
+        timeout_ms?: number;
+        attempts?: number;
+        net_error_kind?: string;
+        timeout_cause?: string;
+    } = {
         class: rf.class ?? "other",
     };
     if (typeof rf.status === "number") out.http_status = rf.status;
     if (typeof rf.timeout_ms === "number") out.timeout_ms = rf.timeout_ms;
     if (typeof rf.attempt === "number") out.attempts = rf.attempt;
     if (typeof rf.net_error_kind === "string" && rf.net_error_kind.length > 0) out.net_error_kind = rf.net_error_kind;
+    if (typeof rf.timeout_cause === "string" && rf.timeout_cause.length > 0) out.timeout_cause = rf.timeout_cause;
     return out;
 }
 

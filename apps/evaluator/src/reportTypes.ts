@@ -288,10 +288,40 @@ export type CompareReport = {
         repl_policy_pass: boolean;
       };
     };
+    assumption_state: {
+      baseline: {
+        status: "present" | "missing" | "not_required";
+        source?: "response" | "derived" | "missing";
+        selected_count: number;
+        rejected_count: number;
+        reason_code?: string;
+      };
+      new: {
+        status: "present" | "missing" | "not_required";
+        source?: "response" | "derived" | "missing";
+        selected_count: number;
+        rejected_count: number;
+        reason_code?: string;
+      };
+    };
 
     failure_summary?: {
-      baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string };
-      new?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string };
+      baseline?: {
+        class: string;
+        http_status?: number;
+        timeout_ms?: number;
+        attempts?: number;
+        net_error_kind?: string;
+        timeout_cause?: string;
+      };
+      new?: {
+        class: string;
+        http_status?: number;
+        timeout_ms?: number;
+        attempts?: number;
+        net_error_kind?: string;
+        timeout_cause?: string;
+      };
     };
 
     artifacts: {

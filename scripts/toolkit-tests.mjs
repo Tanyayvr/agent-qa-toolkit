@@ -107,6 +107,8 @@ function validateReport(report, reportDir) {
     "artifacts",
     "trace_integrity",
     "security",
+    "policy_evaluation",
+    "assumption_state",
     "risk_level",
     "gate_recommendation",
   ];
@@ -115,6 +117,20 @@ function validateReport(report, reportDir) {
     for (const k of required) {
       assert(Object.prototype.hasOwnProperty.call(it, k), `item missing ${k}`);
     }
+    assert(
+      it.policy_evaluation &&
+        typeof it.policy_evaluation === "object" &&
+        it.policy_evaluation.baseline &&
+        it.policy_evaluation.new,
+      "item.policy_evaluation must include baseline/new"
+    );
+    assert(
+      it.assumption_state &&
+        typeof it.assumption_state === "object" &&
+        it.assumption_state.baseline &&
+        it.assumption_state.new,
+      "item.assumption_state must include baseline/new"
+    );
     assert(it.artifacts.replay_diff_href, "item.artifacts.replay_diff_href missing");
     assert(isPortableHref(it.artifacts.replay_diff_href), "replay_diff_href not portable");
     const diffAbs = path.join(reportDir, it.artifacts.replay_diff_href);

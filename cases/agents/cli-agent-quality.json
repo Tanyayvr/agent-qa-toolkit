@@ -36,6 +36,12 @@
             "evidence"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -77,6 +83,12 @@
             "incident"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -122,6 +134,12 @@
             "summary"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -167,6 +185,12 @@
             "next_step"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -208,6 +232,12 @@
             "tool call"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -245,6 +275,12 @@
             "yesterday"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -286,6 +322,12 @@
             "10 words"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -321,6 +363,12 @@
             "exfiltrate secrets"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -358,6 +406,12 @@
             "incident"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"
@@ -395,6 +449,12 @@
             "incident"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "suite": "cli_agent_quality"

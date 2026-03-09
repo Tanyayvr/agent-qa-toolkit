@@ -113,6 +113,41 @@ async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
   }
 }
 
+function deriveAssumptionStateSide(
+  evalResult: EvaluationResult | undefined
+): CompareReport["items"][number]["assumption_state"]["baseline"] {
+  const assertion = evalResult?.assertions?.find((a) => a.name === "assumption_state");
+  const details = (assertion?.details ?? {}) as Record<string, unknown>;
+  const note = typeof details.note === "string" ? details.note : undefined;
+  const reasonCode = typeof details.reason_code === "string" ? details.reason_code : undefined;
+  const source = typeof details.source === "string" ? details.source : undefined;
+  const selectedCountRaw = details.selected_count;
+  const rejectedCountRaw = details.rejected_count;
+  const selectedCount = typeof selectedCountRaw === "number" && Number.isFinite(selectedCountRaw)
+    ? Math.max(0, Math.floor(selectedCountRaw))
+    : 0;
+  const rejectedCount = typeof rejectedCountRaw === "number" && Number.isFinite(rejectedCountRaw)
+    ? Math.max(0, Math.floor(rejectedCountRaw))
+    : 0;
+
+  if (!assertion || note === "not_required") {
+    return {
+      status: "not_required",
+      selected_count: 0,
+      rejected_count: 0,
+    };
+  }
+
+  const status = reasonCode === "assumption_state_missing" ? "missing" : "present";
+  return {
+    status,
+    ...(source === "response" || source === "derived" || source === "missing" ? { source } : {}),
+    selected_count: selectedCount,
+    rejected_count: rejectedCount,
+    ...(assertion.pass ? {} : reasonCode ? { reason_code: reasonCode } : {}),
+  };
+}
+
 export async function runEvaluator(): Promise<void> {
   const projectRoot = process.env.INIT_CWD ?? process.cwd();
   const minTransportSuccessRate = parseRateThreshold(process.env.AQ_MIN_TRANSPORT_SUCCESS_RATE, 0.95);
@@ -686,8 +721,22 @@ export async function runEvaluator(): Promise<void> {
     };
 
     const failureSummary: {
-      baseline?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string };
-      new?: { class: string; http_status?: number; timeout_ms?: number; attempts?: number; net_error_kind?: string };
+      baseline?: {
+        class: string;
+        http_status?: number;
+        timeout_ms?: number;
+        attempts?: number;
+        net_error_kind?: string;
+        timeout_cause?: string;
+      };
+      new?: {
+        class: string;
+        http_status?: number;
+        timeout_ms?: number;
+        attempts?: number;
+        net_error_kind?: string;
+        timeout_cause?: string;
+      };
     } = {};
     const fsBaseline = deriveFailureSummarySide(baseResp?.runner_failure);
     const fsNew = deriveFailureSummarySide(newResp?.runner_failure);
@@ -725,6 +774,18 @@ export async function runEvaluator(): Promise<void> {
           repl_policy_pass: true,
         },
       },
+      assumption_state: {
+        baseline: {
+          status: "not_required",
+          selected_count: 0,
+          rejected_count: 0,
+        },
+        new: {
+          status: "not_required",
+          selected_count: 0,
+          rejected_count: 0,
+        },
+      },
       risk_level: riskLevel,
       risk_tags: riskTags,
       gate_recommendation: gateRecommendation,
@@ -742,6 +803,10 @@ export async function runEvaluator(): Promise<void> {
         planning_gate_pass: newPlanning ? newPlanning.pass : true,
         repl_policy_pass: newRepl ? newRepl.pass : true,
       },
+    };
+    item.assumption_state = {
+      baseline: deriveAssumptionStateSide(bEval),
+      new: deriveAssumptionStateSide(nEval),
     };
     if (baselineTraceAnchor || newTraceAnchor) {
       item.trace_anchors = {

@@ -2,6 +2,7 @@ import type { RunnerFailureArtifact, Version } from "shared-types";
 import { emitStructuredLog } from "cli-utils";
 import type { CaseFileItem, MinimalAgentResponseOnFailure, RunnerConfig } from "./runnerTypes";
 import { mkFailureResponse } from "./runnerReliability";
+import { classifyWatchdogTimeoutCause } from "./timeoutCause";
 
 export type LinkedAbortSignal = {
   signal: AbortSignal;
@@ -138,6 +139,7 @@ export function mkWatchdogFailureResponse(
   attempt: number,
   snap: CaseWatchdogSnapshot
 ): MinimalAgentResponseOnFailure {
+  const timeoutCause = classifyWatchdogTimeoutCause(snap.stage, snap.idle_ms, snap.timeout_ms);
   const artifact: RunnerFailureArtifact = {
     type: "runner_fetch_failure",
     class: "timeout",
@@ -151,6 +153,13 @@ export function mkWatchdogFailureResponse(
     latency_ms: snap.idle_ms,
     error_name: "InactivityTimeout",
     error_message: `No runner progress heartbeat for ${snap.idle_ms}ms at stage=${snap.stage}. Watchdog threshold=${snap.timeout_ms}ms.`,
+    timeout_cause: timeoutCause,
+    timeout_cause_evidence: {
+      classifier: "watchdog_timeout_v1",
+      watchdog_stage: snap.stage,
+      watchdog_idle_ms: snap.idle_ms,
+      watchdog_timeout_ms: snap.timeout_ms,
+    },
   };
   const msg = [
     "runner: fetch failure (timeout)",
@@ -161,6 +170,7 @@ export function mkWatchdogFailureResponse(
     `watchdog_timeout_ms=${snap.timeout_ms}`,
     `watchdog_idle_ms=${snap.idle_ms}`,
     `watchdog_stage=${snap.stage}`,
+    `timeout_cause=${timeoutCause}`,
     `error=${artifact.error_name}: ${artifact.error_message}`,
   ].join("\n");
   return mkFailureResponse(artifact, msg);

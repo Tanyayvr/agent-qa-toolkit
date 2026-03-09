@@ -107,3 +107,79 @@ PREFLIGHT_MODE=off \
 FAIL_FAST_TRANSPORT_STREAK=0 \
 ./scripts/run-local-campaign.sh
 ```
+
+Note:
+- `run-local-campaign.sh` now defaults to staged execution for `CAMPAIGN_PROFILE=quality`:
+  `smoke` (`infra` subset) -> auto-promote to full only on green smoke.
+- Set `STAGED_MODE=0` for legacy single-stage runs when needed (for CI profiling or targeted troubleshooting).
+- Each generated report folder now includes `devops-envelope.json` with the effective runtime limits
+  (timeouts, retries, concurrency, preflight/fail-fast) used for that run.
+- For repeatable multi-agent operation, use profile launcher:
+  `./scripts/run-agent-profile.sh --list` then `./scripts/run-agent-profile.sh <profile>`.
+- Profile launcher defaults to `quick` mode (calibration/smoke only); add `--full` to auto-promote into full campaign.
+
+## 8) Operator modes (what each run means)
+
+- `quick` (default):
+  - optional `calibration` if history is missing;
+  - `smoke` on a small subset;
+  - stops after smoke even when smoke is green.
+  - Use it to answer: "is this agent ready for full evaluation?"
+- `full`:
+  - explicit opt-in via `./scripts/run-agent-profile.sh --full <profile>`;
+  - runs the full quality campaign only after green smoke.
+  - Use it to answer: "does this agent pass the full quality/evidence standard?"
+- `diagnostic`:
+  - explicit opt-in via `./scripts/run-agent-profile.sh --diagnostic <profile>`;
+  - same full suite, but with a more generous timeout envelope for slow but live agents.
+  - Use it when `full` fails with `timeout_budget_too_small` and health/progress are otherwise normal.
+- raw/manual:
+  - use `scripts/run-local-campaign.sh` directly when you intentionally need low-level control.
+
+Interpretation rule:
+- a green `quick` run means `ready_for_full`;
+- it does not mean final product quality is proven.
+
+## 9) External-agent operator commands
+
+Health check:
+```bash
+npm run campaign:agent:health -- --baseUrl http://127.0.0.1:8788
+```
+
+Quick run:
+```bash
+npm run campaign:agent -- goose-ollama
+```
+
+Full run:
+```bash
+npm run campaign:agent:full -- goose-ollama
+```
+
+Diagnostic run:
+```bash
+npm run campaign:agent:diagnostic -- goose-ollama
+```
+
+Post-run summary:
+```bash
+npm run campaign:agent:status
+npm run campaign:agent:status -- --reportPrefix goose-ollama-20260308_121554
+```
+
+What to inspect after the run:
+- `stage-result.json` = what happened
+- `devops-envelope.json` = what limits were used
+- `next-envelope.json` = what the toolkit recommends next
+
+If the launcher stops on failure, inspect:
+- `apps/evaluator/reports/<reportId>-calibration/stage-result.json`
+- `apps/evaluator/reports/<reportId>-smoke/stage-result.json`
+- `apps/evaluator/reports/<reportId>/compare-report.json`
+
+Timeout interpretation:
+- `timeout_budget_too_small` = envelope too small for this agent/profile
+- `agent_stuck_or_loop` = no useful progress
+- `waiting_for_input` = interactive path detected
+- `transport_failure` = infra/network/adapter problem

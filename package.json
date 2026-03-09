@@ -55,7 +55,12 @@
     "trend": "ts-node packages/trending/src/cli.ts",
     "quality:gate": "npm run lint -- --max-warnings=0 && npm run typecheck && npm run test:coverage && npm run docs:check-links && npm run security:secrets && docker compose config --quiet && npm audit --audit-level=high",
     "metrics:dd": "node scripts/collect-dd-metrics.mjs",
-    "library:ingest": "node scripts/library-ingest.mjs"
+    "library:ingest": "node scripts/library-ingest.mjs",
+    "campaign:agent": "bash scripts/run-agent-profile.sh",
+    "campaign:agent:full": "bash scripts/run-agent-profile.sh --full",
+    "campaign:agent:diagnostic": "bash scripts/run-agent-profile.sh --diagnostic",
+    "campaign:agent:health": "node scripts/check-adapter-health.mjs",
+    "campaign:agent:status": "node scripts/agent-run-status.mjs"
   },
   "overrides": {
     "qs": "6.14.2",

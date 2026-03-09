@@ -78,6 +78,8 @@ describe("langchain-adapter", () => {
     expect(out.events?.some((e) => e.type === "tool_result")).toBe(true);
     expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
     expect(out.proposed_actions?.[0]?.tool_name).toBe("search");
+    expect(out.assumption_state?.selected).toHaveLength(1);
+    expect(out.assumption_state?.selected?.[0]?.reason_code).toBe("selected_by_agent");
     expect(out.telemetry_mode).toBe("native");
   });
 
@@ -93,6 +95,8 @@ describe("langchain-adapter", () => {
     expect(out.final_output).toEqual({ content_type: "text", content: "ok" });
     expect(out.telemetry_mode).toBe("wrapper_only");
     expect(out.events?.some((e) => e.type === "final_output")).toBe(true);
+    expect(out.assumption_state?.selected).toEqual([]);
+    expect(out.assumption_state?.rejected).toEqual([]);
   });
 
   it("supports custom mapInput/mapOutput and workflow id", async () => {

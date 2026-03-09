@@ -1,5 +1,5 @@
 //apps/demo-agent/src/types.ts
-import type { HandoffEnvelope, HandoffEnvelopeInput, HandoffReceipt, RunMeta, TraceAnchor } from "shared-types";
+import type { AssumptionState, HandoffEnvelope, HandoffEnvelopeInput, HandoffReceipt, RunMeta, TraceAnchor } from "shared-types";
 
 export type ContentType = "text" | "json";
 
@@ -65,6 +65,7 @@ export type AgentCaseResponse = {
   trace_anchor?: TraceAnchor;
   handoff_receipts?: HandoffReceipt[];
   handoff_emits?: HandoffEnvelope[];
+  assumption_state?: AssumptionState;
 };
 
 export type RunCaseRequestBody = {

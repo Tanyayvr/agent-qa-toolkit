@@ -6,6 +6,7 @@ import { appendFile, mkdir, rename, writeFile } from "node:fs/promises";
 import { stableStringify, normalizeRunMeta, validateAndNormalizeHandoffEnvelope } from "cli-utils";
 import { dirname, isAbsolute, resolve } from "node:path";
 import type {
+  AssumptionState,
   HandoffEnvelope,
   HandoffReceipt,
   ProposedAction,
@@ -328,6 +329,7 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): {
   events: RunEvent[];
   proposedActions: ProposedAction[];
   telemetryMode: "wrapper_only" | "inferred";
+  assumptionState: AssumptionState;
 } {
   const baseTs = Number.isFinite(params.startedAtMs) ? Math.max(0, Math.floor(params.startedAtMs)) : Date.now();
   const endTs = Number.isFinite(params.finishedAtMs) ? Math.max(baseTs, Math.floor(params.finishedAtMs)) : baseTs;
@@ -425,7 +427,32 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): {
   });
 
   const telemetryMode: "wrapper_only" | "inferred" = inferred.length > 0 ? "inferred" : "wrapper_only";
-  return { events, proposedActions, telemetryMode };
+  const assumptionState: AssumptionState = {
+    selected: [
+      {
+        kind: "tool",
+        candidate_id: execCallId,
+        decision: "selected",
+        reason_code: "selected_by_agent",
+        tool_name: params.execToolName,
+        details: { source: "wrapper_exec_tool" },
+      },
+      ...inferred.map((item, idx) => ({
+        kind: "tool" as const,
+        candidate_id: `${execCallId}_tool_${idx + 1}`,
+        decision: "selected" as const,
+        reason_code: "selected_by_agent" as const,
+        tool_name: item.tool,
+        details: {
+          source: "inferred_tool_trace",
+          source_line_no: item.sourceLineNo,
+          source_line_hash: item.sourceLineHash,
+        },
+      })),
+    ],
+    rejected: [],
+  };
+  return { events, proposedActions, telemetryMode, assumptionState };
 }
 
 function asStringList(value: unknown): string[] {
@@ -1529,6 +1556,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
           proposed_actions: telemetry.proposedActions,
           final_output: { content_type: "text", content: `[adapter:policy_violation] ${message}` },
           events: telemetry.events,
+          assumption_state: telemetry.assumptionState,
           telemetry_mode: telemetry.telemetryMode,
           policy_violations: policyViolations,
           ...(runMeta ? { run_meta: runMeta } : {}),
@@ -1545,6 +1573,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
         proposed_actions: telemetry.proposedActions,
         final_output: { content_type: "text", content: output },
         events: telemetry.events,
+        assumption_state: telemetry.assumptionState,
         telemetry_mode: telemetry.telemetryMode,
         ...(runMeta ? { run_meta: runMeta } : {}),
         ...(handoffReceipts.length > 0 ? { handoff_receipts: handoffReceipts } : {}),
@@ -1588,6 +1617,7 @@ export function createCliAgentAdapterApp(env: NodeJS.ProcessEnv = process.env): 
         proposed_actions: telemetry.proposedActions,
         final_output: { content_type: "text", content: output },
         events: telemetry.events,
+        assumption_state: telemetry.assumptionState,
         telemetry_mode: telemetry.telemetryMode,
         ...(runMeta ? { run_meta: runMeta } : {}),
         ...(handoffReceipts.length > 0 ? { handoff_receipts: handoffReceipts } : {}),

@@ -10,6 +10,7 @@
   and uses incremental chunked page rendering + debounced text filtering to stay responsive on large runs.
 3) **Evidence pack** is the report directory (manifest + assets + report.html + compare-report.json).
    Local campaign script (`scripts/run-local-campaign.sh`) ingests generated reports into the local library by default (`.agent-qa/library`, opt-out via `LIBRARY_INGEST=0`).
+   For `CAMPAIGN_PROFILE=quality`, campaign orchestration is staged by default: `smoke` (`infra` + small subset) -> auto-promote to full quality only on green smoke.
 4) **Group bundle (`P1`)** can aggregate multiple report directories under one incident:
    `npm run bundle:group -- --report a=<reportDirA> --report b=<reportDirB> ...`
    producing `index.html`, `group-index.json`, and `group-manifest.json` with checksum verification via
@@ -53,6 +54,9 @@ Runner and evaluator support additional scenarios for production drift:
 - **Graceful shutdown**: runner/evaluator trap `SIGINT`/`SIGTERM`, persist interruption metadata, and exit with deterministic code (`130`/`143`).
 - **Runner inactivity watchdog**: runner aborts a case when no progress heartbeat is observed for `--inactivityTimeoutMs`;
   heartbeat telemetry is emitted every `--heartbeatIntervalMs` to surface slow/stuck requests.
+- **Timeout root-cause taxonomy (machine-readable)**: timeout/transport failures carry deterministic `timeout_cause`:
+  `timeout_budget_too_small`, `agent_stuck_or_loop`, `waiting_for_input`, `transport_failure`, `unknown_timeout`.
+  Evaluator propagates this into `failure_summary` so staged gating and incident triage can distinguish budget vs stuck vs interactive wait.
 - **Runner preflight**: optional adapter readiness checks via `--preflightMode off|warn|strict` and `--preflightTimeoutMs`
   (`/health` + canary `/run-case`) to catch infra issues before full campaigns.
   The canary includes `x-aq-preflight: 1`; `cli-agent-adapter` short-circuits `case_id="__preflight__"` into
@@ -82,6 +86,21 @@ Runner and evaluator support additional scenarios for production drift:
   `AQ_MIN_TRANSPORT_SUCCESS_RATE`, `AQ_MAX_WEAK_EXPECTED_RATE`,
   `AQ_MIN_PRE_ACTION_ENTROPY_REMOVED`, `AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK`.
   `scripts/run-local-campaign.sh` enables this gate by default (`EVAL_FAIL_ON_EXECUTION_DEGRADED=1`).
+- **Default staged UX (`smoke` -> `full`)**:
+  `run-local-campaign.sh` emits typed stage decisions (`stage`, `reason`, `next_action`) and stops before full run on red smoke.
+  Each report directory additionally receives `devops-envelope.json` with effective runtime bounds
+  (`timeout*`, retries, concurrency, preflight, fail-fast), so operators can audit/replicate the exact envelope.
+  `STAGED_MODE=0` preserves legacy single-stage behavior for CI or targeted profiling runs.
+  `scripts/run-agent-profile.sh` adds the operator-facing layer:
+  - default `quick` mode = optional `calibration` + `smoke`, then stop;
+  - explicit `--full` = green quick gate plus auto-promotion into full quality campaign.
+  - explicit `--diagnostic` = full quality campaign with a more generous timeout envelope for known slow-but-live agents.
+  This separation is deliberate: quick is a readiness/triage contract, full is the quality-certification contract.
+  DevOps owns the runtime envelope (`TIMEOUT_MS`, `TIMEOUT_AUTO_CAP_MS`, retries, concurrency, sample count);
+  runner auto-tuning stays inside that envelope and must not silently upgrade quick into full unless `--full` was requested.
+  Launcher/runtime also emit machine-readable operator planning artifacts:
+  - pre-run estimate (console) with `recommendedMode` + confidence
+  - `next-envelope.json` in report directories with the next suggested mode/envelope after smoke pass or timeout-budget failure
 - **Semantic text-eval layer**: evaluator supports deterministic semantic assertions
   (`expected.semantic.required_concepts`, `forbidden_concepts`, `reference_texts`, `profile|min_token_f1|min_lcs_ratio`, `synonyms`),
   so text checks are not limited to raw substring matching.
@@ -203,8 +222,14 @@ Policy violations are also appended to an audit log (`.agent-qa/policy-violation
 Evaluator enforces deterministic `planning_gate` / `repl_policy` assertions from case expectations and emits `policy_tampering`
 signals that map to gate escalation (`require_approval` / `block`).
 `compare-report` item schema requires `policy_evaluation`, making policy pass/fail contract-mandatory per case.
+Evaluator also enforces a decision-legibility `assumption_state` assertion. It prefers response-native
+`assumption_state`, can deterministically derive fallback counts from telemetry (`proposed_actions`/`tool_call`/`retrieval`),
+and emits typed reason codes (`assumption_state_missing`, `selected_candidates_below_min`, etc.) for gating.
+`compare-report` item schema requires `assumption_state` per side (`status`, `source`, `selected_count`, `rejected_count`, `reason_code`).
 Quality campaign validation (`scripts/validate-cases-quality.mjs`) can require semantic contracts for lexical text expectations
 (`--requireSemanticQuality 1`, enabled by default in `scripts/run-local-campaign.sh` via `CASE_QUALITY_REQUIRE_SEMANTIC=1`).
+Quality campaign validation also requires assumption-state contracts by default
+(`--requireAssumptionState` defaults to `1`; `scripts/run-local-campaign.sh` passes `CASE_QUALITY_REQUIRE_ASSUMPTION_STATE=1`).
 For `reference_texts`, validation requires calibrated thresholds via either `semantic.profile` or explicit
 `semantic.min_token_f1` + `semantic.min_lcs_ratio`.
 

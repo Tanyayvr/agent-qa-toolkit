@@ -128,6 +128,18 @@
           "planning_gate_pass": true,
           "repl_policy_pass": true
         }
+      },
+      "assumption_state": {
+        "baseline": {
+          "status": "not_required",
+          "selected_count": 0,
+          "rejected_count": 0
+        },
+        "new": {
+          "status": "not_required",
+          "selected_count": 0,
+          "rejected_count": 0
+        }
       }
     }
   ],

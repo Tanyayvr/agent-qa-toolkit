@@ -435,7 +435,7 @@ export async function runRunner(): Promise<void> {
     console.log("timeoutProfileAuto:", JSON.stringify(timeoutAutoResolution));
     if (timeoutAutoResolution.history_candidate_ignored_reason === "failure_only_history") {
       console.warn(
-        "WARNING: auto timeout ignored failure-only history (no successful samples); using base timeout + adapter hints."
+        "WARNING: auto timeout ignored failure-only history (no successful samples); using base timeout and server safety bounds."
       );
     }
     if (timeoutAutoResolution.history_candidate_ignored_reason === "insufficient_success_samples") {

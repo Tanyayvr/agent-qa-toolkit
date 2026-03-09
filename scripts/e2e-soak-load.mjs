@@ -290,6 +290,7 @@ async function main() {
           CASES: subsetCasesPath,
           AGENT_SUITE: "cli",
           CAMPAIGN_PROFILE: "quality",
+          STAGED_MODE: "0",
           RUN_PREFIX: runPrefix,
           REPORT_PREFIX: reportPrefix,
           TIMEOUT_PROFILE: "off",

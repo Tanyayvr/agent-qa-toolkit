@@ -293,6 +293,8 @@ describe("cli-agent-adapter helpers", () => {
     expect(telemetry.events.some((e) => e.type === "tool_result")).toBe(true);
     expect(telemetry.events.some((e) => e.type === "final_output")).toBe(true);
     expect(telemetry.telemetryMode).toBe("wrapper_only");
+    expect(telemetry.assumptionState.selected.length).toBeGreaterThan(0);
+    expect(telemetry.assumptionState.selected[0]?.reason_code).toBe("selected_by_agent");
   });
 });
 
@@ -496,6 +498,10 @@ describe("cli-agent-adapter app", () => {
       expect(events.some((e) => e.type === "tool_result")).toBe(true);
       expect(events.some((e) => e.type === "final_output")).toBe(true);
       expect(["wrapper_only", "inferred"]).toContain((json.telemetry_mode as string | undefined) ?? "");
+      const assumptionState = json.assumption_state as { selected?: unknown[]; rejected?: unknown[] } | undefined;
+      expect(Array.isArray(assumptionState?.selected)).toBe(true);
+      expect(Array.isArray(assumptionState?.rejected)).toBe(true);
+      expect((assumptionState?.selected ?? []).length).toBeGreaterThan(0);
 
       const receipts = (json.handoff_receipts as Array<{ status?: string }> | undefined) ?? [];
       expect(receipts).toHaveLength(1);
@@ -523,6 +529,10 @@ describe("cli-agent-adapter app", () => {
         const events = (json.events as Array<{ type?: string; tool?: string }> | undefined) ?? [];
         expect(events.some((e) => e.type === "tool_call" && e.tool === "cli_agent_exec")).toBe(true);
         expect(json.telemetry_mode).toBe("wrapper_only");
+        const assumptionState = json.assumption_state as { selected?: unknown[]; rejected?: unknown[] } | undefined;
+        expect(Array.isArray(assumptionState?.selected)).toBe(true);
+        expect(Array.isArray(assumptionState?.rejected)).toBe(true);
+        expect((assumptionState?.selected ?? []).length).toBeGreaterThan(0);
       }
     );
   });

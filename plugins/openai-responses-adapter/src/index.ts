@@ -1,5 +1,5 @@
 import type { SimpleAgent } from "agent-sdk";
-import type { FinalOutput, ProposedAction, RunEvent, TokenUsage } from "shared-types";
+import type { AssumptionState, FinalOutput, ProposedAction, RunEvent, TokenUsage } from "shared-types";
 
 type OpenAIResponsesCreatePayload = Record<string, unknown>;
 type OpenAIResponsesResult = Record<string, unknown>;
@@ -88,6 +88,7 @@ type OpenAITelemetry = {
   events: RunEvent[];
   proposed_actions: ProposedAction[];
   telemetry_mode: "native" | "wrapper_only";
+  assumption_state: AssumptionState;
 };
 
 function collectToolHintCount(result: OpenAIResponsesResult): number {
@@ -109,7 +110,14 @@ function collectToolHintCount(result: OpenAIResponsesResult): number {
 
 function extractToolTelemetry(result: OpenAIResponsesResult): OpenAITelemetry {
   const output = Array.isArray(result.output) ? result.output : [];
-  if (!output.length) return { events: [], proposed_actions: [], telemetry_mode: "wrapper_only" };
+  if (!output.length) {
+    return {
+      events: [],
+      proposed_actions: [],
+      telemetry_mode: "wrapper_only",
+      assumption_state: { selected: [], rejected: [] },
+    };
+  }
 
   const events: RunEvent[] = [];
   const proposedActions: ProposedAction[] = [];
@@ -196,10 +204,26 @@ function extractToolTelemetry(result: OpenAIResponsesResult): OpenAITelemetry {
     );
   }
 
+  const assumptionState: AssumptionState = {
+    selected: Array.from(callIds).map((callId) => {
+      const call = events.find((e): e is Extract<RunEvent, { type: "tool_call" }> => e.type === "tool_call" && e.call_id === callId);
+      return {
+        kind: "tool",
+        candidate_id: callId,
+        decision: "selected",
+        reason_code: "selected_by_agent",
+        ...(call?.tool ? { tool_name: call.tool } : {}),
+        ...(call?.args ? { details: { args: call.args } } : {}),
+      };
+    }),
+    rejected: [],
+  };
+
   return {
     events,
     proposed_actions: proposedActions,
     telemetry_mode: events.length > 0 ? "native" : "wrapper_only",
+    assumption_state: assumptionState,
   };
 }
 
@@ -236,6 +260,7 @@ export function wrapOpenAIResponses(
       final_output,
       events,
       telemetry_mode: telemetry.telemetry_mode,
+      assumption_state: telemetry.assumption_state,
       ...(telemetry.proposed_actions.length > 0 ? { proposed_actions: telemetry.proposed_actions } : {}),
       ...(tokenUsage ? { token_usage: tokenUsage } : {}),
     };

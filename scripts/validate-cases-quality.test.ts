@@ -43,6 +43,8 @@ describe("validate-cases-quality", () => {
         "0.2",
         "--requireSemanticQuality",
         "0",
+        "--requireAssumptionState",
+        "0",
       ]);
       expect(res.code).toBe(0);
       const parsed = JSON.parse(res.stdout.trim()) as { weak_expected_rate?: number };
@@ -76,6 +78,8 @@ describe("validate-cases-quality", () => {
         "--maxWeakExpectedRate",
         "0.2",
         "--requireSemanticQuality",
+        "0",
+        "--requireAssumptionState",
         "0",
       ]);
       expect(res.code).toBe(2);
@@ -134,6 +138,8 @@ describe("validate-cases-quality", () => {
         "1",
         "--requireSemanticQuality",
         "0",
+        "--requireAssumptionState",
+        "0",
       ]);
       expect(res.code).toBe(2);
       expect(res.stderr).toContain("requires tool evidence assertions");
@@ -168,6 +174,8 @@ describe("validate-cases-quality", () => {
         "1",
         "--requireSemanticQuality",
         "0",
+        "--requireAssumptionState",
+        "0",
       ]);
       expect(res.code).toBe(0);
       const parsed = JSON.parse(res.stdout.trim()) as { tool_evidence_missing_cases?: number };
@@ -200,6 +208,8 @@ describe("validate-cases-quality", () => {
         "--requireStrongTelemetry",
         "1",
         "--requireSemanticQuality",
+        "0",
+        "--requireAssumptionState",
         "0",
       ]);
       expect(res.code).toBe(2);
@@ -244,6 +254,8 @@ describe("validate-cases-quality", () => {
         "1",
         "--requireSemanticQuality",
         "0",
+        "--requireAssumptionState",
+        "0",
       ]);
       expect(res.code).toBe(0);
       const parsed = JSON.parse(res.stdout.trim()) as { strong_telemetry_missing_cases?: number };
@@ -280,6 +292,8 @@ describe("validate-cases-quality", () => {
         "quality",
         "--requireSemanticQuality",
         "1",
+        "--requireAssumptionState",
+        "0",
       ]);
       expect(res.code).toBe(2);
       expect(res.stderr).toContain("requires semantic quality contract");
@@ -318,6 +332,8 @@ describe("validate-cases-quality", () => {
         "quality",
         "--requireSemanticQuality",
         "1",
+        "--requireAssumptionState",
+        "0",
       ]);
       expect(res.code).toBe(0);
       const parsed = JSON.parse(res.stdout.trim()) as { semantic_quality_missing_cases?: number };
@@ -342,7 +358,7 @@ describe("validate-cases-quality", () => {
         ),
         "utf8"
       );
-      const res = await runValidate(["--cases", casesPath, "--profile", "quality"]);
+      const res = await runValidate(["--cases", casesPath, "--profile", "quality", "--requireAssumptionState", "0"]);
       expect(res.code).toBe(2);
       expect(res.stderr).toContain("requires semantic quality contract");
     } finally {
@@ -373,9 +389,123 @@ describe("validate-cases-quality", () => {
         ),
         "utf8"
       );
-      const res = await runValidate(["--cases", casesPath, "--profile", "quality"]);
+      const res = await runValidate(["--cases", casesPath, "--profile", "quality", "--requireAssumptionState", "0"]);
       expect(res.code).toBe(2);
       expect(res.stderr).toContain("requires semantic quality contract");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("fails quality profile when assumption-state contract is required but missing", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-assumption-missing-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            {
+              id: "c1",
+              expected: {
+                must_include: ["offline evidence"],
+                semantic: { required_concepts: [["offline"]] },
+              },
+            },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireAssumptionState",
+        "1",
+      ]);
+      expect(res.code).toBe(2);
+      expect(res.stderr).toContain("requires assumption-state contract");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("passes quality profile when assumption-state contract is present", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-assumption-ok-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            {
+              id: "c1",
+              expected: {
+                tool_required: ["search"],
+                assumption_state: {
+                  required: true,
+                  min_selected_candidates: 1,
+                  max_rejected_candidates: 50,
+                  require_reason_codes_for_rejected: true,
+                },
+              },
+            },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+        "--requireAssumptionState",
+        "1",
+        "--requireSemanticQuality",
+        "0",
+      ]);
+      expect(res.code).toBe(0);
+      const parsed = JSON.parse(res.stdout.trim()) as { assumption_state_missing_cases?: number };
+      expect(parsed.assumption_state_missing_cases).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("fails by default when expectation-bearing case has no assumption-state contract", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "aq-cases-assumption-default-missing-"));
+    try {
+      const casesPath = path.join(root, "cases.json");
+      await writeFile(
+        casesPath,
+        JSON.stringify(
+          [
+            {
+              id: "c1",
+              expected: {
+                must_include: ["offline evidence"],
+                semantic: { required_concepts: [["offline"], ["evidence"]] },
+              },
+            },
+          ],
+          null,
+          2
+        ),
+        "utf8"
+      );
+      const res = await runValidate([
+        "--cases",
+        casesPath,
+        "--profile",
+        "quality",
+      ]);
+      expect(res.code).toBe(2);
+      expect(res.stderr).toContain("requires assumption-state contract");
     } finally {
       await rm(root, { recursive: true, force: true });
     }

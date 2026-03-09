@@ -31,6 +31,7 @@ import {
   mkFailureResponse,
   sleep,
 } from "./runnerReliability";
+import { classifyFetchTimeoutCause } from "./timeoutCause";
 
 const MID_RUN_ADAPTER_RECOVERY_EXTRA_RETRIES = 1;
 const MID_RUN_ADAPTER_HEALTH_ATTEMPTS = 5;
@@ -157,7 +158,8 @@ export async function runOneCaseWithReliability(
           status_text: res.statusText,
           http_is_transient: httpIsTransient(res.status),
           body_snippet: snippet,
-          max_body_bytes: cfg.maxBodyBytes
+          max_body_bytes: cfg.maxBodyBytes,
+          timeout_cause: "transport_failure",
         };
 
         if (bodyRel !== undefined) artifact.full_body_saved_to = bodyRel;
@@ -204,7 +206,8 @@ export async function runOneCaseWithReliability(
           latency_ms: latency,
           error_name: "RunnerError",
           error_message: "response.body is null",
-          is_transient: false
+          is_transient: false,
+          timeout_cause: "transport_failure",
         };
         return mkFailureResponse(artifact, "runner: invalid_json (response.body is null)");
       }
@@ -301,7 +304,8 @@ export async function runOneCaseWithReliability(
           max_body_bytes: cfg.maxBodyBytes,
           body_truncated: true,
           body_bytes_written: merged.byteLength,
-          is_transient: false
+          is_transient: false,
+          timeout_cause: "transport_failure",
         };
         if (bodyRel !== undefined) artifact.full_body_saved_to = bodyRel;
         if (metaRel !== undefined) artifact.full_body_meta_saved_to = metaRel;
@@ -378,7 +382,8 @@ export async function runOneCaseWithReliability(
           error_message: e instanceof Error ? e.message : String(e),
           body_snippet: snippet,
           max_body_bytes: cfg.maxBodyBytes,
-          is_transient: false
+          is_transient: false,
+          timeout_cause: "transport_failure",
         };
         if (bodyRel !== undefined) artifact.full_body_saved_to = bodyRel;
         if (metaRel !== undefined) artifact.full_body_meta_saved_to = metaRel;
@@ -417,8 +422,29 @@ export async function runOneCaseWithReliability(
         timeout_ms: cfg.timeoutMs,
         latency_ms: latency,
         error_name: e instanceof Error ? e.name : "Error",
-        error_message: e instanceof Error ? e.message : String(e)
+        error_message: e instanceof Error ? e.message : String(e),
       };
+
+      if (klass === "timeout") {
+        artifact.timeout_cause = classifyFetchTimeoutCause({
+          netErrorKind,
+          errorMessage: artifact.error_message,
+          attempt,
+          retries: cfg.retries,
+          timeoutMs: cfg.timeoutMs,
+          latencyMs: latency,
+        });
+        artifact.timeout_cause_evidence = {
+          classifier: "fetch_timeout_v1",
+          net_error_kind: netErrorKind,
+          attempt,
+          retries: cfg.retries,
+          timeout_ms: cfg.timeoutMs,
+          latency_ms: latency,
+        };
+      } else {
+        artifact.timeout_cause = "transport_failure";
+      }
 
       artifact.is_transient = klass === "timeout" || klass === "network_error";
 
@@ -463,7 +489,8 @@ export async function runOneCaseWithReliability(
     timeout_ms: cfg.timeoutMs,
     latency_ms: 0,
     error_name: "RunnerError",
-    error_message: "unreachable"
+    error_message: "unreachable",
+    timeout_cause: "transport_failure",
   };
   return mkFailureResponse(fallback, "runner: unreachable state");
 }

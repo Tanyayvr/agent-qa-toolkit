@@ -126,6 +126,18 @@ describe("agent-sdk helpers", () => {
         output_tokens: 5,
         total_tokens: 15,
       },
+      assumption_state: {
+        selected: [
+          {
+            kind: "tool",
+            candidate_id: "a1",
+            decision: "selected",
+            reason_code: "selected_by_agent",
+            tool_name: "search",
+          },
+        ],
+        rejected: [],
+      },
     }));
 
     const out = await handler({
@@ -144,6 +156,7 @@ describe("agent-sdk helpers", () => {
     expect(out.policy_violations?.[0]?.code).toBe("missing_plan_envelope");
     expect(out.trace_anchor?.source).toBe("response_body");
     expect(out.token_usage?.total_tokens).toBe(15);
+    expect(out.assumption_state?.selected[0]?.candidate_id).toBe("a1");
   });
 
   it("wrapSimpleAgent forwards run_meta and handoff fields when provided", async () => {

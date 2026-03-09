@@ -218,7 +218,7 @@ describe("runner orchestration", () => {
     expect(runMeta.runner?.timeout_ms).toBe(170_000);
   });
 
-  it("auto timeout profile constrains timeout by adapter server request timeout window", async () => {
+  it("auto timeout profile treats adapter timeout as ceiling metadata, not as growth floor", async () => {
     const casesPath = path.join(root, "cases.json");
     const outDir = path.join(root, "runs");
     await writeJson(casesPath, [
@@ -308,13 +308,15 @@ describe("runner orchestration", () => {
           server_request_timeout_ms?: number;
           server_candidate_timeout_ms?: number;
           clamped_by_server_timeout?: boolean;
+          history_candidate_ignored_reason?: string;
         };
       };
     };
     expect(runMeta.runner?.timeout_auto?.server_request_timeout_ms).toBe(300_000);
     expect(runMeta.runner?.timeout_auto?.server_candidate_timeout_ms).toBe(295_000);
-    expect(runMeta.runner?.timeout_auto?.clamped_by_server_timeout).toBe(true);
-    expect(runMeta.runner?.timeout_ms).toBe(295_000);
+    expect(runMeta.runner?.timeout_auto?.history_candidate_ignored_reason).toBe("insufficient_success_samples");
+    expect(runMeta.runner?.timeout_auto?.clamped_by_server_timeout).toBe(false);
+    expect(runMeta.runner?.timeout_ms).toBe(120_000);
   });
 
   it("forwards metadata.handoff and run_meta routing fields to /run-case", async () => {
@@ -472,8 +474,9 @@ describe("runner orchestration", () => {
     await mod.runRunner();
 
     const baselineRaw = await readFile(path.join(outDir, "baseline", "timeout-run", "c1.json"), "utf-8");
-    const baseline = JSON.parse(baselineRaw) as { runner_failure?: { class?: string } };
+    const baseline = JSON.parse(baselineRaw) as { runner_failure?: { class?: string; timeout_cause?: string } };
     expect(baseline.runner_failure?.class).toBe("timeout");
+    expect(baseline.runner_failure?.timeout_cause).toBe("timeout_budget_too_small");
   });
 
   it("captures inactivity watchdog timeout when request stays silent", async () => {
@@ -538,10 +541,11 @@ describe("runner orchestration", () => {
 
     const baselineRaw = await readFile(path.join(outDir, "baseline", "watchdog-run", "c1.json"), "utf-8");
     const baseline = JSON.parse(baselineRaw) as {
-      runner_failure?: { class?: string; error_name?: string };
+      runner_failure?: { class?: string; error_name?: string; timeout_cause?: string };
     };
     expect(baseline.runner_failure?.class).toBe("timeout");
     expect(baseline.runner_failure?.error_name).toBe("InactivityTimeout");
+    expect(baseline.runner_failure?.timeout_cause).toBe("agent_stuck_or_loop");
   });
 
   it("retries transient HTTP 500 and succeeds on next attempt", async () => {

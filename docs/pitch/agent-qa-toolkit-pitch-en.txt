@@ -13,6 +13,7 @@ Problem
 Solution
 - One run → one portable Evidence Pack
 - report.html (human) + compare-report.json (CI contract)
+- operator flow is explicit: quick readiness first, full evaluation only when requested
 - assets/ + manifest.json with sha256 integrity
 - Strict verify: portability + integrity checks
 - NOW: strict-signature parity checks across Node/Python/Go validators (signed pack must pass, tampered manifest must fail)
@@ -23,12 +24,15 @@ Solution
 - NEW: release-gate E2E in CI (policy-gate + soak/load stability checks)
 - NOW: runtime policy hardening shipped (planning/repl policy enforcement in adapter + deterministic evaluator checks)
 - NOW: quality profile requires strong tool telemetry (`native|inferred`; wrapper-only is treated as insufficient evidence)
+- NOW: decision-legibility contract adds machine-auditable `assumption_state` (selected/rejected candidates + deterministic reason codes)
 - NOW: plugin adapters fail fast on telemetry mismatch (`invalid_telemetry`) when tool activity is hinted but structured tool events are missing
 - NOW: semantic quality checks shipped for text tasks (`required/forbidden concepts` + calibrated profile/thresholds + custom synonyms)
 - NOW: release campaign gate is ON by default and can enforce KPI thresholds (`pre-action entropy removed`, `reconstruction min saved/block`)
 - NOW: quality gate includes high-confidence repository secret scan (keys/tokens/private-key markers)
 - NOW: auto-timeout guardrails shipped (success-only learning, min successful samples, bounded growth vs base timeout)
+- NOW: machine-readable timeout cause taxonomy shipped (`timeout_budget_too_small`, `agent_stuck_or_loop`, `waiting_for_input`, `transport_failure`, `unknown_timeout`)
 - NOW: campaign runs are ingested into local evidence library by default (opt-out flag only)
+- NOW: staged campaign UX is default (`smoke` -> `full` auto-promotion with typed `stage/reason/next_action` output)
 
 How It Works
 - Runner executes cases against the agent
@@ -70,6 +74,7 @@ Why Not Promptfoo / DeepEval / LangSmith / Galileo
 - We focus on agent behavior + portable offline handoff artifacts
 - Evidence Pack is attachable to tickets/PRs/incident docs
 - Deterministic CI gate from one machine contract (`compare-report.json`)
+- green quick means "ready for full", not "quality already proven"
 - Complement path: keep observability platform, add us for release evidence in CI
 - Plus: local trend DB + offline charts (no vendor lock-in, no data egress)
 

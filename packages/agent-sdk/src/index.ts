@@ -28,6 +28,7 @@ export type SimpleAgent = (input: { user: string; context?: unknown }) => Promis
   run_meta?: AgentResponse["run_meta"];
   handoff_emits?: AgentResponse["handoff_emits"];
   handoff_receipts?: AgentResponse["handoff_receipts"];
+  assumption_state?: AgentResponse["assumption_state"];
 }>;
 
 
@@ -176,6 +177,7 @@ export function wrapSimpleAgent(agent: SimpleAgent): RunCaseHandler {
       ...(out.run_meta ? { run_meta: out.run_meta } : {}),
       ...(out.handoff_emits ? { handoff_emits: out.handoff_emits } : {}),
       ...(out.handoff_receipts ? { handoff_receipts: out.handoff_receipts } : {}),
+      ...(out.assumption_state ? { assumption_state: out.assumption_state } : {}),
     };
   };
 }

@@ -49,6 +49,12 @@
             "CUST-9999"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -107,6 +113,12 @@
             ]
           }
         }
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -154,7 +166,13 @@
       },
       "tool_required": [
         "send_email"
-      ]
+      ],
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
+      }
     },
     "metadata": {
       "tags": [
@@ -180,7 +198,13 @@
       "tool_sequence": [
         "get_customer",
         "create_ticket"
-      ]
+      ],
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
+      }
     },
     "metadata": {
       "tags": [
@@ -211,6 +235,12 @@
             "reset your password"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -242,6 +272,12 @@
             "incident"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -273,6 +309,12 @@
             "pending"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -306,6 +348,12 @@
             "refund"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -339,6 +387,12 @@
             "Priority High"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -386,6 +440,12 @@
             "ticket created"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {
@@ -413,6 +473,12 @@
             "Verified fix"
           ]
         ]
+      },
+      "assumption_state": {
+        "required": true,
+        "min_selected_candidates": 1,
+        "max_rejected_candidates": 50,
+        "require_reason_codes_for_rejected": true
       }
     },
     "metadata": {

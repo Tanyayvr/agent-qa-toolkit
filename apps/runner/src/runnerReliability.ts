@@ -183,7 +183,6 @@ export async function resolveTimeoutProfileAuto(params: {
 
   let recommendedBeforeCaps = baseTimeoutMs;
   if (typeof historyCandidate === "number") recommendedBeforeCaps = Math.max(recommendedBeforeCaps, historyCandidate);
-  if (typeof adapterCandidate === "number") recommendedBeforeCaps = Math.max(recommendedBeforeCaps, adapterCandidate);
 
   let finalTimeoutMs = Math.min(recommendedBeforeCaps, cfg.timeoutAutoCapMs);
   const clampedByCap = finalTimeoutMs < recommendedBeforeCaps;

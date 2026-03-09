@@ -10,6 +10,7 @@ function parseArgs(argv) {
     requireToolEvidence: false,
     requireStrongTelemetry: false,
     requireSemanticQuality: true,
+    requireAssumptionState: true,
   };
   for (let i = 2; i < argv.length; i += 1) {
     const a = argv[i];
@@ -47,11 +48,17 @@ function parseArgs(argv) {
       i += 1;
       continue;
     }
+    if (a === "--requireAssumptionState") {
+      const raw = String(argv[i + 1] ?? "0").toLowerCase();
+      out.requireAssumptionState = raw === "1" || raw === "true" || raw === "yes";
+      i += 1;
+      continue;
+    }
     if (a === "--help" || a === "-h") {
       console.log(
         [
           "Usage:",
-          "  node scripts/validate-cases-quality.mjs --cases <path> [--profile quality|infra] [--maxWeakExpectedRate <0..1>] [--requireToolEvidence 0|1] [--requireStrongTelemetry 0|1] [--requireSemanticQuality 0|1]",
+          "  node scripts/validate-cases-quality.mjs --cases <path> [--profile quality|infra] [--maxWeakExpectedRate <0..1>] [--requireToolEvidence 0|1] [--requireStrongTelemetry 0|1] [--requireSemanticQuality 0|1] [--requireAssumptionState 0|1]",
         ].join("\n")
       );
       process.exit(0);
@@ -104,6 +111,39 @@ function hasLexicalTextExpectation(exp) {
       .filter((v) => v.length > 0 && !v.startsWith("[adapter:"))
     : [];
   return include || filteredMustNot.length > 0;
+}
+
+function hasExpectationSignal(exp) {
+  if (!exp || typeof exp !== "object") return false;
+  if (hasList(exp.action_required)) return true;
+  if (exp.evidence_required_for_actions === true) return true;
+  if (hasList(exp.tool_required)) return true;
+  if (hasList(exp.tool_sequence)) return true;
+  if (exp.tool_telemetry && typeof exp.tool_telemetry === "object") return true;
+  if (exp.retrieval_required && typeof exp.retrieval_required === "object" && hasList(exp.retrieval_required.doc_ids)) return true;
+  if (hasList(exp.must_include)) return true;
+  if (hasList(exp.must_not_include)) return true;
+  if (exp.semantic && typeof exp.semantic === "object") return true;
+  if (exp.planning_gate && typeof exp.planning_gate === "object") return true;
+  if (exp.repl_policy && typeof exp.repl_policy === "object") return true;
+  return false;
+}
+
+function hasAssumptionStateContract(exp) {
+  if (!exp || typeof exp !== "object") return false;
+  const a = exp.assumption_state;
+  if (!a || typeof a !== "object") return false;
+  if (a.required === false) return false;
+  if (typeof a.min_selected_candidates !== "number") return false;
+  if (a.min_selected_candidates < 1) return false;
+  if (a.max_rejected_candidates !== undefined && (typeof a.max_rejected_candidates !== "number" || a.max_rejected_candidates < 0)) {
+    return false;
+  }
+  if (a.allowed_reason_codes !== undefined) {
+    if (!Array.isArray(a.allowed_reason_codes)) return false;
+    if (a.allowed_reason_codes.length === 0) return false;
+  }
+  return true;
 }
 
 function hasSemanticQualityContract(exp) {
@@ -171,6 +211,7 @@ function main() {
   const toolEvidenceMissing = [];
   const strongTelemetryMissing = [];
   const semanticQualityMissing = [];
+  const assumptionStateMissing = [];
   for (const c of cases) {
     const id = typeof c?.id === "string" && c.id.length > 0 ? c.id : "<unknown>";
     const expected = c?.expected && typeof c.expected === "object" ? c.expected : {};
@@ -179,6 +220,9 @@ function main() {
     if (args.requireStrongTelemetry && !hasStrongTelemetryContract(expected)) strongTelemetryMissing.push(id);
     if (args.requireSemanticQuality && hasLexicalTextExpectation(expected) && !hasSemanticQualityContract(expected)) {
       semanticQualityMissing.push(id);
+    }
+    if (args.requireAssumptionState && hasExpectationSignal(expected) && !hasAssumptionStateContract(expected)) {
+      assumptionStateMissing.push(id);
     }
   }
 
@@ -199,6 +243,8 @@ function main() {
     strong_telemetry_missing_cases: strongTelemetryMissing.length,
     semantic_quality_required: args.requireSemanticQuality,
     semantic_quality_missing_cases: semanticQualityMissing.length,
+    assumption_state_required: args.requireAssumptionState,
+    assumption_state_missing_cases: assumptionStateMissing.length,
   };
 
   if (args.profile === "quality" && weakRate > args.maxWeakExpectedRate) {
@@ -255,6 +301,21 @@ function main() {
         sample ? `missing_semantic_quality_case_ids_sample: ${sample}` : "",
         "Add expected.semantic.required_concepts/forbidden_concepts/reference_texts to text-eval cases.",
         "If reference_texts are used, include either semantic.profile (strict|balanced|lenient) or both semantic.min_token_f1 + semantic.min_lcs_ratio.",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    );
+    process.exit(2);
+  }
+
+  if (args.profile === "quality" && args.requireAssumptionState && assumptionStateMissing.length > 0) {
+    const sample = assumptionStateMissing.slice(0, 12).join(", ");
+    console.error(
+      [
+        "ERROR: quality campaign requires assumption-state contract, but some cases are missing expected.assumption_state requirements.",
+        JSON.stringify(summary),
+        sample ? `missing_assumption_state_case_ids_sample: ${sample}` : "",
+        "Add expected.assumption_state with required=true and min_selected_candidates>=1.",
       ]
         .filter(Boolean)
         .join("\n")
