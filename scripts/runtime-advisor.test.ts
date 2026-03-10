@@ -120,4 +120,49 @@ describe("runtime-advisor", () => {
     expect(recommendation.suggested_envelope.timeout_ms).toBeGreaterThan(360000);
     expect(recommendation.timed_out_case_ids).toEqual(["c4"]);
   });
+
+  it("keeps full-lite as the recommended next path when runtime is elevated but not diagnostic", () => {
+    const root = mkdtempSync(path.join(os.tmpdir(), "aq-runtime-full-lite-"));
+    const outDir = path.join(root, "runs");
+    const baselineRun = path.join(outDir, "baseline", "run-a");
+    mkdirSync(baselineRun, { recursive: true });
+    const casesPath = path.join(root, "cases.json");
+    writeFileSync(
+      casesPath,
+      JSON.stringify([{ id: "c1" }, { id: "c2" }, { id: "c3" }, { id: "c4" }, { id: "c5" }], null, 2),
+      "utf8"
+    );
+    for (const [id, latency] of [
+      ["c1", 180000],
+      ["c2", 210000],
+      ["c3", 240000],
+    ]) {
+      writeFileSync(
+        path.join(baselineRun, `${id}.json`),
+        JSON.stringify({ runner_transport: { latency_ms: latency } }, null, 2),
+        "utf8"
+      );
+    }
+
+    const plan = estimateRuntimePlan({
+      mode: "full-lite",
+      cases: casesPath,
+      outDir,
+      timeoutProfile: "auto",
+      timeoutMs: 180000,
+      timeoutAutoCapMs: 3600000,
+      timeoutAutoLookbackRuns: 12,
+      timeoutAutoMinSuccessSamples: 1,
+      timeoutAutoMaxIncreaseFactor: 4,
+      sampleCount: 1,
+      retries: 0,
+      concurrency: 1,
+      runtimeClass: "slow_local_cli",
+      diagnosticThresholdMs: 90 * 60 * 1000,
+      maxCases: 5,
+    });
+
+    expect(plan.recommended_mode).toBe("full-lite");
+    expect(plan.estimated_request_timeout_ms).toBeGreaterThanOrEqual(180000);
+  });
 });

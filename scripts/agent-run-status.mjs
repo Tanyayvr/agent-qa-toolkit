@@ -72,6 +72,9 @@ export function summarizeReportDir(reportDir) {
     timeout_causes: compare ? countTimeoutCauses(compare) : {},
     devops_envelope: envelope
       ? {
+          runMode: envelope.run_mode ?? envelope.runMode ?? null,
+          runtimeClass: envelope.runtime_class ?? envelope.runtimeClass ?? null,
+          profileName: envelope.profile_name ?? envelope.profileName ?? null,
           profile: envelope.profile ?? null,
           sampleCount: envelope.sample_count ?? envelope.sampleCount ?? null,
           timeoutProfile: envelope.timeout_profile ?? envelope.timeoutProfile ?? null,
@@ -129,7 +132,7 @@ function formatSummary(entry) {
   }
   if (entry.devops_envelope) {
     lines.push(
-      `  envelope profile=${entry.devops_envelope.profile} sampleCount=${entry.devops_envelope.sampleCount} timeoutProfile=${entry.devops_envelope.timeoutProfile} timeoutMs=${entry.devops_envelope.timeoutMs} cap=${entry.devops_envelope.timeoutAutoCapMs} retries=${entry.devops_envelope.retries} concurrency=${entry.devops_envelope.concurrency}`,
+      `  envelope runMode=${entry.devops_envelope.runMode} runtimeClass=${entry.devops_envelope.runtimeClass} profileName=${entry.devops_envelope.profileName} profile=${entry.devops_envelope.profile} sampleCount=${entry.devops_envelope.sampleCount} timeoutProfile=${entry.devops_envelope.timeoutProfile} timeoutMs=${entry.devops_envelope.timeoutMs} cap=${entry.devops_envelope.timeoutAutoCapMs} retries=${entry.devops_envelope.retries} concurrency=${entry.devops_envelope.concurrency}`,
     );
   }
   const timeoutEntries = Object.entries(entry.timeout_causes || {});

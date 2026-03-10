@@ -3,15 +3,22 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green.svg)](package.json)
 [![Tests](https://img.shields.io/badge/tests-vitest-brightgreen.svg)](#development)
 
-# Agent QA Toolkit — Portable Evidence Packs, Regression Diffs, and CI Gates
+# Agent QA Toolkit — Agent Qualification, Evidence Packs, and Right-Sized Validation Paths
 
-The only open‑source regression testing framework purpose‑built for tool‑using AI agents.
-Most tools measure model quality. We measure agent behavior:
-did it call the right tools, in the right order, with safe parameters — and can you prove it?
+Agent QA Toolkit is a self-hosted qualification layer for tool-using AI agents.
+Most tools answer "was the output good?".
+This toolkit answers a harder engineering question:
 
-Portable Evidence Packs · Regression Diffs · CI Gates · Security Signals
+**can you trust this agent as part of an engineering or release workflow?**
 
-Why this exists: most observability tools trace what happened, but do not produce a portable, signed, offline‑verifiable artifact you can attach to a ticket or gate in CI. This toolkit does - via Evidence Packs + per‑case CI gate decisions + offline artifacts.
+That means separating:
+- model/output quality;
+- execution quality (transport/runtime health);
+- operational fitness (what validation path this agent honestly supports).
+
+Portable Evidence Packs · Runtime Classes · CI Gates · Security Signals
+
+Why this exists: most observability tools trace what happened, but do not produce a portable, offline-verifiable artifact you can attach to a ticket or gate in CI. This toolkit does that, and it also makes the validation path explicit: `quick`, `full-lite`, `full`, or `diagnostic`.
 
 **Quick links:**
 [Quickstart](#quickstart) · [Live report](https://tanyayvr.github.io/agent-qa-toolkit/demo/report.html) · [Demo bundle](#demo-bundle) · [CI usage](docs/ci.md) · [Evidence Pack contract](#evidence-pack-format) · [Security scanners](docs/security-scanners.md) · [Architecture](docs/architecture.md) · [Chronology](docs/CHRONOLOGY.md) · [Verify](docs/VERIFY.md)
@@ -47,6 +54,11 @@ You get:
 - Synthetic fault-matrix mode (`cases/matrix.json`) to validate transport/data failure classification before external pilots
 - Root cause attribution (RCA) and policy hints
 - Security signals (6 scanners + optional entropy scanner)
+- Runtime-classed operator path:
+  - `quick` for readiness/triage,
+  - `full-lite` for indie and small-team regression loops,
+  - `full` for full quality certification,
+  - `diagnostic` for slow/heavy agents or nightly/dedicated runs.
 
 ## What makes this different
 |  | Agent QA Toolkit | LangSmith / Langfuse | Custom eval scripts |
@@ -296,6 +308,7 @@ Profile-based agent run (recommended for external agents):
 ```bash
 ./scripts/run-agent-profile.sh --list
 ./scripts/run-agent-profile.sh goose-ollama
+./scripts/run-agent-profile.sh --full-lite goose-ollama
 ./scripts/run-agent-profile.sh --full goose-ollama
 ./scripts/run-agent-profile.sh --diagnostic goose-ollama
 ./scripts/run-agent-profile.sh gooseteam-ollama
@@ -307,14 +320,21 @@ npm run campaign:agent -- goose-ollama
 ```
 Launcher writes active prefixes to `/tmp/aq_run_prefix` and `/tmp/aq_report_prefix` for quick post-run summaries.
 Launcher default is now buyer-friendly `quick` mode: it runs `calibration`/`smoke` and stops after green smoke.
-Use `--full` when you explicitly want auto-promotion into the full quality campaign.
+Use `--full-lite`, `--full`, or `--diagnostic` when you explicitly want auto-promotion beyond quick.
 Default behavior is now staged (`STAGED_MODE=1`): the script runs `smoke` first (`infra` + small subset), and auto-promotes to full quality campaign only on green smoke.
 When timeout auto-tuning is enabled and history is insufficient, the script can auto-run a `calibration` stage first to collect initial latency samples before `smoke`.
 Implemented operator modes:
 - `quick` (default): optional `calibration`, then `smoke`, then stop. Interpret green quick as `ready_for_full`, not as final quality proof.
+- `full-lite`: explicit opt-in via `--full-lite`; runs a reduced quality subset after green smoke. This is the default developer-grade path for slower local agents and the main bridge between quick and full.
 - `full`: explicit opt-in via `--full`; runs the full quality campaign only after green smoke.
 - `diagnostic`: explicit opt-in via `--diagnostic`; keeps the same full suite, but uses a more generous envelope for known slow but live agents.
 - raw/manual: call `scripts/run-local-campaign.sh` directly when you intentionally need low-level campaign control.
+Runtime class is a first-class part of the operator contract. The toolkit is intentionally explicit that not every local agent belongs in the same loop:
+- `fast_remote`: standard quick/full in local CI is usually reasonable.
+- `standard_cli`: quick/full is usually practical on a developer machine.
+- `slow_local_cli`: quick is the default local path; `full-lite` is usually the honest developer loop; `full` may still work, but diagnostic/nightly is often the safer default.
+- `heavy_mcp_agent`: quick locally, `full-lite` when you need a smaller regression slice, with full/diagnostic typically moved to dedicated hosts or scheduled runs.
+This means the product promise is not "every agent is equally fast locally". The promise is: every agent gets a reproducible validation path, and the runtime class tells operators which path is operationally honest.
 What `quick` proves:
 - adapter/agent path starts and responds;
 - transport/runtime path is healthy enough for smoke;
@@ -324,6 +344,10 @@ What `quick` does not prove:
 - full-suite quality;
 - long-run stability;
 - final release readiness.
+What `full-lite` proves:
+- the agent can survive a reduced but real quality/regression loop;
+- the team has a practical path between smoke and full;
+- the integration is usable for indie/small-team inner loops without pretending that every agent deserves a full local run.
 Before execution, the launcher now prints an operator runtime estimate:
 - `estimatedRequestTimeoutMs`
 - `estimatedStageUpperBoundMinutes`
@@ -337,6 +361,7 @@ On staged failures it emits machine-readable stage output with typed reason and 
 For DevOps handoff, each stage/report also records effective runtime envelope:
 - console: `DevOps envelope (...)`
 - JSON artifact: `apps/evaluator/reports/<reportId>/devops-envelope.json`
+- envelope fields now include `runMode`, `runtimeClass`, and `profileName`, in addition to timeouts/retries/concurrency.
 - owner model: DevOps sets limits (`TIMEOUT_MS`, `TIMEOUT_AUTO_CAP_MS`, `RETRIES`, `CONCURRENCY`, etc.); runner auto-tunes only inside these bounds.
 To run the legacy single-stage flow explicitly:
 ```bash
@@ -354,7 +379,8 @@ npm run campaign:agent:status
 npm run campaign:agent:status -- --reportPrefix goose-ollama-20260308_121554
 ```
 `campaign:agent:status` now also prints:
-- next recommended mode (`full` vs `diagnostic`)
+- runtime classification (`runMode`, `runtimeClass`, `profileName`)
+- next recommended mode (`full-lite` vs `full` vs `diagnostic`)
 - recommended timeout/cap after a budget failure
 - timed-out case ids when the failure is localized
 
@@ -366,12 +392,19 @@ npm run campaign:agent -- goose-ollama
 # 2) inspect status / stage result
 npm run campaign:agent:status
 
-# 3) run full only intentionally
+# 3) run full-lite if you want a practical local regression pass first
+npm run campaign:agent:full-lite -- goose-ollama
+
+# 4) run full only intentionally
 npm run campaign:agent:full -- goose-ollama
 
-# 4) if full says timeout_budget for a slow but live agent, use diagnostic
+# 5) if full says timeout_budget for a slow but live agent, use diagnostic
 npm run campaign:agent:diagnostic -- goose-ollama
 ```
+Segment-specific promise:
+- indie / solo builders: `quick + full-lite in minutes`, with one portable report instead of dashboard archaeology;
+- small teams: `quick + full-lite` on laptops, `full` when the agent is operationally fit;
+- platform / enterprise teams: `quick + full + diagnostic + portable evidence + deterministic gates`, including nightly or dedicated-host paths for heavy agents.
 By default this script ingests each generated report into local library (`.agent-qa/library`). Set `LIBRARY_INGEST=0` to disable.
 Execution quality release gate is ON by default in `run-local-campaign.sh` (`EVAL_FAIL_ON_EXECUTION_DEGRADED=1`).
 To disable explicitly (not recommended for release):

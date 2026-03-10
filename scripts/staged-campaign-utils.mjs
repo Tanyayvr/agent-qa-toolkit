@@ -19,7 +19,7 @@ export function parsePositiveInt(value, fallback) {
   return Math.floor(n);
 }
 
-export function pickSmokeCases(cases, maxCases) {
+export function pickSubsetCases(cases, maxCases) {
   if (!Array.isArray(cases)) {
     throw new Error("cases payload must be an array");
   }
@@ -27,13 +27,17 @@ export function pickSmokeCases(cases, maxCases) {
   return cases.slice(0, cap);
 }
 
-export function writeSmokeSubset(params) {
+export function pickSmokeCases(cases, maxCases) {
+  return pickSubsetCases(cases, maxCases);
+}
+
+export function writeSubset(params) {
   const absCases = path.resolve(process.cwd(), params.casesPath);
   const absOut = path.resolve(process.cwd(), params.outPath);
   const maxCases = parsePositiveInt(params.maxCases, 4);
   const all = JSON.parse(fs.readFileSync(absCases, "utf8"));
   if (!Array.isArray(all)) throw new Error("cases file must be a JSON array");
-  const selected = pickSmokeCases(all, maxCases);
+  const selected = pickSubsetCases(all, maxCases);
   fs.writeFileSync(absOut, JSON.stringify(selected, null, 2));
   return {
     cases_path: absCases,
@@ -42,6 +46,10 @@ export function writeSmokeSubset(params) {
     selected_cases: selected.length,
     max_cases: maxCases,
   };
+}
+
+export function writeSmokeSubset(params) {
+  return writeSubset(params);
 }
 
 export function mapTimeoutCauseToStageReason(timeoutCause) {
@@ -207,6 +215,7 @@ export function parseCliArgs(argv) {
 function renderHelp() {
   return [
     "Usage:",
+    "  node scripts/staged-campaign-utils.mjs subset --cases <path> --out <path> [--maxCases <n>]",
     "  node scripts/staged-campaign-utils.mjs smoke-subset --cases <path> --out <path> [--maxCases <n>]",
     "  node scripts/staged-campaign-utils.mjs classify --compare <compare-report.json> [--defaultReason unknown]",
   ].join("\n");
@@ -218,9 +227,9 @@ function main(argv) {
     console.log(renderHelp());
     return 0;
   }
-  if (cli.cmd === "smoke-subset") {
-    if (!cli.cases || !cli.out) throw new Error("smoke-subset requires --cases and --out");
-    const result = writeSmokeSubset({ casesPath: cli.cases, outPath: cli.out, maxCases: cli.maxCases });
+  if (cli.cmd === "subset" || cli.cmd === "smoke-subset") {
+    if (!cli.cases || !cli.out) throw new Error(`${cli.cmd} requires --cases and --out`);
+    const result = writeSubset({ casesPath: cli.cases, outPath: cli.out, maxCases: cli.maxCases });
     console.log(JSON.stringify(result));
     return 0;
   }

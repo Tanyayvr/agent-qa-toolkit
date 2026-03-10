@@ -1,103 +1,77 @@
 Agent QA Toolkit
-Portable Evidence Packs для tool-using AI агентов
-- Offline, self-hosted, без утечки данных
-- CI gate decisions + security сигналы
-- ЦА: platform/QA инженеры, продакшн-агенты
-
+Self-hosted слой qualification и evidence для AI-агентов
+- Portable evidence packs
+- Runtime-classed validation paths
+- Детерминированные CI/release gates
+- ЦА: engineering leads, platform teams, QA, AI infrastructure
+
 Проблема
-- Хэндовер инцидентов = скриншоты + частичные логи
-- Передать run без доступа к UI сложно
-- Tool I/O и retrieval контекст разрознены
-- Секреты/PII делают шаринг рискованным
-
-Решение
-- Один run → один Evidence Pack
-- report.html (человеку) + compare-report.json (CI контракт)
-- операторский сценарий явный: сначала быстрый readiness-прогон, затем full только по запросу
-- assets/ + manifest.json с sha256 целостностью
-- Strict verify: portability + integrity checks
-- СДЕЛАНО: strict-signature parity для валидаторов Node/Python/Go (подписанный пак проходит, tampered manifest детерминированно падает)
-- СДЕЛАНО: единая обязательная CI-точка релизного входа (`release:gate:ci`) с машиночитаемым PASS/FAIL отчётом
-- НОВОЕ: Historical Trending (локальная SQLite) для дрейфа регрессий и костов во времени
-- НОВОЕ: data-driven timeout onboarding profile (калибровка -> валидация -> прод) для медленных внешних агентов
-- НОВОЕ: уровни нормализации телеметрии (native -> inferred из stdout -> wrapper fallback), чтобы не было "тихих" прогонов без trace
-- НОВОЕ: release-gate E2E в CI (policy-gate + soak/load проверка стабильности)
-- СДЕЛАНО: runtime policy hardening (enforcement `planning_gate`/`repl_policy` в адаптере + детерминированные проверки в evaluator)
-- СДЕЛАНО: quality-профиль требует сильную tool-телеметрию (`native|inferred`); wrapper-only считается недостаточным доказательством
-- СДЕЛАНО: decision-legibility контракт добавляет машиночитаемый `assumption_state` (selected/rejected кандидаты + детерминированные reason codes)
-- СДЕЛАНО: plugin-адаптеры fail-fast при рассинхроне телеметрии (`invalid_telemetry`), если есть признаки tool-активности без структурных tool events
-- СДЕЛАНО: semantic quality проверки для текстовых задач (`required/forbidden concepts` + калиброванные profile/thresholds + custom synonyms)
-- СДЕЛАНО: release gate кампаний включен по умолчанию и поддерживает KPI-пороги (`pre-action entropy removed`, `reconstruction min saved/block`)
-- СДЕЛАНО: quality gate включает high-confidence secret scan репозитория (ключи/токены/private-key маркеры)
-- СДЕЛАНО: guardrails для auto-timeout (обучение только на успешных сэмплах, минимальный порог успехов, ограничение роста относительно базового timeout)
-- СДЕЛАНО: машиночитаемая taxonomy причин timeout (`timeout_budget_too_small`, `agent_stuck_or_loop`, `waiting_for_input`, `transport_failure`, `unknown_timeout`)
-- СДЕЛАНО: campaign-прогоны по умолчанию попадают в локальную evidence-библиотеку (можно отключить флагом)
-- СДЕЛАНО: staged UX кампаний по умолчанию (`smoke` -> `full` с auto-promote и typed `stage/reason/next_action`)
-
-Как работает
-- Runner запускает кейсы
-- Evaluator сравнивает baseline vs new
-- Выдаёт Evidence Pack (offline, shareable)
-- CI читает gate decision per-case
-- Auto timeout profile учится на истории прогонов, а не на фиксированном timeout "на глаз"
-
-Что даёт
-- Regression diffs по кейсам
-- Root cause attribution (RCA)
-- Security scanners (PII, injection, exfiltration, risk)
-- Self-contained, portable report directory
-
-Historical Trending (Pro+ add‑on, когда доступен)
-- Дрейф регрессий между релизами (не один дифф)
-- Flaky‑кейсы: pass/fail во времени
-- Тренд gate‑решений: none/approval/block
-- Тренд токен‑костов: ранний сигнал удорожания
-- Release safety: “зелёное сегодня, сломалось завтра” становится видимым
-- Разбор инцидентов: когда началась деградация
-- Offline‑first: SQLite + HTML, без egress
-- Shareable: trend.html можно вложить в тикет
-- Без зависимости от tracing UI: тренды из Evidence Packs
-- Vendor‑neutral: работает в air‑gapped
-- CI‑friendly CLI: trend runs/tokens/html
-- Audit readiness: исторические доказательства для compliance
-- Измерение улучшений по релизам
-- Контроль затрат: база для бюджетов/лимитов
-- Без скрытой телеметрии
-
-Historical Trending (offline)
-- Каждый run пишется в локальную SQLite базу
-- Trend CLI + trend.html (без SaaS и внешних запросов)
-- Тренды регрессий, gate-решений и токен‑костов
-
-Почему не Promptfoo / DeepEval / LangSmith / Galileo
-- Они сильны в model evals и/или observability
-- Мы про agent behavior + переносимый offline handoff
-- Evidence Pack можно вложить в тикет/PR/incident-док
-- Детерминированный CI gate из одного машинного контракта (`compare-report.json`)
-- зелёный quick означает «можно переходить к full», а не «качество уже доказано»
-- Путь комплементарности: оставить observability платформу и добавить нас как release-evidence слой в CI
-- Плюс: локальная БД трендов и офлайн‑графики (без lock‑in и egress)
-
-Деплой
-- Только self-hosted
-- Работает в air-gapped
-- Нет аккаунтов и внешнего хранения
-- Вы контролируете ретеншн и шаринг
-- Trend DB локальная (SQLite), без SaaS/телеметрии
-
-Цены
-- Free: open-source core
-- Services-first: onboarding + CI setup + custom rules
-- Pro (позже): rules library
-- Pro+ (позже): Historical Trending + retention management
-- Enterprise: advanced redaction + support SLA
-
-Use Cases
-- Release gates перед деплоем новой версии агента
-- Support bundles для клиентов/вендоров
-- Evidence packs для compliance команд
-
-Call to Action
-- Пилоты: 5–10 команд
-- Подключаем агента за 1 день
-- Начните с demo bundle и CI gate
+- Команды видят trace, но всё равно не могут доказать, можно ли доверять агенту как части release workflow
+- "Зелёный" прогон часто смешивает runtime failure, timeout budget и model quality в один шумный вердикт
+- Тяжёлых локальных агентов гоняют тем же циклом, что и быстрых, теряя часы и не понимая реальную причину
+- Support/on-call по-прежнему восстанавливают контекст по скриншотам и кускам логов
+
+Что мы узнали на реальных прогонах
+- не каждый агент подходит под один и тот же локальный validation loop
+- маленький репозиторий не означает маленький runtime
+- боль с timeout часто говорит не только о конфиге, а об operational fitness агента
+- командам нужно понимать, какой путь валидации для этого агента вообще честный
+
+Тезис продукта
+Мы не просто тестируем агентов.
+Мы определяем, operationally fit ли агент для реального engineering/release цикла.
+
+Ключевое разделение
+- execution quality: был ли runtime вообще пригоден для оценки?
+- model quality: был ли output/behavior приемлемым?
+- operational fitness: какой validation path этот агент реально поддерживает?
+
+Validation paths
+- quick: readiness / triage
+- full-lite: практический локальный regression path
+- full: полная quality certification
+- diagnostic: длинный investigation path для slow but live агентов
+- nightly / dedicated runs: честный путь для тяжёлых агентов
+
+Runtime classes
+- fast_remote
+- standard_cli
+- slow_local_cli
+- heavy_mcp_agent
+
+Почему это важно
+- оператор перестаёт считать, что все агенты обязаны жить в одном и том же loop
+- runtime truth становится частью quality truth
+- toolkit говорит не только "что сломалось", но и "какой путь валидации нужен дальше"
+
+Что даёт артефакт
+- report.html для человека
+- compare-report.json для CI и автоматизации
+- stage-result.json с typed stage/reason/next_action
+- devops-envelope.json с точным runtime envelope
+- next-envelope.json с рекомендованным следующим mode и budget
+
+Что мы уменьшаем
+- часы на реконструкцию контекста
+- ложные выводы о model regression, когда execution был degraded
+- бессмысленные full-прогоны, если quick уже показал, что интеграция не готова
+- ручной подбор timeout маленькими шагами
+
+Где мы выигрываем
+- self-hosted evidence вместо зависимости от dashboard
+- qualification layer поверх eval и observability
+- runtime class + right-sized validation path
+- воспроизводимые release artifacts для support, vendor review и governance
+
+Promise для инди
+- quick + full-lite за минуты, если агент это поддерживает
+- локальный артефакт без enterprise-overload
+
+Promise для enterprise
+- quick + full + diagnostic + portable evidence + deterministic gates
+- reproducibility и governance для release decisions
+
+CTA
+- Подключите реального агента
+- Сначала запустите quick
+- Посмотрите, готов ли агент к full, подходит ли только для full-lite, или честнее сразу идти в diagnostic/nightly path

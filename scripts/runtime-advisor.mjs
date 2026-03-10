@@ -57,6 +57,7 @@ function recommendedModeForRuntime({ mode, runtimeClass, estimatedRuntimeUpperBo
   if (mode === "quick") return "quick";
   if (mode === "diagnostic") return "diagnostic";
   if (estimatedRuntimeUpperBoundMs >= diagnosticThresholdMs) return "diagnostic";
+  if (mode === "full-lite") return "full-lite";
   if (runtimeClass === "slow_local_cli" && estimatedRuntimeUpperBoundMs >= 60 * 60 * 1000) {
     return "diagnostic";
   }
@@ -126,6 +127,12 @@ export function estimateRuntimePlan(params) {
 
   if (recommendedMode === "diagnostic" && params.mode !== "diagnostic") {
     notes.push("predicted runtime is high enough that diagnostic mode is recommended");
+  }
+  if (params.runtimeClass === "heavy_mcp_agent" && recommendedMode !== "quick") {
+    notes.push("heavy_mcp_agent runs are usually better on nightly or dedicated hosts than on the default local loop");
+  }
+  if (params.runtimeClass === "slow_local_cli" && recommendedMode === "diagnostic") {
+    notes.push("slow_local_cli agent is likely better on a nightly or dedicated path for long validation runs");
   }
   if (confidence === "low") {
     notes.push("estimate confidence is low; treat this as envelope planning, not a precise forecast");
@@ -246,11 +253,11 @@ export function recommendRuntimeEnvelope(params) {
     timeoutMs: suggestedBaseTimeoutMs,
     timeoutAutoCapMs: suggestedCapMs,
     timeoutAutoMaxIncreaseFactor: suggestedMaxIncreaseFactor,
-    mode: params.mode === "quick" ? "quick" : "full",
+    mode: params.mode === "quick" ? "quick" : params.mode,
   });
 
   const suggestedMode = recommendedModeForRuntime({
-    mode: params.mode === "quick" ? "quick" : "full",
+    mode: params.mode === "quick" ? "quick" : params.mode,
     runtimeClass: params.runtimeClass,
     estimatedRuntimeUpperBoundMs: suggestedPlan.estimated_stage_runtime_upper_bound_ms,
     diagnosticThresholdMs: params.diagnosticThresholdMs,
@@ -337,8 +344,8 @@ function parseArgs(argv) {
 function renderHelp() {
   return [
     "Usage:",
-    "  node scripts/runtime-advisor.mjs plan --mode <quick|full|diagnostic> --cases <path> [options]",
-    "  node scripts/runtime-advisor.mjs recommend --stage <smoke|full> --compare <compare-report.json> --cases <path> [options]",
+    "  node scripts/runtime-advisor.mjs plan --mode <quick|full-lite|full|diagnostic> --cases <path> [options]",
+    "  node scripts/runtime-advisor.mjs recommend --stage <smoke|full-lite|full> --compare <compare-report.json> --cases <path> [options]",
     "",
     "Common options:",
     "  --outDir <dir> --timeoutProfile <off|auto> --timeoutMs <ms> --timeoutAutoCapMs <ms>",

@@ -116,7 +116,7 @@ Note:
   (timeouts, retries, concurrency, preflight/fail-fast) used for that run.
 - For repeatable multi-agent operation, use profile launcher:
   `./scripts/run-agent-profile.sh --list` then `./scripts/run-agent-profile.sh <profile>`.
-- Profile launcher defaults to `quick` mode (calibration/smoke only); add `--full` to auto-promote into full campaign.
+- Profile launcher defaults to `quick` mode (calibration/smoke only); add `--full-lite`, `--full`, or `--diagnostic` when you intentionally want a heavier path.
 
 ## 8) Operator modes (what each run means)
 
@@ -125,6 +125,10 @@ Note:
   - `smoke` on a small subset;
   - stops after smoke even when smoke is green.
   - Use it to answer: "is this agent ready for full evaluation?"
+- `full-lite`:
+  - explicit opt-in via `./scripts/run-agent-profile.sh --full-lite <profile>`;
+  - runs a reduced quality subset only after green smoke.
+  - Use it to answer: "do we have a practical developer-grade regression path for this agent?"
 - `full`:
   - explicit opt-in via `./scripts/run-agent-profile.sh --full <profile>`;
   - runs the full quality campaign only after green smoke.
@@ -139,6 +143,31 @@ Note:
 Interpretation rule:
 - a green `quick` run means `ready_for_full`;
 - it does not mean final product quality is proven.
+- a green `full-lite` run means the agent has a usable local regression loop;
+- it still does not replace `full` for release-grade certification.
+
+## 8.1) Runtime classes (what kind of agent you are validating)
+
+Not every local agent is operationally fit for the same validation loop. Treat runtime class as an explicit operator label, not an after-the-fact explanation.
+
+- `fast_remote`:
+  - quick/full are usually practical in local CI and on developer laptops.
+- `standard_cli`:
+  - quick/full are usually practical, with diagnostic reserved for unusual regressions.
+- `slow_local_cli`:
+  - quick is the default local path;
+  - `full-lite` is usually the honest local regression loop;
+  - full may still work, but diagnostic or scheduled runs are often more honest.
+- `heavy_mcp_agent`:
+  - quick locally;
+  - `full-lite` only when the subset still fits the local loop;
+  - full/diagnostic are typically better on dedicated hosts or nightly jobs.
+
+Operational rule:
+- every agent should get `quick`;
+- not every agent should get local `full` as the default developer loop;
+- `full-lite` exists specifically to preserve a practical indie/small-team path between quick and full.
+- if an agent repeatedly requires multi-hour envelopes, that is a product signal about the agent's operational fitness, not just a timeout-tuning annoyance.
 
 ## 9) External-agent operator commands
 
@@ -150,6 +179,11 @@ npm run campaign:agent:health -- --baseUrl http://127.0.0.1:8788
 Quick run:
 ```bash
 npm run campaign:agent -- goose-ollama
+```
+
+Full-lite run:
+```bash
+npm run campaign:agent:full-lite -- goose-ollama
 ```
 
 Full run:
@@ -170,7 +204,7 @@ npm run campaign:agent:status -- --reportPrefix goose-ollama-20260308_121554
 
 What to inspect after the run:
 - `stage-result.json` = what happened
-- `devops-envelope.json` = what limits were used
+- `devops-envelope.json` = what limits were used, plus `runMode`, `runtimeClass`, and `profileName`
 - `next-envelope.json` = what the toolkit recommends next
 
 If the launcher stops on failure, inspect:

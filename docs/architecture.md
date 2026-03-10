@@ -86,21 +86,32 @@ Runner and evaluator support additional scenarios for production drift:
   `AQ_MIN_TRANSPORT_SUCCESS_RATE`, `AQ_MAX_WEAK_EXPECTED_RATE`,
   `AQ_MIN_PRE_ACTION_ENTROPY_REMOVED`, `AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK`.
   `scripts/run-local-campaign.sh` enables this gate by default (`EVAL_FAIL_ON_EXECUTION_DEGRADED=1`).
-- **Default staged UX (`smoke` -> `full`)**:
+- **Default staged UX (`quick` first, heavier paths only by explicit mode)**:
+  The operator contract is now "qualification + evidence + right-sized validation path", not "one loop for every agent".
   `run-local-campaign.sh` emits typed stage decisions (`stage`, `reason`, `next_action`) and stops before full run on red smoke.
   Each report directory additionally receives `devops-envelope.json` with effective runtime bounds
-  (`timeout*`, retries, concurrency, preflight, fail-fast), so operators can audit/replicate the exact envelope.
+  (`timeout*`, retries, concurrency, preflight, fail-fast) plus operator classification
+  (`runMode`, `runtimeClass`, `profileName`), so operators can audit/replicate the exact envelope.
   `STAGED_MODE=0` preserves legacy single-stage behavior for CI or targeted profiling runs.
   `scripts/run-agent-profile.sh` adds the operator-facing layer:
   - default `quick` mode = optional `calibration` + `smoke`, then stop;
-  - explicit `--full` = green quick gate plus auto-promotion into full quality campaign.
+  - explicit `--full-lite` = green quick gate plus auto-promotion into a reduced quality subset;
+  - explicit `--full` = green quick gate plus auto-promotion into full quality campaign;
   - explicit `--diagnostic` = full quality campaign with a more generous timeout envelope for known slow-but-live agents.
-  This separation is deliberate: quick is a readiness/triage contract, full is the quality-certification contract.
+  This separation is deliberate:
+  - `quick` = readiness/triage contract,
+  - `full-lite` = practical developer-grade regression contract,
+  - `full` = quality-certification contract,
+  - `diagnostic` = long-run investigation contract.
+  Runtime class is also deliberate: the toolkit does not assume every local agent belongs in the same loop.
+  `fast_remote` and `standard_cli` may fit normal local full runs; `slow_local_cli` and `heavy_mcp_agent`
+  often require quick-first local loops, `full-lite` for local iteration, and full/diagnostic on a longer or dedicated path.
   DevOps owns the runtime envelope (`TIMEOUT_MS`, `TIMEOUT_AUTO_CAP_MS`, retries, concurrency, sample count);
-  runner auto-tuning stays inside that envelope and must not silently upgrade quick into full unless `--full` was requested.
+  runner auto-tuning stays inside that envelope and must not silently upgrade quick into a heavier mode unless that mode was requested.
   Launcher/runtime also emit machine-readable operator planning artifacts:
   - pre-run estimate (console) with `recommendedMode` + confidence
   - `next-envelope.json` in report directories with the next suggested mode/envelope after smoke pass or timeout-budget failure
+  This is what lets the product answer: "can this agent be trusted in a normal engineering/release loop, and if not, what is the honest validation path?"
 - **Semantic text-eval layer**: evaluator supports deterministic semantic assertions
   (`expected.semantic.required_concepts`, `forbidden_concepts`, `reference_texts`, `profile|min_token_f1|min_lcs_ratio`, `synonyms`),
   so text checks are not limited to raw substring matching.

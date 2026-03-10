@@ -9,6 +9,7 @@ print_help() {
   cat <<'EOF'
 Usage:
   ./scripts/run-agent-profile.sh <profile-name>
+  ./scripts/run-agent-profile.sh --full-lite <profile-name>
   ./scripts/run-agent-profile.sh --full <profile-name>
   ./scripts/run-agent-profile.sh --diagnostic <profile-name>
   ./scripts/run-agent-profile.sh --file <path/to/profile.env>
@@ -16,6 +17,7 @@ Usage:
 
 Examples:
   ./scripts/run-agent-profile.sh goose-ollama
+  ./scripts/run-agent-profile.sh --full-lite goose-ollama
   ./scripts/run-agent-profile.sh --full goose-ollama
   ./scripts/run-agent-profile.sh --diagnostic goose-ollama
   TIMEOUT_MS=180000 RETRIES=0 ./scripts/run-agent-profile.sh gooseteam-ollama
@@ -59,6 +61,7 @@ load_env_if_unset() {
 
 PROFILE_ARG=""
 PROFILE_FILE=""
+RUN_FULL_LITE=0
 RUN_FULL=0
 RUN_DIAGNOSTIC=0
 
@@ -92,6 +95,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --full)
       RUN_FULL=1
+      shift
+      ;;
+    --full-lite)
+      RUN_FULL_LITE=1
       shift
       ;;
     --diagnostic)
@@ -157,6 +164,20 @@ if [[ "${RUN_DIAGNOSTIC}" == "1" ]]; then
   if [[ -z "${USER_SET_PREFLIGHT_MODE}" ]]; then PREFLIGHT_MODE="${DIAGNOSTIC_PREFLIGHT_MODE:-off}"; fi
   if [[ -z "${USER_SET_PREFLIGHT_TIMEOUT_MS}" ]]; then PREFLIGHT_TIMEOUT_MS="${DIAGNOSTIC_PREFLIGHT_TIMEOUT_MS:-1900000}"; fi
   if [[ -z "${USER_SET_FAIL_FAST_TRANSPORT_STREAK}" ]]; then FAIL_FAST_TRANSPORT_STREAK="${DIAGNOSTIC_FAIL_FAST_TRANSPORT_STREAK:-0}"; fi
+elif [[ "${RUN_FULL_LITE}" == "1" ]]; then
+  if [[ -z "${USER_SET_STAGED_AUTO_PROMOTE_FULL}" ]]; then STAGED_AUTO_PROMOTE_FULL=1; fi
+  if [[ -z "${USER_SET_CAMPAIGN_SAMPLE_COUNT}" ]]; then CAMPAIGN_SAMPLE_COUNT="${FULL_LITE_CAMPAIGN_SAMPLE_COUNT:-${CAMPAIGN_SAMPLE_COUNT:-1}}"; fi
+  if [[ -z "${USER_SET_TIMEOUT_PROFILE}" ]]; then TIMEOUT_PROFILE="${FULL_LITE_TIMEOUT_PROFILE:-${TIMEOUT_PROFILE:-auto}}"; fi
+  if [[ -z "${USER_SET_TIMEOUT_MS}" ]]; then TIMEOUT_MS="${FULL_LITE_TIMEOUT_MS:-${TIMEOUT_MS:-180000}}"; fi
+  if [[ -z "${USER_SET_TIMEOUT_AUTO_CAP_MS}" ]]; then TIMEOUT_AUTO_CAP_MS="${FULL_LITE_TIMEOUT_AUTO_CAP_MS:-${TIMEOUT_AUTO_CAP_MS:-3600000}}"; fi
+  if [[ -z "${USER_SET_TIMEOUT_AUTO_LOOKBACK_RUNS}" ]]; then TIMEOUT_AUTO_LOOKBACK_RUNS="${FULL_LITE_TIMEOUT_AUTO_LOOKBACK_RUNS:-${TIMEOUT_AUTO_LOOKBACK_RUNS:-20}}"; fi
+  if [[ -z "${USER_SET_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" ]]; then TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES:-${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES:-1}}"; fi
+  if [[ -z "${USER_SET_TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" ]]; then TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR:-${TIMEOUT_AUTO_MAX_INCREASE_FACTOR:-4}}"; fi
+  if [[ -z "${USER_SET_RETRIES}" ]]; then RETRIES="${FULL_LITE_RETRIES:-${RETRIES:-0}}"; fi
+  if [[ -z "${USER_SET_CONCURRENCY}" ]]; then CONCURRENCY="${FULL_LITE_CONCURRENCY:-${CONCURRENCY:-1}}"; fi
+  if [[ -z "${USER_SET_PREFLIGHT_MODE}" ]]; then PREFLIGHT_MODE="${FULL_LITE_PREFLIGHT_MODE:-${PREFLIGHT_MODE:-off}}"; fi
+  if [[ -z "${USER_SET_PREFLIGHT_TIMEOUT_MS}" ]]; then PREFLIGHT_TIMEOUT_MS="${FULL_LITE_PREFLIGHT_TIMEOUT_MS:-${PREFLIGHT_TIMEOUT_MS:-600000}}"; fi
+  if [[ -z "${USER_SET_FAIL_FAST_TRANSPORT_STREAK}" ]]; then FAIL_FAST_TRANSPORT_STREAK="${FULL_LITE_FAIL_FAST_TRANSPORT_STREAK:-${FAIL_FAST_TRANSPORT_STREAK:-0}}"; fi
 elif [[ "${RUN_FULL}" == "1" ]]; then
   : "${STAGED_AUTO_PROMOTE_FULL:=1}"
 else
@@ -166,6 +187,8 @@ fi
 MODE="quick"
 if [[ "${RUN_DIAGNOSTIC}" == "1" ]]; then
   MODE="diagnostic"
+elif [[ "${RUN_FULL_LITE}" == "1" ]]; then
+  MODE="full-lite"
 elif [[ "${RUN_FULL}" == "1" ]]; then
   MODE="full"
 fi
@@ -216,6 +239,10 @@ if [[ "${MODE}" == "quick" ]]; then
   RUNTIME_PLAN_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES:-1}"
   RUNTIME_PLAN_RETRIES="${SMOKE_RETRIES:-0}"
   RUNTIME_PLAN_CONCURRENCY="${SMOKE_CONCURRENCY:-1}"
+elif [[ "${MODE}" == "full-lite" ]]; then
+  RUNTIME_PLAN_MODE="full-lite"
+  RUNTIME_PLAN_CASES="${FULL_LITE_CASES:-${RUNTIME_PLAN_CASES}}"
+  RUNTIME_PLAN_MAX_CASES="${FULL_LITE_MAX_CASES:-5}"
 fi
 
 if [[ -n "${RUNTIME_PLAN_CASES}" && -f "${RUNTIME_PLAN_CASES}" ]]; then

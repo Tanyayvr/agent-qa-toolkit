@@ -2,11 +2,18 @@ import { describe, expect, it } from "vitest";
 import {
   classifyStageFailure,
   mapTimeoutCauseToStageReason,
+  pickSubsetCases,
   pickSmokeCases,
   stageNextAction,
 } from "./staged-campaign-utils.mjs";
 
 describe("staged-campaign-utils", () => {
+  it("picks deterministic generic subset", () => {
+    const input = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
+    const picked = pickSubsetCases(input, 3);
+    expect(picked).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
+  });
+
   it("picks deterministic smoke subset", () => {
     const input = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
     const picked = pickSmokeCases(input, 2);
@@ -74,4 +81,3 @@ describe("staged-campaign-utils", () => {
     expect(out.reason).toBe("transport");
   });
 });
-

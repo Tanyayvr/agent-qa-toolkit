@@ -28,6 +28,23 @@ SMOKE_FAIL_FAST_TRANSPORT_STREAK="${SMOKE_FAIL_FAST_TRANSPORT_STREAK:-1}"
 SMOKE_ENFORCE_CASE_QUALITY="${SMOKE_ENFORCE_CASE_QUALITY:-0}"
 SMOKE_LIBRARY_INGEST="${SMOKE_LIBRARY_INGEST:-0}"
 SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES:-}"
+FULL_LITE_CASES="${FULL_LITE_CASES:-}"             # optional explicit reduced full cases file
+FULL_LITE_MAX_CASES="${FULL_LITE_MAX_CASES:-5}"    # used when FULL_LITE_CASES is not provided
+FULL_LITE_CAMPAIGN_SAMPLE_COUNT="${FULL_LITE_CAMPAIGN_SAMPLE_COUNT:-1}"
+FULL_LITE_TIMEOUT_PROFILE="${FULL_LITE_TIMEOUT_PROFILE:-}"
+FULL_LITE_TIMEOUT_MS="${FULL_LITE_TIMEOUT_MS:-180000}"
+FULL_LITE_TIMEOUT_AUTO_CAP_MS="${FULL_LITE_TIMEOUT_AUTO_CAP_MS:-}"
+FULL_LITE_TIMEOUT_AUTO_LOOKBACK_RUNS="${FULL_LITE_TIMEOUT_AUTO_LOOKBACK_RUNS:-}"
+FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR:-}"
+FULL_LITE_RETRIES="${FULL_LITE_RETRIES:-0}"
+FULL_LITE_CONCURRENCY="${FULL_LITE_CONCURRENCY:-1}"
+FULL_LITE_PREFLIGHT_MODE="${FULL_LITE_PREFLIGHT_MODE:-off}"
+FULL_LITE_PREFLIGHT_TIMEOUT_MS="${FULL_LITE_PREFLIGHT_TIMEOUT_MS:-600000}"
+FULL_LITE_FAIL_FAST_TRANSPORT_STREAK="${FULL_LITE_FAIL_FAST_TRANSPORT_STREAK:-0}"
+FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES:-}"
+FULL_LITE_ENFORCE_CASE_QUALITY="${FULL_LITE_ENFORCE_CASE_QUALITY:-1}"
+FULL_LITE_LIBRARY_INGEST="${FULL_LITE_LIBRARY_INGEST:-1}"
+FULL_LITE_EVAL_FAIL_ON_EXECUTION_DEGRADED="${FULL_LITE_EVAL_FAIL_ON_EXECUTION_DEGRADED:-1}"
 OUT_DIR="${OUT_DIR:-apps/runner/runs}"
 REPORTS_DIR="${REPORTS_DIR:-apps/evaluator/reports}"
 RUN_PREFIX="${RUN_PREFIX:-cli_prod}"
@@ -178,6 +195,26 @@ if [[ -z "${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" ]]; then
     SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
   fi
 fi
+
+if [[ -z "${FULL_LITE_TIMEOUT_PROFILE}" ]]; then
+  if [[ "${TIMEOUT_PROFILE}" == "auto" ]]; then
+    FULL_LITE_TIMEOUT_PROFILE="auto"
+  else
+    FULL_LITE_TIMEOUT_PROFILE="${TIMEOUT_PROFILE}"
+  fi
+fi
+
+if [[ -z "${FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" ]]; then
+  if [[ "${FULL_LITE_TIMEOUT_PROFILE}" == "auto" ]]; then
+    FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="1"
+  else
+    FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
+  fi
+fi
+
+: "${FULL_LITE_TIMEOUT_AUTO_CAP_MS:=${TIMEOUT_AUTO_CAP_MS}}"
+: "${FULL_LITE_TIMEOUT_AUTO_LOOKBACK_RUNS:=${TIMEOUT_AUTO_LOOKBACK_RUNS}}"
+: "${FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR:=${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}}"
 
 run_runner() {
   local run_id="$1"
@@ -350,6 +387,9 @@ print_devops_envelope() {
 
   echo "DevOps envelope (${CAMPAIGN_STAGE_LABEL}):"
   echo "  baseUrl=${BASE_URL}"
+  echo "  runMode=${AGENT_RUN_MODE:-manual}"
+  echo "  runtimeClass=${AGENT_RUNTIME_CLASS}"
+  echo "  profileName=${AGENT_PROFILE_NAME:-manual}"
   echo "  cases=${CASES}"
   echo "  suite=${AGENT_SUITE}"
   echo "  profile=${CAMPAIGN_PROFILE}"
@@ -372,10 +412,13 @@ write_devops_envelope_file() {
   local report_dir="$1"
   mkdir -p "${report_dir}"
   local out="${report_dir}/devops-envelope.json"
-  node -e 'const fs=require("fs");const out=process.argv[1];const payload={stage:process.argv[2],generated_at:new Date().toISOString(),base_url:process.argv[3],cases:process.argv[4],suite:process.argv[5],profile:process.argv[6],sample_count:Number(process.argv[7]),timeout_profile:process.argv[8],timeout_ms:Number(process.argv[9]),timeout_auto_cap_ms:Number(process.argv[10]),timeout_auto_lookback_runs:Number(process.argv[11]),timeout_auto_min_success_samples:Number(process.argv[12]),timeout_auto_max_increase_factor:Number(process.argv[13]),retries:Number(process.argv[14]),concurrency:Number(process.argv[15]),preflight_mode:process.argv[16],preflight_timeout_ms:Number(process.argv[17]),fail_fast_transport_streak:Number(process.argv[18]),inactivity_timeout_ms:Number(process.argv[19])};fs.writeFileSync(out,JSON.stringify(payload,null,2));' \
+  node -e 'const fs=require("fs");const out=process.argv[1];const payload={stage:process.argv[2],generated_at:new Date().toISOString(),base_url:process.argv[3],run_mode:process.argv[4],runtime_class:process.argv[5],profile_name:process.argv[6],cases:process.argv[7],suite:process.argv[8],profile:process.argv[9],sample_count:Number(process.argv[10]),timeout_profile:process.argv[11],timeout_ms:Number(process.argv[12]),timeout_auto_cap_ms:Number(process.argv[13]),timeout_auto_lookback_runs:Number(process.argv[14]),timeout_auto_min_success_samples:Number(process.argv[15]),timeout_auto_max_increase_factor:Number(process.argv[16]),retries:Number(process.argv[17]),concurrency:Number(process.argv[18]),preflight_mode:process.argv[19],preflight_timeout_ms:Number(process.argv[20]),fail_fast_transport_streak:Number(process.argv[21]),inactivity_timeout_ms:Number(process.argv[22])};fs.writeFileSync(out,JSON.stringify(payload,null,2));' \
     "${out}" \
     "${CAMPAIGN_STAGE_LABEL}" \
     "${BASE_URL}" \
+    "${AGENT_RUN_MODE:-manual}" \
+    "${AGENT_RUNTIME_CLASS}" \
+    "${AGENT_PROFILE_NAME:-manual}" \
     "${CASES}" \
     "${AGENT_SUITE}" \
     "${CAMPAIGN_PROFILE}" \
@@ -516,7 +559,9 @@ if (!profile) {
 }
 let scriptName = "campaign:agent";
 const envPrefix = [];
-if (recommendedMode === "full") {
+if (recommendedMode === "full-lite") {
+  scriptName = "campaign:agent:full-lite";
+} else if (recommendedMode === "full") {
   scriptName = "campaign:agent:full";
 } else if (recommendedMode === "diagnostic") {
   scriptName = "campaign:agent:diagnostic";
@@ -526,6 +571,10 @@ if (suggested) {
     envPrefix.push(`SMOKE_TIMEOUT_MS=${suggested.timeout_ms}`);
     envPrefix.push(`TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
     envPrefix.push(`TIMEOUT_AUTO_MAX_INCREASE_FACTOR=${suggested.timeout_auto_max_increase_factor}`);
+  } else if (recommendedMode === "full-lite") {
+    envPrefix.push(`FULL_LITE_TIMEOUT_MS=${suggested.timeout_ms}`);
+    envPrefix.push(`FULL_LITE_TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
+    envPrefix.push(`FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR=${suggested.timeout_auto_max_increase_factor}`);
   } else if (recommendedMode === "diagnostic") {
     envPrefix.push(`DIAGNOSTIC_TIMEOUT_MS=${suggested.timeout_ms}`);
     envPrefix.push(`DIAGNOSTIC_TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
@@ -580,6 +629,20 @@ should_run_calibration() {
     return 0
   fi
   return 1
+}
+
+default_post_quick_mode() {
+  case "${AGENT_RUN_MODE}" in
+    diagnostic) echo "diagnostic" ;;
+    full) echo "full" ;;
+    full-lite) echo "full-lite" ;;
+    *)
+      case "${AGENT_RUNTIME_CLASS}" in
+        slow_local_cli|heavy_mcp_agent) echo "full-lite" ;;
+        *) echo "full" ;;
+      esac
+      ;;
+  esac
 }
 
 run_calibration_stage() {
@@ -665,6 +728,12 @@ run_calibration_stage() {
 
 run_staged_flow() {
   local full_cases_path="${CASES}"
+  local full_lite_cases_path="${FULL_LITE_CASES}"
+  local tmp_full_lite_cases=""
+  local full_lite_run_prefix="${RUN_PREFIX}_full_lite"
+  local full_lite_report_prefix="${REPORT_PREFIX}-full-lite"
+  local full_lite_report_dir="${REPORTS_DIR}/${full_lite_report_prefix}"
+  local full_lite_compare="${full_lite_report_dir}/compare-report.json"
   local smoke_cases_path="${SMOKE_CASES}"
   local tmp_smoke_cases=""
   local smoke_run_prefix="${RUN_PREFIX}_smoke"
@@ -767,68 +836,151 @@ run_staged_flow() {
     return 20
   fi
 
-  emit_stage_result "smoke" "passed" "none" "run_full_stage" "stage_gate" "${smoke_report_dir}" "${smoke_compare}"
-  local full_stage_mode="full"
-  if [[ "${AGENT_RUN_MODE}" == "diagnostic" ]]; then
-    full_stage_mode="diagnostic"
+  local next_stage_mode
+  next_stage_mode="$(default_post_quick_mode)"
+  local smoke_next_action_label="run_full_stage"
+  if [[ "${next_stage_mode}" == "full-lite" ]]; then
+    smoke_next_action_label="run_full_lite_stage"
+  elif [[ "${next_stage_mode}" == "diagnostic" ]]; then
+    smoke_next_action_label="run_diagnostic_stage"
   fi
+  emit_stage_result "smoke" "passed" "none" "${smoke_next_action_label}" "stage_gate" "${smoke_report_dir}" "${smoke_compare}"
+
+  local plan_cases_path="${full_cases_path}"
+  local plan_max_cases="0"
+  local plan_timeout_profile="${TIMEOUT_PROFILE}"
+  local plan_timeout_ms="${TIMEOUT_MS}"
+  local plan_timeout_auto_min_success_samples="${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
+  local plan_timeout_auto_max_increase_factor="${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}"
+  local plan_retries="${RETRIES}"
+  local plan_concurrency="${CONCURRENCY}"
+  local plan_sample_count="${CAMPAIGN_SAMPLE_COUNT}"
+
+  if [[ "${next_stage_mode}" == "full-lite" ]]; then
+    plan_cases_path="${FULL_LITE_CASES:-${full_cases_path}}"
+    plan_max_cases="${FULL_LITE_MAX_CASES}"
+    plan_timeout_profile="${FULL_LITE_TIMEOUT_PROFILE}"
+    plan_timeout_ms="${FULL_LITE_TIMEOUT_MS}"
+    plan_timeout_auto_min_success_samples="${FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
+    plan_timeout_auto_max_increase_factor="${FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR}"
+    plan_retries="${FULL_LITE_RETRIES}"
+    plan_concurrency="${FULL_LITE_CONCURRENCY}"
+    plan_sample_count="${FULL_LITE_CAMPAIGN_SAMPLE_COUNT}"
+  fi
+
   write_runtime_plan_file \
     "${smoke_report_dir}/next-envelope.json" \
-    "${full_stage_mode}" \
-    "${full_cases_path}" \
-    "${TIMEOUT_PROFILE}" \
-    "${TIMEOUT_MS}" \
-    "${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" \
-    "${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
-    "${RETRIES}" \
-    "${CONCURRENCY}" \
-    "${CAMPAIGN_SAMPLE_COUNT}" \
-    "0"
+    "${next_stage_mode}" \
+    "${plan_cases_path}" \
+    "${plan_timeout_profile}" \
+    "${plan_timeout_ms}" \
+    "${plan_timeout_auto_min_success_samples}" \
+    "${plan_timeout_auto_max_increase_factor}" \
+    "${plan_retries}" \
+    "${plan_concurrency}" \
+    "${plan_sample_count}" \
+    "${plan_max_cases}"
   print_next_envelope_summary "${smoke_report_dir}/next-envelope.json"
+
   local smoke_next_mode
   smoke_next_mode="$(json_field "$(cat "${smoke_report_dir}/next-envelope.json")" "recommended_mode")"
-  if [[ "${STAGED_AUTO_PROMOTE_FULL}" == "1" && "${smoke_next_mode}" == "diagnostic" && "${full_stage_mode}" != "diagnostic" ]]; then
-    echo "WARNING: runtime advisor recommends diagnostic mode for the next stage; proceeding with standard full because auto-promote is enabled."
+  if [[ "${STAGED_AUTO_PROMOTE_FULL}" == "1" && "${smoke_next_mode}" != "${next_stage_mode}" ]]; then
+    echo "WARNING: runtime advisor recommends ${smoke_next_mode} for the next stage; proceeding with requested ${next_stage_mode} because auto-promote is enabled."
   fi
   if [[ "${STAGED_AUTO_PROMOTE_FULL}" != "1" ]]; then
     if [[ -n "${tmp_smoke_cases}" ]]; then
       rm -f "${tmp_smoke_cases}"
     fi
-    echo "Staged campaign completed at smoke stage (auto-promote to full is disabled)."
+    echo "Staged campaign completed at smoke stage (auto-promote to next stage is disabled)."
     return 0
   fi
   if [[ -n "${tmp_smoke_cases}" ]]; then
     rm -f "${tmp_smoke_cases}"
   fi
-  echo "Staged campaign: stage=full (profile=${CAMPAIGN_PROFILE}, cases=${full_cases_path})"
 
-  local full_report_dir="${REPORTS_DIR}/${REPORT_PREFIX}"
-  local full_compare="${full_report_dir}/compare-report.json"
-  local full_exit=0
+  local promoted_stage_label="full"
+  local promoted_run_prefix="${RUN_PREFIX}"
+  local promoted_report_prefix="${REPORT_PREFIX}"
+  local promoted_report_dir="${REPORTS_DIR}/${REPORT_PREFIX}"
+  local promoted_compare="${promoted_report_dir}/compare-report.json"
+  local promoted_cases_path="${full_cases_path}"
+  local promoted_timeout_profile="${TIMEOUT_PROFILE}"
+  local promoted_timeout_ms="${TIMEOUT_MS}"
+  local promoted_timeout_auto_cap_ms="${TIMEOUT_AUTO_CAP_MS}"
+  local promoted_timeout_auto_lookback_runs="${TIMEOUT_AUTO_LOOKBACK_RUNS}"
+  local promoted_timeout_auto_min_success_samples="${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
+  local promoted_timeout_auto_max_increase_factor="${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}"
+  local promoted_retries="${RETRIES}"
+  local promoted_concurrency="${CONCURRENCY}"
+  local promoted_preflight_mode="${PREFLIGHT_MODE}"
+  local promoted_preflight_timeout_ms="${PREFLIGHT_TIMEOUT_MS}"
+  local promoted_fail_fast_transport_streak="${FAIL_FAST_TRANSPORT_STREAK}"
+  local promoted_sample_count="${CAMPAIGN_SAMPLE_COUNT}"
+  local promoted_enforce_case_quality="${ENFORCE_CASE_QUALITY}"
+  local promoted_library_ingest="${LIBRARY_INGEST}"
+  local promoted_eval_fail_on_execution_degraded="${EVAL_FAIL_ON_EXECUTION_DEGRADED}"
+  local promoted_stage_reason_label="full"
+
+  if [[ "${next_stage_mode}" == "full-lite" ]]; then
+    promoted_stage_label="full-lite"
+    promoted_stage_reason_label="full-lite"
+    promoted_run_prefix="${full_lite_run_prefix}"
+    promoted_report_prefix="${full_lite_report_prefix}"
+    promoted_report_dir="${full_lite_report_dir}"
+    promoted_compare="${full_lite_compare}"
+    if [[ -z "${full_lite_cases_path}" ]]; then
+      tmp_full_lite_cases="$(mktemp "${TMPDIR:-/tmp}/aq-full-lite-cases.XXXXXX")"
+      full_lite_cases_path="${tmp_full_lite_cases}"
+      node "${SCRIPT_DIR}/staged-campaign-utils.mjs" subset \
+        --cases "${full_cases_path}" \
+        --out "${full_lite_cases_path}" \
+        --maxCases "${FULL_LITE_MAX_CASES}" >/dev/null
+    fi
+    promoted_cases_path="${full_lite_cases_path}"
+    promoted_timeout_profile="${FULL_LITE_TIMEOUT_PROFILE}"
+    promoted_timeout_ms="${FULL_LITE_TIMEOUT_MS}"
+    promoted_timeout_auto_cap_ms="${FULL_LITE_TIMEOUT_AUTO_CAP_MS}"
+    promoted_timeout_auto_lookback_runs="${FULL_LITE_TIMEOUT_AUTO_LOOKBACK_RUNS}"
+    promoted_timeout_auto_min_success_samples="${FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
+    promoted_timeout_auto_max_increase_factor="${FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR}"
+    promoted_retries="${FULL_LITE_RETRIES}"
+    promoted_concurrency="${FULL_LITE_CONCURRENCY}"
+    promoted_preflight_mode="${FULL_LITE_PREFLIGHT_MODE}"
+    promoted_preflight_timeout_ms="${FULL_LITE_PREFLIGHT_TIMEOUT_MS}"
+    promoted_fail_fast_transport_streak="${FULL_LITE_FAIL_FAST_TRANSPORT_STREAK}"
+    promoted_sample_count="${FULL_LITE_CAMPAIGN_SAMPLE_COUNT}"
+    promoted_enforce_case_quality="${FULL_LITE_ENFORCE_CASE_QUALITY}"
+    promoted_library_ingest="${FULL_LITE_LIBRARY_INGEST}"
+    promoted_eval_fail_on_execution_degraded="${FULL_LITE_EVAL_FAIL_ON_EXECUTION_DEGRADED}"
+  fi
+
+  echo "Staged campaign: stage=${promoted_stage_label} (profile=${CAMPAIGN_PROFILE}, cases=${promoted_cases_path})"
+
+  local promoted_exit=0
   set +e
   STAGED_MODE=0 \
-    CAMPAIGN_STAGE_LABEL="full" \
+    CAMPAIGN_STAGE_LABEL="${promoted_stage_label}" \
     PRINT_DEVOPS_ENVELOPE="${PRINT_DEVOPS_ENVELOPE}" \
-    CAMPAIGN_SAMPLE_COUNT="${CAMPAIGN_SAMPLE_COUNT}" \
+    CAMPAIGN_SAMPLE_COUNT="${promoted_sample_count}" \
     BASE_URL="${BASE_URL}" \
-    CASES="${full_cases_path}" \
+    CASES="${promoted_cases_path}" \
     AGENT_SUITE="${AGENT_SUITE}" \
     CAMPAIGN_PROFILE="${CAMPAIGN_PROFILE}" \
     OUT_DIR="${OUT_DIR}" \
     REPORTS_DIR="${REPORTS_DIR}" \
-    RUN_PREFIX="${RUN_PREFIX}" \
-    REPORT_PREFIX="${REPORT_PREFIX}" \
-    TIMEOUT_PROFILE="${TIMEOUT_PROFILE}" \
-    TIMEOUT_MS="${TIMEOUT_MS}" \
-    TIMEOUT_AUTO_CAP_MS="${TIMEOUT_AUTO_CAP_MS}" \
-    TIMEOUT_AUTO_LOOKBACK_RUNS="${TIMEOUT_AUTO_LOOKBACK_RUNS}" \
-    TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" \
-    TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
-    RETRIES="${RETRIES}" \
-    CONCURRENCY="${CONCURRENCY}" \
-    PREFLIGHT_MODE="${PREFLIGHT_MODE}" \
-    PREFLIGHT_TIMEOUT_MS="${PREFLIGHT_TIMEOUT_MS}" \
-    FAIL_FAST_TRANSPORT_STREAK="${FAIL_FAST_TRANSPORT_STREAK}" \
+    RUN_PREFIX="${promoted_run_prefix}" \
+    REPORT_PREFIX="${promoted_report_prefix}" \
+    TIMEOUT_PROFILE="${promoted_timeout_profile}" \
+    TIMEOUT_MS="${promoted_timeout_ms}" \
+    TIMEOUT_AUTO_CAP_MS="${promoted_timeout_auto_cap_ms}" \
+    TIMEOUT_AUTO_LOOKBACK_RUNS="${promoted_timeout_auto_lookback_runs}" \
+    TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${promoted_timeout_auto_min_success_samples}" \
+    TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${promoted_timeout_auto_max_increase_factor}" \
+    RETRIES="${promoted_retries}" \
+    CONCURRENCY="${promoted_concurrency}" \
+    PREFLIGHT_MODE="${promoted_preflight_mode}" \
+    PREFLIGHT_TIMEOUT_MS="${promoted_preflight_timeout_ms}" \
+    FAIL_FAST_TRANSPORT_STREAK="${promoted_fail_fast_transport_streak}" \
     INACTIVITY_TIMEOUT_MS="${INACTIVITY_TIMEOUT_MS}" \
     HEALTH_RETRIES="${HEALTH_RETRIES}" \
     HEALTH_WAIT_SEC="${HEALTH_WAIT_SEC}" \
@@ -836,55 +988,59 @@ run_staged_flow() {
     VERIFY_RUNTIME_HANDOFF="${VERIFY_RUNTIME_HANDOFF}" \
     RUNTIME_HANDOFF_MODE="${RUNTIME_HANDOFF_MODE}" \
     RUNCASE_TIMEOUT_MS="${RUNCASE_TIMEOUT_MS}" \
-    ENFORCE_CASE_QUALITY="${ENFORCE_CASE_QUALITY}" \
+    ENFORCE_CASE_QUALITY="${promoted_enforce_case_quality}" \
     CASE_QUALITY_MAX_WEAK_EXPECTED_RATE="${CASE_QUALITY_MAX_WEAK_EXPECTED_RATE}" \
     CASE_QUALITY_REQUIRE_TOOL_EVIDENCE="${CASE_QUALITY_REQUIRE_TOOL_EVIDENCE}" \
     CASE_QUALITY_REQUIRE_STRONG_TELEMETRY="${CASE_QUALITY_REQUIRE_STRONG_TELEMETRY}" \
     CASE_QUALITY_REQUIRE_SEMANTIC="${CASE_QUALITY_REQUIRE_SEMANTIC}" \
     CASE_QUALITY_REQUIRE_ASSUMPTION_STATE="${CASE_QUALITY_REQUIRE_ASSUMPTION_STATE}" \
-    LIBRARY_INGEST="${LIBRARY_INGEST}" \
+    LIBRARY_INGEST="${promoted_library_ingest}" \
     LIBRARY_DIR="${LIBRARY_DIR}" \
     LIBRARY_AGENT_ID="${LIBRARY_AGENT_ID}" \
     LIBRARY_SOURCE="${LIBRARY_SOURCE}" \
-    EVAL_FAIL_ON_EXECUTION_DEGRADED="${EVAL_FAIL_ON_EXECUTION_DEGRADED}" \
+    EVAL_FAIL_ON_EXECUTION_DEGRADED="${promoted_eval_fail_on_execution_degraded}" \
     AQ_MIN_PRE_ACTION_ENTROPY_REMOVED="${AQ_MIN_PRE_ACTION_ENTROPY_REMOVED}" \
     AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK="${AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK}" \
     ALLOW_EXISTING_RUN_PREFIX="${ALLOW_EXISTING_RUN_PREFIX}" \
     "${SCRIPT_PATH}"
-  full_exit=$?
+  promoted_exit=$?
   set -e
 
-  if [[ "${full_exit}" -ne 0 ]]; then
-    local full_class
-    full_class="$(node "${SCRIPT_DIR}/staged-campaign-utils.mjs" classify --compare "${full_compare}" --defaultReason unknown)"
-    local full_reason
-    local full_next_action
-    local full_source
-    full_reason="$(json_field "${full_class}" "reason")"
-    full_next_action="$(json_field "${full_class}" "next_action")"
-    full_source="$(json_field "${full_class}" "source")"
-    if [[ -f "${full_compare}" ]]; then
-      write_runtime_recommendation_file \
-        "${full_report_dir}/next-envelope.json" \
-        "full" \
-        "${full_compare}" \
-        "${full_stage_mode}" \
-        "${full_cases_path}" \
-        "${TIMEOUT_PROFILE}" \
-        "${TIMEOUT_MS}" \
-        "${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" \
-        "${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
-        "${RETRIES}" \
-        "${CONCURRENCY}" \
-        "${CAMPAIGN_SAMPLE_COUNT}" \
-        "0"
-      print_next_envelope_summary "${full_report_dir}/next-envelope.json"
-    fi
-    emit_stage_result "full" "failed" "${full_reason}" "${full_next_action}" "${full_source}" "${full_report_dir}" "${full_compare}"
-    return "${full_exit}"
+  if [[ -n "${tmp_full_lite_cases}" ]]; then
+    rm -f "${tmp_full_lite_cases}"
   fi
 
-  emit_stage_result "full" "passed" "none" "none" "stage_gate" "${full_report_dir}" "${full_compare}"
+  if [[ "${promoted_exit}" -ne 0 ]]; then
+    local promoted_class
+    promoted_class="$(node "${SCRIPT_DIR}/staged-campaign-utils.mjs" classify --compare "${promoted_compare}" --defaultReason unknown)"
+    local promoted_reason
+    local promoted_next_action
+    local promoted_source
+    promoted_reason="$(json_field "${promoted_class}" "reason")"
+    promoted_next_action="$(json_field "${promoted_class}" "next_action")"
+    promoted_source="$(json_field "${promoted_class}" "source")"
+    if [[ -f "${promoted_compare}" ]]; then
+      write_runtime_recommendation_file \
+        "${promoted_report_dir}/next-envelope.json" \
+        "${promoted_stage_reason_label}" \
+        "${promoted_compare}" \
+        "${next_stage_mode}" \
+        "${promoted_cases_path}" \
+        "${promoted_timeout_profile}" \
+        "${promoted_timeout_ms}" \
+        "${promoted_timeout_auto_min_success_samples}" \
+        "${promoted_timeout_auto_max_increase_factor}" \
+        "${promoted_retries}" \
+        "${promoted_concurrency}" \
+        "${promoted_sample_count}" \
+        "${plan_max_cases}"
+      print_next_envelope_summary "${promoted_report_dir}/next-envelope.json"
+    fi
+    emit_stage_result "${promoted_stage_label}" "failed" "${promoted_reason}" "${promoted_next_action}" "${promoted_source}" "${promoted_report_dir}" "${promoted_compare}"
+    return "${promoted_exit}"
+  fi
+
+  emit_stage_result "${promoted_stage_label}" "passed" "none" "none" "stage_gate" "${promoted_report_dir}" "${promoted_compare}"
   return 0
 }
 
