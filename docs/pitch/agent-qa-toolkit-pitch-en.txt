@@ -16,6 +16,7 @@ What we learned from real agent runs
 - small repo does not mean small runtime
 - timeout pain is often a signal about operational fitness, not only configuration
 - teams need to know which path the agent honestly supports
+- first-run budget must be explicit up front; repeated timeout bumping is product failure
 
 Product thesis
 We do not just test agents.
@@ -50,12 +51,14 @@ What the artifact gives you
 - stage-result.json with typed stage/reason/next_action
 - devops-envelope.json with the exact runtime envelope used
 - next-envelope.json with the recommended next mode and budget
+- one envelope for both runner and adapter, so operators do not tune two timeout layers by hand
 
 What we reduce
 - hours spent reconstructing context
 - false model-regression conclusions when execution was degraded
 - pointless full runs when quick already shows the integration is not ready
 - manual timeout tuning by tiny increments
+- separate hand-tuning of runner timeout vs adapter/server timeout
 
 Where we win
 - self-hosted evidence, not dashboard dependency

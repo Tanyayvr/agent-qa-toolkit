@@ -307,6 +307,7 @@ BASE_URL=http://127.0.0.1:8788 AGENT_SUITE=cli CAMPAIGN_PROFILE=quality RUN_PREF
 Profile-based agent run (recommended for external agents):
 ```bash
 ./scripts/run-agent-profile.sh --list
+./scripts/run-agent-profile.sh --dry-run goose-ollama
 ./scripts/run-agent-profile.sh goose-ollama
 ./scripts/run-agent-profile.sh --full-lite goose-ollama
 ./scripts/run-agent-profile.sh --full goose-ollama
@@ -321,6 +322,9 @@ npm run campaign:agent -- goose-ollama
 Launcher writes active prefixes to `/tmp/aq_run_prefix` and `/tmp/aq_report_prefix` for quick post-run summaries.
 Launcher default is now buyer-friendly `quick` mode: it runs `calibration`/`smoke` and stops after green smoke.
 Use `--full-lite`, `--full`, or `--diagnostic` when you explicitly want auto-promotion beyond quick.
+When a profile declares managed-adapter settings, the launcher also restarts `cli-agent-adapter` with a timeout envelope aligned to the selected mode. Users should not manually tune adapter timeouts separately from campaign timeouts. External dependencies outside the adapter itself (for example an MCP server on another port) still need to be running.
+Use `--dry-run` to inspect the resolved campaign envelope, runtime class, and managed-adapter command without starting a campaign.
+When timeout history is missing, the launcher uses runtime-class first-run defaults as the starting envelope. The first-run default is intentionally the upper bound for that class/mode, not a minimal guess, so operators do not burn hours on repeated timeout bumps.
 Default behavior is now staged (`STAGED_MODE=1`): the script runs `smoke` first (`infra` + small subset), and auto-promotes to full quality campaign only on green smoke.
 When timeout auto-tuning is enabled and history is insufficient, the script can auto-run a `calibration` stage first to collect initial latency samples before `smoke`.
 Implemented operator modes:
@@ -353,6 +357,14 @@ Before execution, the launcher now prints an operator runtime estimate:
 - `estimatedStageUpperBoundMinutes`
 - `recommendedMode`
 - `confidence`
+- `detectedRuntimeClass`
+- `runtimeClassBasis`
+- `configuredInitialTimeoutMs`
+- `configuredHardCapMs`
+It also prints the adapter envelope that will be required for the run:
+- `timeoutMs`
+- `timeoutCapMs`
+- `serverRequestTimeoutMs`
 This estimate is advisory, not a guarantee; it exists to prevent "manual timeout tuning by small increments".
 On staged failures it emits machine-readable stage output with typed reason and action:
 - `stage=calibration|smoke|full`
@@ -371,6 +383,9 @@ Operator helpers:
 ```bash
 # adapter liveness / effective runtime envelope
 npm run campaign:agent:health -- --baseUrl http://127.0.0.1:8788
+
+# inspect campaign + adapter envelope without starting the run
+npm run campaign:agent:dry-run -- goose-ollama
 
 # latest report summary from /tmp/aq_report_prefix
 npm run campaign:agent:status

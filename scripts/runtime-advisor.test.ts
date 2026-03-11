@@ -48,7 +48,7 @@ describe("runtime-advisor", () => {
     expect(plan.estimated_request_timeout_ms).toBeGreaterThan(120000);
   });
 
-  it("recommends diagnostic mode for timeout-budget full failure on slow local cli", () => {
+  it("keeps full mode and expands timeout for timeout-budget failure on slow local cli", () => {
     const root = mkdtempSync(path.join(os.tmpdir(), "aq-runtime-recommend-"));
     const outDir = path.join(root, "runs");
     const baselineRun = path.join(outDir, "baseline", "run-a");
@@ -116,7 +116,7 @@ describe("runtime-advisor", () => {
     });
 
     expect(recommendation.reason).toBe("timeout_budget");
-    expect(recommendation.suggested_envelope.mode).toBe("diagnostic");
+    expect(recommendation.suggested_envelope.mode).toBe("full");
     expect(recommendation.suggested_envelope.timeout_ms).toBeGreaterThan(360000);
     expect(recommendation.timed_out_case_ids).toEqual(["c4"]);
   });

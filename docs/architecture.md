@@ -108,6 +108,18 @@ Runner and evaluator support additional scenarios for production drift:
   often require quick-first local loops, `full-lite` for local iteration, and full/diagnostic on a longer or dedicated path.
   DevOps owns the runtime envelope (`TIMEOUT_MS`, `TIMEOUT_AUTO_CAP_MS`, retries, concurrency, sample count);
   runner auto-tuning stays inside that envelope and must not silently upgrade quick into a heavier mode unless that mode was requested.
+  Profiles can also own the adapter envelope. When `ADAPTER_MANAGED=1`, `scripts/run-agent-profile.sh`
+  restarts `cli-agent-adapter` with an aligned runtime contract before the campaign starts:
+  - `CLI_AGENT_TIMEOUT_MS`
+  - `CLI_AGENT_TIMEOUT_CAP_MS`
+  - `CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS`
+  The launcher uses the selected run mode plus smoke/calibration requirements to compute one adapter envelope,
+  so operators do not hand-tune adapter and runner timeouts separately.
+  When timeout history is missing, the initial envelope comes from runtime-class defaults for that mode
+  (`fast_remote`, `standard_cli`, `slow_local_cli`, `heavy_mcp_agent`). These first-run defaults are the
+  conservative upper bound for the class, so the first run is budgeted honestly instead of starting with a low guess.
+  If managed adapter is disabled, the launcher still checks `/health` and blocks early on an envelope mismatch,
+  printing the exact restart command that would satisfy the run.
   Launcher/runtime also emit machine-readable operator planning artifacts:
   - pre-run estimate (console) with `recommendedMode` + confidence
   - `next-envelope.json` in report directories with the next suggested mode/envelope after smoke pass or timeout-budget failure

@@ -57,6 +57,7 @@
     "metrics:dd": "node scripts/collect-dd-metrics.mjs",
     "library:ingest": "node scripts/library-ingest.mjs",
     "campaign:agent": "bash scripts/run-agent-profile.sh",
+    "campaign:agent:dry-run": "bash scripts/run-agent-profile.sh --dry-run",
     "campaign:agent:full-lite": "bash scripts/run-agent-profile.sh --full-lite",
     "campaign:agent:full": "bash scripts/run-agent-profile.sh --full",
     "campaign:agent:diagnostic": "bash scripts/run-agent-profile.sh --diagnostic",

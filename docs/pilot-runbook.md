@@ -117,6 +117,9 @@ Note:
 - For repeatable multi-agent operation, use profile launcher:
   `./scripts/run-agent-profile.sh --list` then `./scripts/run-agent-profile.sh <profile>`.
 - Profile launcher defaults to `quick` mode (calibration/smoke only); add `--full-lite`, `--full`, or `--diagnostic` when you intentionally want a heavier path.
+- If a profile sets `ADAPTER_MANAGED=1`, the launcher also restarts `cli-agent-adapter` with the required timeout envelope before the run. Operators should not tune adapter timeouts separately from campaign timeouts.
+- External dependencies outside the adapter itself still need to be running. Example: `gooseteam-ollama` still requires the GooseTeam MCP server.
+- If timeout history is missing, the launcher seeds the first run from runtime-class defaults for the selected mode. This first-run envelope is intentionally conservative so operators do not spend the first day manually stepping timeouts upward.
 
 ## 8) Operator modes (what each run means)
 
@@ -175,6 +178,12 @@ Health check:
 ```bash
 npm run campaign:agent:health -- --baseUrl http://127.0.0.1:8788
 ```
+
+Dry-run envelope preview:
+```bash
+npm run campaign:agent:dry-run -- goose-ollama
+```
+Dry-run shows `detectedRuntimeClass`, `runtimeClassBasis`, `configuredInitialTimeoutMs`, `configuredHardCapMs`, and the required adapter envelope before any long run starts.
 
 Quick run:
 ```bash

@@ -53,14 +53,10 @@ function chooseConfidence(successSamples, minSuccessSamples) {
   return "low";
 }
 
-function recommendedModeForRuntime({ mode, runtimeClass, estimatedRuntimeUpperBoundMs, diagnosticThresholdMs }) {
+function recommendedModeForRuntime({ mode }) {
   if (mode === "quick") return "quick";
   if (mode === "diagnostic") return "diagnostic";
-  if (estimatedRuntimeUpperBoundMs >= diagnosticThresholdMs) return "diagnostic";
   if (mode === "full-lite") return "full-lite";
-  if (runtimeClass === "slow_local_cli" && estimatedRuntimeUpperBoundMs >= 60 * 60 * 1000) {
-    return "diagnostic";
-  }
   return "full";
 }
 
@@ -120,18 +116,15 @@ export function estimateRuntimePlan(params) {
   const confidence = chooseConfidence(history.success_sample_count, params.timeoutAutoMinSuccessSamples);
   const recommendedMode = recommendedModeForRuntime({
     mode: params.mode,
-    runtimeClass: params.runtimeClass,
-    estimatedRuntimeUpperBoundMs,
-    diagnosticThresholdMs: params.diagnosticThresholdMs,
   });
 
-  if (recommendedMode === "diagnostic" && params.mode !== "diagnostic") {
-    notes.push("predicted runtime is high enough that diagnostic mode is recommended");
+  if (estimatedRuntimeUpperBoundMs >= params.diagnosticThresholdMs && params.mode !== "diagnostic") {
+    notes.push("predicted runtime is high enough that a nightly or dedicated host is recommended");
   }
-  if (params.runtimeClass === "heavy_mcp_agent" && recommendedMode !== "quick") {
-    notes.push("heavy_mcp_agent runs are usually better on nightly or dedicated hosts than on the default local loop");
+  if (params.runtimeClass === "heavy_mcp_agent" && params.mode !== "quick") {
+    notes.push("heavy_mcp_agent runs often need a larger first-run budget and may be better on nightly or dedicated hosts");
   }
-  if (params.runtimeClass === "slow_local_cli" && recommendedMode === "diagnostic") {
+  if (params.runtimeClass === "slow_local_cli" && estimatedRuntimeUpperBoundMs >= params.diagnosticThresholdMs) {
     notes.push("slow_local_cli agent is likely better on a nightly or dedicated path for long validation runs");
   }
   if (confidence === "low") {
@@ -258,9 +251,6 @@ export function recommendRuntimeEnvelope(params) {
 
   const suggestedMode = recommendedModeForRuntime({
     mode: params.mode === "quick" ? "quick" : params.mode,
-    runtimeClass: params.runtimeClass,
-    estimatedRuntimeUpperBoundMs: suggestedPlan.estimated_stage_runtime_upper_bound_ms,
-    diagnosticThresholdMs: params.diagnosticThresholdMs,
   });
 
   result.next_action = nextActionForRecommendation(classification.reason, suggestedMode);
@@ -274,8 +264,11 @@ export function recommendRuntimeEnvelope(params) {
     estimated_stage_runtime_upper_bound_ms: suggestedPlan.estimated_stage_runtime_upper_bound_ms,
     confidence: suggestedPlan.confidence,
   };
-  if (suggestedMode === "diagnostic") {
-    result.notes.push("recommended envelope is now in diagnostic range; operator should use diagnostic mode");
+  if (
+    suggestedPlan.estimated_stage_runtime_upper_bound_ms >= params.diagnosticThresholdMs &&
+    suggestedMode !== "diagnostic"
+  ) {
+    result.notes.push("recommended envelope is large; consider running this mode on a nightly or dedicated host");
   }
   return result;
 }
@@ -350,7 +343,7 @@ function renderHelp() {
     "Common options:",
     "  --outDir <dir> --timeoutProfile <off|auto> --timeoutMs <ms> --timeoutAutoCapMs <ms>",
     "  --timeoutAutoLookbackRuns <n> --timeoutAutoMinSuccessSamples <n> --timeoutAutoMaxIncreaseFactor <n>",
-    "  --sampleCount <n> --retries <n> --concurrency <n> --runtimeClass <generic|slow_local_cli>",
+    "  --sampleCount <n> --retries <n> --concurrency <n> --runtimeClass <fast_remote|standard_cli|slow_local_cli|heavy_mcp_agent|generic>",
     "  --maxCases <n> --diagnosticThresholdMs <ms> [--out <path>]",
   ].join("\n");
 }

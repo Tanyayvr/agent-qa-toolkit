@@ -16,6 +16,7 @@ Self-hosted слой qualification и evidence для AI-агентов
 - маленький репозиторий не означает маленький runtime
 - боль с timeout часто говорит не только о конфиге, а об operational fitness агента
 - командам нужно понимать, какой путь валидации для этого агента вообще честный
+- бюджет первого прогона должен быть честно показан заранее; повторные маленькие timeout bumps — это провал продукта
 
 Тезис продукта
 Мы не просто тестируем агентов.
@@ -50,12 +51,14 @@ Runtime classes
 - stage-result.json с typed stage/reason/next_action
 - devops-envelope.json с точным runtime envelope
 - next-envelope.json с рекомендованным следующим mode и budget
+- один согласованный envelope для runner и adapter, чтобы оператор не тюнил два слоя timeout вручную
 
 Что мы уменьшаем
 - часы на реконструкцию контекста
 - ложные выводы о model regression, когда execution был degraded
 - бессмысленные full-прогоны, если quick уже показал, что интеграция не готова
 - ручной подбор timeout маленькими шагами
+- отдельный ручной тюнинг runner timeout и adapter/server timeout
 
 Где мы выигрываем
 - self-hosted evidence вместо зависимости от dashboard

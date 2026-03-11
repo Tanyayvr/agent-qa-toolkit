@@ -20,6 +20,9 @@ SMOKE_MAX_CASES="${SMOKE_MAX_CASES:-4}"    # used when SMOKE_CASES is not provid
 SMOKE_CAMPAIGN_SAMPLE_COUNT="${SMOKE_CAMPAIGN_SAMPLE_COUNT:-1}"
 SMOKE_TIMEOUT_PROFILE="${SMOKE_TIMEOUT_PROFILE:-}"
 SMOKE_TIMEOUT_MS="${SMOKE_TIMEOUT_MS:-30000}"
+SMOKE_TIMEOUT_AUTO_CAP_MS="${SMOKE_TIMEOUT_AUTO_CAP_MS:-}"
+SMOKE_TIMEOUT_AUTO_LOOKBACK_RUNS="${SMOKE_TIMEOUT_AUTO_LOOKBACK_RUNS:-}"
+SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR:-}"
 SMOKE_RETRIES="${SMOKE_RETRIES:-0}"
 SMOKE_CONCURRENCY="${SMOKE_CONCURRENCY:-1}"
 SMOKE_PREFLIGHT_MODE="${SMOKE_PREFLIGHT_MODE:-strict}"
@@ -98,6 +101,9 @@ CALIBRATION_FAIL_FAST_TRANSPORT_STREAK="${CALIBRATION_FAIL_FAST_TRANSPORT_STREAK
 CALIBRATION_ENFORCE_CASE_QUALITY="${CALIBRATION_ENFORCE_CASE_QUALITY:-0}"
 CALIBRATION_LIBRARY_INGEST="${CALIBRATION_LIBRARY_INGEST:-0}"
 CALIBRATION_EVAL_FAIL_ON_EXECUTION_DEGRADED="${CALIBRATION_EVAL_FAIL_ON_EXECUTION_DEGRADED:-0}"
+ADAPTER_TIMEOUT_MS=""
+ADAPTER_TIMEOUT_CAP_MS=""
+ADAPTER_SERVER_REQUEST_TIMEOUT_MS=""
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -196,6 +202,10 @@ if [[ -z "${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" ]]; then
   fi
 fi
 
+: "${SMOKE_TIMEOUT_AUTO_CAP_MS:=${TIMEOUT_AUTO_CAP_MS}}"
+: "${SMOKE_TIMEOUT_AUTO_LOOKBACK_RUNS:=${TIMEOUT_AUTO_LOOKBACK_RUNS}}"
+: "${SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR:=${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}}"
+
 if [[ -z "${FULL_LITE_TIMEOUT_PROFILE}" ]]; then
   if [[ "${TIMEOUT_PROFILE}" == "auto" ]]; then
     FULL_LITE_TIMEOUT_PROFILE="auto"
@@ -282,8 +292,15 @@ check_adapter_ready() {
   local health_url="${BASE_URL%/}/health"
   local attempt=1
   while [[ "${attempt}" -le "${HEALTH_RETRIES}" ]]; do
-    if curl -fsS --max-time 5 "${health_url}" >/dev/null; then
+    local health_json=""
+    if health_json="$(curl -fsS --max-time 5 "${health_url}")"; then
+      ADAPTER_TIMEOUT_MS="$(printf '%s' "${health_json}" | node -e 'const fs=require("fs");const j=JSON.parse(fs.readFileSync(0,"utf8"));process.stdout.write(String(j?.runtime?.timeout_ms ?? ""));')"
+      ADAPTER_TIMEOUT_CAP_MS="$(printf '%s' "${health_json}" | node -e 'const fs=require("fs");const j=JSON.parse(fs.readFileSync(0,"utf8"));process.stdout.write(String(j?.runtime?.timeout_cap_ms ?? ""));')"
+      ADAPTER_SERVER_REQUEST_TIMEOUT_MS="$(printf '%s' "${health_json}" | node -e 'const fs=require("fs");const j=JSON.parse(fs.readFileSync(0,"utf8"));process.stdout.write(String(j?.runtime?.server_request_timeout_ms ?? ""));')"
       echo "Adapter health check passed: ${health_url}"
+      if [[ -n "${ADAPTER_TIMEOUT_MS}" || -n "${ADAPTER_SERVER_REQUEST_TIMEOUT_MS}" ]]; then
+        echo "Adapter runtime limits: timeoutMs=${ADAPTER_TIMEOUT_MS:-unknown} timeoutCapMs=${ADAPTER_TIMEOUT_CAP_MS:-unknown} serverRequestTimeoutMs=${ADAPTER_SERVER_REQUEST_TIMEOUT_MS:-unknown}"
+      fi
       return 0
     fi
     echo "Adapter health check failed (attempt ${attempt}/${HEALTH_RETRIES}): ${health_url}"
@@ -412,7 +429,7 @@ write_devops_envelope_file() {
   local report_dir="$1"
   mkdir -p "${report_dir}"
   local out="${report_dir}/devops-envelope.json"
-  node -e 'const fs=require("fs");const out=process.argv[1];const payload={stage:process.argv[2],generated_at:new Date().toISOString(),base_url:process.argv[3],run_mode:process.argv[4],runtime_class:process.argv[5],profile_name:process.argv[6],cases:process.argv[7],suite:process.argv[8],profile:process.argv[9],sample_count:Number(process.argv[10]),timeout_profile:process.argv[11],timeout_ms:Number(process.argv[12]),timeout_auto_cap_ms:Number(process.argv[13]),timeout_auto_lookback_runs:Number(process.argv[14]),timeout_auto_min_success_samples:Number(process.argv[15]),timeout_auto_max_increase_factor:Number(process.argv[16]),retries:Number(process.argv[17]),concurrency:Number(process.argv[18]),preflight_mode:process.argv[19],preflight_timeout_ms:Number(process.argv[20]),fail_fast_transport_streak:Number(process.argv[21]),inactivity_timeout_ms:Number(process.argv[22])};fs.writeFileSync(out,JSON.stringify(payload,null,2));' \
+  node -e 'const fs=require("fs");const out=process.argv[1];const toNum=v=>{const n=Number(v);return Number.isFinite(n)?n:null};const payload={stage:process.argv[2],generated_at:new Date().toISOString(),base_url:process.argv[3],run_mode:process.argv[4],runtime_class:process.argv[5],profile_name:process.argv[6],cases:process.argv[7],suite:process.argv[8],profile:process.argv[9],sample_count:Number(process.argv[10]),timeout_profile:process.argv[11],timeout_ms:Number(process.argv[12]),timeout_auto_cap_ms:Number(process.argv[13]),timeout_auto_lookback_runs:Number(process.argv[14]),timeout_auto_min_success_samples:Number(process.argv[15]),timeout_auto_max_increase_factor:Number(process.argv[16]),retries:Number(process.argv[17]),concurrency:Number(process.argv[18]),preflight_mode:process.argv[19],preflight_timeout_ms:Number(process.argv[20]),fail_fast_transport_streak:Number(process.argv[21]),inactivity_timeout_ms:Number(process.argv[22]),adapter_timeout_ms:toNum(process.argv[23]),adapter_timeout_cap_ms:toNum(process.argv[24]),adapter_server_request_timeout_ms:toNum(process.argv[25])};fs.writeFileSync(out,JSON.stringify(payload,null,2));' \
     "${out}" \
     "${CAMPAIGN_STAGE_LABEL}" \
     "${BASE_URL}" \
@@ -434,7 +451,10 @@ write_devops_envelope_file() {
     "${PREFLIGHT_MODE}" \
     "${PREFLIGHT_TIMEOUT_MS}" \
     "${FAIL_FAST_TRANSPORT_STREAK}" \
-    "${INACTIVITY_TIMEOUT_MS}"
+    "${INACTIVITY_TIMEOUT_MS}" \
+    "${ADAPTER_TIMEOUT_MS}" \
+    "${ADAPTER_TIMEOUT_CAP_MS}" \
+    "${ADAPTER_SERVER_REQUEST_TIMEOUT_MS}"
   echo "DevOps envelope JSON: ${out}"
 }
 
@@ -533,6 +553,8 @@ const estimatedStageUpperBoundMs =
   0;
 const estimatedStageUpperBoundMinutes = estimatedStageUpperBoundMs > 0 ? Math.ceil(estimatedStageUpperBoundMs / 60000) : 0;
 const confidence = suggested?.confidence || payload.confidence || payload.current_plan?.confidence || "unknown";
+const currentRunMode = process.env.AGENT_RUN_MODE || "quick";
+const preserveRunMode = payload.stage === "smoke" && currentRunMode !== "quick" && recommendedMode === "quick";
 console.log("Next recommendation:");
 if (suggested) {
   console.log(
@@ -559,7 +581,15 @@ if (!profile) {
 }
 let scriptName = "campaign:agent";
 const envPrefix = [];
-if (recommendedMode === "full-lite") {
+if (preserveRunMode) {
+  if (currentRunMode === "full-lite") {
+    scriptName = "campaign:agent:full-lite";
+  } else if (currentRunMode === "full") {
+    scriptName = "campaign:agent:full";
+  } else if (currentRunMode === "diagnostic") {
+    scriptName = "campaign:agent:diagnostic";
+  }
+} else if (recommendedMode === "full-lite") {
   scriptName = "campaign:agent:full-lite";
 } else if (recommendedMode === "full") {
   scriptName = "campaign:agent:full";
@@ -567,7 +597,11 @@ if (recommendedMode === "full-lite") {
   scriptName = "campaign:agent:diagnostic";
 }
 if (suggested) {
-  if (recommendedMode === "quick") {
+  if (preserveRunMode) {
+    envPrefix.push(`SMOKE_TIMEOUT_MS=${suggested.timeout_ms}`);
+    envPrefix.push(`SMOKE_TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
+    envPrefix.push(`SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR=${suggested.timeout_auto_max_increase_factor}`);
+  } else if (recommendedMode === "quick") {
     envPrefix.push(`SMOKE_TIMEOUT_MS=${suggested.timeout_ms}`);
     envPrefix.push(`TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
     envPrefix.push(`TIMEOUT_AUTO_MAX_INCREASE_FACTOR=${suggested.timeout_auto_max_increase_factor}`);
@@ -779,10 +813,10 @@ run_staged_flow() {
     REPORT_PREFIX="${smoke_report_prefix}" \
     TIMEOUT_PROFILE="${SMOKE_TIMEOUT_PROFILE}" \
     TIMEOUT_MS="${SMOKE_TIMEOUT_MS}" \
-    TIMEOUT_AUTO_CAP_MS="${TIMEOUT_AUTO_CAP_MS}" \
-    TIMEOUT_AUTO_LOOKBACK_RUNS="${TIMEOUT_AUTO_LOOKBACK_RUNS}" \
+    TIMEOUT_AUTO_CAP_MS="${SMOKE_TIMEOUT_AUTO_CAP_MS}" \
+    TIMEOUT_AUTO_LOOKBACK_RUNS="${SMOKE_TIMEOUT_AUTO_LOOKBACK_RUNS}" \
     TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES="${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" \
-    TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
+    TIMEOUT_AUTO_MAX_INCREASE_FACTOR="${SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
     RETRIES="${SMOKE_RETRIES}" \
     CONCURRENCY="${SMOKE_CONCURRENCY}" \
     PREFLIGHT_MODE="${SMOKE_PREFLIGHT_MODE}" \
@@ -821,7 +855,7 @@ run_staged_flow() {
         "${SMOKE_TIMEOUT_PROFILE}" \
         "${SMOKE_TIMEOUT_MS}" \
         "${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" \
-        "${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
+        "${SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
         "${SMOKE_RETRIES}" \
         "${SMOKE_CONCURRENCY}" \
         "${SMOKE_CAMPAIGN_SAMPLE_COUNT}" \
@@ -1006,10 +1040,6 @@ run_staged_flow() {
   promoted_exit=$?
   set -e
 
-  if [[ -n "${tmp_full_lite_cases}" ]]; then
-    rm -f "${tmp_full_lite_cases}"
-  fi
-
   if [[ "${promoted_exit}" -ne 0 ]]; then
     local promoted_class
     promoted_class="$(node "${SCRIPT_DIR}/staged-campaign-utils.mjs" classify --compare "${promoted_compare}" --defaultReason unknown)"
@@ -1036,10 +1066,16 @@ run_staged_flow() {
         "${plan_max_cases}"
       print_next_envelope_summary "${promoted_report_dir}/next-envelope.json"
     fi
+    if [[ -n "${tmp_full_lite_cases}" ]]; then
+      rm -f "${tmp_full_lite_cases}"
+    fi
     emit_stage_result "${promoted_stage_label}" "failed" "${promoted_reason}" "${promoted_next_action}" "${promoted_source}" "${promoted_report_dir}" "${promoted_compare}"
     return "${promoted_exit}"
   fi
 
+  if [[ -n "${tmp_full_lite_cases}" ]]; then
+    rm -f "${tmp_full_lite_cases}"
+  fi
   emit_stage_result "${promoted_stage_label}" "passed" "none" "none" "stage_gate" "${promoted_report_dir}" "${promoted_compare}"
   return 0
 }
