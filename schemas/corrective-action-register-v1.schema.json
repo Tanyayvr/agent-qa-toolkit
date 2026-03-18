@@ -1,0 +1,97 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "framework",
+    "profile_id",
+    "system_id",
+    "updated_at",
+    "summary",
+    "items"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "corrective_action_register" },
+    "framework": { "enum": ["AGENT_EVIDENCE", "EU_AI_ACT"] },
+    "profile_id": { "type": "string" },
+    "system_id": { "type": "string" },
+    "updated_at": { "type": "number" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_items", "open_items", "resolved_items", "recurring_items", "latest_report_id"],
+      "properties": {
+        "total_items": { "type": "number", "minimum": 0 },
+        "open_items": { "type": "number", "minimum": 0 },
+        "resolved_items": { "type": "number", "minimum": 0 },
+        "recurring_items": { "type": "number", "minimum": 0 },
+        "latest_report_id": { "type": "string" }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "continuity_key",
+          "framework",
+          "gap_id",
+          "source",
+          "severity",
+          "description",
+          "artifact_hrefs",
+          "first_seen_report_id",
+          "first_seen_at",
+          "last_seen_report_id",
+          "last_seen_at",
+          "last_review_decision_status",
+          "occurrence_count",
+          "current_status",
+          "current_owner_name",
+          "latest_disposition",
+          "latest_note",
+          "history"
+        ],
+        "properties": {
+          "continuity_key": { "type": "string", "minLength": 1 },
+          "framework": { "enum": ["AGENT_EVIDENCE", "EU_AI_ACT"] },
+          "gap_id": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "severity": { "enum": ["review", "block"] },
+          "description": { "type": "string", "minLength": 1 },
+          "artifact_hrefs": { "type": "array", "items": { "type": "string" } },
+          "first_seen_report_id": { "type": "string", "minLength": 1 },
+          "first_seen_at": { "type": "number" },
+          "last_seen_report_id": { "type": "string", "minLength": 1 },
+          "last_seen_at": { "type": "number" },
+          "last_review_decision_status": { "type": "string" },
+          "occurrence_count": { "type": "number", "minimum": 1 },
+          "current_status": { "enum": ["open", "mitigating", "accepted", "escalated", "resolved"] },
+          "current_owner_name": { "type": "string" },
+          "latest_disposition": { "enum": ["mitigate", "accept", "escalate", "resolved"] },
+          "latest_note": { "type": "string" },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["report_id", "generated_at", "seen_status", "decision_status", "disposition", "owner_name", "note"],
+              "properties": {
+                "report_id": { "type": "string", "minLength": 1 },
+                "generated_at": { "type": "number" },
+                "seen_status": { "enum": ["present", "resolved"] },
+                "decision_status": { "type": "string" },
+                "disposition": { "enum": ["mitigate", "accept", "escalate", "resolved"] },
+                "owner_name": { "type": "string" },
+                "note": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

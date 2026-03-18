@@ -42,3 +42,10 @@ agent_qa:
     - npm ci
     - npm run release:gate:ci
 ```
+
+The machine-readable CI report now includes explicit product-surface steps:
+
+- `agent_evidence_surface_gate`
+- `eu_ai_act_surface_gate`
+
+That keeps the generic agent product and the EU vertical visible as separate release checks.

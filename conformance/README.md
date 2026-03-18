@@ -30,3 +30,12 @@ Run:
 ```bash
 node scripts/conformance-test.mjs
 ```
+
+EU AI Act export contracts are frozen separately:
+
+- core source fixtures: `conformance/agent-evidence-contract-source/`
+- core normalized golden snapshot: `conformance/golden-agent-evidence-contract.json`
+- core checker: `node scripts/agent-evidence-contract-check.mjs`
+- source fixtures: `conformance/eu-ai-act-contract-source/`
+- normalized golden snapshot: `conformance/golden-eu-ai-act-contract.json`
+- checker: `node scripts/eu-ai-act-contract-check.mjs`

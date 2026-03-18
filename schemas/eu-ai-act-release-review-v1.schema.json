@@ -1,0 +1,111 @@
+{
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "release_decision",
+    "release_gate_summary",
+    "checklist",
+    "reviewer_signoff",
+    "recommended_next_step"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "coverage_href",
+        "annex_iv_href",
+        "report_html_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "release_decision": {
+      "type": "object",
+      "required": ["status", "rationale", "approval_case_ids", "blocking_case_ids", "required_human_actions"],
+      "properties": {
+        "status": { "enum": ["approve", "approve_with_review", "reject"] },
+        "rationale": { "type": "array", "items": { "type": "string" } },
+        "approval_case_ids": { "type": "array", "items": { "type": "string" } },
+        "blocking_case_ids": { "type": "array", "items": { "type": "string" } },
+        "required_human_actions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "release_gate_summary": {
+      "type": "object",
+      "required": [
+        "execution_quality_status",
+        "regressions",
+        "improvements",
+        "cases_requiring_approval",
+        "cases_block_recommended",
+        "compliance_clause_status_counts"
+      ],
+      "properties": {
+        "execution_quality_status": { "enum": ["healthy", "degraded"] },
+        "regressions": { "type": "integer" },
+        "improvements": { "type": "integer" },
+        "cases_requiring_approval": { "type": "integer" },
+        "cases_block_recommended": { "type": "integer" },
+        "compliance_clause_status_counts": { "type": "object" }
+      }
+    },
+    "checklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "status", "summary", "evidence_selectors", "artifact_hrefs"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "status": { "enum": ["pass", "review", "fail"] },
+          "summary": { "type": "string" },
+          "evidence_selectors": { "type": "array", "items": { "type": "string" } },
+          "artifact_hrefs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "reviewer_signoff": {
+      "type": "object",
+      "required": ["required", "recommended_role", "reason"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "recommended_role": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "recommended_next_step": { "type": "string" }
+  }
+}

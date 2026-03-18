@@ -1,0 +1,6 @@
+{
+  "agent_id": "golden-eu-agent",
+  "model": "golden-model-v1",
+  "prompt_version": "prompt-golden-v1",
+  "tools_version": "tools-golden-v1"
+}

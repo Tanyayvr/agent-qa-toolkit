@@ -36,6 +36,7 @@ For the EU-oriented vertical, the bundle also adds dossier-facing exports such a
 - oversight, release, and post-market monitoring outputs
 
 Those scaffolds are then tracked through structured owner completion in the review record.
+Recurring residual gaps can also be linked across review cycles through the corrective-action register when the bundle is tied back to an intake profile.
 
 ---
 

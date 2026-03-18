@@ -1,0 +1,525 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1773861446621,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "release_review_href": "compliance/release-review.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json"
+  },
+  "clauses": [
+    {
+      "clause": "Art_9",
+      "title": "Risk management system",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.risk_summary",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].gate_recommendation",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].security",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.execution_quality.admissibility_kpi",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Operator-owned risk governance still sits outside the evaluator.",
+        "Annex III classification and legal interpretation still require counsel."
+      ],
+      "notes": [
+        "This clause is scored as runtime evidence coverage, not full legal conformity."
+      ]
+    },
+    {
+      "clause": "Art_10",
+      "title": "Data governance and data quality",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment.training_data_provenance",
+          "role": "required",
+          "presence": "missing",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.data_coverage",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response"
+      ],
+      "residual_gaps": [
+        "Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation."
+      ]
+    },
+    {
+      "clause": "Art_11",
+      "title": "Technical documentation",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        },
+        {
+          "selector": "compare-report.json.items[]",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The evaluator emits evidence inputs, not the full Article 11 technical file."
+      ],
+      "notes": [
+        "Use this output as an annex to a broader technical documentation package."
+      ]
+    },
+    {
+      "clause": "Annex_IV",
+      "title": "Technical documentation dossier structure",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[]",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs."
+      ]
+    },
+    {
+      "clause": "Art_12",
+      "title": "Record-keeping and logging",
+      "status": "covered",
+      "selectors": [
+        {
+          "selector": "compare-report.json.items[].trace_integrity",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].artifacts",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response"
+      ]
+    },
+    {
+      "clause": "Art_13",
+      "title": "Transparency and instructions for use",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.cases_requiring_approval",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.environment",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].gate_recommendation",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+        "Human oversight procedures for deployers still require operator-authored narrative."
+      ],
+      "notes": [
+        "This clause is scored as a technical instructions scaffold, not a finished instructions-for-use document."
+      ]
+    },
+    {
+      "clause": "Art_17",
+      "title": "Quality management system",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.cases_requiring_approval",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.cases_block_recommended",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary_by_suite",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities."
+      ],
+      "notes": [
+        "This clause is scored as a technical QMS scaffold, not a complete quality management system."
+      ]
+    },
+    {
+      "clause": "Art_14",
+      "title": "Human oversight",
+      "status": "covered",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.cases_requiring_approval",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].gate_recommendation",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].policy_evaluation",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ]
+    },
+    {
+      "clause": "Art_15",
+      "title": "Accuracy, robustness, and cybersecurity",
+      "status": "covered",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.security",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].risk_level",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].security",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ]
+    },
+    {
+      "clause": "Art_72",
+      "title": "Post-market monitoring",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary_by_suite",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities."
+      ]
+    }
+  ],
+  "manifest_items": [
+    {
+      "manifest_key": "c-approval/baseline/case_response",
+      "rel_path": "assets/raw/case_responses/c-approval/baseline.json",
+      "media_type": "application/json",
+      "bytes": 282,
+      "sha256": "1a973f0617cac294b64612626b3e38c61625f0a04a8805ace1084458ee2a8f49"
+    },
+    {
+      "manifest_key": "c-approval/new/case_response",
+      "rel_path": "assets/raw/case_responses/c-approval/new.json",
+      "media_type": "application/json",
+      "bytes": 341,
+      "sha256": "10f8187c5238e6382e6df917f86c6d995604b75da5db872564d90e8e0d38f2f4"
+    },
+    {
+      "manifest_key": "c-approval/baseline/final_output",
+      "rel_path": "assets/final_output/c-approval/baseline.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    },
+    {
+      "manifest_key": "c-approval/new/final_output",
+      "rel_path": "assets/final_output/c-approval/new.json",
+      "media_type": "application/json",
+      "bytes": 79,
+      "sha256": "f2bf3fe080e98d3e2e2988576eb6470523dada052c4119ff967eb48fb4bb3e5b"
+    },
+    {
+      "manifest_key": "c-block/baseline/case_response",
+      "rel_path": "assets/raw/case_responses/c-block/baseline.json",
+      "media_type": "application/json",
+      "bytes": 279,
+      "sha256": "1c1d8d25ab79242bdda0f3c74ce5be87531ab3515b28354f7975c332b8fe4c08"
+    },
+    {
+      "manifest_key": "c-block/new/case_response",
+      "rel_path": "assets/raw/case_responses/c-block/new.json",
+      "media_type": "application/json",
+      "bytes": 763,
+      "sha256": "40e639e6ae88bb2df9498c5831fb0034ea634300511e03c2aa525aab9c9b51b3"
+    },
+    {
+      "manifest_key": "c-block/baseline/final_output",
+      "rel_path": "assets/final_output/c-block/baseline.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    },
+    {
+      "manifest_key": "c-block/new/final_output",
+      "rel_path": "assets/final_output/c-block/new.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    }
+  ]
+}

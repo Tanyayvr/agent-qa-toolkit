@@ -1,0 +1,252 @@
+{
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "summary",
+    "monitoring_window",
+    "current_run",
+    "run_history",
+    "monitored_cases",
+    "residual_gaps",
+    "governance_review_attachment"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "coverage_href",
+        "annex_iv_href",
+        "report_html_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "monitoring_status",
+        "trend_ingest_enabled",
+        "scope",
+        "current_run_included_in_history",
+        "runs_in_window",
+        "prior_runs_in_window",
+        "monitored_case_count",
+        "drift_detected",
+        "drift_signals"
+      ],
+      "properties": {
+        "monitoring_status": {
+          "enum": ["history_current", "history_stale", "no_matching_history", "trend_unavailable"]
+        },
+        "trend_ingest_enabled": { "type": "boolean" },
+        "scope": { "enum": ["agent_model", "unscoped"] },
+        "current_run_included_in_history": { "type": "boolean" },
+        "runs_in_window": { "type": "integer" },
+        "prior_runs_in_window": { "type": "integer" },
+        "monitored_case_count": { "type": "integer" },
+        "drift_detected": { "type": "boolean" },
+        "drift_signals": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "monitoring_window": {
+      "type": "object",
+      "required": ["last_runs"],
+      "properties": {
+        "last_runs": { "type": "integer" },
+        "agent_id": { "type": "string" },
+        "model": { "type": "string" },
+        "earliest_generated_at": { "type": "integer" },
+        "latest_generated_at": { "type": "integer" }
+      }
+    },
+    "current_run": { "$ref": "#/$defs/runHistoryEntry" },
+    "previous_run": { "$ref": "#/$defs/runHistoryEntry" },
+    "change_over_time": {
+      "type": "object",
+      "required": [
+        "pass_rate_delta_vs_previous_run",
+        "fail_count_delta_vs_previous_run",
+        "approval_cases_delta_vs_previous_run",
+        "blocking_cases_delta_vs_previous_run",
+        "high_signal_delta_vs_previous_run",
+        "critical_signal_delta_vs_previous_run"
+      ],
+      "properties": {
+        "pass_rate_delta_vs_previous_run": { "type": "number" },
+        "fail_count_delta_vs_previous_run": { "type": "integer" },
+        "approval_cases_delta_vs_previous_run": { "type": "integer" },
+        "blocking_cases_delta_vs_previous_run": { "type": "integer" },
+        "high_signal_delta_vs_previous_run": { "type": "integer" },
+        "critical_signal_delta_vs_previous_run": { "type": "integer" }
+      }
+    },
+    "run_history": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/runHistoryEntry" }
+    },
+    "monitored_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "title",
+          "flagged_because",
+          "current_state",
+          "history_summary",
+          "timeline"
+        ],
+        "properties": {
+          "case_id": { "type": "string" },
+          "title": { "type": "string" },
+          "suite": { "type": "string" },
+          "flagged_because": { "type": "array", "items": { "type": "string" } },
+          "current_state": {
+            "type": "object",
+            "required": ["new_pass", "risk_level", "gate_recommendation", "new_signal_count"],
+            "properties": {
+              "new_pass": { "type": "boolean" },
+              "risk_level": { "type": "string" },
+              "gate_recommendation": { "type": "string" },
+              "new_signal_count": { "type": "integer" }
+            }
+          },
+          "history_summary": {
+            "type": "object",
+            "required": [
+              "runs_observed",
+              "pass_count",
+              "fail_count",
+              "pass_rate",
+              "approval_runs",
+              "blocking_runs",
+              "high_risk_runs",
+              "high_or_critical_signal_runs"
+            ],
+            "properties": {
+              "runs_observed": { "type": "integer" },
+              "pass_count": { "type": "integer" },
+              "fail_count": { "type": "integer" },
+              "pass_rate": { "type": "number" },
+              "approval_runs": { "type": "integer" },
+              "blocking_runs": { "type": "integer" },
+              "high_risk_runs": { "type": "integer" },
+              "high_or_critical_signal_runs": { "type": "integer" }
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "report_id",
+                "generated_at",
+                "new_pass",
+                "risk_level",
+                "gate_recommendation",
+                "sec_high",
+                "sec_critical"
+              ],
+              "properties": {
+                "report_id": { "type": "string" },
+                "generated_at": { "type": "integer" },
+                "new_pass": { "type": ["boolean", "null"] },
+                "risk_level": { "type": "string" },
+                "gate_recommendation": { "type": "string" },
+                "sec_high": { "type": "integer" },
+                "sec_critical": { "type": "integer" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "residual_gaps": { "type": "array", "items": { "type": "string" } },
+    "governance_review_attachment": {
+      "type": "object",
+      "required": ["recommended_artifacts", "recurring_review_questions"],
+      "properties": {
+        "recommended_artifacts": { "type": "array", "items": { "type": "string" } },
+        "recurring_review_questions": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "runHistoryEntry": {
+      "type": "object",
+      "required": [
+        "report_id",
+        "generated_at",
+        "executed_cases",
+        "pass_count",
+        "fail_count",
+        "skipped_count",
+        "pass_rate",
+        "regressions",
+        "improvements",
+        "cases_requiring_approval",
+        "cases_block_recommended",
+        "high_risk_cases",
+        "signal_totals"
+      ],
+      "properties": {
+        "report_id": { "type": "string" },
+        "generated_at": { "type": "integer" },
+        "model": { "type": "string" },
+        "executed_cases": { "type": "integer" },
+        "pass_count": { "type": "integer" },
+        "fail_count": { "type": "integer" },
+        "skipped_count": { "type": "integer" },
+        "pass_rate": { "type": "number" },
+        "regressions": { "type": "integer" },
+        "improvements": { "type": "integer" },
+        "cases_requiring_approval": { "type": "integer" },
+        "cases_block_recommended": { "type": "integer" },
+        "high_risk_cases": { "type": "integer" },
+        "signal_totals": {
+          "type": "object",
+          "required": ["low", "medium", "high", "critical"],
+          "properties": {
+            "low": { "type": "integer" },
+            "medium": { "type": "integer" },
+            "high": { "type": "integer" },
+            "critical": { "type": "integer" }
+          }
+        }
+      }
+    }
+  }
+}

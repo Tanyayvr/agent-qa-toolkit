@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1773861446621,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "release_review_href": "compliance/release-review.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json"
+  },
+  "document_scope": {
+    "article": "Art_72",
+    "generated_scope": "technical_monitoring_plan_scaffold",
+    "operator_inputs_required": [
+      "named monitoring owner and backup owner",
+      "monitoring cadence and SLA by deployment context",
+      "incident, customer, and authority notification workflow",
+      "retention period and archive location for monitoring artifacts",
+      "corrective-action and rollback authority for repeated drift or blocking findings"
+    ]
+  },
+  "monitored_system": {
+    "agent_id": "golden-eu-agent",
+    "model": "golden-model-v1",
+    "scope": "agent_model",
+    "monitoring_status": "history_current",
+    "current_run_included_in_history": true,
+    "runs_in_window": 2,
+    "prior_runs_in_window": 1,
+    "monitored_case_count": 2
+  },
+  "monitoring_objectives": [
+    "Detect regressions, approval paths, and blocking findings after release or during release readiness review.",
+    "Track recurring drift, risk concentration, and signal accumulation across monitored runs.",
+    "Preserve a portable evidence path from current release data to recurring governance review.",
+    "Escalate material findings to release, security, compliance, or legal owners before relying on the system in scope."
+  ],
+  "data_sources": [
+    {
+      "id": "current_release_evidence",
+      "description": "Current report bundle used as the baseline evidence source for release or monitoring review.",
+      "cadence": "per_release",
+      "artifact_hrefs": [
+        "compare-report.json",
+        "report.html",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "id": "longitudinal_monitoring",
+      "description": "Trend and watchlist evidence used to compare the current run against prior monitored runs.",
+      "cadence": "recurring",
+      "artifact_hrefs": [
+        "compliance/post-market-monitoring.json"
+      ]
+    },
+    {
+      "id": "governance_decisions",
+      "description": "Oversight queue and release review used to route approval, blocking, and reviewer follow-up decisions.",
+      "cadence": "per_release",
+      "artifact_hrefs": [
+        "compliance/human-oversight-summary.json",
+        "compliance/release-review.json"
+      ]
+    },
+    {
+      "id": "operator_reference_scaffolds",
+      "description": "Technical scaffolds that keep operator instructions and open risks aligned with monitoring review.",
+      "cadence": "event_driven",
+      "artifact_hrefs": [
+        "compliance/article-13-instructions.json",
+        "compliance/article-9-risk-register.json",
+        "compliance/eu-ai-act-annex-iv.json"
+      ]
+    }
+  ],
+  "review_cadence": [
+    {
+      "trigger": "Release candidate or meaningful model/prompt/tool/workflow change",
+      "recommended_cadence": "Per release candidate before promotion",
+      "rationale": "Material changes should refresh the monitoring baseline before the system is promoted."
+    },
+    {
+      "trigger": "Recurring governed operation",
+      "recommended_cadence": "Weekly or per formal governance checkpoint",
+      "rationale": "Regular review keeps drift, approval pressure, and unresolved gaps visible over time."
+    },
+    {
+      "trigger": "Drift, blocking findings, or serious incident signals",
+      "recommended_cadence": "Same business day escalation",
+      "rationale": "Material post-market signals require a documented response instead of waiting for the next routine review."
+    },
+    {
+      "trigger": "New deployment context, market, or regulatory mapping change",
+      "recommended_cadence": "Before the expanded deployment goes live",
+      "rationale": "Monitoring scope and thresholds can change when the operating context changes."
+    }
+  ],
+  "escalation_rules": [
+    {
+      "id": "execution-quality-degraded",
+      "condition": "Execution quality is degraded in the current evidence bundle.",
+      "recommended_response": "block",
+      "required_roles": [
+        "release owner",
+        "platform engineer"
+      ],
+      "artifact_hrefs": [
+        "compare-report.json",
+        "compliance/release-review.json"
+      ]
+    },
+    {
+      "id": "blocking-case-present",
+      "condition": "One or more cases recommend blocking release or operation.",
+      "recommended_response": "block",
+      "required_roles": [
+        "release owner",
+        "security or compliance reviewer"
+      ],
+      "artifact_hrefs": [
+        "compliance/release-review.json",
+        "compliance/article-9-risk-register.json"
+      ]
+    },
+    {
+      "id": "approval-review-queue",
+      "condition": "Approval-required cases remain open for the current run.",
+      "recommended_response": "review",
+      "required_roles": [
+        "named human reviewer",
+        "system owner"
+      ],
+      "artifact_hrefs": [
+        "compliance/human-oversight-summary.json",
+        "compliance/article-13-instructions.json"
+      ]
+    },
+    {
+      "id": "monitoring-drift",
+      "condition": "Current monitoring evidence detected drift versus the prior run window.",
+      "recommended_response": "review",
+      "required_roles": [
+        "system owner",
+        "compliance or governance owner"
+      ],
+      "artifact_hrefs": [
+        "compliance/post-market-monitoring.json",
+        "compliance/release-review.json"
+      ]
+    },
+    {
+      "id": "history-not-current",
+      "condition": "Monitoring history currently includes the latest run; keep this continuity on future runs.",
+      "recommended_response": "monitor",
+      "required_roles": [
+        "platform owner"
+      ],
+      "artifact_hrefs": [
+        "compliance/post-market-monitoring.json"
+      ]
+    }
+  ],
+  "corrective_action_loop": [
+    "Record the triggering finding and the affected artifact in the review package.",
+    "Assign an owner, disposition, and due date for mitigation or acceptance.",
+    "Apply remediation, rerun the relevant cases or release workflow, and replace stale evidence.",
+    "Escalate to legal or compliance review when the finding changes deployment assumptions, market scope, or residual-risk acceptance."
+  ],
+  "current_baseline": {
+    "execution_quality_status": "healthy",
+    "release_decision_status": "reject",
+    "drift_detected": true,
+    "drift_signals": [
+      "Approval-required cases increased from 0 to 1.",
+      "Blocking cases increased from 0 to 1.",
+      "High/critical signal volume increased by 2.",
+      "Critical signal count increased by 1."
+    ],
+    "approval_case_count": 1,
+    "blocking_case_count": 1,
+    "previous_run_report_id": "eu-ai-act-demo-seed"
+  },
+  "operator_inputs_required": [
+    "named monitoring owner and backup owner",
+    "monitoring cadence and SLA by deployment context",
+    "incident, customer, and authority notification workflow",
+    "retention period and archive location for monitoring artifacts",
+    "corrective-action and rollback authority for repeated drift or blocking findings"
+  ],
+  "residual_gaps": [
+    "Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.",
+    "Operator-authored instructions for use are still required before deployer handoff.",
+    "This export summarizes technical evidence; it does not replace deployer-facing operating instructions.",
+    "Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+    "Human oversight procedures for deployers still require operator-authored narrative.",
+    "The evaluator emits evidence inputs, not the full Article 11 technical file.",
+    "The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.",
+    "Art_10: missing required evidence compare-report.json.environment.training_data_provenance",
+    "Art_9: Operator-owned risk governance still sits outside the evaluator.",
+    "Art_9: Annex III classification and legal interpretation still require counsel.",
+    "Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.",
+    "Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.",
+    "Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.",
+    "Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+    "Art_13: Human oversight procedures for deployers still require operator-authored narrative.",
+    "Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.",
+    "Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.",
+    "Operator-owned risk governance still sits outside the evaluator.",
+    "Annex III classification and legal interpretation still require counsel.",
+    "This register is generated from runtime evidence and still requires operator-owned likelihood, impact, and acceptance rationale.",
+    "This plan is a technical scaffold and still requires operator-owned monitoring ownership, cadence, retention, and authority-reporting decisions."
+  ]
+}

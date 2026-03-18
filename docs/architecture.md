@@ -83,6 +83,7 @@ This layer is deliberate:
 - it verifies that a live adapter can satisfy the required `/run-case` telemetry depth on a reviewed canary case
 - it verifies that baseline/new runner directories are structurally comparable before packaging
 - it scaffolds a structured human review record after packaging
+- it persists a recurring corrective-action register after successful review checks
 - it validates that the handoff package no longer contains placeholder decisions or open machine gaps
 - it makes human-owned fields explicit instead of hiding them in email or notes
 
@@ -117,6 +118,7 @@ For the exact split between intentional manual work, current operational tech de
    creates `review/review-decision.json`, `review/handoff-note.md`, and optional `review/intake/*` snapshots.
    `npm run review:check -- --reportDir <dir>`
    validates the schema plus the human-owned readiness rules: no `pending` decision, no `TODO` placeholders, no undispositioned machine gaps, and for EU bundles no incomplete owner-completion loop for Article 13, Article 17, or Article 72 scaffolds.
+   When an intake profile is attached, the same check also syncs `ops/intake/<profile>/corrective-action-register.json` and refreshes `review/intake/corrective-action-register.json`, so repeated machine gaps keep continuity across runs.
 7) **Group bundle (`P1`)** can aggregate multiple report directories under one incident:
    `npm run bundle:group -- --report a=<reportDirA> --report b=<reportDirB> ...`
    producing `index.html`, `group-index.json`, and `group-manifest.json` with checksum verification via

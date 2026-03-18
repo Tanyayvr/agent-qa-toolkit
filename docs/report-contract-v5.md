@@ -138,6 +138,8 @@ Top-level shape:
   "summary_by_suite": { "correctness": { ... }, "robustness": { ... } },
   "quality_flags": { ... },
   "compliance_mapping": [ ... ],
+  "compliance_coverage": [ ... ],
+  "compliance_exports": { "eu_ai_act": { ... } },
   "items": [ ... ]
 }
 
@@ -163,6 +165,25 @@ Execution-quality admissibility block (recommended):
   - `reconstruction_minutes_saved_total: number`
   - `reconstruction_minutes_saved_per_block: number`
   - `model` (weights/factors used for the calculation, persisted for auditability)
+
+Compliance coverage block (optional, recommended for evidence-engine profiles):
+- `compliance_coverage[].status: "covered" | "partial" | "missing"`
+- `compliance_coverage[].status_cap` when a profile intentionally refuses to overclaim
+- `compliance_coverage[].required_evidence*` and `supporting_evidence*` arrays for machine-readable clause coverage
+- `compliance_coverage[].residual_gaps[]` and `notes[]` for explicit scope boundaries
+
+Compliance export block (optional):
+- `compliance_exports.eu_ai_act.coverage_href`
+- `compliance_exports.eu_ai_act.annex_iv_href`
+- `compliance_exports.eu_ai_act.report_html_href`
+- `compliance_exports.eu_ai_act.evidence_index_href`
+- `compliance_exports.eu_ai_act.article_13_instructions_href`
+- `compliance_exports.eu_ai_act.article_9_risk_register_href`
+- `compliance_exports.eu_ai_act.article_17_qms_lite_href`
+- `compliance_exports.eu_ai_act.article_72_monitoring_plan_href`
+- `compliance_exports.eu_ai_act.human_oversight_summary_href`
+- `compliance_exports.eu_ai_act.release_review_href`
+- `compliance_exports.eu_ai_act.post_market_monitoring_href`
 
 6. Items (MUST)
 Each item includes:

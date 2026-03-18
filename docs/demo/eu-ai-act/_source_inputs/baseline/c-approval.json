@@ -1,0 +1,17 @@
+{
+  "case_id": "c-approval",
+  "version": "baseline",
+  "final_output": {
+    "content_type": "text",
+    "content": "ok"
+  },
+  "events": [
+    {
+      "type": "final_output",
+      "ts": 1,
+      "content_type": "text",
+      "content": "ok"
+    }
+  ],
+  "proposed_actions": []
+}

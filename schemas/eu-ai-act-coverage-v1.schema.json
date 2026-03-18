@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "required": ["schema_version", "framework", "report_id", "generated_at", "bundle_artifacts", "coverage"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "coverage_href",
+        "annex_iv_href",
+        "report_html_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "framework",
+          "clause",
+          "status",
+          "required_evidence",
+          "required_evidence_present",
+          "required_evidence_missing",
+          "supporting_evidence",
+          "supporting_evidence_present",
+          "supporting_evidence_missing"
+        ],
+        "properties": {
+          "framework": { "type": "string" },
+          "clause": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "enum": ["covered", "partial", "missing"] },
+          "status_cap": { "enum": ["covered", "partial", "missing"] },
+          "required_evidence": { "type": "array", "items": { "type": "string" } },
+          "required_evidence_present": { "type": "array", "items": { "type": "string" } },
+          "required_evidence_missing": { "type": "array", "items": { "type": "string" } },
+          "supporting_evidence": { "type": "array", "items": { "type": "string" } },
+          "supporting_evidence_present": { "type": "array", "items": { "type": "string" } },
+          "supporting_evidence_missing": { "type": "array", "items": { "type": "string" } },
+          "residual_gaps": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

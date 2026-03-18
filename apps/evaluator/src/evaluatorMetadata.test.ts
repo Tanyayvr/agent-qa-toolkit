@@ -3,8 +3,11 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  loadComplianceProfile,
   loadComplianceMapping,
   loadEnvironmentContext,
+  resolveComplianceCoverageRequirements,
+  resolveComplianceMapping,
   resolveTransferClass,
 } from "./evaluatorMetadata";
 
@@ -85,6 +88,51 @@ describe("evaluatorMetadata", () => {
     expect(fromObject).toEqual([{ framework: "NIST", clause: "GV.1" }]);
   });
 
+  it("loads expanded compliance profiles with coverage requirements", async () => {
+    const profileAbs = path.join(root, "compliance-profile.json");
+    await writeFile(
+      profileAbs,
+      JSON.stringify({
+        compliance_mapping: [{ framework: "EU_AI_ACT", clause: "Art_9", title: "Risk management" }],
+        coverage_requirements: [
+          {
+            framework: "EU_AI_ACT",
+            clause: "Art_11",
+            title: "Technical documentation",
+            required_evidence: ["compare-report.json.summary"],
+            supporting_evidence: ["artifacts/manifest.json"],
+            residual_gaps: ["Operator-owned dossier still required."],
+            notes: ["Evaluator provides only the runtime evidence slice."],
+            status_cap: "partial",
+          },
+        ],
+      }),
+      "utf-8"
+    );
+
+    const profile = await loadComplianceProfile({
+      projectRoot: root,
+      complianceFile: "compliance-profile.json",
+      maxMetaBytes: 2_000,
+    });
+
+    expect(resolveComplianceMapping(profile)).toEqual([
+      { framework: "EU_AI_ACT", clause: "Art_9", title: "Risk management" },
+    ]);
+    expect(resolveComplianceCoverageRequirements(profile)).toEqual([
+      {
+        framework: "EU_AI_ACT",
+        clause: "Art_11",
+        title: "Technical documentation",
+        required_evidence: ["compare-report.json.summary"],
+        supporting_evidence: ["artifacts/manifest.json"],
+        residual_gaps: ["Operator-owned dossier still required."],
+        notes: ["Evaluator provides only the runtime evidence slice."],
+        status_cap: "partial",
+      },
+    ]);
+  });
+
   it("validates transfer class values", () => {
     expect(resolveTransferClass(undefined)).toBe("internal_only");
     expect(resolveTransferClass("internal_only")).toBe("internal_only");
@@ -92,4 +140,3 @@ describe("evaluatorMetadata", () => {
     expect(resolveTransferClass("invalid")).toBeNull();
   });
 });
-

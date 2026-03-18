@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Technical operating model for AI evidence | EU AI Evidence Builder</title>
+  <meta name="description" content="Professional technical view of the workflow: inputs, artifacts, readiness, re-evaluation triggers, and support scope." />
+  
+  <link rel="canonical" href="https://tanyayvr.github.io/agent-qa-toolkit/en/technical/" />
+  <link rel="alternate" hreflang="en" href="https://tanyayvr.github.io/agent-qa-toolkit/en/technical/" />
+<link rel="alternate" hreflang="de" href="https://tanyayvr.github.io/agent-qa-toolkit/de/technical/" />
+<link rel="alternate" hreflang="fr" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/technical/" />
+  <link rel="alternate" hreflang="x-default" href="https://tanyayvr.github.io/agent-qa-toolkit/en/" />
+  <link rel="stylesheet" href="../../site-assets/site.css" />
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="site-shell">
+    
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="../">
+          <span class="brand-mark">EU</span>
+          <span class="brand-copy">
+            <span class="brand-title">EU AI Evidence</span>
+            <span class="brand-subtitle">Documentation builder for Agent QA Toolkit</span>
+          </span>
+        </a>
+        <nav class="header-nav" aria-label="Primary">
+          <a href="../how-it-works/">How it works</a>
+          <a href="./">Technical</a>
+          <a href="../templates/">Templates</a>
+          <a href="../pricing/">Pricing</a>
+          <a href="../docs/">Docs</a>
+          <a class="button" href="../builder/" data-track-event="header_start_free">Start Free</a>
+          <label class="sr-only" for="locale-switcher">Language</label>
+          <select id="locale-switcher" class="locale-switch" data-locale-switcher>
+            <option value="./" selected>English</option><option value="../../de/technical/" >Deutsch</option><option value="../../fr/technical/" >Français</option>
+          </select>
+        </nav>
+      </div>
+    </header>
+  
+    <main id="main">
+      
+    <section class="section">
+      <div class="container split-grid">
+        <div class="card fade-up">
+          <p class="eyebrow">For technical teams</p>
+          <h1>Professional operating model for evidence-backed AI agent reviews</h1>
+          <p class="lead">This page is for platform leads, release engineers, product security, and compliance engineering teams that need the real workflow, exact inputs, and actual bundle outputs.</p>
+          <div class="button-row section-tight">
+            <a class="button" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Open live evidence</a>
+            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/evidence-operations-model.md" target="_blank" rel="noreferrer">Open operational model</a>
+            <a class="button-soft" href="../docs/">Open OSS docs</a>
+          </div>
+        </div>
+        <aside class="hero-card fade-up">
+          <p class="eyebrow">Time to first evidence</p>
+          <div class="metric-grid">
+            
+              <div class="metric">
+                <span>Self-serve first setup</span>
+                <strong>3-4 weeks</strong>
+              </div>
+              <div class="metric">
+                <span>Launch Pack first verified package</span>
+                <strong>5 business days</strong>
+              </div>
+              <div class="metric">
+                <span>Recurring release after onboarding</span>
+                <strong>1-2 days</strong>
+              </div>
+              <div class="metric">
+                <span>Monthly support scope</span>
+                <strong>Supported agents only</strong>
+              </div>
+          </div>
+          <p class="muted">Planning estimates, not delivery guarantees.</p>
+        </aside>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <div class="card fade-up">
+          <p class="eyebrow">Workflow</p>
+          <h2 class="section-title">What actually happens</h2>
+          <div class="timeline section-tight">
+            
+              <article class="timeline-card">
+                <span class="timeline-step">1</span>
+                <h3>Scope freeze</h3>
+                <p class="muted">Capture the system boundary, deployment context, owners, and the specific change under review in `system-scope.json`.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">2</span>
+                <h3>Quality contract</h3>
+                <p class="muted">Make pass, require_approval, and block rules explicit in `quality-contract.json` before any evidence is collected.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">3</span>
+                <h3>Case suite</h3>
+                <p class="muted">Build a quality-grade `cases.json` that reflects critical paths, negative cases, and risky actions.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">4</span>
+                <h3>Adapter depth</h3>
+                <p class="muted">Make the agent callable through `/run-case` with enough telemetry for the chosen quality bar.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">5</span>
+                <h3>Comparable runs</h3>
+                <p class="muted">Produce baseline and new run inputs that are actually comparable, not just mechanically different.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">6</span>
+                <h3>Package and verify</h3>
+                <p class="muted">Generate `compare-report.json`, `report.html`, `manifest.json`, and a portable `_source_inputs/` snapshot.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">7</span>
+                <h3>EU dossier</h3>
+                <p class="muted">If needed, add clause coverage, Annex IV structure, Article 13 instructions scaffold, Article 9 risk register scaffold, Article 17 QMS-lite scaffold, Article 72 monitoring-plan scaffold, oversight outputs, and post-market monitoring exports.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">8</span>
+                <h3>Human review</h3>
+                <p class="muted">Scaffold `review/review-decision.json` and `review/handoff-note.md`, then complete narrative, residual risk notes, release decision, legal escalation, and sync the recurring corrective-action register. For EU bundles, also complete the Article 13/17/72 owner-completion loop.</p>
+              </article>
+          </div>
+        </div>
+        <div class="proof-card fade-up">
+          <p class="eyebrow">Automation boundary</p>
+          <h3>Prepared inputs -> verified technical evidence bundle</h3>
+          <p class="muted">The toolkit is strongest on `prepared inputs -&gt; verified technical evidence bundle`. Intake validation is automated, but scope judgment, quality policy, adapter depth, and final signoff remain human-owned.</p>
+          <div class="code-snippet"><code>{
+"human_owned": ["scope", "quality_contract", "adapter_depth", "final_signoff"],
+"automated": ["runs", "package", "verify", "review_scaffold", "review_check", "eu_exports"],
+"handoff": ["report.html", "compare-report.json", "manifest.json", "review/review-decision.json"]
+}</code></div>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <div class="card fade-up">
+          <p class="eyebrow">Intake</p>
+          <h2 class="section-title">Structured intake layer</h2>
+          <p class="muted">Automate the upstream contract before case authoring and adapter work starts.</p>
+          <div class="code-snippet"><code>npm run intake:init -- --profile &lt;name&gt; [--euDossierRequired 1]
+npm run intake:validate -- --profile &lt;name&gt;
+npm run intake:scaffold:cases -- --profile &lt;name&gt;
+npm run intake:check:cases -- --profile &lt;name&gt; --cases &lt;cases.json&gt;
+npm run intake:check:adapter -- --profile &lt;name&gt; --cases &lt;cases.json&gt; --baseUrl &lt;adapter&gt;
+npm run intake:check:runs -- --profile &lt;name&gt; --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt;</code></div>
+          <ul class="check-list section-tight">
+            <li>`system-scope.json` for scope, owners, deployment context, and evidence preferences</li><li>`quality-contract.json` for critical tasks, prohibited behaviors, risky actions, and case targets</li><li>`cases-coverage.json` for persistent intake-to-case coverage after the reviewed suite is checked</li><li>`adapter-capability.json` for the proven telemetry depth and evidence limits of the live adapter</li><li>`run-fingerprint.json` for structural comparability, environment clues, and missing-signal visibility before packaging</li><li>`corrective-action-register.json` for recurring gap continuity across review cycles</li><li>draft `cases/&lt;profile&gt;.intake-scaffold.json` as a human-reviewed starting point</li>
+          </ul>
+        </div>
+        <div class="proof-card fade-up">
+          <p class="eyebrow">Human-owned</p>
+          <h2 class="section-title">What still stays human-owned</h2>
+          <table class="section-table">
+            <thead>
+              <tr><th>Area</th><th>Why it stays manual</th></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>Intended use</td>
+                  <td>Owner-defined system purpose and boundary.</td>
+                </tr>
+                <tr>
+                  <td>Business harms</td>
+                  <td>Impact and residual-risk framing stay with the operator.</td>
+                </tr>
+                <tr>
+                  <td>Approval/block policy</td>
+                  <td>The toolkit cannot choose governance thresholds for the team.</td>
+                </tr>
+                <tr>
+                  <td>Final narrative and signoff</td>
+                  <td>Release, compliance, and legal approval remain human-owned.</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <div class="card fade-up">
+          <p class="eyebrow">Stage deep dive</p>
+          <h2 class="section-title">1. cases.json</h2>
+          <p class="lead">This is usually the first real bottleneck. A case suite is not a prompt list. It is the machine-readable expression of what the agent must do and how the team will know it did it correctly.</p>
+          <div class="timeline section-tight">
+            <article class="timeline-card">
+              <h3>Goal</h3>
+              <p class="muted">Formalize expected agent behavior and define how correctness, escalation, and failure will be checked later in the bundle.</p>
+            </article>
+            <article class="timeline-card">
+              <h3>Minimum input</h3>
+              <p class="muted">A JSON array of case objects. `id` is required. Most quality-grade cases also include `title`, `input.user`, optional `input.context`, `expected`, and `metadata`.</p>
+            </article>
+            <article class="timeline-card">
+              <h3>How to prepare it</h3>
+              <p class="muted">Build representative operational scenarios: normal, boundary, risky, refusal, tool-using, ambiguous, retry-sensitive, and handoff cases. Do not copy the demo suite and treat it as production-ready.</p>
+            </article>
+          </div>
+          <div class="code-snippet section-tight"><code>[
+  {
+    "id": "ticket_update_001",
+    "title": "Update ticket after retrieval",
+    "input": { "user": "Resolve ticket T-2002. Return JSON only." },
+    "expected": {
+      "action_required": ["get_ticket", "update_ticket_status"],
+      "tool_sequence": ["get_ticket", "update_ticket_status"],
+      "json_schema": { "...": "..." }
+    }
+  }
+]</code></div>
+        </div>
+        <div class="proof-card fade-up">
+          <p class="eyebrow">What quality looks like</p>
+          <h3>A strong case does not leave `expected` empty. Quality suites should use strong expectation signals, not only generic prompts.</h3>
+          <p class="eyebrow section-tight">Strong expectation signals</p>
+          <ul class="check-list">
+            <li>`json_schema` for structure-sensitive outputs</li><li>`tool_required` and `tool_sequence` for tool-use correctness</li><li>`must_include` and `must_not_include` for explicit lexical constraints</li><li>`action_required` and `evidence_required_for_actions` for risky actions</li><li>`semantic.*` for concept-level text evaluation</li><li>`assumption_state` for decision legibility</li>
+          </ul>
+          <p class="eyebrow section-tight">Where automation stops</p>
+          <p class="muted">The toolkit can validate file shape and some quality properties. It cannot decide which business risks, workflows, and escalation paths matter for this specific agent.</p>
+          <p class="eyebrow section-tight">Reference implementation and examples</p>
+          <ul class="artifact-list">
+            
+      <li><a href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/apps/runner/src/runnerTypes.ts" target="_blank" rel="noreferrer">Contract type</a><span class="muted"> · <code>apps/runner/src/runnerTypes.ts</code></span></li>
+      <li><a href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/apps/runner/src/runnerCli.ts" target="_blank" rel="noreferrer">Parser</a><span class="muted"> · <code>apps/runner/src/runnerCli.ts</code></span></li>
+      <li><a href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/scripts/evidence-intake-check-cases.mjs" target="_blank" rel="noreferrer">Intake completeness gate</a><span class="muted"> · <code>scripts/evidence-intake-check-cases.mjs</code></span></li>
+      <li><a href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/scripts/validate-cases-quality.mjs" target="_blank" rel="noreferrer">Quality validator</a><span class="muted"> · <code>scripts/validate-cases-quality.mjs</code></span></li>
+      <li><a href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/cases/cases.json" target="_blank" rel="noreferrer">Strong reference suite</a><span class="muted"> · <code>cases/cases.json</code></span></li>
+      <li><a href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/cases/agents/cli-agent.json" target="_blank" rel="noreferrer">Weak smoke / infra example</a><span class="muted"> · <code>cases/agents/cli-agent.json</code></span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <div class="table-card fade-up">
+          <p class="eyebrow">Metrics</p>
+          <h3>Recommended case-suite metrics</h3>
+          <p class="muted">Recommended targets for quality campaigns. These are operating targets, not all hard-enforced by code today.</p>
+          <table class="section-table section-tight">
+            <thead>
+              <tr><th>Metric</th><th>Meaning</th><th>Target</th></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>Specificity</td>
+                  <td>% of cases with non-empty, meaningful `expected` blocks</td>
+                  <td>Target: &gt;= 70%</td>
+                </tr>
+                <tr>
+                  <td>Negative coverage</td>
+                  <td>% of cases that should fail, escalate, or block</td>
+                  <td>Target: &gt;= 30%</td>
+                </tr>
+                <tr>
+                  <td>Weak expected rate</td>
+                  <td>Cases that only carry weak or empty expectations</td>
+                  <td>Stay below validator threshold, commonly &lt;= 20%</td>
+                </tr>
+                <tr>
+                  <td>Semantic depth</td>
+                  <td>Text cases using `expected.semantic.*`, not only lexical checks</td>
+                  <td>Increase over time for mature suites</td>
+                </tr>
+                <tr>
+                  <td>Minimum count</td>
+                  <td>Meaningful cases before pass_rate becomes management-useful</td>
+                  <td>Start at &gt;= 20</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card fade-up">
+          <p class="eyebrow">Ready gate</p>
+          <ul class="check-list section-tight">
+            <li>The file parses cleanly and ids are stable and unique.</li><li>Critical scenarios from the quality contract are covered.</li><li>Negative and risky cases exist, not only happy path.</li><li>The intake completeness gate passes against the reviewed suite and writes `cases-coverage.json`.</li><li>The quality validator passes under the chosen profile.</li><li>The suite reflects the real tool and risk perimeter of the agent.</li>
+          </ul>
+          <p class="eyebrow section-tight">Common failure modes</p>
+          <ul class="check-list">
+            <li>Critical cases have empty `expected` blocks, so the bundle looks green while proving very little.</li><li>The suite is copied from demo or smoke examples and does not reflect real agent behavior.</li><li>No negative cases exist, so unsafe or refusal behavior is never exercised.</li><li>The suite is never updated after tool, model, or prompt changes, so drift goes unseen.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  
+    <section class="section section-tight">
+      <div class="container table-card fade-up">
+        <p class="eyebrow">Artifacts</p>
+        <h2 class="section-title">Artifacts and ready gates</h2>
+        <p class="muted">These are the artifacts technical teams should expect to exist if the workflow is healthy.</p>
+        <table class="section-table">
+          <thead>
+            <tr><th>Stage</th><th>Artifact</th><th>Created by</th><th>Ready gate</th></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Stage 0</td>
+                <td><code>ops/intake/&lt;profile&gt;/system-scope.json</code></td>
+                <td>Intake + human</td>
+                <td>System, change, owners, and deployment context are explicit.</td>
+              </tr>
+              <tr>
+                <td>Stage 1</td>
+                <td><code>ops/intake/&lt;profile&gt;/quality-contract.json</code></td>
+                <td>Intake + human</td>
+                <td>Pass, approval, and block logic are concrete and reviewable.</td>
+              </tr>
+              <tr>
+                <td>Stage 2</td>
+                <td><code>cases.json + cases-coverage.json</code></td>
+                <td>Human + validator</td>
+                <td>Case ids are stable; the reviewed suite passes the contract-coverage gate and persists coverage details.</td>
+              </tr>
+              <tr>
+                <td>Stage 3</td>
+                <td><code>adapter config / endpoint + adapter-capability.json</code></td>
+                <td>Developer + onboarding gate</td>
+                <td>Canary returns valid `/run-case` responses with required telemetry depth and writes a durable adapter capability profile.</td>
+              </tr>
+              <tr>
+                <td>Stage 4</td>
+                <td><code>runs/baseline/, runs/new/, and run-fingerprint.json</code></td>
+                <td>Runner + comparability gate</td>
+                <td>Both run dirs contain valid `run.json`, matching case outputs, and a durable run fingerprint that records comparability plus environment clues.</td>
+              </tr>
+              <tr>
+                <td>Stage 5</td>
+                <td><code>reports/&lt;id&gt;/ bundle</code></td>
+                <td>Packager</td>
+                <td>Evidence verify passes and the bundle is portable.</td>
+              </tr>
+              <tr>
+                <td>Stage 6</td>
+                <td><code>reports/&lt;id&gt;/compliance/*</code></td>
+                <td>EU packager</td>
+                <td>EU verify passes, the instructions/risk-register/QMS-lite/monitoring-plan scaffolds are present, and residual gaps remain explicit.</td>
+              </tr>
+              <tr>
+                <td>Stage 7</td>
+                <td><code>review/review-decision.json + review/handoff-note.md + corrective-action-register.json</code></td>
+                <td>Review scaffold + human</td>
+                <td>`review:check` passes with a named owner decision, no TODOs, no open machine gaps, synced corrective-action continuity, and completed EU owner-completion records where applicable.</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <div class="card fade-up">
+          <p class="eyebrow">Review</p>
+          <h2 class="section-title">Structured review handoff</h2>
+          <p class="muted">Stage 7 is still human-owned, but it is no longer an unstructured email or ticket comment.</p>
+          <div class="code-snippet"><code>npm run review:init -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
+npm run review:check -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]</code></div>
+          <ul class="check-list section-tight">
+            <li>`review/review-decision.json` for the structured owner decision, residual-gap actions, and EU scaffold completion records</li><li>`review/handoff-note.md` for the narrative handoff summary</li><li>optional `review/intake/*` snapshot when the review is linked back to the intake contract, including continuity artifacts when available</li>
+          </ul>
+        </div>
+        <div class="proof-card fade-up">
+          <p class="eyebrow">Gate</p>
+          <h2 class="section-title">What the handoff gate enforces</h2>
+          <ul class="check-list section-tight">
+            <li>Decision status must not remain `pending`.</li><li>No `TODO` placeholders may remain in the review record or handoff note.</li><li>Every machine-derived residual gap must have an owner, a disposition, and a note.</li><li>Recurring corrective-action continuity must stay coherent and is synced back into intake on successful review checks.</li><li>EU bundles must complete the Article 13, Article 17, and Article 72 owner-completion loop before handoff is ready.</li><li>Approvals with block-severity machine gaps require explicit overrides.</li><li>Legal review requests need an explicit reason before the handoff is ready.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <div class="card fade-up">
+          <p class="eyebrow">Readiness</p>
+          <h2 class="section-title">Readiness self-assessment</h2>
+          <p class="muted">Use this before choosing self-serve, Launch Pack, or monthly support.</p>
+          <ul class="check-list section-tight">
+            <li>I can describe my AI system's intended use in one sentence.</li><li>I know which tools, APIs, or retrieval sources the agent uses.</li><li>I have at least 20 real user scenarios or operational cases documented.</li><li>I can produce baseline and new versions in a comparable environment.</li><li>I have a named owner for release or governance decisions.</li><li>I know whether I need only technical evidence or also EU dossier outputs.</li>
+          </ul>
+          <p class="eyebrow section-tight">How to read the score</p>
+          <div class="timeline">
+            
+              <article class="timeline-card">
+                <span class="timeline-step">0-2</span>
+                <p class="muted">Needs scoping help before self-serve or Launch Pack will be efficient.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">3-4</span>
+                <p class="muted">Good Launch Pack candidate: the core workflow exists but needs structuring.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">5-6</span>
+                <p class="muted">Good self-serve or Team candidate: the team is operationally ready.</p>
+              </article>
+          </div>
+        </div>
+        <div class="proof-card fade-up">
+          <p class="eyebrow">Maturity</p>
+          <h2 class="section-title">Evidence maturity model</h2>
+          <p class="muted">This is the fastest way to explain where a team is now and what level the next engagement should target.</p>
+          <table class="section-table">
+            <thead>
+              <tr><th>Level</th><th>Name</th><th>Characteristics</th></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>L0</td>
+                  <td>No evidence</td>
+                  <td>&quot;It works on my machine&quot; and no durable review record.</td>
+                </tr>
+                <tr>
+                  <td>L1</td>
+                  <td>Ad-hoc testing</td>
+                  <td>Manual checks exist, but artifacts are inconsistent or not portable.</td>
+                </tr>
+                <tr>
+                  <td>L2</td>
+                  <td>Structured cases</td>
+                  <td>`cases.json` exists and the team can run repeatable checks.</td>
+                </tr>
+                <tr>
+                  <td>L3</td>
+                  <td>Verified evidence</td>
+                  <td>Portable bundle passes integrity and portability verification.</td>
+                </tr>
+                <tr>
+                  <td>L4</td>
+                  <td>Governed evidence</td>
+                  <td>Recurring runs, drift detection, and named human review exist.</td>
+                </tr>
+                <tr>
+                  <td>L5</td>
+                  <td>Audit-ready</td>
+                  <td>EU dossier exports, coverage mapping, and governed handoff are in place.</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <div class="card fade-up">
+          <p class="eyebrow">Re-run triggers</p>
+          <h2 class="section-title">When evidence should be re-run</h2>
+          <table class="section-table">
+            <thead>
+              <tr><th>Trigger</th><th>Expected action</th></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>Model version change</td>
+                  <td>Re-run Stages 4-7.</td>
+                </tr>
+                <tr>
+                  <td>Prompt or toolset change</td>
+                  <td>Usually re-run Stages 2-7.</td>
+                </tr>
+                <tr>
+                  <td>New deployment context or market</td>
+                  <td>Re-run Stages 0-7.</td>
+                </tr>
+                <tr>
+                  <td>Nightly drift monitoring</td>
+                  <td>Automate Stages 4-6 and escalate Stage 7 when gates fire.</td>
+                </tr>
+                <tr>
+                  <td>EU AI Act mapping or standards update</td>
+                  <td>Re-run Stages 6-7.</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="proof-card fade-up">
+          <p class="eyebrow">Support scope</p>
+          <h2 class="section-title">What each engagement layer actually covers</h2>
+          <table class="section-table">
+            <thead>
+              <tr><th>Layer</th><th>Good fit</th><th>Not included</th></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>OSS self-serve</td>
+                  <td>Teams that can scope, integrate, and operate the workflow alone.</td>
+                  <td>No setup help, no supported-agent scope, no done-for-you onboarding.</td>
+                </tr>
+                <tr>
+                  <td>Launch Pack</td>
+                  <td>One supported agent that needs first-time setup and a first serious package.</td>
+                  <td>Not unlimited case authoring, not full legal drafting, not multi-agent implementation.</td>
+                </tr>
+                <tr>
+                  <td>Monthly support</td>
+                  <td>Supported agents that already cleared onboarding and now need recurring help.</td>
+                  <td>Not full done-for-you setup for every new agent unless separately scoped.</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container">
+        <p class="eyebrow">Failure modes</p>
+        <h2 class="section-title">Common failure modes</h2>
+        <div class="docs-grid section-tight">
+          
+            <article class="card fade-up">
+              <h3>Weak cases</h3>
+              <p class="muted">Critical cases use empty or weak `expected` blocks, so the bundle looks green while proving very little.</p>
+            </article>
+            <article class="card fade-up">
+              <h3>Shallow adapter</h3>
+              <p class="muted">The endpoint returns final text but not the telemetry depth required for tool, trace, or assumption evidence.</p>
+            </article>
+            <article class="card fade-up">
+              <h3>Incomparable runs</h3>
+              <p class="muted">Baseline and new were run with different environments, budgets, or incomplete case sets, so the diff is misleading.</p>
+            </article>
+            <article class="card fade-up">
+              <h3>Narrative without proof</h3>
+              <p class="muted">The package claims oversight, logging, or robustness, but the bundle does not contain matching artifacts.</p>
+            </article>
+        </div>
+      </div>
+    </section>
+  
+    </main>
+    
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; 2026 EU AI Evidence Builder</p>
+        <div class="footer-links">
+          <a href="../privacy/">Privacy</a>
+          <a href="../terms/">Terms</a>
+          <a href="../disclaimer/">Disclaimer</a>
+          <a href="../cookies/">Cookies</a>
+          <a href="../contact/">Contact</a>
+          <a href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+    </footer>
+  
+  </div>
+  
+    <div class="cookie-banner" data-cookie-banner>
+      <div>
+        <strong>Cookie settings</strong>
+        <p class="muted">This site uses only essential storage by default. Analytics can be enabled later with EU-hosted Plausible.</p>
+      </div>
+      <div class="button-row">
+        <button class="button-soft" type="button" data-cookie-choice="essential">Essential only</button>
+        <button class="button" type="button" data-cookie-choice="analytics">Allow analytics</button>
+      </div>
+    </div>
+  
+  <script src="../../site-assets/site.js" defer></script>
+  
+</body>
+</html>

@@ -128,6 +128,7 @@ export function buildCompareReportDocument(params: {
   summaryBySuite: NonNullable<CompareReport["summary_by_suite"]>;
   qualityFlags: CompareReport["quality_flags"];
   complianceMapping?: ComplianceMappingEntry[];
+  complianceCoverage?: CompareReport["compliance_coverage"];
   items: CompareReport["items"];
   embeddedManifestIndex?: ThinIndex;
 }): CompareReport & { embedded_manifest_index?: ThinIndex } {
@@ -174,9 +175,9 @@ export function buildCompareReportDocument(params: {
     summary_by_suite: params.summaryBySuite,
     quality_flags: params.qualityFlags,
     ...(params.complianceMapping ? { compliance_mapping: params.complianceMapping } : {}),
+    ...(params.complianceCoverage ? { compliance_coverage: params.complianceCoverage } : {}),
     items: params.items,
     ...(params.embeddedManifestIndex ? { embedded_manifest_index: params.embeddedManifestIndex } : {}),
   };
   return report;
 }
-

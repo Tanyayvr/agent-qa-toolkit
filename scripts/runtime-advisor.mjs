@@ -4,6 +4,11 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 
+import { classDefaultTimeoutMs } from "./runtime-policy.mjs";
+import {
+  readRuntimeStateRecommendation,
+  writeRuntimeStateRecommendation,
+} from "./runtime-state.mjs";
 import { summarizeTimeoutHistory } from "./timeout-history-summary.mjs";
 import { classifyStageFailureFromPath } from "./staged-campaign-utils.mjs";
 
@@ -20,6 +25,12 @@ function parsePositiveInt(value, fallback) {
 function parseNonNegativeInt(value, fallback) {
   const n = Number(value);
   if (!Number.isFinite(n) || n < 0) return fallback;
+  return Math.floor(n);
+}
+
+function parseMaybePositiveInt(value, fallback = 0) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
   return Math.floor(n);
 }
 
@@ -63,17 +74,42 @@ function recommendedModeForRuntime({ mode }) {
 export function estimateRuntimePlan(params) {
   if (!params.cases) throw new Error("--cases is required");
   const caseInfo = loadCases(params.cases, params.maxCases ?? 0);
+  const runtimeState = readRuntimeStateRecommendation(params.runtimeStatePath, params.mode);
+  const firstRunSeedTimeoutMs = Math.max(
+    classDefaultTimeoutMs(params.runtimeClass, params.mode),
+    parseMaybePositiveInt(params.firstRunSeedTimeoutMs, 0)
+  );
   const history = summarizeTimeoutHistory({
     outDir: params.outDir,
+    reportsDir: params.reportsDir,
     cases: params.cases,
+    profileName: params.profileName,
+    mode: params.mode,
+    runtimeClass: params.runtimeClass,
     lookbackRuns: params.timeoutAutoLookbackRuns,
     minSuccessSamples: params.timeoutAutoMinSuccessSamples,
     maxCases: params.maxCases ?? 0,
   });
+  const recommendedFirstRunMinimumMs = Math.max(
+    firstRunSeedTimeoutMs,
+    runtimeState?.timeout_ms ?? 0,
+    typeof history.class_recommended_timeout_ms === "number" && Number.isFinite(history.class_recommended_timeout_ms)
+      ? history.class_recommended_timeout_ms
+      : 0
+  );
+  const resolvedTimeoutAutoCapMs = Math.max(
+    params.timeoutAutoCapMs,
+    runtimeState?.timeout_auto_cap_ms ?? 0,
+    recommendedFirstRunMinimumMs
+  );
+  const resolvedTimeoutAutoMaxIncreaseFactor = Math.max(
+    params.timeoutAutoMaxIncreaseFactor,
+    runtimeState?.timeout_auto_max_increase_factor ?? 0
+  );
 
   const growthCapMs = Math.max(
-    params.timeoutMs,
-    Math.floor(params.timeoutMs * Math.max(1, params.timeoutAutoMaxIncreaseFactor))
+    recommendedFirstRunMinimumMs,
+    Math.floor(recommendedFirstRunMinimumMs * Math.max(1, resolvedTimeoutAutoMaxIncreaseFactor))
   );
 
   let effectiveTimeoutMs = params.timeoutMs;
@@ -81,8 +117,29 @@ export function estimateRuntimePlan(params) {
   let clampedByGrowth = false;
   let clampedByCap = false;
   const notes = [];
+  let runtimeStateApplied = false;
 
-  if (params.timeoutProfile === "auto") {
+  if (params.timeoutProfile === "auto" && runtimeState && runtimeState.timeout_ms > effectiveTimeoutMs) {
+    effectiveTimeoutMs = runtimeState.timeout_ms;
+    estimateSource = "runtime_state_floor";
+    runtimeStateApplied = true;
+    notes.push(`persisted runtime-state raises the timeout floor to ${runtimeState.timeout_ms}ms`);
+  }
+
+  if (history.first_run) {
+    estimateSource = runtimeStateApplied ? "first_run_runtime_state" : "first_run_class_seed";
+    if (params.timeoutProfile === "auto" && recommendedFirstRunMinimumMs > effectiveTimeoutMs) {
+      effectiveTimeoutMs = recommendedFirstRunMinimumMs;
+      notes.push(`first-run minimum auto-applied at ${recommendedFirstRunMinimumMs}ms`);
+      if (runtimeState && runtimeState.timeout_ms === recommendedFirstRunMinimumMs) {
+        runtimeStateApplied = true;
+      }
+    } else if (recommendedFirstRunMinimumMs > params.timeoutMs) {
+      notes.push(`first-run class minimum is ${recommendedFirstRunMinimumMs}ms; configured timeout is lower`);
+    } else {
+      notes.push("first-run plan uses runtime-class minimum only; scoped history is intentionally ignored");
+    }
+  } else if (params.timeoutProfile === "auto") {
     if (typeof history.recommended_timeout_ms === "number" && Number.isFinite(history.recommended_timeout_ms)) {
       let candidate = history.recommended_timeout_ms;
       estimateSource = "history_candidate";
@@ -92,17 +149,22 @@ export function estimateRuntimePlan(params) {
         estimateSource = "history_candidate_growth_capped";
         notes.push(`history candidate exceeded growth guard and was capped at ${growthCapMs}ms`);
       }
-      if (candidate > params.timeoutAutoCapMs) {
-        candidate = params.timeoutAutoCapMs;
+      if (candidate > resolvedTimeoutAutoCapMs) {
+        candidate = resolvedTimeoutAutoCapMs;
         clampedByCap = true;
         estimateSource = `${estimateSource}_cap_capped`;
-        notes.push(`history candidate exceeded cap and was capped at ${params.timeoutAutoCapMs}ms`);
+        notes.push(`history candidate exceeded cap and was capped at ${resolvedTimeoutAutoCapMs}ms`);
       }
-      effectiveTimeoutMs = Math.max(params.timeoutMs, candidate);
+      effectiveTimeoutMs = Math.max(recommendedFirstRunMinimumMs, candidate);
     } else {
       estimateSource =
-        history.success_sample_count > 0 ? "base_timeout_insufficient_history" : "base_timeout_no_history";
-      notes.push("history is not strong enough to tune timeout automatically");
+        runtimeStateApplied
+          ? "runtime_state_floor"
+          : history.success_sample_count > 0
+            ? "scoped_history_insufficient"
+            : "scoped_history_missing";
+      effectiveTimeoutMs = Math.max(effectiveTimeoutMs, recommendedFirstRunMinimumMs);
+      notes.push("scoped learned history is not strong enough to tune timeout automatically");
     }
   }
 
@@ -135,17 +197,26 @@ export function estimateRuntimePlan(params) {
     purpose: "plan",
     mode: params.mode,
     runtime_class: params.runtimeClass,
+    profile_name: params.profileName || null,
     cases_path: path.resolve(process.cwd(), params.cases),
     selected_case_count: caseInfo.selectedCaseCount,
     total_case_count: caseInfo.totalCaseCount,
+    cases_signature: history.cases_signature,
     sample_count: params.sampleCount,
     retries: params.retries,
     concurrency: params.concurrency,
     timeout_profile: params.timeoutProfile,
     base_timeout_ms: params.timeoutMs,
+    first_run_seed_timeout_ms: firstRunSeedTimeoutMs,
+    first_run: history.first_run,
+    recommended_first_run_minimum_ms: recommendedFirstRunMinimumMs,
     timeout_auto_cap_ms: params.timeoutAutoCapMs,
+    resolved_timeout_auto_cap_ms: Math.max(resolvedTimeoutAutoCapMs, effectiveTimeoutMs),
     timeout_auto_min_success_samples: params.timeoutAutoMinSuccessSamples,
     timeout_auto_max_increase_factor: params.timeoutAutoMaxIncreaseFactor,
+    resolved_timeout_auto_max_increase_factor: resolvedTimeoutAutoMaxIncreaseFactor,
+    matching_report_count: history.matching_report_count,
+    matching_passed_report_count: history.matching_passed_report_count,
     history_sample_count: history.history_sample_count,
     history_success_sample_count: history.success_sample_count,
     history_failure_sample_count: history.failure_sample_count,
@@ -153,12 +224,26 @@ export function estimateRuntimePlan(params) {
     history_p99_success_ms: history.p99_success_ms,
     history_max_success_ms: history.max_success_ms,
     history_candidate_timeout_ms: history.recommended_timeout_ms,
+    class_report_count: history.class_report_count,
+    class_passed_report_count: history.class_passed_report_count,
+    class_history_sample_count: history.class_history_sample_count,
+    class_success_sample_count: history.class_success_sample_count,
+    class_failure_sample_count: history.class_failure_sample_count,
+    class_p95_success_ms: history.class_p95_success_ms,
+    class_p99_success_ms: history.class_p99_success_ms,
+    class_max_success_ms: history.class_max_success_ms,
+    class_candidate_timeout_ms: history.class_recommended_timeout_ms,
     growth_cap_ms: growthCapMs,
     estimated_request_timeout_ms: effectiveTimeoutMs,
     estimated_stage_runtime_upper_bound_ms: estimatedRuntimeUpperBoundMs,
     estimate_source: estimateSource,
     clamped_by_growth: clampedByGrowth,
     clamped_by_cap: clampedByCap,
+    runtime_state_path: runtimeState?.path ?? (params.runtimeStatePath ? path.resolve(process.cwd(), params.runtimeStatePath) : null),
+    runtime_state_timeout_ms: runtimeState?.timeout_ms ?? null,
+    runtime_state_timeout_auto_cap_ms: runtimeState?.timeout_auto_cap_ms ?? null,
+    runtime_state_timeout_auto_max_increase_factor: runtimeState?.timeout_auto_max_increase_factor ?? null,
+    runtime_state_applied: runtimeStateApplied,
     confidence,
     recommended_mode: recommendedMode,
     notes,
@@ -220,10 +305,10 @@ export function recommendRuntimeEnvelope(params) {
 
   const effectiveTimeoutMs = currentPlan.estimated_request_timeout_ms;
   let suggestedBaseTimeoutMs = Math.max(params.timeoutMs, Math.ceil(effectiveTimeoutMs * 2));
-  let suggestedMaxIncreaseFactor = params.timeoutAutoMaxIncreaseFactor;
+  let suggestedMaxIncreaseFactor = currentPlan.resolved_timeout_auto_max_increase_factor;
 
   if (params.timeoutProfile === "auto" && currentPlan.clamped_by_growth) {
-    suggestedMaxIncreaseFactor = Math.max(params.timeoutAutoMaxIncreaseFactor, 6);
+    suggestedMaxIncreaseFactor = Math.max(currentPlan.resolved_timeout_auto_max_increase_factor, 6);
     result.notes.push("growth guard limited the current auto-timeout; recommendation raises the growth factor");
   }
 
@@ -234,7 +319,7 @@ export function recommendRuntimeEnvelope(params) {
     );
   }
 
-  let suggestedCapMs = params.timeoutAutoCapMs;
+  let suggestedCapMs = currentPlan.resolved_timeout_auto_cap_ms;
   const neededCapMs = Math.ceil(suggestedBaseTimeoutMs * Math.max(1, suggestedMaxIncreaseFactor));
   if (neededCapMs > suggestedCapMs) {
     suggestedCapMs = Math.min(ABSOLUTE_RECOMMEND_CAP_MS, neededCapMs);
@@ -246,6 +331,7 @@ export function recommendRuntimeEnvelope(params) {
     timeoutMs: suggestedBaseTimeoutMs,
     timeoutAutoCapMs: suggestedCapMs,
     timeoutAutoMaxIncreaseFactor: suggestedMaxIncreaseFactor,
+    runtimeStatePath: params.runtimeStatePath,
     mode: params.mode === "quick" ? "quick" : params.mode,
   });
 
@@ -281,8 +367,11 @@ function parseArgs(argv) {
     compare: "",
     cases: "",
     outDir: "apps/runner/runs",
+    reportsDir: "apps/evaluator/reports",
+    profileName: "",
     timeoutProfile: "off",
     timeoutMs: 120000,
+    firstRunSeedTimeoutMs: 0,
     timeoutAutoCapMs: 3600000,
     timeoutAutoLookbackRuns: 12,
     timeoutAutoMinSuccessSamples: 3,
@@ -293,6 +382,8 @@ function parseArgs(argv) {
     runtimeClass: "generic",
     diagnosticThresholdMs: DEFAULT_DIAGNOSTIC_THRESHOLD_MS,
     maxCases: 0,
+    runtimeStatePath: "",
+    persistRuntimeState: 0,
     out: "",
     help: false,
   };
@@ -312,8 +403,11 @@ function parseArgs(argv) {
     else if (arg === "--compare") out.compare = String(argv[++i] ?? "");
     else if (arg === "--cases") out.cases = String(argv[++i] ?? "");
     else if (arg === "--outDir") out.outDir = String(argv[++i] ?? out.outDir);
+    else if (arg === "--reportsDir") out.reportsDir = String(argv[++i] ?? out.reportsDir);
+    else if (arg === "--profileName") out.profileName = String(argv[++i] ?? out.profileName);
     else if (arg === "--timeoutProfile") out.timeoutProfile = String(argv[++i] ?? out.timeoutProfile);
     else if (arg === "--timeoutMs") out.timeoutMs = parsePositiveInt(argv[++i], out.timeoutMs);
+    else if (arg === "--firstRunSeedTimeoutMs") out.firstRunSeedTimeoutMs = parsePositiveInt(argv[++i], out.firstRunSeedTimeoutMs);
     else if (arg === "--timeoutAutoCapMs") out.timeoutAutoCapMs = parsePositiveInt(argv[++i], out.timeoutAutoCapMs);
     else if (arg === "--timeoutAutoLookbackRuns") out.timeoutAutoLookbackRuns = parsePositiveInt(argv[++i], out.timeoutAutoLookbackRuns);
     else if (arg === "--timeoutAutoMinSuccessSamples") {
@@ -327,6 +421,10 @@ function parseArgs(argv) {
     else if (arg === "--diagnosticThresholdMs") {
       out.diagnosticThresholdMs = parsePositiveInt(argv[++i], out.diagnosticThresholdMs);
     } else if (arg === "--maxCases") out.maxCases = parsePositiveInt(argv[++i], out.maxCases);
+    else if (arg === "--runtimeStatePath") out.runtimeStatePath = String(argv[++i] ?? "");
+    else if (arg === "--persistRuntimeState") {
+      out.persistRuntimeState = parseMaybePositiveInt(argv[++i], out.persistRuntimeState);
+    }
     else if (arg === "--out") out.out = String(argv[++i] ?? "");
     else throw new Error(`Unknown option: ${arg}`);
   }
@@ -341,10 +439,11 @@ function renderHelp() {
     "  node scripts/runtime-advisor.mjs recommend --stage <smoke|full-lite|full> --compare <compare-report.json> --cases <path> [options]",
     "",
     "Common options:",
-    "  --outDir <dir> --timeoutProfile <off|auto> --timeoutMs <ms> --timeoutAutoCapMs <ms>",
+    "  --outDir <dir> --timeoutProfile <off|auto> --timeoutMs <ms> --firstRunSeedTimeoutMs <ms> --timeoutAutoCapMs <ms>",
+    "  --reportsDir <dir> --profileName <name>",
     "  --timeoutAutoLookbackRuns <n> --timeoutAutoMinSuccessSamples <n> --timeoutAutoMaxIncreaseFactor <n>",
     "  --sampleCount <n> --retries <n> --concurrency <n> --runtimeClass <fast_remote|standard_cli|slow_local_cli|heavy_mcp_agent|generic>",
-    "  --maxCases <n> --diagnosticThresholdMs <ms> [--out <path>]",
+    "  --maxCases <n> --diagnosticThresholdMs <ms> [--runtimeStatePath <path>] [--persistRuntimeState 0|1] [--out <path>]",
   ].join("\n");
 }
 
@@ -360,6 +459,25 @@ export function cliMain(argv) {
     result = estimateRuntimePlan(args);
   } else if (args.command === "recommend") {
     result = recommendRuntimeEnvelope(args);
+    if (args.persistRuntimeState && args.runtimeStatePath && result.suggested_envelope) {
+      const writtenPath = writeRuntimeStateRecommendation({
+        runtimeStatePath: args.runtimeStatePath,
+        profileName: args.profileName,
+        runtimeClass: args.runtimeClass,
+        mode: result.suggested_envelope.mode,
+        timeoutMs: result.suggested_envelope.timeout_ms,
+        timeoutAutoCapMs: result.suggested_envelope.timeout_auto_cap_ms,
+        timeoutAutoMaxIncreaseFactor: result.suggested_envelope.timeout_auto_max_increase_factor,
+        confidence: result.suggested_envelope.confidence,
+        source: result.source,
+        stage: args.stage,
+        reason: result.reason,
+      });
+      result = {
+        ...result,
+        runtime_state_path: writtenPath,
+      };
+    }
   } else {
     throw new Error(`Unknown command: ${args.command}`);
   }

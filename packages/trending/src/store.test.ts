@@ -138,6 +138,9 @@ describe("TrendStore integration", () => {
     expect(runTrend.length).toBeGreaterThanOrEqual(2);
     expect(runTrend[0]?.kpi_pre_action_entropy_removed).toBe(0.6);
     expect(runTrend[0]?.kpi_recon_minutes_saved_per_block).toBe(72);
+    expect(runTrend[0]?.cases_requiring_approval).toBe(1);
+    expect(runTrend[0]?.sec_high_total).toBe(1);
+    expect(runTrend.at(-1)?.report_id).toBe("rep-2");
 
     const flaky = store.queryFlakiestCases({ last: 10, limit: 5 });
     expect(flaky.some((f) => f.case_id === "case_a")).toBe(true);

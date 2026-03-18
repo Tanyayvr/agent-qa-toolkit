@@ -55,6 +55,13 @@ export interface RunTrendRow {
   regressions: number;
   improvements: number;
   skipped_count: number;
+  cases_requiring_approval: number;
+  cases_block_recommended: number;
+  high_risk_cases: number;
+  sec_low_total: number;
+  sec_medium_total: number;
+  sec_high_total: number;
+  sec_critical_total: number;
   model: string | null;
   git_commit: string | null;
   ingest_mode: IngestMode;

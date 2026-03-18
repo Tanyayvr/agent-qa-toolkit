@@ -22,19 +22,22 @@ export function queryCaseTrend(db: Database.Database, caseId: string, opts: Quer
   const last = opts.last ?? 30;
   const rows = db
     .prepare(
-      `SELECT
-        r.report_id, r.run_id, r.generated_at, r.model, r.git_commit, r.git_branch,
-        cr.baseline_pass, cr.new_pass, cr.case_status, cr.risk_level, cr.gate_recommendation,
-        cr.root_cause, cr.input_tokens, cr.output_tokens, cr.total_tokens, cr.tool_call_count,
-        cr.loop_detected, cr.pass_rate, cr.run_count, cr.sec_low, cr.sec_medium, cr.sec_high, cr.sec_critical,
-        r.prompt_version
-      FROM case_results cr
-      JOIN runs r ON r.report_id = cr.report_id
-      WHERE cr.case_id = ?
-        AND cr.case_status = 'executed'
-        AND ${sql}
-      ORDER BY r.generated_at
-      LIMIT ?`
+      `SELECT * FROM (
+        SELECT
+          r.report_id, r.run_id, r.generated_at, r.model, r.git_commit, r.git_branch,
+          cr.baseline_pass, cr.new_pass, cr.case_status, cr.risk_level, cr.gate_recommendation,
+          cr.root_cause, cr.input_tokens, cr.output_tokens, cr.total_tokens, cr.tool_call_count,
+          cr.loop_detected, cr.pass_rate, cr.run_count, cr.sec_low, cr.sec_medium, cr.sec_high, cr.sec_critical,
+          r.prompt_version
+        FROM case_results cr
+        JOIN runs r ON r.report_id = cr.report_id
+        WHERE cr.case_id = ?
+          AND cr.case_status = 'executed'
+          AND ${sql}
+        ORDER BY r.generated_at DESC
+        LIMIT ?
+      )
+      ORDER BY generated_at`
     )
     .all(caseId, ...params, last) as CaseTrendRow[];
   return rows;
@@ -45,22 +48,32 @@ export function queryRunTrend(db: Database.Database, opts: QueryOpts = {}): RunT
   const last = opts.last ?? 30;
   const rows = db
     .prepare(
-      `SELECT
-        r.report_id, r.run_id, r.generated_at, r.total_cases, r.model, r.git_commit, r.ingest_mode,
-        r.kpi_risk_mass_before, r.kpi_risk_mass_after, r.kpi_pre_action_entropy_removed,
-        r.kpi_blocked_cases, r.kpi_recon_minutes_saved_total, r.kpi_recon_minutes_saved_per_block,
-        SUM(CASE WHEN cr.case_status = 'executed' THEN 1 ELSE 0 END) AS executed_cases,
-        SUM(CASE WHEN cr.case_status = 'executed' AND cr.new_pass = 1 THEN 1 ELSE 0 END) AS pass_count,
-        SUM(CASE WHEN cr.case_status = 'executed' AND cr.new_pass = 0 THEN 1 ELSE 0 END) AS fail_count,
-        SUM(CASE WHEN cr.case_status != 'executed' THEN 1 ELSE 0 END) AS skipped_count,
-        r.regressions AS regressions,
-        r.improvements AS improvements
-      FROM runs r
-      LEFT JOIN case_results cr ON cr.report_id = r.report_id
-      WHERE ${sql}
-      GROUP BY r.report_id
-      ORDER BY r.generated_at
-      LIMIT ?`
+      `SELECT * FROM (
+        SELECT
+          r.report_id, r.run_id, r.generated_at, r.total_cases, r.model, r.git_commit, r.ingest_mode,
+          r.kpi_risk_mass_before, r.kpi_risk_mass_after, r.kpi_pre_action_entropy_removed,
+          r.kpi_blocked_cases, r.kpi_recon_minutes_saved_total, r.kpi_recon_minutes_saved_per_block,
+          COALESCE(SUM(CASE WHEN cr.case_status = 'executed' THEN 1 ELSE 0 END), 0) AS executed_cases,
+          COALESCE(SUM(CASE WHEN cr.case_status = 'executed' AND cr.new_pass = 1 THEN 1 ELSE 0 END), 0) AS pass_count,
+          COALESCE(SUM(CASE WHEN cr.case_status = 'executed' AND cr.new_pass = 0 THEN 1 ELSE 0 END), 0) AS fail_count,
+          COALESCE(SUM(CASE WHEN cr.case_status != 'executed' THEN 1 ELSE 0 END), 0) AS skipped_count,
+          COALESCE(SUM(CASE WHEN cr.case_status = 'executed' AND cr.gate_recommendation = 'require_approval' THEN 1 ELSE 0 END), 0) AS cases_requiring_approval,
+          COALESCE(SUM(CASE WHEN cr.case_status = 'executed' AND cr.gate_recommendation = 'block' THEN 1 ELSE 0 END), 0) AS cases_block_recommended,
+          COALESCE(SUM(CASE WHEN cr.case_status = 'executed' AND cr.risk_level = 'high' THEN 1 ELSE 0 END), 0) AS high_risk_cases,
+          COALESCE(SUM(cr.sec_low), 0) AS sec_low_total,
+          COALESCE(SUM(cr.sec_medium), 0) AS sec_medium_total,
+          COALESCE(SUM(cr.sec_high), 0) AS sec_high_total,
+          COALESCE(SUM(cr.sec_critical), 0) AS sec_critical_total,
+          r.regressions AS regressions,
+          r.improvements AS improvements
+        FROM runs r
+        LEFT JOIN case_results cr ON cr.report_id = r.report_id
+        WHERE ${sql}
+        GROUP BY r.report_id
+        ORDER BY r.generated_at DESC
+        LIMIT ?
+      )
+      ORDER BY generated_at`
     )
     .all(...params, last) as RunTrendRow[];
   return rows;
@@ -108,20 +121,23 @@ export function queryTokenTrend(
 
   const rows = db
     .prepare(
-      `SELECT
-        r.generated_at, r.report_id, r.model,
-        SUM(cr.input_tokens) AS total_input,
-        SUM(cr.output_tokens) AS total_output,
-        SUM(cr.total_tokens) AS total_tokens,
-        COUNT(CASE WHEN cr.total_tokens IS NOT NULL THEN 1 END) AS cases_with_tokens,
-        COUNT(*) AS executed_cases
-      FROM case_results cr
-      JOIN runs r ON r.report_id = cr.report_id
-      WHERE cr.case_status = 'executed'
-        AND ${sql}
-      GROUP BY r.report_id
-      ORDER BY r.generated_at
-      LIMIT ?`
+      `SELECT * FROM (
+        SELECT
+          r.generated_at, r.report_id, r.model,
+          SUM(cr.input_tokens) AS total_input,
+          SUM(cr.output_tokens) AS total_output,
+          SUM(cr.total_tokens) AS total_tokens,
+          COUNT(CASE WHEN cr.total_tokens IS NOT NULL THEN 1 END) AS cases_with_tokens,
+          COUNT(*) AS executed_cases
+        FROM case_results cr
+        JOIN runs r ON r.report_id = cr.report_id
+        WHERE cr.case_status = 'executed'
+          AND ${sql}
+        GROUP BY r.report_id
+        ORDER BY r.generated_at DESC
+        LIMIT ?
+      )
+      ORDER BY generated_at`
     )
     .all(...params, last) as TokenTrendRow[];
 

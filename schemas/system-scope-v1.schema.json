@@ -1,0 +1,244 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "system-scope-v1.schema.json",
+  "title": "System Scope Intake v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "system_id",
+    "agent_id",
+    "system_name",
+    "intended_use",
+    "change_under_review",
+    "deployment_context",
+    "tools",
+    "owners",
+    "evidence_preferences",
+    "human_context"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "system_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "system_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intended_use": {
+      "type": "string",
+      "minLength": 1
+    },
+    "change_under_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "baseline_target",
+        "new_target"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "new_target": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "deployment_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_environment",
+        "target_markets",
+        "affects_people",
+        "user_impact",
+        "autonomy_level",
+        "eu_dossier_required"
+      ],
+      "properties": {
+        "primary_environment": {
+          "type": "string",
+          "enum": [
+            "local",
+            "staging",
+            "production",
+            "mixed"
+          ]
+        },
+        "target_markets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "affects_people": {
+          "type": "boolean"
+        },
+        "user_impact": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "autonomy_level": {
+          "type": "string",
+          "enum": [
+            "assistant",
+            "semi_autonomous",
+            "autonomous"
+          ]
+        },
+        "eu_dossier_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "in_scope",
+        "out_of_scope"
+      ],
+      "properties": {
+        "in_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "owners": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "system_owner",
+        "evaluation_owner",
+        "release_owner"
+      ],
+      "properties": {
+        "system_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluation_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "release_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compliance_owner": {
+          "type": "string"
+        },
+        "legal_reviewer": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence_preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require_tool_telemetry",
+        "require_trace_anchor",
+        "require_assumption_state",
+        "require_recurring_monitoring",
+        "require_eu_exports"
+      ],
+      "properties": {
+        "require_tool_telemetry": {
+          "type": "boolean"
+        },
+        "require_trace_anchor": {
+          "type": "boolean"
+        },
+        "require_assumption_state": {
+          "type": "boolean"
+        },
+        "require_recurring_monitoring": {
+          "type": "boolean"
+        },
+        "require_eu_exports": {
+          "type": "boolean"
+        }
+      }
+    },
+    "human_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "business_harms",
+        "deployment_assumptions",
+        "narrative_requirements",
+        "legal_review_required"
+      ],
+      "properties": {
+        "business_harms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "deployment_assumptions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "narrative_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "legal_review_required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

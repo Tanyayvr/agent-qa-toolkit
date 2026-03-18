@@ -1,0 +1,65 @@
+{
+  "contract_version": 1,
+  "generated_at": "2026-03-18T19:17:27.601Z",
+  "surfaces": [
+    {
+      "id": "agent-evidence",
+      "label": "Agent Evidence Platform",
+      "tagline": "Portable release evidence for tool-using AI agents.",
+      "publish_dir": "agent-evidence",
+      "report_id": "agent-evidence-demo",
+      "command": "npm run demo:agent-evidence",
+      "release_gate_command": "npm run release:gate:agent-evidence",
+      "artifact_hrefs": {
+        "report_html": "agent-evidence/report.html",
+        "compare_report": "agent-evidence/compare-report.json",
+        "manifest": "agent-evidence/artifacts/manifest.json"
+      },
+      "summary": {
+        "generated_at": 1773861437281,
+        "cases_total": 2,
+        "approvals": 1,
+        "blocks": 1,
+        "execution_quality_status": "healthy",
+        "portable_paths": true,
+        "self_contained": true
+      }
+    },
+    {
+      "id": "eu-ai-act",
+      "label": "EU AI Act Evidence Engine",
+      "tagline": "Dossier-ready technical evidence for EU-facing AI governance workflows.",
+      "publish_dir": "eu-ai-act",
+      "report_id": "eu-ai-act-demo",
+      "command": "npm run demo:eu-ai-act",
+      "release_gate_command": "npm run release:gate:eu-ai-act",
+      "artifact_hrefs": {
+        "report_html": "eu-ai-act/report.html",
+        "compare_report": "eu-ai-act/compare-report.json",
+        "manifest": "eu-ai-act/artifacts/manifest.json",
+        "dossier_html": "eu-ai-act/compliance/eu-ai-act-report.html",
+        "coverage": "eu-ai-act/compliance/eu-ai-act-coverage.json",
+        "annex_iv": "eu-ai-act/compliance/eu-ai-act-annex-iv.json",
+        "evidence_index": "eu-ai-act/compliance/evidence-index.json",
+        "article_13_instructions": "eu-ai-act/compliance/article-13-instructions.json",
+        "article_9_risk_register": "eu-ai-act/compliance/article-9-risk-register.json",
+        "article_72_monitoring_plan": "eu-ai-act/compliance/article-72-monitoring-plan.json",
+        "article_17_qms_lite": "eu-ai-act/compliance/article-17-qms-lite.json",
+        "human_oversight_summary": "eu-ai-act/compliance/human-oversight-summary.json",
+        "release_review": "eu-ai-act/compliance/release-review.json",
+        "post_market_monitoring": "eu-ai-act/compliance/post-market-monitoring.json"
+      },
+      "summary": {
+        "generated_at": 1773861446593,
+        "cases_total": 2,
+        "approvals": 1,
+        "blocks": 1,
+        "execution_quality_status": "healthy",
+        "monitoring_status": "history_current",
+        "runs_in_window": 2,
+        "portable_paths": true,
+        "self_contained": true
+      }
+    }
+  ]
+}

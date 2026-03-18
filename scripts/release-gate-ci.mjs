@@ -61,6 +61,16 @@ export function buildGateSteps({ runSuffix, toolkitBaseUrl, proofPort }) {
   const proofReportDir = `apps/evaluator/reports/latest_${runSuffix}`;
   return [
     npmStep("quality_gate", "Lint + typecheck + coverage + docs + security + audit", "quality:gate"),
+    npmStep(
+      "agent_evidence_surface_gate",
+      "Agent Evidence surface gate (contracts + deterministic demo bundle)",
+      "release:gate:agent-evidence"
+    ),
+    npmStep(
+      "eu_ai_act_surface_gate",
+      "EU AI Act surface gate (contracts + deterministic demo bundle)",
+      "release:gate:eu-ai-act"
+    ),
     npmStep("conformance_python", "Python validator conformance", "conformance:test:python"),
     npmStep("conformance_go", "Go validator conformance", "conformance:test:go"),
     npmStep("conformance_signature", "Strict-signature parity (Node/Python/Go)", "conformance:test:signature"),

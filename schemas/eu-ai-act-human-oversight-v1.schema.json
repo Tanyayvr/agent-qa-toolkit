@@ -1,0 +1,92 @@
+{
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "reviewer_action_map",
+    "overview",
+    "review_queue",
+    "approval_required_cases",
+    "blocked_cases",
+    "blocked_case_rationale_summary",
+    "reviewer_guidance"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "coverage_href",
+        "annex_iv_href",
+        "report_html_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "reviewer_action_map": {
+      "type": "object",
+      "required": ["none", "require_approval", "block"],
+      "properties": {
+        "none": { "type": "object" },
+        "require_approval": { "type": "object" },
+        "block": { "type": "object" }
+      }
+    },
+    "overview": {
+      "type": "object",
+      "required": ["total_cases", "no_action_cases", "approval_required_cases", "blocked_cases"],
+      "properties": {
+        "total_cases": { "type": "integer" },
+        "no_action_cases": { "type": "integer" },
+        "approval_required_cases": { "type": "integer" },
+        "blocked_cases": { "type": "integer" }
+      }
+    },
+    "review_queue": { "type": "array" },
+    "approval_required_cases": { "type": "array" },
+    "blocked_cases": { "type": "array" },
+    "blocked_case_rationale_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["reason", "case_count"],
+        "properties": {
+          "reason": { "type": "string" },
+          "case_count": { "type": "integer" }
+        }
+      }
+    },
+    "reviewer_guidance": { "type": "array", "items": { "type": "string" } }
+  }
+}

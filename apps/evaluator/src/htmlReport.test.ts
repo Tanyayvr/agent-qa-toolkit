@@ -206,9 +206,49 @@ describe("htmlReport", () => {
       prompt_version: "p1",
       tools_version: "t1",
     };
-    report.compliance_mapping = [
-      { framework: "EU AI Act", clause: "Art. 9", title: "Risk management" },
+    report.compliance_coverage = [
+      {
+        framework: "EU_AI_ACT",
+        clause: "Art_9",
+        title: "Risk management",
+        status: "covered",
+        required_evidence: ["compare-report.json.summary.risk_summary"],
+        required_evidence_present: ["compare-report.json.summary.risk_summary"],
+        required_evidence_missing: [],
+        supporting_evidence: ["artifacts/manifest.json"],
+        supporting_evidence_present: ["artifacts/manifest.json"],
+        supporting_evidence_missing: [],
+      },
+      {
+        framework: "EU_AI_ACT",
+        clause: "Art_11",
+        title: "Technical documentation",
+        status: "partial",
+        status_cap: "partial",
+        required_evidence: ["compare-report.json.summary.execution_quality"],
+        required_evidence_present: ["compare-report.json.summary.execution_quality"],
+        required_evidence_missing: [],
+        supporting_evidence: [],
+        supporting_evidence_present: [],
+        supporting_evidence_missing: [],
+        residual_gaps: ["Full Annex IV dossier is outside the evaluator scope."],
+      },
     ];
+    report.compliance_exports = {
+      eu_ai_act: {
+        coverage_href: "compliance/eu-ai-act-coverage.json",
+        annex_iv_href: "compliance/eu-ai-act-annex-iv.json",
+        report_html_href: "compliance/eu-ai-act-report.html",
+        evidence_index_href: "compliance/evidence-index.json",
+        article_13_instructions_href: "compliance/article-13-instructions.json",
+        article_9_risk_register_href: "compliance/article-9-risk-register.json",
+        article_72_monitoring_plan_href: "compliance/article-72-monitoring-plan.json",
+        article_17_qms_lite_href: "compliance/article-17-qms-lite.json",
+        human_oversight_summary_href: "compliance/human-oversight-summary.json",
+        release_review_href: "compliance/release-review.json",
+        post_market_monitoring_href: "compliance/post-market-monitoring.json",
+      },
+    };
     report.quality_flags = {
       ...report.quality_flags,
       missing_assets: ["a", "b", "c", "d", "e", "f", "g"],
@@ -228,6 +268,17 @@ describe("htmlReport", () => {
     expect(html).toContain("OTel anchors");
     expect(html).toContain("Environment");
     expect(html).toContain("Compliance");
+    expect(html).toContain("covered");
+    expect(html).toContain("partial");
+    expect(html).toContain("residual gaps");
+    expect(html).toContain("eu-ai-act-report.html");
+    expect(html).toContain("human-oversight-summary.json");
+    expect(html).toContain("article-13-instructions.json");
+    expect(html).toContain("article-9-risk-register.json");
+    expect(html).toContain("article-72-monitoring-plan.json");
+    expect(html).toContain("article-17-qms-lite.json");
+    expect(html).toContain("release-review.json");
+    expect(html).toContain("post-market-monitoring.json");
     expect(html).not.toContain("Only one suite present in this report.");
     expect(html).toContain("root_cause");
     expect(html).toContain("invalid_json");
@@ -244,6 +295,7 @@ describe("htmlReport", () => {
     delete report.summary.trace_anchor_coverage;
     delete report.environment;
     report.compliance_mapping = [];
+    report.compliance_coverage = [];
     const html = renderHtmlReport(report);
 
     expect(html).toContain("No failures / no breakdown");

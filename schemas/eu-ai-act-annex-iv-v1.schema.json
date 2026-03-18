@@ -1,0 +1,167 @@
+{
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "system_identity",
+    "intended_use_and_operational_constraints",
+    "clause_coverage",
+    "risk_controls_and_residual_risk",
+    "logging_and_traceability",
+    "accuracy_robustness_and_cybersecurity",
+    "post_market_monitoring_preparation",
+    "uncovered_areas"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "coverage_href",
+        "annex_iv_href",
+        "report_html_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "system_identity": {
+      "type": "object",
+      "required": [
+        "report_id",
+        "toolkit_version",
+        "spec_version",
+        "generated_at",
+        "baseline_dir",
+        "new_dir",
+        "cases_path",
+        "transfer_class",
+        "redaction_status"
+      ],
+      "properties": {
+        "report_id": { "type": "string" },
+        "toolkit_version": { "type": "string" },
+        "spec_version": { "type": "string" },
+        "generated_at": { "type": "string" },
+        "environment": { "type": "object" },
+        "baseline_dir": { "type": "string" },
+        "new_dir": { "type": "string" },
+        "cases_path": { "type": "string" },
+        "transfer_class": { "enum": ["internal_only", "transferable"] },
+        "redaction_status": { "enum": ["none", "applied"] },
+        "redaction_preset_id": { "type": "string" }
+      }
+    },
+    "intended_use_and_operational_constraints": {
+      "type": "object",
+      "required": ["declared_intended_use", "operator_inputs_required", "assumption_state_summary", "operational_constraints"],
+      "properties": {
+        "declared_intended_use": { "type": "null" },
+        "operator_inputs_required": { "type": "array", "items": { "type": "string" } },
+        "assumption_state_summary": {
+          "type": "object",
+          "required": ["baseline", "new", "cases_with_missing_assumption_state"],
+          "properties": {
+            "baseline": { "type": "object" },
+            "new": { "type": "object" },
+            "cases_with_missing_assumption_state": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "operational_constraints": {
+          "type": "object",
+          "required": [
+            "suites",
+            "self_contained",
+            "portable_paths",
+            "missing_assets_count",
+            "path_violations_count",
+            "large_payloads_count",
+            "transfer_class"
+          ],
+          "properties": {
+            "suites": { "type": "array", "items": { "type": "string" } },
+            "self_contained": { "type": "boolean" },
+            "portable_paths": { "type": "boolean" },
+            "missing_assets_count": { "type": "integer" },
+            "path_violations_count": { "type": "integer" },
+            "large_payloads_count": { "type": "integer" },
+            "transfer_class": { "enum": ["internal_only", "transferable"] }
+          }
+        }
+      }
+    },
+    "clause_coverage": { "type": "array" },
+    "risk_controls_and_residual_risk": {
+      "type": "object",
+      "required": ["risk_summary", "gate_summary", "top_signal_kinds_new", "top_signal_kinds_baseline", "approval_cases", "residual_gaps"],
+      "properties": {
+        "risk_summary": { "type": "object" },
+        "gate_summary": { "type": "object" },
+        "top_signal_kinds_new": { "type": "array", "items": { "type": "string" } },
+        "top_signal_kinds_baseline": { "type": "array", "items": { "type": "string" } },
+        "approval_cases": { "type": "array" },
+        "residual_gaps": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "logging_and_traceability": {
+      "type": "object",
+      "required": ["manifest_item_count", "case_artifacts", "residual_gaps"],
+      "properties": {
+        "manifest_item_count": { "type": "integer" },
+        "trace_anchor_coverage": { "type": "object" },
+        "case_artifacts": { "type": "array" },
+        "residual_gaps": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "accuracy_robustness_and_cybersecurity": {
+      "type": "object",
+      "required": ["execution_quality", "security_summary", "regressions", "improvements", "highlighted_cases"],
+      "properties": {
+        "execution_quality": { "type": "object" },
+        "security_summary": { "type": "object" },
+        "regressions": { "type": "integer" },
+        "improvements": { "type": "integer" },
+        "highlighted_cases": { "type": "array" }
+      }
+    },
+    "post_market_monitoring_preparation": {
+      "type": "object",
+      "required": ["residual_gaps"],
+      "properties": {
+        "summary_by_suite": { "type": "object" },
+        "residual_gaps": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "uncovered_areas": { "type": "array", "items": { "type": "string" } }
+  }
+}

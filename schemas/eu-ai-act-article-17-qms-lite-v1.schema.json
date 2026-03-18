@@ -1,0 +1,153 @@
+{
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "document_scope",
+    "managed_system",
+    "process_areas",
+    "governance_roles",
+    "management_review_triggers",
+    "current_signals",
+    "operator_inputs_required",
+    "residual_gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "coverage_href",
+        "annex_iv_href",
+        "report_html_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "document_scope": {
+      "type": "object",
+      "required": ["article", "generated_scope", "operator_inputs_required"],
+      "properties": {
+        "article": { "const": "Art_17" },
+        "generated_scope": { "const": "technical_qms_lite_scaffold" },
+        "operator_inputs_required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "managed_system": {
+      "type": "object",
+      "required": [
+        "execution_quality_status",
+        "release_decision_status",
+        "monitoring_status",
+        "approval_case_count",
+        "blocking_case_count"
+      ],
+      "properties": {
+        "agent_id": { "type": "string" },
+        "model": { "type": "string" },
+        "execution_quality_status": { "enum": ["healthy", "degraded"] },
+        "release_decision_status": { "enum": ["approve", "approve_with_review", "reject"] },
+        "monitoring_status": {
+          "enum": ["history_current", "history_stale", "no_matching_history", "trend_unavailable"]
+        },
+        "approval_case_count": { "type": "number" },
+        "blocking_case_count": { "type": "number" }
+      }
+    },
+    "process_areas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "objective",
+          "current_controls",
+          "evidence_hrefs",
+          "operator_inputs_required",
+          "residual_gaps"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "change_management",
+              "testing_and_validation",
+              "incident_and_corrective_action",
+              "documentation_and_record_control",
+              "oversight_and_release_control",
+              "monitoring_and_feedback"
+            ]
+          },
+          "title": { "type": "string" },
+          "objective": { "type": "string" },
+          "current_controls": { "type": "array", "items": { "type": "string" } },
+          "evidence_hrefs": { "type": "array", "items": { "type": "string" } },
+          "operator_inputs_required": { "type": "array", "items": { "type": "string" } },
+          "residual_gaps": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "governance_roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "responsibilities"],
+        "properties": {
+          "role": { "type": "string" },
+          "responsibilities": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "management_review_triggers": { "type": "array", "items": { "type": "string" } },
+    "current_signals": {
+      "type": "object",
+      "required": [
+        "residual_compliance_gap_count",
+        "drift_detected",
+        "drift_signal_count",
+        "review_queue_count",
+        "runs_in_window"
+      ],
+      "properties": {
+        "residual_compliance_gap_count": { "type": "number" },
+        "drift_detected": { "type": "boolean" },
+        "drift_signal_count": { "type": "number" },
+        "review_queue_count": { "type": "number" },
+        "runs_in_window": { "type": "number" }
+      }
+    },
+    "operator_inputs_required": { "type": "array", "items": { "type": "string" } },
+    "residual_gaps": { "type": "array", "items": { "type": "string" } }
+  }
+}

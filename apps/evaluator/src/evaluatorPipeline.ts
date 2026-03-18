@@ -41,9 +41,12 @@ import {
   resolveFromRoot,
 } from "./evaluatorIo";
 import {
-  loadComplianceMapping,
+  loadComplianceProfile,
   loadEnvironmentContext,
+  resolveComplianceCoverageRequirements,
+  resolveComplianceMapping,
   resolveTransferClass,
+  type ComplianceCoverageRequirement,
   type ComplianceMappingEntry,
 } from "./evaluatorMetadata";
 import { assessRedactionState, verifyRedactionCoverage } from "./evaluatorRedaction";
@@ -53,7 +56,10 @@ import {
   buildQualityEntries,
   maybeAttachLargePayloadWarnings,
 } from "./evaluatorSummary";
+import { computeComplianceCoverage } from "./complianceCoverage";
+import { buildEuAiActBundleArtifacts, buildEuAiActComplianceBundle } from "./euAiActDossier";
 import { finalizeManifest, writeRedactionSummaryIfNeeded } from "./evaluatorFinalization";
+import { buildEuAiActPostMarketMonitoring, collectEuAiActMonitoring } from "./euAiActMonitoring";
 import { ingestTrendIfEnabled } from "./evaluatorTrend";
 import { HELP_TEXT } from "./evaluatorHelp";
 import { cleanupOldReports } from "./evaluatorRetention";
@@ -245,6 +251,7 @@ export async function runEvaluator(): Promise<void> {
   const complianceFile = getArg("--complianceProfile");
   let environment: Record<string, unknown> | undefined;
   let complianceMapping: ComplianceMappingEntry[] | undefined;
+  let complianceCoverageRequirements: ComplianceCoverageRequirement[] | undefined;
   try {
     environment = await loadEnvironmentContext({
       projectRoot,
@@ -256,11 +263,13 @@ export async function runEvaluator(): Promise<void> {
   }
 
   try {
-    complianceMapping = await loadComplianceMapping({
+    const complianceProfile = await loadComplianceProfile({
       projectRoot,
       maxMetaBytes,
       ...(complianceFile ? { complianceFile } : {}),
     });
+    complianceMapping = resolveComplianceMapping(complianceProfile);
+    complianceCoverageRequirements = resolveComplianceCoverageRequirements(complianceProfile);
   } catch {
     throw new CliUsageError(`Invalid --complianceProfile JSON file: ${String(complianceFile)}\n\n${HELP_TEXT}`);
   }
@@ -993,8 +1002,6 @@ export async function runEvaluator(): Promise<void> {
     items,
   });
 
-  await writeJsonAtomic(path.join(reportDirAbs, "compare-report.json"), report);
-
   await writeRedactionSummaryIfNeeded({
     reportDirAbs,
     redactionStatus,
@@ -1002,12 +1009,43 @@ export async function runEvaluator(): Promise<void> {
     redactionWarnings,
     manifestItems,
   });
-  const { thinIndex } = await finalizeManifest({
+  const { manifest, thinIndex } = await finalizeManifest({
     reportDirAbs,
     manifestItems,
   });
 
   report.embedded_manifest_index = thinIndex;
+  const complianceCoverage = computeComplianceCoverage({
+    report,
+    manifest,
+    requirements: complianceCoverageRequirements,
+  });
+  if (complianceCoverage?.length) {
+    report.compliance_coverage = complianceCoverage;
+  }
+  const euAiActBundleArtifacts = report.compliance_coverage?.some((entry) => entry.framework === "EU_AI_ACT")
+    ? buildEuAiActBundleArtifacts()
+    : undefined;
+  if (euAiActBundleArtifacts) {
+    report.compliance_exports = {
+      ...(report.compliance_exports ?? {}),
+      eu_ai_act: {
+        coverage_href: euAiActBundleArtifacts.coverage_href,
+        annex_iv_href: euAiActBundleArtifacts.annex_iv_href,
+        report_html_href: euAiActBundleArtifacts.report_html_href,
+        evidence_index_href: euAiActBundleArtifacts.evidence_index_href,
+        article_13_instructions_href: euAiActBundleArtifacts.article_13_instructions_href,
+        article_9_risk_register_href: euAiActBundleArtifacts.article_9_risk_register_href,
+        article_72_monitoring_plan_href: euAiActBundleArtifacts.article_72_monitoring_plan_href,
+        article_17_qms_lite_href: euAiActBundleArtifacts.article_17_qms_lite_href,
+        human_oversight_summary_href: euAiActBundleArtifacts.human_oversight_summary_href,
+        release_review_href: euAiActBundleArtifacts.release_review_href,
+        post_market_monitoring_href: euAiActBundleArtifacts.post_market_monitoring_href,
+      },
+    };
+  }
+
+  await writeJsonAtomic(path.join(reportDirAbs, "compare-report.json"), report);
 
   const html = renderHtmlReport(report);
   await writeFileAtomic(path.join(reportDirAbs, "report.html"), html, "utf-8");
@@ -1015,8 +1053,9 @@ export async function runEvaluator(): Promise<void> {
   console.log(`html report: ${normRel(projectRoot, path.join(reportDirAbs, "report.html"))}`);
   console.log(`compare report: ${normRel(projectRoot, path.join(reportDirAbs, "compare-report.json"))}`);
 
+  const trendIngestEnabled = !hasFlag("--no-trend");
   await ingestTrendIfEnabled({
-    enabled: !hasFlag("--no-trend"),
+    enabled: trendIngestEnabled,
     ...(getArg("--trend-db") ? { trendDbArg: getArg("--trend-db") as string } : {}),
     report,
     reportId,
@@ -1025,6 +1064,58 @@ export async function runEvaluator(): Promise<void> {
     newRunMeta: newRun.meta,
     responses: newRun.byId,
   });
+
+  if (euAiActBundleArtifacts) {
+    const postMarketMonitoring = buildEuAiActPostMarketMonitoring({
+      report,
+      bundleArtifacts: euAiActBundleArtifacts,
+      generatedAt: Date.now(),
+      collection: collectEuAiActMonitoring({
+        report,
+        trendIngestEnabled,
+        ...(getArg("--trend-db") ? { trendDbArg: getArg("--trend-db") as string } : {}),
+      }),
+    });
+    const euAiActBundle = buildEuAiActComplianceBundle({
+      report,
+      manifest,
+      postMarketMonitoring,
+      bundleArtifacts: euAiActBundleArtifacts,
+    });
+    if (euAiActBundle) {
+      const complianceDirAbs = path.join(reportDirAbs, "compliance");
+      await ensureDir(complianceDirAbs);
+      await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.coverage_href), euAiActBundle.coverageExport);
+      await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.annex_iv_href), euAiActBundle.annexIv);
+      await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.evidence_index_href), euAiActBundle.evidenceIndex);
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_13_instructions_href),
+        euAiActBundle.article13Instructions
+      );
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_9_risk_register_href),
+        euAiActBundle.article9RiskRegister
+      );
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_72_monitoring_plan_href),
+        euAiActBundle.article72MonitoringPlan
+      );
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_17_qms_lite_href),
+        euAiActBundle.article17QmsLite
+      );
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.human_oversight_summary_href),
+        euAiActBundle.humanOversightSummary
+      );
+      await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.release_review_href), euAiActBundle.releaseReview);
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.post_market_monitoring_href),
+        euAiActBundle.postMarketMonitoring
+      );
+      await writeFileAtomic(path.join(reportDirAbs, euAiActBundle.exports.report_html_href), euAiActBundle.reportHtml, "utf-8");
+    }
+  }
 
   const interruption = interruptedBy as { signal: "SIGINT" | "SIGTERM"; at: number } | null;
   if (interruption) {

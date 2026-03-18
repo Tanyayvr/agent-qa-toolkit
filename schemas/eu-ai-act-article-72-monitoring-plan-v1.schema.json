@@ -1,0 +1,156 @@
+{
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "document_scope",
+    "monitored_system",
+    "monitoring_objectives",
+    "data_sources",
+    "review_cadence",
+    "escalation_rules",
+    "corrective_action_loop",
+    "current_baseline",
+    "operator_inputs_required",
+    "residual_gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "coverage_href",
+        "annex_iv_href",
+        "report_html_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "document_scope": {
+      "type": "object",
+      "required": ["article", "generated_scope", "operator_inputs_required"],
+      "properties": {
+        "article": { "const": "Art_72" },
+        "generated_scope": { "const": "technical_monitoring_plan_scaffold" },
+        "operator_inputs_required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "monitored_system": {
+      "type": "object",
+      "required": [
+        "scope",
+        "monitoring_status",
+        "current_run_included_in_history",
+        "runs_in_window",
+        "prior_runs_in_window",
+        "monitored_case_count"
+      ],
+      "properties": {
+        "agent_id": { "type": "string" },
+        "model": { "type": "string" },
+        "scope": { "enum": ["agent_model", "unscoped"] },
+        "monitoring_status": {
+          "enum": ["history_current", "history_stale", "no_matching_history", "trend_unavailable"]
+        },
+        "current_run_included_in_history": { "type": "boolean" },
+        "runs_in_window": { "type": "number" },
+        "prior_runs_in_window": { "type": "number" },
+        "monitored_case_count": { "type": "number" }
+      }
+    },
+    "monitoring_objectives": { "type": "array", "items": { "type": "string" } },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "cadence", "artifact_hrefs"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "cadence": { "enum": ["per_release", "recurring", "event_driven"] },
+          "artifact_hrefs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "review_cadence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["trigger", "recommended_cadence", "rationale"],
+        "properties": {
+          "trigger": { "type": "string" },
+          "recommended_cadence": { "type": "string" },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "escalation_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "condition", "recommended_response", "required_roles", "artifact_hrefs"],
+        "properties": {
+          "id": { "type": "string" },
+          "condition": { "type": "string" },
+          "recommended_response": { "enum": ["monitor", "review", "block"] },
+          "required_roles": { "type": "array", "items": { "type": "string" } },
+          "artifact_hrefs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "corrective_action_loop": { "type": "array", "items": { "type": "string" } },
+    "current_baseline": {
+      "type": "object",
+      "required": [
+        "execution_quality_status",
+        "release_decision_status",
+        "drift_detected",
+        "drift_signals",
+        "approval_case_count",
+        "blocking_case_count"
+      ],
+      "properties": {
+        "execution_quality_status": { "enum": ["healthy", "degraded"] },
+        "release_decision_status": { "enum": ["approve", "approve_with_review", "reject"] },
+        "drift_detected": { "type": "boolean" },
+        "drift_signals": { "type": "array", "items": { "type": "string" } },
+        "approval_case_count": { "type": "number" },
+        "blocking_case_count": { "type": "number" },
+        "previous_run_report_id": { "type": "string" }
+      }
+    },
+    "operator_inputs_required": { "type": "array", "items": { "type": "string" } },
+    "residual_gaps": { "type": "array", "items": { "type": "string" } }
+  }
+}

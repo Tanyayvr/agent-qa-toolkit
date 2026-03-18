@@ -97,6 +97,40 @@ export type EnvironmentContext = {
   tools_version?: string;
 };
 
+export type ComplianceCoverageStatus = "covered" | "partial" | "missing";
+
+export type ComplianceCoverageEntry = {
+  framework: string;
+  clause: string;
+  title?: string;
+  status: ComplianceCoverageStatus;
+  status_cap?: ComplianceCoverageStatus;
+  required_evidence: string[];
+  required_evidence_present: string[];
+  required_evidence_missing: string[];
+  supporting_evidence: string[];
+  supporting_evidence_present: string[];
+  supporting_evidence_missing: string[];
+  residual_gaps?: string[];
+  notes?: string[];
+};
+
+export type ComplianceExports = {
+  eu_ai_act?: {
+    coverage_href: string;
+    annex_iv_href: string;
+    report_html_href: string;
+    evidence_index_href: string;
+    article_13_instructions_href: string;
+    article_9_risk_register_href: string;
+    article_72_monitoring_plan_href: string;
+    article_17_qms_lite_href: string;
+    human_oversight_summary_href: string;
+    release_review_href: string;
+    post_market_monitoring_href: string;
+  };
+};
+
 export type ItemAssertion = {
   name: string;
   pass: boolean;
@@ -241,6 +275,9 @@ export type CompareReport = {
     title?: string;
     evidence?: string[];
   }>;
+
+  compliance_coverage?: ComplianceCoverageEntry[];
+  compliance_exports?: ComplianceExports;
 
   items: Array<{
     case_id: string;

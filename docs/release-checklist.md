@@ -12,6 +12,8 @@
 - [ ] `npm test` (unit)
 - [ ] `SKIP_AUDIT=1 node scripts/demo-e2e.mjs --baseUrl http://localhost:8788 --skipAudit`
 - [ ] `npm run test:toolkit`
+- [ ] `npm run release:gate:agent-evidence`
+- [ ] `npm run release:gate:eu-ai-act`
 - [ ] `npm run release:gate:ci` (mandatory bundled release gate)
 
 ## Report Validation
@@ -28,6 +30,8 @@
 
 ## Packaging
 - [ ] `npm run pvip:pack`
+- [ ] `npm run demo:agent-evidence`
+- [ ] `npm run demo:eu-ai-act`
 - [ ] Docker compose starts (`docker-compose up --build`)
 - [ ] Dockerfile uses multi-stage + `npm ci --omit=dev`
 - [ ] `.dockerignore` excludes node_modules/.git/reports

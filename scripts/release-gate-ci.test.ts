@@ -25,6 +25,8 @@ describe("release-gate-ci", () => {
       toolkitBaseUrl: "http://127.0.0.1:9999",
       proofPort: 8811,
     });
+    expect(steps.some((s) => s.id === "agent_evidence_surface_gate")).toBe(true);
+    expect(steps.some((s) => s.id === "eu_ai_act_surface_gate")).toBe(true);
     expect(steps.some((s) => s.id === "conformance_signature")).toBe(true);
     const toolkit = steps.find((s) => s.id === "toolkit_tests");
     expect(toolkit?.args.join(" ")).toContain("--baseUrl http://127.0.0.1:9999 --runSuffix abc123");

@@ -4,13 +4,275 @@
       "framework": "EU_AI_ACT",
       "clause": "Art_9",
       "title": "Risk management system",
-      "evidence": ["compare-report.json.summary", "report.html"]
+      "evidence": [
+        "compare-report.json.summary.risk_summary",
+        "compare-report.json.items[].gate_recommendation",
+        "compare-report.json.items[].security",
+        "compare-report.json.summary.execution_quality.admissibility_kpi",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_10",
+      "title": "Data governance and data quality",
+      "evidence": [
+        "compare-report.json.summary.data_coverage",
+        "compare-report.json.quality_flags"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_11",
+      "title": "Technical documentation",
+      "evidence": [
+        "compare-report.json.summary",
+        "compare-report.json.environment",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Annex_IV",
+      "title": "Technical documentation dossier structure",
+      "evidence": [
+        "compare-report.json.summary",
+        "compare-report.json.items[]",
+        "artifacts/manifest.json"
+      ]
     },
     {
       "framework": "EU_AI_ACT",
       "clause": "Art_12",
-      "title": "Record‑keeping and logging",
-      "evidence": ["compare-report.json", "artifacts/manifest.json"]
+      "title": "Record-keeping and logging",
+      "evidence": [
+        "compare-report.json.items[].trace_integrity",
+        "compare-report.json.items[].artifacts",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_13",
+      "title": "Transparency and instructions for use",
+      "evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.cases_requiring_approval",
+        "compare-report.json.quality_flags",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_17",
+      "title": "Quality management system",
+      "evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.cases_requiring_approval",
+        "compare-report.json.summary.cases_block_recommended",
+        "compare-report.json.quality_flags",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_14",
+      "title": "Human oversight",
+      "evidence": [
+        "compare-report.json.summary.cases_requiring_approval",
+        "compare-report.json.items[].gate_recommendation",
+        "compare-report.json.items[].policy_evaluation"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_15",
+      "title": "Accuracy, robustness, and cybersecurity",
+      "evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.security",
+        "compare-report.json.items[].risk_level",
+        "compare-report.json.items[].security"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_72",
+      "title": "Post-market monitoring",
+      "evidence": [
+        "compare-report.json.summary_by_suite",
+        "compare-report.json.summary.execution_quality",
+        "report.html"
+      ]
+    }
+  ],
+  "coverage_requirements": [
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_9",
+      "title": "Risk management system",
+      "required_evidence": [
+        "compare-report.json.summary.risk_summary",
+        "compare-report.json.items[].gate_recommendation",
+        "compare-report.json.items[].security",
+        "compare-report.json.summary.execution_quality.admissibility_kpi"
+      ],
+      "supporting_evidence": [
+        "artifacts/manifest.json"
+      ],
+      "residual_gaps": [
+        "Operator-owned risk governance still sits outside the evaluator.",
+        "Annex III classification and legal interpretation still require counsel."
+      ],
+      "notes": [
+        "This clause is scored as runtime evidence coverage, not full legal conformity."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_10",
+      "title": "Data governance and data quality",
+      "required_evidence": [
+        "compare-report.json.environment.training_data_provenance"
+      ],
+      "supporting_evidence": [
+        "compare-report.json.summary.data_coverage",
+        "compare-report.json.quality_flags"
+      ],
+      "residual_gaps": [
+        "Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_11",
+      "title": "Technical documentation",
+      "required_evidence": [
+        "compare-report.json.summary",
+        "compare-report.json.environment",
+        "artifacts/manifest.json"
+      ],
+      "supporting_evidence": [
+        "compare-report.json.items[]"
+      ],
+      "residual_gaps": [
+        "The evaluator emits evidence inputs, not the full Article 11 technical file."
+      ],
+      "notes": [
+        "Use this output as an annex to a broader technical documentation package."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Annex_IV",
+      "title": "Technical documentation dossier structure",
+      "required_evidence": [
+        "compare-report.json.summary",
+        "compare-report.json.items[]",
+        "artifacts/manifest.json"
+      ],
+      "residual_gaps": [
+        "The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_12",
+      "title": "Record-keeping and logging",
+      "required_evidence": [
+        "compare-report.json.items[].trace_integrity",
+        "compare-report.json.items[].artifacts",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_13",
+      "title": "Transparency and instructions for use",
+      "required_evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.cases_requiring_approval",
+        "compare-report.json.quality_flags"
+      ],
+      "supporting_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.items[].gate_recommendation",
+        "report.html"
+      ],
+      "residual_gaps": [
+        "Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+        "Human oversight procedures for deployers still require operator-authored narrative."
+      ],
+      "notes": [
+        "This clause is scored as a technical instructions scaffold, not a finished instructions-for-use document."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_17",
+      "title": "Quality management system",
+      "required_evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.cases_requiring_approval",
+        "compare-report.json.summary.cases_block_recommended",
+        "compare-report.json.quality_flags"
+      ],
+      "supporting_evidence": [
+        "compare-report.json.summary_by_suite",
+        "report.html"
+      ],
+      "residual_gaps": [
+        "Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities."
+      ],
+      "notes": [
+        "This clause is scored as a technical QMS scaffold, not a complete quality management system."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_14",
+      "title": "Human oversight",
+      "required_evidence": [
+        "compare-report.json.summary.cases_requiring_approval",
+        "compare-report.json.items[].gate_recommendation",
+        "compare-report.json.items[].policy_evaluation"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_15",
+      "title": "Accuracy, robustness, and cybersecurity",
+      "required_evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.security",
+        "compare-report.json.items[].risk_level",
+        "compare-report.json.items[].security"
+      ],
+      "supporting_evidence": [
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_72",
+      "title": "Post-market monitoring",
+      "required_evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary_by_suite"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities."
+      ],
+      "status_cap": "partial"
     }
   ]
 }

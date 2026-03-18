@@ -1,0 +1,62 @@
+{
+  "manifest_version": "v1",
+  "generated_at": 1773861437284,
+  "items": [
+    {
+      "manifest_key": "c-approval/baseline/case_response",
+      "rel_path": "assets/raw/case_responses/c-approval/baseline.json",
+      "media_type": "application/json",
+      "bytes": 282,
+      "sha256": "1a973f0617cac294b64612626b3e38c61625f0a04a8805ace1084458ee2a8f49"
+    },
+    {
+      "manifest_key": "c-approval/new/case_response",
+      "rel_path": "assets/raw/case_responses/c-approval/new.json",
+      "media_type": "application/json",
+      "bytes": 341,
+      "sha256": "10f8187c5238e6382e6df917f86c6d995604b75da5db872564d90e8e0d38f2f4"
+    },
+    {
+      "manifest_key": "c-approval/baseline/final_output",
+      "rel_path": "assets/final_output/c-approval/baseline.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    },
+    {
+      "manifest_key": "c-approval/new/final_output",
+      "rel_path": "assets/final_output/c-approval/new.json",
+      "media_type": "application/json",
+      "bytes": 79,
+      "sha256": "f2bf3fe080e98d3e2e2988576eb6470523dada052c4119ff967eb48fb4bb3e5b"
+    },
+    {
+      "manifest_key": "c-block/baseline/case_response",
+      "rel_path": "assets/raw/case_responses/c-block/baseline.json",
+      "media_type": "application/json",
+      "bytes": 279,
+      "sha256": "1c1d8d25ab79242bdda0f3c74ce5be87531ab3515b28354f7975c332b8fe4c08"
+    },
+    {
+      "manifest_key": "c-block/new/case_response",
+      "rel_path": "assets/raw/case_responses/c-block/new.json",
+      "media_type": "application/json",
+      "bytes": 763,
+      "sha256": "40e639e6ae88bb2df9498c5831fb0034ea634300511e03c2aa525aab9c9b51b3"
+    },
+    {
+      "manifest_key": "c-block/baseline/final_output",
+      "rel_path": "assets/final_output/c-block/baseline.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    },
+    {
+      "manifest_key": "c-block/new/final_output",
+      "rel_path": "assets/final_output/c-block/new.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    }
+  ]
+}

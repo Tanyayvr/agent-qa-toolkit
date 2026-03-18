@@ -89,7 +89,7 @@ The production path is now more than runner plus evaluator. The toolkit supports
 3. **Adapter onboarding** — prove the live adapter can satisfy `/run-case` expectations and persist `adapter-capability.json`
 4. **Run comparability** — verify baseline/new structural comparability and persist `run-fingerprint.json`
 5. **Package evidence** — build the portable Evidence Pack
-6. **Review handoff** — scaffold and validate `review/review-decision.json` and `review/handoff-note.md`
+6. **Review handoff** — scaffold and validate `review/review-decision.json` and `review/handoff-note.md`, then sync recurring `corrective-action-register.json` continuity when intake is attached
 
 This makes the release workflow reproducible instead of team-memory-driven.
 

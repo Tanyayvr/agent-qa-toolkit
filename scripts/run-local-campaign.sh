@@ -86,6 +86,7 @@ AQ_MIN_PRE_ACTION_ENTROPY_REMOVED="${AQ_MIN_PRE_ACTION_ENTROPY_REMOVED:-0}"
 AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK="${AQ_MIN_RECON_MINUTES_SAVED_PER_BLOCK:-0}"
 AGENT_RUNTIME_CLASS="${AGENT_RUNTIME_CLASS:-generic}"
 AGENT_RUN_MODE="${AGENT_RUN_MODE:-}"
+AGENT_RUNTIME_STATE_PATH="${AGENT_RUNTIME_STATE_PATH:-}"
 DIAGNOSTIC_RECOMMEND_RUNTIME_MS="${DIAGNOSTIC_RECOMMEND_RUNTIME_MS:-5400000}"
 CALIBRATION_MODE="${CALIBRATION_MODE:-auto}"   # auto | always | off
 CALIBRATION_CASES="${CALIBRATION_CASES:-}"
@@ -464,21 +465,27 @@ write_runtime_plan_file() {
   local cases_path="$3"
   local timeout_profile="$4"
   local timeout_ms="$5"
-  local timeout_auto_min_success_samples="$6"
-  local timeout_auto_max_increase_factor="$7"
-  local retries="$8"
-  local concurrency="$9"
-  local sample_count="${10}"
-  local max_cases="${11:-0}"
+  local first_run_seed_timeout_ms="$6"
+  local timeout_auto_cap_ms="$7"
+  local timeout_auto_lookback_runs="$8"
+  local timeout_auto_min_success_samples="$9"
+  local timeout_auto_max_increase_factor="${10}"
+  local retries="${11}"
+  local concurrency="${12}"
+  local sample_count="${13}"
+  local max_cases="${14:-0}"
 
   node "${SCRIPT_DIR}/runtime-advisor.mjs" plan \
     --mode "${mode}" \
     --cases "${cases_path}" \
     --outDir "${OUT_DIR}" \
+    --reportsDir "${REPORTS_DIR}" \
+    --profileName "${AGENT_PROFILE_NAME:-manual}" \
     --timeoutProfile "${timeout_profile}" \
     --timeoutMs "${timeout_ms}" \
-    --timeoutAutoCapMs "${TIMEOUT_AUTO_CAP_MS}" \
-    --timeoutAutoLookbackRuns "${TIMEOUT_AUTO_LOOKBACK_RUNS}" \
+    --firstRunSeedTimeoutMs "${first_run_seed_timeout_ms}" \
+    --timeoutAutoCapMs "${timeout_auto_cap_ms}" \
+    --timeoutAutoLookbackRuns "${timeout_auto_lookback_runs}" \
     --timeoutAutoMinSuccessSamples "${timeout_auto_min_success_samples}" \
     --timeoutAutoMaxIncreaseFactor "${timeout_auto_max_increase_factor}" \
     --sampleCount "${sample_count}" \
@@ -499,12 +506,15 @@ write_runtime_recommendation_file() {
   local cases_path="$5"
   local timeout_profile="$6"
   local timeout_ms="$7"
-  local timeout_auto_min_success_samples="$8"
-  local timeout_auto_max_increase_factor="$9"
-  local retries="${10}"
-  local concurrency="${11}"
-  local sample_count="${12}"
-  local max_cases="${13:-0}"
+  local first_run_seed_timeout_ms="$8"
+  local timeout_auto_cap_ms="$9"
+  local timeout_auto_lookback_runs="${10}"
+  local timeout_auto_min_success_samples="${11}"
+  local timeout_auto_max_increase_factor="${12}"
+  local retries="${13}"
+  local concurrency="${14}"
+  local sample_count="${15}"
+  local max_cases="${16:-0}"
 
   node "${SCRIPT_DIR}/runtime-advisor.mjs" recommend \
     --stage "${stage}" \
@@ -512,10 +522,13 @@ write_runtime_recommendation_file() {
     --compare "${compare_path}" \
     --cases "${cases_path}" \
     --outDir "${OUT_DIR}" \
+    --reportsDir "${REPORTS_DIR}" \
+    --profileName "${AGENT_PROFILE_NAME:-manual}" \
     --timeoutProfile "${timeout_profile}" \
     --timeoutMs "${timeout_ms}" \
-    --timeoutAutoCapMs "${TIMEOUT_AUTO_CAP_MS}" \
-    --timeoutAutoLookbackRuns "${TIMEOUT_AUTO_LOOKBACK_RUNS}" \
+    --firstRunSeedTimeoutMs "${first_run_seed_timeout_ms}" \
+    --timeoutAutoCapMs "${timeout_auto_cap_ms}" \
+    --timeoutAutoLookbackRuns "${timeout_auto_lookback_runs}" \
     --timeoutAutoMinSuccessSamples "${timeout_auto_min_success_samples}" \
     --timeoutAutoMaxIncreaseFactor "${timeout_auto_max_increase_factor}" \
     --sampleCount "${sample_count}" \
@@ -524,6 +537,8 @@ write_runtime_recommendation_file() {
     --runtimeClass "${AGENT_RUNTIME_CLASS}" \
     --diagnosticThresholdMs "${DIAGNOSTIC_RECOMMEND_RUNTIME_MS}" \
     --maxCases "${max_cases}" \
+    --runtimeStatePath "${AGENT_RUNTIME_STATE_PATH}" \
+    --persistRuntimeState 1 \
     --out "${out_path}" >/dev/null
   echo "Next envelope JSON: ${out_path}"
 }
@@ -603,8 +618,8 @@ if (suggested) {
     envPrefix.push(`SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR=${suggested.timeout_auto_max_increase_factor}`);
   } else if (recommendedMode === "quick") {
     envPrefix.push(`SMOKE_TIMEOUT_MS=${suggested.timeout_ms}`);
-    envPrefix.push(`TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
-    envPrefix.push(`TIMEOUT_AUTO_MAX_INCREASE_FACTOR=${suggested.timeout_auto_max_increase_factor}`);
+    envPrefix.push(`SMOKE_TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
+    envPrefix.push(`SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR=${suggested.timeout_auto_max_increase_factor}`);
   } else if (recommendedMode === "full-lite") {
     envPrefix.push(`FULL_LITE_TIMEOUT_MS=${suggested.timeout_ms}`);
     envPrefix.push(`FULL_LITE_TIMEOUT_AUTO_CAP_MS=${suggested.timeout_auto_cap_ms}`);
@@ -628,9 +643,13 @@ NODE
 history_summary_json() {
   local cases_path="$1"
   node "${SCRIPT_DIR}/timeout-history-summary.mjs" \
-    --outDir "${OUT_DIR}" \
+    --reportsDir "${REPORTS_DIR}" \
     --cases "${cases_path}" \
-    --lookbackRuns "${TIMEOUT_AUTO_LOOKBACK_RUNS}"
+    --profileName "${AGENT_PROFILE_NAME:-manual}" \
+    --mode "quick" \
+    --runtimeClass "${AGENT_RUNTIME_CLASS}" \
+    --lookbackRuns "${SMOKE_TIMEOUT_AUTO_LOOKBACK_RUNS}" \
+    --minSuccessSamples "${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
 }
 
 should_run_calibration() {
@@ -854,6 +873,9 @@ run_staged_flow() {
         "${smoke_cases_path}" \
         "${SMOKE_TIMEOUT_PROFILE}" \
         "${SMOKE_TIMEOUT_MS}" \
+        "${SMOKE_TIMEOUT_MS}" \
+        "${SMOKE_TIMEOUT_AUTO_CAP_MS}" \
+        "${SMOKE_TIMEOUT_AUTO_LOOKBACK_RUNS}" \
         "${SMOKE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}" \
         "${SMOKE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR}" \
         "${SMOKE_RETRIES}" \
@@ -884,6 +906,9 @@ run_staged_flow() {
   local plan_max_cases="0"
   local plan_timeout_profile="${TIMEOUT_PROFILE}"
   local plan_timeout_ms="${TIMEOUT_MS}"
+  local plan_first_run_seed_timeout_ms="${TIMEOUT_MS}"
+  local plan_timeout_auto_cap_ms="${TIMEOUT_AUTO_CAP_MS}"
+  local plan_timeout_auto_lookback_runs="${TIMEOUT_AUTO_LOOKBACK_RUNS}"
   local plan_timeout_auto_min_success_samples="${TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
   local plan_timeout_auto_max_increase_factor="${TIMEOUT_AUTO_MAX_INCREASE_FACTOR}"
   local plan_retries="${RETRIES}"
@@ -895,6 +920,9 @@ run_staged_flow() {
     plan_max_cases="${FULL_LITE_MAX_CASES}"
     plan_timeout_profile="${FULL_LITE_TIMEOUT_PROFILE}"
     plan_timeout_ms="${FULL_LITE_TIMEOUT_MS}"
+    plan_first_run_seed_timeout_ms="${FULL_LITE_TIMEOUT_MS}"
+    plan_timeout_auto_cap_ms="${FULL_LITE_TIMEOUT_AUTO_CAP_MS}"
+    plan_timeout_auto_lookback_runs="${FULL_LITE_TIMEOUT_AUTO_LOOKBACK_RUNS}"
     plan_timeout_auto_min_success_samples="${FULL_LITE_TIMEOUT_AUTO_MIN_SUCCESS_SAMPLES}"
     plan_timeout_auto_max_increase_factor="${FULL_LITE_TIMEOUT_AUTO_MAX_INCREASE_FACTOR}"
     plan_retries="${FULL_LITE_RETRIES}"
@@ -908,6 +936,9 @@ run_staged_flow() {
     "${plan_cases_path}" \
     "${plan_timeout_profile}" \
     "${plan_timeout_ms}" \
+    "${plan_first_run_seed_timeout_ms}" \
+    "${plan_timeout_auto_cap_ms}" \
+    "${plan_timeout_auto_lookback_runs}" \
     "${plan_timeout_auto_min_success_samples}" \
     "${plan_timeout_auto_max_increase_factor}" \
     "${plan_retries}" \
@@ -1058,6 +1089,9 @@ run_staged_flow() {
         "${promoted_cases_path}" \
         "${promoted_timeout_profile}" \
         "${promoted_timeout_ms}" \
+        "${promoted_timeout_ms}" \
+        "${promoted_timeout_auto_cap_ms}" \
+        "${promoted_timeout_auto_lookback_runs}" \
         "${promoted_timeout_auto_min_success_samples}" \
         "${promoted_timeout_auto_max_increase_factor}" \
         "${promoted_retries}" \

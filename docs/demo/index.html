@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Surface Demos</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --panel: #fffaf1;
+      --ink: #1f1a16;
+      --muted: #6f6358;
+      --border: #d7c8b2;
+      --accent: #0d6b57;
+      --accent-2: #9f3d20;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(13, 107, 87, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(159, 61, 32, 0.10), transparent 24%),
+        linear-gradient(180deg, #f7f2e9 0%, var(--bg) 100%);
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+    .hero {
+      display: grid;
+      gap: 12px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(255, 250, 241, 0.92);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 20px 50px rgba(31, 26, 22, 0.08);
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.5;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .surface-grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 22px;
+    }
+    .card {
+      display: grid;
+      gap: 18px;
+      padding: 24px;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: 0 16px 40px rgba(31, 26, 22, 0.06);
+    }
+    .card-head h2 {
+      margin: 4px 0 8px;
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+    }
+    .eyebrow {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+    .tagline {
+      margin: 0;
+      color: var(--muted);
+      max-width: 720px;
+    }
+    .metrics {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .metric {
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(215, 200, 178, 0.9);
+      background: rgba(255, 255, 255, 0.65);
+    }
+    .metric span {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 1.1rem;
+    }
+    .commands {
+      display: grid;
+      gap: 10px;
+    }
+    code {
+      display: block;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #1f1a16;
+      color: #f7f2e9;
+      overflow-x: auto;
+      font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+      font-size: 0.92rem;
+    }
+    .artifact-list {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+    }
+    a {
+      color: var(--accent-2);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.14em;
+    }
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Website Proof Surface</p>
+      <h1>Product Surface Demos</h1>
+      <p>These published bundles are deterministic proof artifacts for the two commercial surfaces: the core Agent Evidence Platform and the EU AI Act Evidence Engine vertical. Each card links to the exact HTML and JSON outputs the website can reference.</p>
+      <p><a href="product-surfaces.json">Open machine-readable index</a></p>
+    </section>
+    <div class="surface-grid">
+    <section class="card">
+      <div class="card-head">
+        <p class="eyebrow">agent-evidence</p>
+        <h2>Agent Evidence Platform</h2>
+        <p class="tagline">Portable release evidence for tool-using AI agents.</p>
+      </div>
+      <div class="metrics"><div class="metric"><span>Cases</span><strong>2</strong></div><div class="metric"><span>Approvals</span><strong>1</strong></div><div class="metric"><span>Blocks</span><strong>1</strong></div><div class="metric"><span>Execution</span><strong>healthy</strong></div></div>
+      <div class="commands">
+        <code>npm run demo:agent-evidence</code>
+        <code>npm run release:gate:agent-evidence</code>
+      </div>
+      <ul class="artifact-list"><li><a href="agent-evidence/report.html">report_html</a></li><li><a href="agent-evidence/compare-report.json">compare_report</a></li><li><a href="agent-evidence/artifacts/manifest.json">manifest</a></li></ul>
+    </section>
+  
+
+    <section class="card">
+      <div class="card-head">
+        <p class="eyebrow">eu-ai-act</p>
+        <h2>EU AI Act Evidence Engine</h2>
+        <p class="tagline">Dossier-ready technical evidence for EU-facing AI governance workflows.</p>
+      </div>
+      <div class="metrics"><div class="metric"><span>Cases</span><strong>2</strong></div><div class="metric"><span>Approvals</span><strong>1</strong></div><div class="metric"><span>Blocks</span><strong>1</strong></div><div class="metric"><span>Execution</span><strong>healthy</strong></div><div class="metric"><span>Monitoring</span><strong>history_current</strong></div></div>
+      <div class="commands">
+        <code>npm run demo:eu-ai-act</code>
+        <code>npm run release:gate:eu-ai-act</code>
+      </div>
+      <ul class="artifact-list"><li><a href="eu-ai-act/report.html">report_html</a></li><li><a href="eu-ai-act/compare-report.json">compare_report</a></li><li><a href="eu-ai-act/artifacts/manifest.json">manifest</a></li><li><a href="eu-ai-act/compliance/eu-ai-act-report.html">dossier_html</a></li><li><a href="eu-ai-act/compliance/eu-ai-act-coverage.json">coverage</a></li><li><a href="eu-ai-act/compliance/eu-ai-act-annex-iv.json">annex_iv</a></li><li><a href="eu-ai-act/compliance/evidence-index.json">evidence_index</a></li><li><a href="eu-ai-act/compliance/article-13-instructions.json">article_13_instructions</a></li><li><a href="eu-ai-act/compliance/article-9-risk-register.json">article_9_risk_register</a></li><li><a href="eu-ai-act/compliance/article-72-monitoring-plan.json">article_72_monitoring_plan</a></li><li><a href="eu-ai-act/compliance/article-17-qms-lite.json">article_17_qms_lite</a></li><li><a href="eu-ai-act/compliance/human-oversight-summary.json">human_oversight_summary</a></li><li><a href="eu-ai-act/compliance/release-review.json">release_review</a></li><li><a href="eu-ai-act/compliance/post-market-monitoring.json">post_market_monitoring</a></li></ul>
+    </section>
+  </div>
+    <p class="footer">Published 2026-03-18T19:17:27.601Z</p>
+  </main>
+</body>
+</html>

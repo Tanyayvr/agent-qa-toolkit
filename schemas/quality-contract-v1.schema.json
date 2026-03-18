@@ -1,0 +1,366 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "quality-contract-v1.schema.json",
+  "title": "Quality Contract Intake v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "system_id",
+    "critical_tasks",
+    "prohibited_behaviors",
+    "risky_actions",
+    "telemetry_requirements",
+    "case_requirements",
+    "human_review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "system_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "critical_tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "description",
+          "priority",
+          "expected_gate",
+          "required_tools",
+          "tool_sequence",
+          "scenario_variants",
+          "expected_output",
+          "require_assumption_state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium"
+            ]
+          },
+          "expected_gate": {
+            "type": "string",
+            "enum": [
+              "none",
+              "require_approval",
+              "block"
+            ]
+          },
+          "required_tools": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "tool_sequence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "scenario_variants": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "positive",
+                "boundary",
+                "ambiguous",
+                "retry",
+                "handoff"
+              ]
+            }
+          },
+          "expected_output": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "content_type",
+              "required_concepts",
+              "forbidden_concepts",
+              "must_include",
+              "must_not_include"
+            ],
+            "properties": {
+              "content_type": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "json"
+                ]
+              },
+              "json_schema": {},
+              "required_concepts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/conceptGroup"
+                }
+              },
+              "forbidden_concepts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/conceptGroup"
+                }
+              },
+              "must_include": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "must_not_include": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "require_assumption_state": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "prohibited_behaviors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "severity",
+          "refuse_or_block",
+          "related_tools"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium"
+            ]
+          },
+          "refuse_or_block": {
+            "type": "string",
+            "enum": [
+              "refuse",
+              "block",
+              "require_approval"
+            ]
+          },
+          "related_tools": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "risky_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "action_type",
+          "description",
+          "default_gate",
+          "required_evidence",
+          "related_tools"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default_gate": {
+            "type": "string",
+            "enum": [
+              "require_approval",
+              "block"
+            ]
+          },
+          "required_evidence": {
+            "type": "boolean"
+          },
+          "related_tools": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "telemetry_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require_events",
+        "require_trace_anchor",
+        "require_assumption_state",
+        "require_tool_call_result_pairs"
+      ],
+      "properties": {
+        "require_events": {
+          "type": "boolean"
+        },
+        "require_trace_anchor": {
+          "type": "boolean"
+        },
+        "require_assumption_state": {
+          "type": "boolean"
+        },
+        "require_tool_call_result_pairs": {
+          "type": "boolean"
+        }
+      }
+    },
+    "case_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_case_count",
+        "minimum_negative_case_ratio",
+        "minimum_semantic_case_ratio",
+        "require_boundary_cases",
+        "require_refusal_cases",
+        "require_tool_sequence_cases",
+        "require_retry_cases",
+        "require_handoff_cases"
+      ],
+      "properties": {
+        "minimum_case_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimum_negative_case_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimum_semantic_case_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "require_boundary_cases": {
+          "type": "boolean"
+        },
+        "require_refusal_cases": {
+          "type": "boolean"
+        },
+        "require_tool_sequence_cases": {
+          "type": "boolean"
+        },
+        "require_retry_cases": {
+          "type": "boolean"
+        },
+        "require_handoff_cases": {
+          "type": "boolean"
+        }
+      }
+    },
+    "human_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "residual_risk_owner",
+        "approval_rationale_required",
+        "notes"
+      ],
+      "properties": {
+        "residual_risk_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_rationale_required": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "conceptGroup": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    }
+  }
+}

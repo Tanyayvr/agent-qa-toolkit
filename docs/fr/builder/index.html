@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Builder EU AI Act</title>
+  <meta name="description" content="Wizard pas a pas pour le profil systeme, le screening de risque et le package documentaire." />
+  
+  <link rel="canonical" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/builder/" />
+  <link rel="alternate" hreflang="en" href="https://tanyayvr.github.io/agent-qa-toolkit/en/builder/" />
+<link rel="alternate" hreflang="de" href="https://tanyayvr.github.io/agent-qa-toolkit/de/builder/" />
+<link rel="alternate" hreflang="fr" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/builder/" />
+  <link rel="alternate" hreflang="x-default" href="https://tanyayvr.github.io/agent-qa-toolkit/en/" />
+  <link rel="stylesheet" href="../../site-assets/site.css" />
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="site-shell">
+    
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="../">
+          <span class="brand-mark">EU</span>
+          <span class="brand-copy">
+            <span class="brand-title">EU AI Evidence</span>
+            <span class="brand-subtitle">Documentation builder for Agent QA Toolkit</span>
+          </span>
+        </a>
+        <nav class="header-nav" aria-label="Primary">
+          <a href="../how-it-works/">Fonctionnement</a>
+          <a href="../technical/">Technique</a>
+          <a href="../templates/">Modeles</a>
+          <a href="../pricing/">Tarifs</a>
+          <a href="../docs/">Docs</a>
+          <a class="button" href="./" data-track-event="header_start_free">Commencer</a>
+          <label class="sr-only" for="locale-switcher">Language</label>
+          <select id="locale-switcher" class="locale-switch" data-locale-switcher>
+            <option value="../../en/builder/" >English</option><option value="../../de/builder/" >Deutsch</option><option value="./" selected>Français</option>
+          </select>
+        </nav>
+      </div>
+    </header>
+  
+    <main id="main">
+      
+    <section class="section">
+      <div class="container split-grid">
+        <div class="fade-up">
+          <p class="eyebrow">Builder</p>
+          <h1>Construisez votre package documentaire</h1>
+          <p class="lead">Le Builder est gratuit pour la structure. Les preuves techniques sont branchees la ou elles sont necessaires.</p>
+        </div>
+        <aside class="proof-card fade-up">
+          <p class="eyebrow">Live proof</p>
+          <h3>EU AI Act Evidence Engine</h3>
+          <div class="metric-grid">
+            <div class="metric"><span>Cases</span><strong>2</strong></div>
+            <div class="metric"><span>Approvals</span><strong>1</strong></div>
+            <div class="metric"><span>Blocks</span><strong>1</strong></div>
+            <div class="metric"><span>Portable</span><strong>true</strong></div>
+          </div>
+          <a class="button-ghost" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Open dossier demo</a>
+        </aside>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container builder-shell" id="builder-root">
+        <div class="builder-progress"><div class="builder-progress-bar"></div></div>
+        <div class="builder-layout">
+          <div class="builder-main">
+            <div class="builder-panel">
+              <p class="eyebrow" data-builder-step-counter></p>
+              <h2 data-builder-step-title></h2>
+            </div>
+            <div class="builder-main" data-builder-step-body></div>
+            <div class="builder-nav">
+              <button class="button-soft" type="button" data-builder-prev>Back</button>
+              <button class="button" type="button" data-builder-next>Next step</button>
+            </div>
+          </div>
+          <aside class="builder-sidebar" data-builder-summary></aside>
+        </div>
+        <script id="builder-config" type="application/json">{&quot;copy&quot;:{&quot;locale&quot;:&quot;fr&quot;,&quot;stepLabel&quot;:&quot;Step&quot;,&quot;ofLabel&quot;:&quot;of&quot;,&quot;nextLabel&quot;:&quot;Next step&quot;,&quot;finishLabel&quot;:&quot;Done&quot;,&quot;summaryEyebrow&quot;:&quot;Summary&quot;,&quot;summaryTitle&quot;:&quot;Preliminary risk screening&quot;,&quot;evidenceEyebrow&quot;:&quot;Evidence preview&quot;,&quot;evidenceTitle&quot;:&quot;What Agent QA Toolkit can attach&quot;,&quot;selectPlaceholder&quot;:&quot;Select an option&quot;,&quot;disclaimer&quot;:&quot;This is a preliminary screening. It does not replace legal review by qualified counsel.&quot;,&quot;classifications&quot;:{&quot;high&quot;:&quot;HIGH RISK&quot;,&quot;limited&quot;:&quot;LIMITED RISK&quot;,&quot;minimal&quot;:&quot;MINIMAL RISK&quot;},&quot;rationale&quot;:{&quot;high&quot;:&quot;Your answers suggest a system that affects people in a regulated context or under Annex III-style categories.&quot;,&quot;limited&quot;:&quot;Your answers suggest a system with transparency obligations but a lower direct impact profile.&quot;,&quot;minimal&quot;:&quot;Your answers suggest a lower-risk profile, but documentation and review can still be valuable.&quot;,&quot;autonomous&quot;:&quot;Autonomous decision impact plus EU deployment usually deserves a high-risk review path.&quot;},&quot;stepTitles&quot;:{&quot;step1&quot;:&quot;Tell us about your AI system&quot;,&quot;step2&quot;:&quot;Your preliminary risk classification&quot;,&quot;step3&quot;:&quot;Article 9 - Risk management&quot;,&quot;step4&quot;:&quot;Articles 12 and 14 - Logging and oversight&quot;,&quot;step5&quot;:&quot;Download your package&quot;},&quot;fields&quot;:{&quot;systemType&quot;:&quot;Que fait votre systeme d'IA ?&quot;,&quot;memberStates&quot;:&quot;Ou sera-t-il deploye ?&quot;,&quot;usedByEuResidents&quot;:&quot;Utilise par des residents de l'UE ?&quot;,&quot;autonomousDecisions&quot;:&quot;Prend-il des decisions autonomes affectant des personnes ?&quot;,&quot;risks&quot;:&quot;Quels risques avez-vous identifies ?&quot;,&quot;mitigations&quot;:&quot;Quelles mesures de mitigation existent ?&quot;,&quot;logging&quot;:&quot;Comment decrivez-vous le logging et la tracabilite ?&quot;,&quot;oversight&quot;:&quot;Comment la supervision humaine fonctionne-t-elle ?&quot;},&quot;packageSections&quot;:{&quot;profile&quot;:&quot;System profile&quot;,&quot;risk&quot;:&quot;Risk classification&quot;,&quot;article9&quot;:&quot;Article 9 draft&quot;,&quot;oversight&quot;:&quot;Articles 12 and 14 draft&quot;,&quot;evidence&quot;:&quot;Evidence references&quot;},&quot;packageChecklist&quot;:{&quot;done&quot;:[&quot;Brouillon Article 9&quot;,&quot;Brouillon Article 12 logging&quot;,&quot;Brouillon Article 14 oversight&quot;,&quot;Package pret a imprimer&quot;],&quot;todo&quot;:[&quot;Workflow de preuve (self-serve via GitHub ou setup payant)&quot;,&quot;Export audit (apres setup / Team ou plus)&quot;]},&quot;packageTitle&quot;:&quot;EU AI Act Documentation Package&quot;,&quot;packageDisclaimer&quot;:&quot;This package is a documentation draft generated in the browser. Save it as PDF from the browser print dialog, then attach live technical evidence where required.&quot;,&quot;requiredArticles&quot;:&quot;Required articles&quot;,&quot;evidencePlaceholder&quot;:&quot;Technical evidence is strongest for Articles 9, 12, 14, 15, and Annex IV references. Use the live proof surface for that part of the package.&quot;,&quot;getEvidence&quot;:&quot;Reserver le Launch Pack&quot;,&quot;openProof&quot;:&quot;Open live proof&quot;,&quot;openDocs&quot;:&quot;Open docs&quot;,&quot;downloadJson&quot;:&quot;Download JSON&quot;,&quot;openPrintable&quot;:&quot;Open print-ready package&quot;,&quot;exportHint&quot;:&quot;Save the printable package as PDF from your browser if you need a handoff document now.&quot;,&quot;placeholderText&quot;:&quot;Add your team narrative here.&quot;,&quot;yes&quot;:&quot;Oui&quot;,&quot;no&quot;:&quot;Non&quot;,&quot;systemTypes&quot;:[{&quot;value&quot;:&quot;hr&quot;,&quot;label&quot;:&quot;RH / Recrutement&quot;},{&quot;value&quot;:&quot;credit&quot;,&quot;label&quot;:&quot;Credit / decisions financieres&quot;},{&quot;value&quot;:&quot;healthcare&quot;,&quot;label&quot;:&quot;Sante&quot;},{&quot;value&quot;:&quot;education&quot;,&quot;label&quot;:&quot;Education&quot;},{&quot;value&quot;:&quot;customer-service&quot;,&quot;label&quot;:&quot;Service client / chatbot&quot;},{&quot;value&quot;:&quot;other&quot;,&quot;label&quot;:&quot;Autre&quot;}],&quot;memberStates&quot;:[&quot;DE&quot;,&quot;FR&quot;,&quot;NL&quot;,&quot;SE&quot;,&quot;IE&quot;,&quot;EE&quot;],&quot;placeholders&quot;:{&quot;risks&quot;:&quot;Describe the main harms, failure modes, and affected users.&quot;,&quot;mitigations&quot;:&quot;Describe current controls, approvals, and technical guardrails.&quot;,&quot;logging&quot;:&quot;Explain what is recorded, how events are linked, and how retention works.&quot;,&quot;oversight&quot;:&quot;Explain who reviews escalations and what actions humans can stop or approve.&quot;},&quot;ctaRiskEyebrow&quot;:&quot;Evidence required&quot;,&quot;ctaRiskTitle&quot;:&quot;This section requires machine-verifiable evidence&quot;,&quot;ctaRiskBody&quot;:&quot;Article 9 is stronger when the package can point to recent risk testing, gate recommendations, and scanner results.&quot;,&quot;ctaRiskPoints&quot;:[&quot;Risk scores per test case&quot;,&quot;Gate recommendations&quot;,&quot;Security scan results&quot;,&quot;Portable evidence bundle&quot;],&quot;ctaOversightEyebrow&quot;:&quot;Logging and oversight&quot;,&quot;ctaOversightTitle&quot;:&quot;Logging and approval paths should point to real artifacts&quot;,&quot;ctaOversightBody&quot;:&quot;Use a live evidence pack for trace anchors, structured events, and approval-ready review exports.&quot;,&quot;links&quot;:{&quot;pricing&quot;:&quot;../pricing/&quot;,&quot;proof&quot;:&quot;../../demo/eu-ai-act/compliance/eu-ai-act-report.html&quot;,&quot;docs&quot;:&quot;../docs/&quot;},&quot;metrics&quot;:{&quot;approvals&quot;:&quot;Approvals&quot;,&quot;blocks&quot;:&quot;Blocks&quot;,&quot;runs&quot;:&quot;Runs in window&quot;,&quot;execution&quot;:&quot;Execution&quot;}},&quot;evidenceSummary&quot;:{&quot;approvals&quot;:1,&quot;blocks&quot;:1,&quot;runsInWindow&quot;:2,&quot;executionQuality&quot;:&quot;healthy&quot;}}</script>
+      </div>
+    </section>
+  
+    </main>
+    
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; 2026 EU AI Evidence Builder</p>
+        <div class="footer-links">
+          <a href="../privacy/">Confidentialite</a>
+          <a href="../terms/">Conditions</a>
+          <a href="../disclaimer/">Avertissement</a>
+          <a href="../cookies/">Cookies</a>
+          <a href="../contact/">Contact</a>
+          <a href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+    </footer>
+  
+  </div>
+  
+    <div class="cookie-banner" data-cookie-banner>
+      <div>
+        <strong>Parametres des cookies</strong>
+        <p class="muted">This site uses only essential storage by default. Analytics can be enabled later with EU-hosted Plausible.</p>
+      </div>
+      <div class="button-row">
+        <button class="button-soft" type="button" data-cookie-choice="essential">Essential only</button>
+        <button class="button" type="button" data-cookie-choice="analytics">Allow analytics</button>
+      </div>
+    </div>
+  
+  <script src="../../site-assets/site.js" defer></script>
+  <script src="../../site-assets/builder.js" defer></script>
+</body>
+</html>

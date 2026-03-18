@@ -179,11 +179,26 @@ describe("evaluatorSummary", () => {
         large_payloads: [],
       },
       complianceMapping: [{ framework: "ISO", clause: "A.1" }],
+      complianceCoverage: [
+        {
+          framework: "EU_AI_ACT",
+          clause: "Art_9",
+          title: "Risk management",
+          status: "covered",
+          required_evidence: ["compare-report.json.summary.risk_summary"],
+          required_evidence_present: ["compare-report.json.summary.risk_summary"],
+          required_evidence_missing: [],
+          supporting_evidence: [],
+          supporting_evidence_present: [],
+          supporting_evidence_missing: [],
+        },
+      ],
       items: [],
     });
 
     expect(report.report_id).toBe("r1");
     expect(report.compliance_mapping?.[0]?.framework).toBe("ISO");
+    expect(report.compliance_coverage?.[0]?.status).toBe("covered");
     expect(report.summary.execution_quality?.status).toBe("healthy");
   });
 });

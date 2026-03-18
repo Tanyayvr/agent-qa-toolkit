@@ -15,6 +15,9 @@ import {
   buildSuiteControls,
 } from "./htmlSections";
 export type {
+  ComplianceExports,
+  ComplianceCoverageEntry,
+  ComplianceCoverageStatus,
   CompareReport,
   CoreSignalKind,
   EnvironmentContext,
@@ -31,6 +34,99 @@ export type {
   TraceIntegrity,
   TraceIntegritySide,
 } from "./reportTypes";
+
+function complianceStatusBadge(status: "covered" | "partial" | "missing"): string {
+  if (status === "covered") return '<span class="badge b-ok">covered</span>';
+  if (status === "partial") return '<span class="badge b-mid">partial</span>';
+  return '<span class="badge b-bad">missing</span>';
+}
+
+function renderSelectorList(selectors: string[]): string {
+  if (!selectors.length) return '<span class="muted">-</span>';
+  return selectors.map((selector) => `<code>${escHtml(selector)}</code>`).join("<br/>");
+}
+
+function renderComplianceSection(report: CompareReport): string {
+  const exportLinks = report.compliance_exports?.eu_ai_act
+    ? `<div class="muted" style="margin-top:6px;">
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.coverage_href)}">coverage.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.annex_iv_href)}">annex-iv.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.report_html_href)}">eu-ai-act-report.html</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.evidence_index_href)}">evidence-index.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.article_13_instructions_href)}">article-13-instructions.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.article_9_risk_register_href)}">article-9-risk-register.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.article_72_monitoring_plan_href)}">article-72-monitoring-plan.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.article_17_qms_lite_href)}">article-17-qms-lite.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.human_oversight_summary_href)}">human-oversight-summary.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.release_review_href)}">release-review.json</a> ·
+        <a href="${escHtml(report.compliance_exports.eu_ai_act.post_market_monitoring_href)}">post-market-monitoring.json</a>
+      </div>`
+    : "";
+
+  if (report.compliance_coverage?.length) {
+    const rows = report.compliance_coverage
+      .map((entry) => {
+        const evidenceBlock = [
+          entry.required_evidence_present.length
+            ? `<div><span class="badge b-ok">required present ${escHtml(String(entry.required_evidence_present.length))}</span><div class="muted" style="margin-top:4px;">${renderSelectorList(entry.required_evidence_present)}</div></div>`
+            : "",
+          entry.required_evidence_missing.length
+            ? `<div style="margin-top:8px;"><span class="badge b-bad">required missing ${escHtml(String(entry.required_evidence_missing.length))}</span><div class="muted" style="margin-top:4px;">${renderSelectorList(entry.required_evidence_missing)}</div></div>`
+            : "",
+          entry.supporting_evidence_present.length
+            ? `<div style="margin-top:8px;"><span class="badge b-mid">supporting present ${escHtml(String(entry.supporting_evidence_present.length))}</span><div class="muted" style="margin-top:4px;">${renderSelectorList(entry.supporting_evidence_present)}</div></div>`
+            : "",
+          entry.supporting_evidence_missing.length
+            ? `<div style="margin-top:8px;"><span class="badge">supporting missing ${escHtml(String(entry.supporting_evidence_missing.length))}</span><div class="muted" style="margin-top:4px;">${renderSelectorList(entry.supporting_evidence_missing)}</div></div>`
+            : "",
+        ].filter(Boolean).join("");
+        const notes = [
+          entry.residual_gaps?.length
+            ? `<div><span class="badge b-bad">residual gaps</span><div class="muted" style="margin-top:4px;">${entry.residual_gaps.map((gap) => escHtml(gap)).join("<br/>")}</div></div>`
+            : "",
+          entry.notes?.length
+            ? `<div style="margin-top:8px;"><span class="badge">notes</span><div class="muted" style="margin-top:4px;">${entry.notes.map((note) => escHtml(note)).join("<br/>")}</div></div>`
+            : "",
+        ].filter(Boolean).join("");
+
+        return `<tr>
+          <td><code>${escHtml(entry.framework)}</code></td>
+          <td><code>${escHtml(entry.clause)}</code>${entry.title ? `<div class="muted" style="margin-top:4px;">${escHtml(entry.title)}</div>` : ""}</td>
+          <td>${complianceStatusBadge(entry.status)}${entry.status_cap ? `<div class="muted" style="margin-top:4px;">cap: <code>${escHtml(entry.status_cap)}</code></div>` : ""}</td>
+          <td>${evidenceBlock || '<span class="muted">-</span>'}</td>
+          <td>${notes || '<span class="muted">-</span>'}</td>
+        </tr>`;
+      })
+      .join("");
+
+    return `<div style="margin-top:14px; font-size:16px; font-weight:900;">Compliance</div>
+          ${exportLinks}
+          <table class="table" style="margin-top:6px;">
+            <thead>
+              <tr>
+                <th>framework</th>
+                <th>clause</th>
+                <th>status</th>
+                <th>evidence</th>
+                <th>gaps</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+  }
+
+  if (report.compliance_mapping?.length) {
+    return `<div style="margin-top:14px; font-size:16px; font-weight:900;">Compliance</div>
+          ${exportLinks}
+          <div class="muted" style="margin-top:6px;">
+            ${report.compliance_mapping
+              .map((entry) => `${escHtml(entry.framework)} ${escHtml(entry.clause)}${entry.title ? ` - ${escHtml(entry.title)}` : ""}`)
+              .join("<br/>")}
+          </div>`;
+  }
+
+  return "";
+}
 
 export function renderHtmlReport(report: CompareReport & { embedded_manifest_index?: unknown }): string {
   const s = report.summary;
@@ -256,16 +352,7 @@ export function renderHtmlReport(report: CompareReport & { embedded_manifest_ind
               : ""
           }
 
-          ${
-            report.compliance_mapping && report.compliance_mapping.length
-              ? `<div style="margin-top:14px; font-size:16px; font-weight:900;">Compliance</div>
-          <div class="muted" style="margin-top:6px;">
-            ${report.compliance_mapping
-              .map((c) => `${escHtml(c.framework)} ${escHtml(c.clause)}${c.title ? ` — ${escHtml(c.title)}` : ""}`)
-              .join("<br/>")}
-          </div>`
-              : ""
-          }
+          ${renderComplianceSection(report)}
 
           <div style="margin-top:14px; font-size:16px; font-weight:900;">Risk</div>
           <div class="kpi">
