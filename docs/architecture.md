@@ -1,23 +1,129 @@
 <!-- /docs/architecture.md -->
 # Architecture (Self‑Hosted)
 
+## Product Surfaces
+
+The repository now exposes two product surfaces on top of one evidence engine, plus one public website surface for acquisition:
+
+- **Agent Evidence Platform**: the core self-hosted packaging, verification, and contract surface for tool-using AI agents.
+  Operator entrypoints:
+  - `npm run evidence:agent:package -- ...`
+  - `npm run evidence:agent:verify -- --reportDir <dir>`
+  - `npm run evidence:agent:contracts`
+  - `npm run demo:agent-evidence`
+  - `npm run release:gate:agent-evidence`
+- **EU AI Act Evidence Engine**: a vertical package on top of the core Agent Evidence surface.
+  Operator entrypoints:
+  - `npm run compliance:eu-ai-act -- ...`
+  - `npm run compliance:eu-ai-act:verify -- --reportDir <dir>`
+  - `npm run compliance:eu-ai-act:contracts`
+  - `npm run demo:eu-ai-act`
+  - `npm run release:gate:eu-ai-act`
+- **EU AI Evidence Builder Website**: a static multilingual website generated into `docs/` and linked to the live proof hub.
+  Operator entrypoints:
+  - `npm run site:build`
+  - `npm run site:verify`
+  - `npm run site:refresh`
+
+This split is deliberate:
+
+- one shared engine and artifact model
+- one generic product for agent release evidence
+- one vertical package for EU-specific dossier and compliance exports
+- one website publish root for stable product demos under `docs/demo/`
+- one public acquisition layer under `docs/en/`, `docs/de/`, and `docs/fr/`
+
+The website surface is intentionally static. It reuses checked-in proof assets and published demo artifacts instead of introducing a separate frontend runtime. `site:verify` compares the generated HTML against the checked-in output to prevent silent drift between the marketing surface and the real product artifacts.
+
+## Documentation Surfaces
+
+The repository now keeps a tighter split between public product docs and internal marketing docs:
+
+- public entrypoint: [../README.md](../README.md)
+- public engineering path: [engineering-qualification-path.md](engineering-qualification-path.md)
+- public EU governance path: [eu-governance-evidence-path.md](eu-governance-evidence-path.md)
+- public architecture and operator docs: this directory
+- internal messaging and GTM source of truth: `docs/internal/market/`
+
+This split is deliberate:
+
+- public docs explain what the product does and how to operate it
+- internal docs carry positioning variants, thought-leadership language, pitch material, and other non-product copy
+- pricing, pilot packaging, and commercial experiments do not belong in the OSS README
+
+## Structured Intake Layer
+
+Before runner/evaluator packaging, the repository now supports a machine-readable intake layer for upstream requirements:
+
+- `ops/intake/<profile>/system-scope.json`
+- `ops/intake/<profile>/quality-contract.json`
+- `ops/intake/<profile>/cases-coverage.json` after the reviewed suite is checked
+- `ops/intake/<profile>/adapter-capability.json` after the live adapter onboarding gate runs
+- `ops/intake/<profile>/run-fingerprint.json` after the baseline/new comparability gate runs
+- optional draft `cases/<profile>.intake-scaffold.json`
+
+Operator entrypoints:
+
+- `npm run intake:init -- --profile <name> [--euDossierRequired 1]`
+- `npm run intake:validate -- --profile <name>`
+- `npm run intake:scaffold:cases -- --profile <name>`
+- `npm run intake:check:cases -- --profile <name> --cases <cases.json>`
+- `npm run intake:check:adapter -- --profile <name> --cases <cases.json> --baseUrl <adapter>`
+- `npm run intake:check:runs -- --profile <name> --cases <cases.json> --baselineDir <run-dir> --newDir <run-dir>`
+- `npm run review:init -- --reportDir <report-dir> [--profile <name>]`
+- `npm run review:check -- --reportDir <report-dir> [--profile <name>]`
+
+This layer is deliberate:
+
+- it turns scoping and quality expectations into stable JSON artifacts
+- it validates readiness before adapter or case work starts
+- it persists intake-to-case coverage as a machine-readable stage artifact
+- it persists a machine-readable adapter capability profile after the live onboarding gate
+- it persists a machine-readable run fingerprint after the baseline/new comparability gate
+- it verifies that a live adapter can satisfy the required `/run-case` telemetry depth on a reviewed canary case
+- it verifies that baseline/new runner directories are structurally comparable before packaging
+- it scaffolds a structured human review record after packaging
+- it validates that the handoff package no longer contains placeholder decisions or open machine gaps
+- it makes human-owned fields explicit instead of hiding them in email or notes
+
+Automation boundary:
+
+- automated: schema validation, cross-file consistency checks, starter case scaffolding, case completeness checks against the intake contract, adapter onboarding probes against `/health` plus live `/run-case`, and baseline/new run comparability checks before packaging
+- still human-owned: intended use, business harms, deployment assumptions, approval/block policy choices, final narrative, legal signoff
+
+For the exact split between intentional manual work, current operational tech debt, and optional expansion backlog, see [Automation Boundary and Tech Debt](automation-boundary-and-tech-debt.md).
+
 ## Core pipeline
 
-1) **Runner** executes cases against `/run-case` and writes artifacts to `apps/runner/runs/*`.
-2) **Evaluator** compares baseline vs new, produces HTML + JSON report under `apps/evaluator/reports/*`.
+1) **Intake** captures upstream operator inputs before runtime evaluation begins.
+   `system-scope.json` defines the system/change/owners boundary.
+   `quality-contract.json` defines critical tasks, prohibited behaviors, risky actions, telemetry expectations, and case-quality targets.
+   A draft `cases.json` can be scaffolded from intake, but it still requires human review before it becomes a quality-grade suite.
+2) **Runner** executes cases against `/run-case` and writes artifacts to `apps/runner/runs/*`.
+3) **Evaluator** compares baseline vs new, produces HTML + JSON report under `apps/evaluator/reports/*`.
    If a side has `runner_failure`, evaluator preserves failure artifacts/signals and forces that side's `*_pass=false` (conservative summary semantics).
   HTML report renders the cases table lazily from embedded rows JSON, applies client-side pagination,
   and uses incremental chunked page rendering + debounced text filtering to stay responsive on large runs.
-3) **Evidence pack** is the report directory (manifest + assets + report.html + compare-report.json).
+4) **Evidence pack** is the report directory (manifest + assets + report.html + compare-report.json).
+   Product-grade packaging snapshots the operator inputs into `_source_inputs/` inside the report directory,
+   so the bundle preserves `cases.json`, baseline run, and new run as portable handoff inputs.
    Local campaign script (`scripts/run-local-campaign.sh`) ingests generated reports into the local library by default (`.agent-qa/library`, opt-out via `LIBRARY_INGEST=0`).
    For `CAMPAIGN_PROFILE=quality`, campaign orchestration is staged by default: `smoke` (`infra` + small subset) -> auto-promote to full quality only on green smoke.
-4) **Group bundle (`P1`)** can aggregate multiple report directories under one incident:
+5) **Optional vertical exports** may be added when a compliance profile is supplied.
+   The current vertical package is EU AI Act:
+   clause coverage + Annex IV dossier + Article 13 instructions scaffold + Article 9 risk register scaffold + Article 17 QMS-lite scaffold + Article 72 monitoring-plan scaffold + oversight/release/monitoring exports under `compliance/`.
+6) **Structured review handoff** can be scaffolded directly inside a report directory:
+   `npm run review:init -- --reportDir <dir> [--profile <name>]`
+   creates `review/review-decision.json`, `review/handoff-note.md`, and optional `review/intake/*` snapshots.
+   `npm run review:check -- --reportDir <dir>`
+   validates the schema plus the human-owned readiness rules: no `pending` decision, no `TODO` placeholders, no undispositioned machine gaps, and for EU bundles no incomplete owner-completion loop for Article 13, Article 17, or Article 72 scaffolds.
+7) **Group bundle (`P1`)** can aggregate multiple report directories under one incident:
    `npm run bundle:group -- --report a=<reportDirA> --report b=<reportDirB> ...`
    producing `index.html`, `group-index.json`, and `group-manifest.json` with checksum verification via
    `npm run bundle:group:verify`.
    Labels from `--report <label=...>` are persisted as `agent_id` for per-agent navigation.
    This layer is packaging/indexing only.
-5) **Runtime handoff channel (`/handoff`)** supports live agent-to-agent transfer:
+7) **Runtime handoff channel (`/handoff`)** supports live agent-to-agent transfer:
    - idempotent by `incident_id + handoff_id`
    - checksum-validated envelope (`sha256` canonical payload)
    - optional inline handoff on `/run-case` plus `run_meta` routing (`run_id`, `incident_id`, `agent_id`)
@@ -93,8 +199,9 @@ Runner and evaluator support additional scenarios for production drift:
   (`timeout*`, retries, concurrency, preflight, fail-fast) plus operator classification
   (`runMode`, `runtimeClass`, `profileName`), so operators can audit/replicate the exact envelope.
   `STAGED_MODE=0` preserves legacy single-stage behavior for CI or targeted profiling runs.
-  `scripts/run-agent-profile.sh` adds the operator-facing layer:
-  - default `quick` mode = optional `calibration` + `smoke`, then stop;
+	  `scripts/run-agent-profile.sh` adds the operator-facing layer:
+	  - `npm run campaign:agent:init -- --profile <name> --cliCmd <cmd> ...` bootstraps `ops/agents/<name>.env` from template for first-time external agents;
+	  - default `quick` mode = optional `calibration` + `smoke`, then stop;
   - explicit `--full-lite` = green quick gate plus auto-promotion into a reduced quality subset;
   - explicit `--full` = green quick gate plus auto-promotion into full quality campaign;
   - explicit `--diagnostic` = full quality campaign with a more generous timeout envelope for known slow-but-live agents.
@@ -115,9 +222,18 @@ Runner and evaluator support additional scenarios for production drift:
   - `CLI_AGENT_SERVER_REQUEST_TIMEOUT_MS`
   The launcher uses the selected run mode plus smoke/calibration requirements to compute one adapter envelope,
   so operators do not hand-tune adapter and runner timeouts separately.
-  When timeout history is missing, the initial envelope comes from runtime-class defaults for that mode
+  Profiles that depend on MCP can also own the MCP envelope. When `MCP_MANAGED=1`, the launcher restarts
+  the MCP server with a larger contract than the adapter:
+  - `MCP_TIMEOUT_MS`
+  - `MCP_SERVER_REQUEST_TIMEOUT_MS`
+  - `MCP_HEADERS_TIMEOUT_MS`
+  - `MCP_KEEP_ALIVE_TIMEOUT_MS`
+  This preserves a strict chain with buffers: `runner < adapter < MCP`.
+  When timeout history is missing, the run is treated as `first-run` and the initial envelope comes from runtime-class defaults for that mode
   (`fast_remote`, `standard_cli`, `slow_local_cli`, `heavy_mcp_agent`). These first-run defaults are the
   conservative upper bound for the class, so the first run is budgeted honestly instead of starting with a low guess.
+  Those class defaults are intentionally defined in one shared runtime-policy module so launcher planning and advisor recommendations do not diverge.
+  After a successful run exists, timeout learning is scoped to `profile + mode + case-signature`; one agent's history must not tune another agent's first run.
   If managed adapter is disabled, the launcher still checks `/health` and blocks early on an envelope mismatch,
   printing the exact restart command that would satisfy the run.
   Launcher/runtime also emit machine-readable operator planning artifacts:
@@ -171,8 +287,8 @@ After each evaluator run, trend data can be ingested into a local SQLite DB:
 - pre-KPI reports naturally have null KPI fields in trend rows
 
 Product note:
-- This repository contains technical trend capabilities for pilot validation.
-- Commercial packaging/support for Historical Trending is positioned as Pro+.
+- This repository contains the technical trend engine used by the product surfaces above.
+- Packaging, support, and commercial rollout decisions live outside the OSS entry docs.
 
 ## Technical due diligence bridge
 
@@ -203,9 +319,24 @@ Both validators enforce strict-mode signature verification when
 `AQ_MANIFEST_PUBLIC_KEY` is provided.
 Strict-signature parity (signed pass + tampered fail) across Node/Python/Go
 is exercised by `scripts/conformance-test-signature.mjs`.
-CI release entrypoint is `npm run release:gate:ci`, which bundles quality, conformance,
-policy/runtime e2e, soak/load, toolkit compatibility, and `proof:p1` self-contained checks,
-and writes a machine-readable summary at `apps/evaluator/reports/release-gate-ci.json`.
+CI release entrypoint is `npm run release:gate:ci`, which bundles repository quality,
+explicit product-surface gates (`agent_evidence_surface_gate`, `eu_ai_act_surface_gate`),
+conformance, policy/runtime e2e, soak/load, toolkit compatibility, and `proof:p1`
+self-contained checks, and writes a machine-readable summary at
+`apps/evaluator/reports/release-gate-ci.json`.
+Product-grade contract freeze now exists for both product surfaces:
+- `npm run evidence:agent:contracts`
+- `npm run compliance:eu-ai-act:contracts`
+Product-grade demo entrypoints also exist for both product surfaces:
+- `npm run demo:agent-evidence`
+- `npm run demo:eu-ai-act`
+Website publishing entrypoint:
+- `npm run demo:publish:surfaces`
+It publishes a stable proof surface under `docs/demo/` with:
+- `index.html`
+- `product-surfaces.json`
+- `agent-evidence/`
+- `eu-ai-act/`
 
 ## Optional adapters (plugin packages)
 

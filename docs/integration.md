@@ -30,5 +30,5 @@ Reference adapters live in this repo under:
 
 ## One-command run
 ```bash
-npm run pilot
+npm run demo
 ```
