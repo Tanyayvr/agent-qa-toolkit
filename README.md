@@ -23,6 +23,30 @@ Not every agent deserves the same validation loop. Pretending otherwise creates 
 
 **Enterprise / governance teams** — you need portable review artifacts: signed manifests, redacted evidence, structured intake records, and review handoff packages for internal security and compliance review. The same core platform ships an EU AI Act vertical for teams with regulatory timelines.
 
+## Core Scope
+
+The toolkit is a **core evidence engine for tool-using AI agents**.
+
+That means:
+
+- the core object under evaluation is an agent you can call through an adapter and exercise with cases
+- sector-specific work should sit **above** the core as domain-authored case libraries, scanners/assertions, and optional vertical packages
+- the currently shipped vertical package is the EU AI Act evidence path
+
+This is **not** the whole domain compliance stack for every regulated sector.
+
+It is a strong base when the question is still:
+
+- can this agent be exercised on representative cases?
+- can the result be qualified and packaged as portable evidence?
+- can another reviewer verify what happened without our internal dashboards?
+
+It is **not** the right primary tool for:
+
+- static model validation with no agent runtime
+- population-scale backtesting as the main evaluation object
+- sector programs that are mostly document governance with little runtime evidence
+
 ---
 
 ## Quickstart
@@ -46,6 +70,20 @@ docker compose up --build
 
 Live demo (no install): https://tanyayvr.github.io/agent-qa-toolkit/demo/
 
+## Try With Your Own Agent
+
+If your adapter is already running, the fastest honest bridge is:
+
+```bash
+npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud
+```
+
+This generates a **starter evidence pack** on your own infrastructure. It proves
+the toolkit pipeline works with your agent. It does **not** replace a real
+qualification run.
+
+Details: [docs/quickstart-your-agent.md](docs/quickstart-your-agent.md)
+
 ---
 
 ## What You Get
@@ -58,6 +96,7 @@ case-<case_id>.html        per-case replay diff for triage
 compare-report.json        machine contract for CI and review
 assets/                    evidence files
 artifacts/manifest.json    sha256 integrity map
+archive/retention-controls.json
 review/review-decision.json
 review/handoff-note.md     structured owner handoff
 ```
@@ -72,6 +111,7 @@ Beyond the artifact, every run gives you:
 - flakiness tracking and loop detection
 - security signals from 6 scanners
 - local trend history across releases
+- archive and retention controls scaffold for portable handoff
 
 ---
 
@@ -176,7 +216,7 @@ We apply the same evidence standards to ourselves. The toolkit is claim-verifiab
 - reproducibility checklist → [docs/VERIFY.md](docs/VERIFY.md)
 - capability chronology → [docs/CHRONOLOGY.md](docs/CHRONOLOGY.md)
 - conformance tests across Node, Python, and Go validators
-- strict offline verify for generated artifacts
+- strict offline verify for generated artifacts, including manifest signature checks in strict mode
 - release gate in the repo: `npm run release:gate:ci`
 
 ---
@@ -188,6 +228,24 @@ For teams with regulatory timelines, the same core platform ships as an EU-orien
 Key obligations for many providers of high-risk AI systems take effect on **2 August 2026**. Technical evidence — logging, traceability, robustness, review handoff, monitoring, and risk documentation — is required, not optional. Screenshots and declarations are not sufficient. Operational proof is.
 
 The EU AI Act Evidence Engine packages the core qualification artifacts into a structured dossier: intake scope, quality contract, risk register, monitoring history, and a structured review handoff record.
+
+When a regulator-, counsel-, or incident-facing package is needed, the EU path can also assemble an on-demand authority-response bundle from the verified report directory:
+
+```bash
+npm run compliance:eu-ai-act:authority-response:init -- --reportDir apps/evaluator/reports/latest
+npm run compliance:eu-ai-act:authority-response -- --reportDir apps/evaluator/reports/latest
+```
+
+The authority bundle is intentionally post-review: it requires completed review artifacts, a completed `review/authority-request.json` that records disclosure scope, archive location, and legal-hold status, and a signed source bundle that can pass strict verification.
+
+For engineering-only use, manifest hashes are usually enough. For authority- or counsel-facing handoff, authenticity matters as well as integrity. The EU path can sign `artifacts/manifest.json` and then run strict verification:
+
+```bash
+AQ_MANIFEST_PRIVATE_KEY=... \
+npm run compliance:eu-ai-act -- --cases <cases> --baselineDir <baseline> --newDir <new> --outDir <out> --reportId <id> --verify-strict --sign
+```
+
+That produces `artifacts/manifest.sig` and lets strict verification check authenticity, not only hash integrity. `authority-response` now assumes this stricter path for external handoff instead of treating signing as an optional afterthought.
 
 This is a vertical extension, not the whole product. Engineering teams without compliance requirements do not need it.
 

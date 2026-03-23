@@ -35,6 +35,34 @@ This split is deliberate:
 
 The website surface is intentionally static. It reuses checked-in proof assets and published demo artifacts instead of introducing a separate frontend runtime. `site:verify` compares the generated HTML against the checked-in output to prevent silent drift between the marketing surface and the real product artifacts.
 
+## Sector Layering
+
+The architectural split is deliberate:
+
+- the core engine evaluates **tool-using agents**
+- sectors add their own case libraries, assertions, scanners, and review expectations above the core
+- vertical packages add extra exports and handoff structures when a sector needs more than the generic evidence bundle
+
+The current shipped vertical package is EU AI Act.
+
+This should not be read as:
+
+- the repository already solves every sector-specific compliance workflow
+- any future vertical can be added with zero core work
+
+What is true today:
+
+- agent cases are already external inputs
+- adapter seams already exist under `plugins/*`
+- evaluator scanner seams are already extensible
+- vertical exports already sit on top of the shared bundle model
+
+What remains future work for non-EU sectors:
+
+- sector-specific schemas and dossier exports
+- sector-specific review and handoff contracts
+- any population-scale validation layer that is not fundamentally agent-runtime evidence
+
 ## Documentation Surfaces
 
 The repository now keeps a tighter split between public product docs and internal marketing docs:
@@ -105,21 +133,27 @@ For the exact split between intentional manual work, current operational tech de
    If a side has `runner_failure`, evaluator preserves failure artifacts/signals and forces that side's `*_pass=false` (conservative summary semantics).
   HTML report renders the cases table lazily from embedded rows JSON, applies client-side pagination,
   and uses incremental chunked page rendering + debounced text filtering to stay responsive on large runs.
-4) **Evidence pack** is the report directory (manifest + assets + report.html + compare-report.json).
+4) **Evidence pack** is the report directory (manifest + assets + report.html + compare-report.json + `archive/retention-controls.json`).
    Product-grade packaging snapshots the operator inputs into `_source_inputs/` inside the report directory,
    so the bundle preserves `cases.json`, baseline run, and new run as portable handoff inputs.
+   The retention-controls artifact records observed runner/evaluator retention settings, required archive paths, and the operator-owned archive decisions that still need to be completed outside the bundle.
    Local campaign script (`scripts/run-local-campaign.sh`) ingests generated reports into the local library by default (`.agent-qa/library`, opt-out via `LIBRARY_INGEST=0`).
    For `CAMPAIGN_PROFILE=quality`, campaign orchestration is staged by default: `smoke` (`infra` + small subset) -> auto-promote to full quality only on green smoke.
 5) **Optional vertical exports** may be added when a compliance profile is supplied.
    The current vertical package is EU AI Act:
-   clause coverage + Annex IV dossier + Article 13 instructions scaffold + Article 9 risk register scaffold + Article 17 QMS-lite scaffold + Article 72 monitoring-plan scaffold + oversight/release/monitoring exports under `compliance/`.
+   clause coverage + Annex IV dossier + Article 13 instructions scaffold + Article 9 risk register scaffold + Article 17 QMS-lite scaffold + Article 72 monitoring-plan scaffold + Article 73 serious-incident pack + oversight/release/monitoring exports under `compliance/`.
 6) **Structured review handoff** can be scaffolded directly inside a report directory:
    `npm run review:init -- --reportDir <dir> [--profile <name>]`
    creates `review/review-decision.json`, `review/handoff-note.md`, and optional `review/intake/*` snapshots.
    `npm run review:check -- --reportDir <dir>`
-   validates the schema plus the human-owned readiness rules: no `pending` decision, no `TODO` placeholders, no undispositioned machine gaps, and for EU bundles no incomplete owner-completion loop for Article 13, Article 17, or Article 72 scaffolds.
+   validates the schema plus the human-owned readiness rules: no `pending` decision, no `TODO` placeholders, no undispositioned machine gaps, and for EU bundles no incomplete owner-completion loop for Article 13, Article 17, Article 72, or Article 73 scaffolds.
    When an intake profile is attached, the same check also syncs `ops/intake/<profile>/corrective-action-register.json` and refreshes `review/intake/corrective-action-register.json`, so repeated machine gaps keep continuity across runs.
-7) **Group bundle (`P1`)** can aggregate multiple report directories under one incident:
+7) **Optional authority-response bundle** can be assembled for EU-oriented handoff after review:
+   `npm run compliance:eu-ai-act:authority-response:init -- --reportDir <dir>`
+   then
+   `npm run compliance:eu-ai-act:authority-response -- --reportDir <dir> [--includeSourceInputs]`
+   packages the verified report, compliance exports, retention controls, completed review artifacts, and optional `_source_inputs/` into a portable `authority-response/` directory with its own manifest. The workflow requires a completed `review/authority-request.json` so disclosure scope, archive location, and legal-hold status are explicit before handoff.
+8) **Group bundle (`P1`)** can aggregate multiple report directories under one incident:
    `npm run bundle:group -- --report a=<reportDirA> --report b=<reportDirB> ...`
    producing `index.html`, `group-index.json`, and `group-manifest.json` with checksum verification via
    `npm run bundle:group:verify`.

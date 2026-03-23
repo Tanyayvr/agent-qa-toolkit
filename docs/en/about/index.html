@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>About EU AI Evidence Builder</title>
-  <meta name="description" content="Why the site exists, what is open source, and how the Builder relates to Agent QA Toolkit." />
+  <title>For technical teams evaluating fit | EU AI Evidence Builder</title>
+  <meta name="description" content="User-facing page for platform, security, and compliance engineering teams evaluating whether the core product is real enough to install and whether sector-specific work can sit above it cleanly." />
   
   <link rel="canonical" href="https://tanyayvr.github.io/agent-qa-toolkit/en/about/" />
   <link rel="alternate" hreflang="en" href="https://tanyayvr.github.io/agent-qa-toolkit/en/about/" />
@@ -30,7 +30,7 @@
         </a>
         <nav class="header-nav" aria-label="Primary">
           <a href="../how-it-works/">How it works</a>
-          <a href="../technical/">Technical</a>
+          <a href="../technology/">Technology</a>
           <a href="../templates/">Templates</a>
           <a href="../pricing/">Pricing</a>
           <a href="../docs/">Docs</a>
@@ -48,15 +48,66 @@
     <section class="section">
       <div class="container split-grid">
         <div class="card fade-up">
-          <p class="eyebrow">About</p>
-          <h1>Built as a documentation funnel, not a generic compliance portal</h1>
-          <p class="lead">The Builder is the acquisition and documentation layer. Agent QA Toolkit remains the evidence engine. That split is intentional: the free path is OSS self-serve, while paid packages add setup and first-delivery help for teams that do not want to configure everything alone.</p>
+          <p class="eyebrow">Technical teams</p>
+          <h1>For technical teams evaluating fit</h1>
+          <p class="lead">Use this page when the question is not pricing or regulation, but whether the core evidence engine is technically serious enough to deserve installation time.</p>
+          <div class="button-row section-tight">
+            <a class="button" href="../technology/">Open technology page</a>
+            <a class="button-ghost" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Open live evidence</a>
+            <a class="button-soft" href="../docs/">Open OSS docs</a>
+          </div>
         </div>
         <div class="proof-card fade-up">
-          <p class="eyebrow">Open core</p>
-          <h3>Open source core, commercial packaging around it</h3>
-          <p class="muted">The site does not hide the product architecture. It makes the proof story legible for buyers.</p>
-          <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer">Open repository</a>
+          <p class="eyebrow">Live proof</p>
+          <h3>What should already exist before installation time</h3>
+          <div class="proof-frame">
+            <img src="../../assets/screenshots/05.png" alt="Verified evidence bundle screenshot" />
+          </div>
+          <p class="muted">A serious product should expose real artifacts, explicit gates, and, for authority-facing paths, an authenticity story rather than hash-only integrity before your team spends time integrating it.</p>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container">
+        <h2 class="section-title">What to check first</h2>
+        <p class="lead">A technical reviewer should be able to inspect concrete outputs, explicit gates, the split between core and sector-specific work, and an honest automation boundary before doing any deeper integration work.</p>
+        <div class="docs-grid">
+          
+            <article class="card fade-up">
+              <h3>Real outputs</h3>
+              <p class="muted">The product ends in a portable report, machine contract, manifest, retention controls, review record, and optional authority package.</p>
+            </article>
+            <article class="card fade-up">
+              <h3>Hard gates</h3>
+              <p class="muted">Packaging, verify, review, and authority packaging all have explicit checks. This is not a dashboard-only story.</p>
+            </article>
+            <article class="card fade-up">
+              <h3>Sector-ready core</h3>
+              <p class="muted">The core qualifies tool-using agents. Sector case libraries, scanners, and vertical exports can sit above it without turning the base product into a generic compliance suite.</p>
+            </article>
+            <article class="card fade-up">
+              <h3>Source-visible path</h3>
+              <p class="muted">Commands, schemas, and artifacts are visible in the repository and line up with the live proof surface.</p>
+            </article>
+            <article class="card fade-up">
+              <h3>Honest boundary</h3>
+              <p class="muted">The system automates evidence operations, not legal classification, business judgment, or final sign-off.</p>
+            </article>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container evidence-card fade-up">
+        <p class="eyebrow">First run</p>
+        <h3>Fastest honest first run</h3>
+        <p class="muted">If your adapter is already running, use quickstart to build a real starter evidence pack on your own infrastructure before doing any deeper setup work.</p>
+        <div class="code-snippet"><code>npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud</code></div>
+        <ul class="pricing-list section-tight">
+          <li>Runs the starter smoke path on your own adapter and packages a portable report.</li><li>Shows whether the toolkit can really execute, package, and verify evidence in your environment.</li><li>Stays honest: starter evidence pack only, not full qualification or compliance readiness.</li>
+        </ul>
+        <div class="button-row">
+          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/quickstart-your-agent.md" target="_blank" rel="noreferrer">Open quickstart guide</a>
+          <a class="button-soft" href="../technology/">Open technology page</a>
         </div>
       </div>
     </section>

@@ -25,6 +25,7 @@ The core product produces:
 - `compare-report.json` as machine truth
 - `report.html` as human-readable review artifact
 - `artifacts/manifest.json` as integrity map
+- `archive/retention-controls.json` as the archive and retention scaffold
 - structured review handoff artifacts (`review/review-decision.json`, `review/handoff-note.md`)
 - per-case replay diffs and raw evidence assets
 - gate signals for `none | require_approval | block`
@@ -38,6 +39,39 @@ This is already valuable for:
 - product security review
 - internal model or workflow promotion reviews
 - vendor-neutral evidence handoff between teams
+
+## What Sits Above The Core
+
+The core platform is intentionally **agent-centric, not sector-centric**.
+
+That means the right extension model is:
+
+- core evidence engine for tool-using agents
+- domain-authored case libraries on top of the core
+- sector-specific assertions or scanners where needed
+- optional vertical packages when a sector needs extra exports or handoff formats
+
+The repository already supports the first part of that split well:
+
+- case suites are external inputs, not hardcoded into the engine
+- adapter seams already exist under `plugins/*`
+- scanner logic is extensible in the evaluator
+- vertical exports already exist as an added layer on top of the shared bundle model
+
+The currently shipped vertical is the EU AI Act package.
+
+## What The Core Is Not
+
+The core platform is not:
+
+- the whole compliance stack for every regulated sector
+- a generic GRC platform
+- a full model risk management system
+- the best primary tool for population-scale statistical validation or historical backtesting when the main object is not an agent runtime
+
+The honest claim is narrower and stronger:
+
+> if the object under review is still a tool-using agent with measurable cases, runtime evidence, and review gates, the toolkit is a strong base layer; domain-specific compliance can then be added above it.
 
 ## Product Entry Points
 
