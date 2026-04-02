@@ -17,3 +17,10 @@ reports
 *.sqlite-shm
 
 coverage/
+
+# Local agent sandboxes and logs
+.ocode/
+logs/
+Autonomous-CLI-Agent/
+agent-cli/
+ops/agents/ocode.env
