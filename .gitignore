@@ -23,4 +23,6 @@ coverage/
 logs/
 Autonomous-CLI-Agent/
 agent-cli/
-ops/agents/ocode.env
+ops/agents/*.env
+!ops/agents/template.env
+!ops/agents/example-cli.env

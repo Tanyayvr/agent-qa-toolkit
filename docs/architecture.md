@@ -236,7 +236,8 @@ Runner and evaluator support additional scenarios for production drift:
   (`runMode`, `runtimeClass`, `profileName`), so operators can audit/replicate the exact envelope.
   `STAGED_MODE=0` preserves legacy single-stage behavior for CI or targeted profiling runs.
 	  `scripts/run-agent-profile.sh` adds the operator-facing layer:
-	  - `npm run campaign:agent:init -- --profile <name> --cliCmd <cmd> ...` bootstraps `ops/agents/<name>.env` from template for first-time external agents;
+  - `npm run campaign:agent:init -- --profile <name> --cliCmd <cmd> ...` bootstraps `ops/agents/<name>.env` from the public template for first-time external agents;
+  - the repo keeps only `ops/agents/template.env` and `ops/agents/example-cli.env` as public examples; machine-specific agent profiles stay local;
 	  - default `quick` mode = optional `calibration` + `smoke`, then stop;
   - explicit `--full-lite` = green quick gate plus auto-promotion into a reduced quality subset;
   - explicit `--full` = green quick gate plus auto-promotion into full quality campaign;
