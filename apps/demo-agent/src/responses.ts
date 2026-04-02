@@ -1127,6 +1127,9 @@ export const RESPONSES: Record<Version, Record<string, AgentCaseResponse>> = {
           action_id: "a50",
           status: "timeout",
           latency_ms: 5000,
+          result_ref: "tool://c50",
+          error_code: "tool_timeout",
+          error_message: "create_ticket timed out after 5000ms",
           payload_summary: "timeout after 5000ms",
         },
         {

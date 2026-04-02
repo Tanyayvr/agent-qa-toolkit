@@ -50,6 +50,9 @@ export type ToolResultEvent = {
     status: "ok" | "error" | "timeout";
     latency_ms?: number;
     payload_summary?: Record<string, unknown> | string;
+    result_ref?: string;
+    error_code?: string;
+    error_message?: string;
 };
 
 export type RetrievalEvent = {

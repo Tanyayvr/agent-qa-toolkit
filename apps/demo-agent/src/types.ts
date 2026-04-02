@@ -34,6 +34,9 @@ export type RunEvent =
       status: "ok" | "error" | "timeout";
       latency_ms?: number;
       payload_summary?: unknown;
+      result_ref?: string;
+      error_code?: string;
+      error_message?: string;
     }
   | {
       type: "retrieval";

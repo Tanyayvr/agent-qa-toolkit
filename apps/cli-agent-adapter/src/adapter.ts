@@ -365,10 +365,21 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): {
     action_id: execCallId,
     status: params.status,
     latency_ms: latencyMs,
-    payload_summary: {
-      ...(params.statusMessage ? { message: params.statusMessage } : {}),
-      output_preview: String(params.finalOutputContent ?? "").slice(0, 240),
-    },
+    result_ref: `tool://${execCallId}`,
+    ...(params.status === "ok"
+      ? {
+          payload_summary: {
+            ...(params.statusMessage ? { message: params.statusMessage } : {}),
+            output_preview: String(params.finalOutputContent ?? "").slice(0, 240),
+          },
+        }
+      : {
+          error_code: params.status === "timeout" ? "cli_exec_timeout" : "cli_exec_error",
+          error_message: params.statusMessage || `cli execution ended with status=${params.status}`,
+          payload_summary: {
+            output_preview: String(params.finalOutputContent ?? "").slice(0, 240),
+          },
+        }),
   });
   proposedActions.push({
     action_id: execCallId,
@@ -405,9 +416,20 @@ function buildExecutionTelemetry(params: ExecutionTelemetryParams): {
       call_id: callId,
       action_id: callId,
       status: inferredStatus,
-      payload_summary: {
-        inferred_from_output: true,
-      },
+      result_ref: `tool://${callId}`,
+      ...(inferredStatus === "ok"
+        ? {
+            payload_summary: {
+              inferred_from_output: true,
+            },
+          }
+        : {
+            error_code: "inferred_tool_execution_unverified",
+            error_message: "tool_result was inferred from output because native tool telemetry was unavailable",
+            payload_summary: {
+              inferred_from_output: true,
+            },
+          }),
     });
     proposedActions.push({
       action_id: callId,
