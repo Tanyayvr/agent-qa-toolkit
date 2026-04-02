@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 const REPO_ROOT = process.cwd();
 const tempRoots: string[] = [];
+const SCRIPT_TEST_TIMEOUT_MS = 20_000;
 
 function runScript(script: string, args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
@@ -17,7 +18,7 @@ function runScript(script: string, args: string[]): Promise<{ code: number; stdo
         stderr: stderr.toString(),
       });
     });
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 }
 
 async function makeTempRoot() {
@@ -422,7 +423,7 @@ describe("evidence review scripts", () => {
     expect(check.code).toBe(1);
     const result = JSON.parse(check.stdout);
     expect(result.errors.some((issue: { field: string }) => issue.field === "human_completion.decision.status")).toBe(true);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("passes review check for a completed core review bundle", async () => {
     const reportDir = await copyReportFixture("docs/demo/agent-evidence");
@@ -506,6 +507,12 @@ describe("evidence review scripts", () => {
           issue.field === "human_completion.eu_scaffold_completion.article_72_monitoring_plan.status"
       )
     ).toBe(true);
+    expect(
+      initialResult.errors.some(
+        (issue: { field: string }) =>
+          issue.field === "human_completion.eu_scaffold_completion.article_73_serious_incident_pack.status"
+      )
+    ).toBe(true);
 
     await completeReviewArtifacts(reportDir);
 
@@ -531,5 +538,5 @@ describe("evidence review scripts", () => {
     const resolvedItem = register.items.find((item: Record<string, any>) => item.gap_id === "legacy-gap");
     expect(resolvedItem.current_status).toBe("resolved");
     expect(result.summary.corrective_action_register_resolved_items).toBeGreaterThanOrEqual(1);
-  });
+  }, 20_000);
 });

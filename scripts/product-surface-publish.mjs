@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { EU_REVIEWER_PDF_REL_PATH } from "./lib/reviewer-pdf.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..");
@@ -13,6 +14,81 @@ const DEFAULT_AGENT_REPORT_ID = "agent-evidence-demo";
 const DEFAULT_EU_REPORT_ID = "eu-ai-act-demo";
 const DEFAULT_AGENT_DEMO_SCRIPT = path.join(REPO_ROOT, "scripts", "agent-evidence-demo.mjs");
 const DEFAULT_EU_DEMO_SCRIPT = path.join(REPO_ROOT, "scripts", "eu-ai-act-demo.mjs");
+const DEMO_LOCALIZE_SCRIPT = path.join(REPO_ROOT, "apps", "evaluator", "src", "localizeDemoDocuments.ts");
+const TS_NODE_CLI = path.join(REPO_ROOT, "node_modules", "ts-node", "dist", "bin.js");
+const DEMO_LOCALES = ["en", "de", "fr"];
+
+const PUBLISH_COPY = {
+  en: {
+    lang: "en",
+    eyebrow: "Website Proof Surface",
+    title: "Product Surface Demos",
+    body:
+      "These published bundles are deterministic proof artifacts for the two commercial surfaces: the core Agent Evidence Platform and the EU AI Act Evidence Engine vertical. Each card links to the exact HTML and JSON outputs the website can reference.",
+    indexLink: "Open machine-readable index",
+    publishedLabel: "Published",
+    metrics: {
+      cases: "Cases",
+      approvals: "Approvals",
+      blocks: "Blocks",
+      execution: "Execution",
+      signature: "Signature",
+      monitoring: "Monitoring",
+    },
+    actions: {
+      reviewerPdf: "Open reviewer PDF",
+      reviewerHtml: "Open reviewer HTML",
+      dossierHtml: "Open dossier HTML",
+      primaryReport: "Open primary report",
+    },
+  },
+  de: {
+    lang: "de",
+    eyebrow: "Proof-Oberflaeche der Website",
+    title: "Produkt-Demos und Nachweise",
+    body:
+      "Diese veroeffentlichten Bundles sind deterministische Nachweisartefakte fuer die beiden kommerziellen Oberflaechen: die Agent Evidence Platform und die EU AI Act Evidence Engine. Jede Karte verlinkt auf die exakten HTML- und JSON-Ausgaben, auf die sich die Website beziehen kann.",
+    indexLink: "Maschinenlesbaren Index oeffnen",
+    publishedLabel: "Veroeffentlicht",
+    metrics: {
+      cases: "Faelle",
+      approvals: "Freigaben",
+      blocks: "Blocks",
+      execution: "Ausfuehrung",
+      signature: "Signatur",
+      monitoring: "Monitoring",
+    },
+    actions: {
+      reviewerPdf: "Reviewer-PDF oeffnen",
+      reviewerHtml: "Reviewer-HTML oeffnen",
+      dossierHtml: "Dossier-HTML oeffnen",
+      primaryReport: "Primaerbericht oeffnen",
+    },
+  },
+  fr: {
+    lang: "fr",
+    eyebrow: "Surface de preuve du site",
+    title: "Demos et preuves produit",
+    body:
+      "Ces bundles publies sont des artefacts de preuve deterministes pour les deux surfaces commerciales : l'Agent Evidence Platform et le vertical EU AI Act Evidence Engine. Chaque carte renvoie vers les sorties HTML et JSON exactes que le site peut citer.",
+    indexLink: "Ouvrir l'index lisible par machine",
+    publishedLabel: "Publie",
+    metrics: {
+      cases: "Cas",
+      approvals: "Approbations",
+      blocks: "Blocages",
+      execution: "Execution",
+      signature: "Signature",
+      monitoring: "Surveillance",
+    },
+    actions: {
+      reviewerPdf: "Ouvrir le PDF reviewer",
+      reviewerHtml: "Ouvrir le HTML reviewer",
+      dossierHtml: "Ouvrir le dossier HTML",
+      primaryReport: "Ouvrir le rapport principal",
+    },
+  },
+};
 
 function usage(exitCode = 0) {
   const msg = [
@@ -93,6 +169,16 @@ function runNode(scriptAbs, scriptArgs, cwd = REPO_ROOT) {
   });
 }
 
+function runTsNode(scriptAbs, scriptArgs, cwd = REPO_ROOT) {
+  if (!existsSync(TS_NODE_CLI)) {
+    throw new Error(`ts-node CLI not found at ${TS_NODE_CLI}`);
+  }
+  return spawnSync(process.execPath, [TS_NODE_CLI, scriptAbs, ...scriptArgs], {
+    cwd,
+    encoding: "utf8",
+  });
+}
+
 function readJson(absPath) {
   return JSON.parse(readFileSync(absPath, "utf8"));
 }
@@ -115,6 +201,13 @@ function copyReportDir(srcDir, destDir) {
 
 function buildAgentSurfaceRecord(agentReportDir) {
   const report = readJson(path.join(agentReportDir, "compare-report.json"));
+  const retentionHref = report.bundle_exports?.retention_archive_controls_href;
+  const manifestSigRel = existsSync(path.join(agentReportDir, "artifacts", "manifest.sig"))
+    ? "agent-evidence/artifacts/manifest.sig"
+    : null;
+  if (typeof retentionHref !== "string" || retentionHref.length === 0) {
+    throw new Error(`Missing bundle_exports.retention_archive_controls_href in ${path.join(agentReportDir, "compare-report.json")}`);
+  }
   return {
     id: "agent-evidence",
     label: "Agent Evidence Platform",
@@ -127,6 +220,8 @@ function buildAgentSurfaceRecord(agentReportDir) {
       report_html: "agent-evidence/report.html",
       compare_report: "agent-evidence/compare-report.json",
       manifest: "agent-evidence/artifacts/manifest.json",
+      ...(manifestSigRel ? { manifest_signature: manifestSigRel } : {}),
+      retention_archive_controls: normalizeHref(path.join("agent-evidence", retentionHref)),
     },
     summary: {
       generated_at: report.meta?.generated_at ?? null,
@@ -136,6 +231,7 @@ function buildAgentSurfaceRecord(agentReportDir) {
       execution_quality_status: report.summary?.execution_quality?.status ?? null,
       portable_paths: report.quality_flags?.portable_paths === true,
       self_contained: report.quality_flags?.self_contained === true,
+      signature_status: manifestSigRel ? "signed" : "unsigned",
     },
   };
 }
@@ -143,8 +239,15 @@ function buildAgentSurfaceRecord(agentReportDir) {
 function buildEuSurfaceRecord(euReportDir) {
   const report = readJson(path.join(euReportDir, "compare-report.json"));
   const exportsBlock = report.compliance_exports?.eu_ai_act;
+  const retentionHref = report.bundle_exports?.retention_archive_controls_href;
+  const manifestSigRel = existsSync(path.join(euReportDir, "artifacts", "manifest.sig"))
+    ? "eu-ai-act/artifacts/manifest.sig"
+    : null;
   if (!exportsBlock) {
     throw new Error(`Missing compliance_exports.eu_ai_act in ${path.join(euReportDir, "compare-report.json")}`);
+  }
+  if (typeof retentionHref !== "string" || retentionHref.length === 0) {
+    throw new Error(`Missing bundle_exports.retention_archive_controls_href in ${path.join(euReportDir, "compare-report.json")}`);
   }
   const monitoring = readJson(path.join(euReportDir, exportsBlock.post_market_monitoring_href));
   return {
@@ -159,14 +262,33 @@ function buildEuSurfaceRecord(euReportDir) {
       report_html: "eu-ai-act/report.html",
       compare_report: "eu-ai-act/compare-report.json",
       manifest: "eu-ai-act/artifacts/manifest.json",
+      ...(manifestSigRel ? { manifest_signature: manifestSigRel } : {}),
+      retention_archive_controls: normalizeHref(path.join("eu-ai-act", retentionHref)),
+      reviewer_html: normalizeHref(path.join("eu-ai-act", exportsBlock.reviewer_html_href)),
+      reviewer_markdown: normalizeHref(path.join("eu-ai-act", exportsBlock.reviewer_markdown_href)),
+      ...(existsSync(path.join(euReportDir, EU_REVIEWER_PDF_REL_PATH))
+        ? { reviewer_pdf: normalizeHref(path.join("eu-ai-act", EU_REVIEWER_PDF_REL_PATH)) }
+        : {}),
       dossier_html: normalizeHref(path.join("eu-ai-act", exportsBlock.report_html_href)),
       coverage: normalizeHref(path.join("eu-ai-act", exportsBlock.coverage_href)),
       annex_iv: normalizeHref(path.join("eu-ai-act", exportsBlock.annex_iv_href)),
+      article_10_data_governance: normalizeHref(path.join("eu-ai-act", exportsBlock.article_10_data_governance_href)),
       evidence_index: normalizeHref(path.join("eu-ai-act", exportsBlock.evidence_index_href)),
       article_13_instructions: normalizeHref(path.join("eu-ai-act", exportsBlock.article_13_instructions_href)),
+      article_16_provider_obligations: normalizeHref(
+        path.join("eu-ai-act", exportsBlock.article_16_provider_obligations_href)
+      ),
+      article_43_conformity_assessment: normalizeHref(
+        path.join("eu-ai-act", exportsBlock.article_43_conformity_assessment_href)
+      ),
+      article_47_declaration_of_conformity: normalizeHref(
+        path.join("eu-ai-act", exportsBlock.article_47_declaration_of_conformity_href)
+      ),
       article_9_risk_register: normalizeHref(path.join("eu-ai-act", exportsBlock.article_9_risk_register_href)),
       article_72_monitoring_plan: normalizeHref(path.join("eu-ai-act", exportsBlock.article_72_monitoring_plan_href)),
       article_17_qms_lite: normalizeHref(path.join("eu-ai-act", exportsBlock.article_17_qms_lite_href)),
+      annex_v_declaration_content: normalizeHref(path.join("eu-ai-act", exportsBlock.annex_v_declaration_content_href)),
+      article_73_serious_incident_pack: normalizeHref(path.join("eu-ai-act", exportsBlock.article_73_serious_incident_pack_href)),
       human_oversight_summary: normalizeHref(path.join("eu-ai-act", exportsBlock.human_oversight_summary_href)),
       release_review: normalizeHref(path.join("eu-ai-act", exportsBlock.release_review_href)),
       post_market_monitoring: normalizeHref(path.join("eu-ai-act", exportsBlock.post_market_monitoring_href)),
@@ -181,6 +303,7 @@ function buildEuSurfaceRecord(euReportDir) {
       runs_in_window: monitoring.summary?.runs_in_window ?? null,
       portable_paths: report.quality_flags?.portable_paths === true,
       self_contained: report.quality_flags?.self_contained === true,
+      signature_status: manifestSigRel ? "signed" : "unsigned",
     },
   };
 }
@@ -200,16 +323,33 @@ function metric(label, value) {
   return `<div class="metric"><span>${label}</span><strong>${String(value)}</strong></div>`;
 }
 
-function renderSurfaceCard(surface) {
+function renderSurfaceCard(surface, copy) {
   const artifacts = Object.entries(surface.artifact_hrefs)
     .map(([key, href]) => `<li><a href="${href}">${key}</a></li>`)
     .join("");
+  const primaryActions = [
+    surface.artifact_hrefs.reviewer_pdf
+      ? `<a class="action-button" href="${surface.artifact_hrefs.reviewer_pdf}">${copy.actions.reviewerPdf}</a>`
+      : "",
+    surface.artifact_hrefs.reviewer_html
+      ? `<a class="action-button secondary" href="${surface.artifact_hrefs.reviewer_html}">${copy.actions.reviewerHtml}</a>`
+      : "",
+    surface.artifact_hrefs.dossier_html
+      ? `<a class="action-button secondary" href="${surface.artifact_hrefs.dossier_html}">${copy.actions.dossierHtml}</a>`
+      : "",
+    !surface.artifact_hrefs.reviewer_pdf && surface.artifact_hrefs.report_html
+      ? `<a class="action-button" href="${surface.artifact_hrefs.report_html}">${copy.actions.primaryReport}</a>`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("");
   const metrics = [
-    metric("Cases", surface.summary.cases_total ?? 0),
-    metric("Approvals", surface.summary.approvals ?? 0),
-    metric("Blocks", surface.summary.blocks ?? 0),
-    metric("Execution", surface.summary.execution_quality_status ?? "unknown"),
-    surface.summary.monitoring_status ? metric("Monitoring", surface.summary.monitoring_status) : "",
+    metric(copy.metrics.cases, surface.summary.cases_total ?? 0),
+    metric(copy.metrics.approvals, surface.summary.approvals ?? 0),
+    metric(copy.metrics.blocks, surface.summary.blocks ?? 0),
+    metric(copy.metrics.execution, surface.summary.execution_quality_status ?? "unknown"),
+    metric(copy.metrics.signature, surface.summary.signature_status ?? "unknown"),
+    surface.summary.monitoring_status ? metric(copy.metrics.monitoring, surface.summary.monitoring_status) : "",
   ].join("");
 
   return `
@@ -224,15 +364,17 @@ function renderSurfaceCard(surface) {
         <code>${surface.command}</code>
         <code>${surface.release_gate_command}</code>
       </div>
+      ${primaryActions ? `<div class="actions">${primaryActions}</div>` : ""}
       <ul class="artifact-list">${artifacts}</ul>
     </section>
   `;
 }
 
-export function renderPublishIndexHtml(manifest) {
-  const cards = manifest.surfaces.map(renderSurfaceCard).join("\n");
+export function renderPublishIndexHtml(manifest, locale = "en") {
+  const copy = PUBLISH_COPY[locale] || PUBLISH_COPY.en;
+  const cards = manifest.surfaces.map((surface) => renderSurfaceCard(surface, copy)).join("\n");
   return `<!doctype html>
-<html lang="en">
+<html lang="${copy.lang}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -342,6 +484,26 @@ export function renderPublishIndexHtml(manifest) {
       display: grid;
       gap: 10px;
     }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(13, 107, 87, 0.24);
+      background: rgba(13, 107, 87, 0.12);
+      color: var(--ink);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .action-button.secondary {
+      background: rgba(255, 255, 255, 0.76);
+    }
     code {
       display: block;
       padding: 12px 14px;
@@ -374,13 +536,13 @@ export function renderPublishIndexHtml(manifest) {
 <body>
   <main>
     <section class="hero">
-      <p class="eyebrow">Website Proof Surface</p>
-      <h1>Product Surface Demos</h1>
-      <p>These published bundles are deterministic proof artifacts for the two commercial surfaces: the core Agent Evidence Platform and the EU AI Act Evidence Engine vertical. Each card links to the exact HTML and JSON outputs the website can reference.</p>
-      <p><a href="product-surfaces.json">Open machine-readable index</a></p>
+      <p class="eyebrow">${copy.eyebrow}</p>
+      <h1>${copy.title}</h1>
+      <p>${copy.body}</p>
+      <p><a href="product-surfaces.json">${copy.indexLink}</a></p>
     </section>
     <div class="surface-grid">${cards}</div>
-    <p class="footer">Published ${manifest.generated_at}</p>
+    <p class="footer">${copy.publishedLabel} ${manifest.generated_at}</p>
   </main>
 </body>
 </html>
@@ -391,6 +553,36 @@ function writePublishOutputs(publishRoot, manifest) {
   ensureDir(publishRoot);
   writeFileSync(path.join(publishRoot, "product-surfaces.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   writeFileSync(path.join(publishRoot, "index.html"), renderPublishIndexHtml(manifest), "utf8");
+}
+
+function writeLocalizedPublishOutputs(publishRoot, manifest) {
+  for (const locale of DEMO_LOCALES) {
+    const localeRoot = path.join(publishRoot, locale);
+    ensureDir(localeRoot);
+    writeFileSync(path.join(localeRoot, "product-surfaces.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    writeFileSync(path.join(localeRoot, "index.html"), renderPublishIndexHtml(manifest, locale), "utf8");
+  }
+}
+
+function copyLocalizedSurfaceDirs(args) {
+  for (const locale of DEMO_LOCALES) {
+    copyReportDir(args.agentReportDir, path.join(args.publishRoot, locale, "agent-evidence"));
+    copyReportDir(args.euReportDir, path.join(args.publishRoot, locale, "eu-ai-act"));
+  }
+}
+
+function localizePublishedDemoDocs(args) {
+  const result = runTsNode(DEMO_LOCALIZE_SCRIPT, [
+    "--publishRoot",
+    args.publishRoot,
+    "--agentReportDir",
+    args.agentReportDir,
+    "--euReportDir",
+    args.euReportDir,
+  ]);
+  if (result.status !== 0) {
+    throw new Error(result.stderr || result.stdout || "Localized demo document generation failed");
+  }
 }
 
 export function validatePublishedManifest(publishRoot, manifest) {
@@ -405,6 +597,16 @@ export function validatePublishedManifest(publishRoot, manifest) {
     });
   }
 
+  for (const locale of DEMO_LOCALES) {
+    for (const name of rootFiles) {
+      checks.push({
+        name: `${locale}_${name === "index.html" ? "publish_index_present" : "publish_manifest_present"}`,
+        pass: existsSync(path.join(publishRoot, locale, name)),
+        path: path.join(publishRoot, locale, name),
+      });
+    }
+  }
+
   for (const surface of manifest.surfaces || []) {
     for (const [key, href] of Object.entries(surface.artifact_hrefs || {})) {
       checks.push({
@@ -412,6 +614,13 @@ export function validatePublishedManifest(publishRoot, manifest) {
         pass: existsSync(path.join(publishRoot, href)),
         path: path.join(publishRoot, href),
       });
+      for (const locale of DEMO_LOCALES) {
+        checks.push({
+          name: `${locale}_${surface.id}_${key}_present`,
+          pass: existsSync(path.join(publishRoot, locale, href)),
+          path: path.join(publishRoot, locale, href),
+        });
+      }
     }
   }
 
@@ -463,12 +672,15 @@ export function publishProductSurfaces(args) {
   ensureDir(args.publishRoot);
   copyReportDir(args.agentReportDir, agentDest);
   copyReportDir(args.euReportDir, euDest);
+  copyLocalizedSurfaceDirs(args);
 
   const manifest = buildPublishManifest({
     agentReportDir: args.agentReportDir,
     euReportDir: args.euReportDir,
   });
   writePublishOutputs(args.publishRoot, manifest);
+  writeLocalizedPublishOutputs(args.publishRoot, manifest);
+  localizePublishedDemoDocs(args);
   const validation = validatePublishedManifest(args.publishRoot, manifest);
   return {
     ok: validation.ok,

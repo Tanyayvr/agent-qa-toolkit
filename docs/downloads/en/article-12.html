@@ -14,16 +14,43 @@
 </head>
 <body>
   <h1>EU AI Act Article 12 - Logging and Traceability Template</h1>
-  <section><p>Article 12 is where many teams discover that they have logs, but not traceability. A strong section explains what events are recorded, what identifiers can link them together, how long records are kept, and how an operator can reconstruct a decision path when something goes wrong.</p></section>
+  <section><p>Article 12 is where the documentation has to show that a run can be reconstructed outside your internal dashboards. The hard part is not having logs in principle. The hard part is having a record trail that another team can actually inspect, follow, and retain. For high-risk systems, that trail still has to fit into a broader Annex IV documentation package.</p></section>
+  
   <section>
-    <h2>Section guide</h2>
+    <h2>What Article 12 expects, what the toolkit can add, and what your team still owns</h2>
+    <p>Without connecting your agent, the toolkit can only show the trace and logging artifacts already present in the generated package. After adapter integration, it can preserve run records, tool telemetry, result and error artifacts, and trace anchors from real runs.</p>
     <table>
-      <thead><tr><th>Section</th><th>Meaning</th><th>Evidence</th></tr></thead>
+      <thead><tr><th>Article 12 expects</th><th>Toolkit with generated package only</th><th>Toolkit after adapter integration</th><th>Still defined and approved by your team</th></tr></thead>
       <tbody>
-        <tr><td>Event coverage</td><td>Which events are captured and retained?</td><td>Structured events, tool calls, tool results, replay diffs.</td></tr><tr><td>Traceability</td><td>How can a reviewer correlate logs and reports?</td><td>Trace anchors, manifest references, report ids.</td></tr><tr><td>Retention</td><td>How long is evidence kept and where?</td><td>Portable report directory plus policy text.</td></tr><tr><td>Review path</td><td>How do operators audit a run?</td><td>HTML report, compare-report JSON, raw assets.</td></tr>
+        <tr><td>A reviewable event trail</td><td>Shows compare-report data, retained case artifacts, and manifest-backed file integrity already present in the package.</td><td>Adds run records, tool telemetry, result artifacts, error artifacts, and trace anchors from real runs.</td><td>Define which systems must be logged, what counts as a complete record, and which gaps need compensating controls.</td></tr><tr><td>A link between the report and the underlying run</td><td>Can show report IDs, manifest entries, and retained artifacts already bundled together.</td><td>Can point from the report back to concrete run files and case-level artifacts from the connected agent.</td><td>Explain any external trace systems, storage layers, or identifiers that live outside the toolkit.</td></tr><tr><td>A record path after something goes wrong</td><td>Lets another team inspect the generated report, compare file, and retained artifacts already in the package.</td><td>Lets another team open the underlying run records and tool-level artifacts tied to the same cases.</td><td>Define who may access those records, under what workflow, and how incident or audit access is granted.</td></tr><tr><td>Retention and deletion controls</td><td>Shows retention-control output and the retained files already inside the package.</td><td>Can include the real run artifacts and telemetry files that your retention policy needs to cover.</td><td>Set retention period, deletion rules, export policy, and legal disclosure rules.</td></tr>
       </tbody>
     </table>
   </section>
+  
+  
+  <section>
+    <h2>What your team still defines around Article 12</h2>
+    <p>The toolkit can preserve and package records, but it does not choose your retention posture or disclosure rules. Those decisions still belong in your logging policy and governance workflow. Article 12 therefore becomes one reviewed layer inside the larger high-risk package, not the whole package by itself.</p>
+    <table>
+      <thead><tr><th>What you define</th><th>When you define it</th><th>Practical format to use</th></tr></thead>
+      <tbody>
+        <tr><td>Retention period and storage location</td><td>Before you rely on the package for governance review or external handoff.</td><td>A simple policy statement naming how long records are kept and where the retained files live.</td></tr><tr><td>Access and disclosure rules</td><td>When the package may be opened by security, governance, counsel, or an external reviewer.</td><td>A short access matrix naming who can inspect which logging artifacts and under what trigger.</td></tr><tr><td>External trace-system references</td><td>Whenever your trace chain spans systems outside the toolkit package.</td><td>System name, identifier format, and the lookup path needed to continue the trace outside the package.</td></tr><tr><td>Known logging gaps and compensating process</td><td>When the connected adapter does not emit all of the logging depth you want.</td><td>One short gap note plus the manual or external process that fills it.</td></tr><tr><td>Legal export and deletion constraints</td><td>Before evidence is handed to another team or retained for a longer period.</td><td>Short policy text naming when records may be exported, redacted, or deleted.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Article 12 is evidenced through multiple logging and trace files</h2>
+    <p>There is no single Article 12 JSON file in the package. The requirement is covered through the files below. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.</p>
+    <table>
+      <thead><tr><th>File in the package</th><th>Why it matters for Article 12</th><th>Open file</th></tr></thead>
+      <tbody>
+        <tr><td>Compare report - compare-report.json</td><td>Main review file linking case outcomes, trace integrity, and retained artifacts.</td><td>demo/eu-ai-act/compare-report.json</td></tr><tr><td>Manifest - artifacts/manifest.json</td><td>Integrity index showing which files belong to the package and how they are anchored.</td><td>demo/eu-ai-act/artifacts/manifest.json</td></tr><tr><td>Source run record - _source_inputs/new/run.json</td><td>Example raw run record used to reconstruct a concrete execution path.</td><td>demo/eu-ai-act/_source_inputs/new/run.json</td></tr><tr><td>Retention controls - archive/retention-controls.json</td><td>Archive and retention observations attached to the package.</td><td>demo/eu-ai-act/archive/retention-controls.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
   <section><p>Use browser print to save this document as PDF.</p></section>
 </body>
 </html>

@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tool Result Artifact v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "case_id",
+    "version",
+    "call_id",
+    "status",
+    "issues"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "tool_result_record" },
+    "case_id": { "type": "string" },
+    "version": { "enum": ["baseline", "new"] },
+    "call_id": { "type": "string" },
+    "action_id": { "type": "string" },
+    "tool": { "type": "string" },
+    "status": { "enum": ["ok", "error", "timeout"] },
+    "latency_ms": { "type": "number" },
+    "payload_summary": {},
+    "result_ref": { "type": "string" },
+    "error_code": { "type": "string" },
+    "error_message": { "type": "string" },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "call_id": { "type": "string" }
+        }
+      }
+    }
+  }
+}

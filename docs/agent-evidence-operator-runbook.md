@@ -10,6 +10,7 @@ Produce one report directory that contains:
 - `compare-report.json`
 - `report.html`
 - `artifacts/manifest.json`
+- `archive/retention-controls.json`
 - replay diffs and raw evidence assets
 - packaged `_source_inputs/` for portable handoff
 
@@ -48,6 +49,7 @@ What this does:
 
 - snapshots `cases.json`, baseline run, and new run into `_source_inputs/`
 - runs the evaluator
+- writes `archive/retention-controls.json` from observed runner and evaluator retention settings
 - verifies the resulting evidence bundle
 - exits non-zero if packaging or verification fails
 
@@ -151,5 +153,5 @@ Use the EU runbook when you need:
 
 ## Related Docs
 
-- [Agent Evidence Platform](agent-evidence-platform.md)
+- [Architecture](architecture.md)
 - [EU AI Act Operator Runbook](eu-ai-act-operator-runbook.md)

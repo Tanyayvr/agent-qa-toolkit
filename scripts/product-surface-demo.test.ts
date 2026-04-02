@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -42,6 +42,7 @@ describe("product surface demos", () => {
     expect(report.report_id).toBe("agent-evidence-demo-test");
     expect(report.quality_flags.portable_paths).toBe(true);
     expect(report.cases_path).toBe("_source_inputs/cases.json");
+    expect(report.bundle_exports?.retention_archive_controls_href).toBe("archive/retention-controls.json");
     expect(report.compliance_exports).toBeUndefined();
   }, 45_000);
 
@@ -56,15 +57,20 @@ describe("product surface demos", () => {
     const report = JSON.parse(readFileSync(path.join(outDir, "compare-report.json"), "utf8"));
     const exportsBlock = report.compliance_exports?.eu_ai_act;
     expect(report.report_id).toBe("eu-ai-act-demo-test");
+    expect(report.bundle_exports?.retention_archive_controls_href).toBe("archive/retention-controls.json");
     expect(exportsBlock?.post_market_monitoring_href).toBe("compliance/post-market-monitoring.json");
+    expect(exportsBlock?.reviewer_html_href).toBe("compliance/eu-ai-act-reviewer.html");
+    expect(exportsBlock?.reviewer_markdown_href).toBe("compliance/eu-ai-act-reviewer.md");
     expect(exportsBlock?.article_13_instructions_href).toBe("compliance/article-13-instructions.json");
     expect(exportsBlock?.article_9_risk_register_href).toBe("compliance/article-9-risk-register.json");
     expect(exportsBlock?.article_72_monitoring_plan_href).toBe("compliance/article-72-monitoring-plan.json");
     expect(exportsBlock?.article_17_qms_lite_href).toBe("compliance/article-17-qms-lite.json");
+    expect(exportsBlock?.article_73_serious_incident_pack_href).toBe("compliance/article-73-serious-incident-pack.json");
+    expect(existsSync(path.join(outDir, "compliance", "eu-ai-act-reviewer.pdf"))).toBe(true);
 
     const monitoring = JSON.parse(readFileSync(path.join(outDir, exportsBlock.post_market_monitoring_href), "utf8"));
     expect(monitoring.summary.monitoring_status).toBe("history_current");
     expect(monitoring.summary.current_run_included_in_history).toBe(true);
     expect(monitoring.summary.runs_in_window).toBeGreaterThanOrEqual(2);
-  }, 45_000);
+  }, 75_000);
 });

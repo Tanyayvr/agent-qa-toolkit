@@ -32,9 +32,53 @@
       "additionalProperties": true,
       "properties": {
         "agent_id": { "type": "string" },
+        "agent_version": { "type": "string" },
         "model": { "type": "string" },
+        "model_version": { "type": "string" },
         "prompt_version": { "type": "string" },
-        "tools_version": { "type": "string" }
+        "tools_version": { "type": "string" },
+        "config_hash": { "type": "string" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "new", "changed_fields"],
+      "properties": {
+        "baseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["agent_id", "agent_version", "model", "model_version", "prompt_version", "tools_version", "config_hash"],
+          "properties": {
+            "agent_id": { "type": "string" },
+            "agent_version": { "type": "string" },
+            "model": { "type": "string" },
+            "model_version": { "type": "string" },
+            "prompt_version": { "type": "string" },
+            "tools_version": { "type": "string" },
+            "config_hash": { "type": "string" }
+          }
+        },
+        "new": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["agent_id", "agent_version", "model", "model_version", "prompt_version", "tools_version", "config_hash"],
+          "properties": {
+            "agent_id": { "type": "string" },
+            "agent_version": { "type": "string" },
+            "model": { "type": "string" },
+            "model_version": { "type": "string" },
+            "prompt_version": { "type": "string" },
+            "tools_version": { "type": "string" },
+            "config_hash": { "type": "string" }
+          }
+        },
+        "changed_fields": {
+          "type": "array",
+          "items": {
+            "enum": ["agent_id", "agent_version", "model", "model_version", "prompt_version", "tools_version", "config_hash"]
+          }
+        }
       }
     },
     "baseline_dir": { "type": "string" },
@@ -302,32 +346,47 @@
         "eu_ai_act": {
           "type": "object",
           "required": [
-            "coverage_href",
             "annex_iv_href",
-            "report_html_href",
-            "evidence_index_href",
+            "article_10_data_governance_href",
             "article_13_instructions_href",
+            "article_16_provider_obligations_href",
+            "article_43_conformity_assessment_href",
+            "article_47_declaration_of_conformity_href",
             "article_9_risk_register_href",
             "article_72_monitoring_plan_href",
             "article_17_qms_lite_href",
-            "human_oversight_summary_href",
-            "release_review_href",
-            "post_market_monitoring_href"
+            "annex_v_declaration_content_href",
+            "human_oversight_summary_href"
           ],
           "properties": {
             "coverage_href": { "type": "string" },
             "annex_iv_href": { "type": "string" },
+            "article_10_data_governance_href": { "type": "string" },
             "report_html_href": { "type": "string" },
+            "reviewer_html_href": { "type": "string" },
+            "reviewer_markdown_href": { "type": "string" },
             "evidence_index_href": { "type": "string" },
             "article_13_instructions_href": { "type": "string" },
+            "article_16_provider_obligations_href": { "type": "string" },
+            "article_43_conformity_assessment_href": { "type": "string" },
+            "article_47_declaration_of_conformity_href": { "type": "string" },
             "article_9_risk_register_href": { "type": "string" },
             "article_72_monitoring_plan_href": { "type": "string" },
             "article_17_qms_lite_href": { "type": "string" },
+            "annex_v_declaration_content_href": { "type": "string" },
+            "article_73_serious_incident_pack_href": { "type": "string" },
             "human_oversight_summary_href": { "type": "string" },
             "release_review_href": { "type": "string" },
             "post_market_monitoring_href": { "type": "string" }
           }
         }
+      }
+    },
+    "bundle_exports": {
+      "type": "object",
+      "required": ["retention_archive_controls_href"],
+      "properties": {
+        "retention_archive_controls_href": { "type": "string" }
       }
     },
     "items": {
@@ -551,10 +610,28 @@
             "required": ["replay_diff_href"],
             "properties": {
               "replay_diff_href": { "type": "string" },
+              "baseline_failure_body_href": { "type": "string" },
+              "baseline_failure_body_key": { "type": "string" },
+              "baseline_failure_meta_href": { "type": "string" },
+              "baseline_failure_meta_key": { "type": "string" },
+              "new_failure_body_href": { "type": "string" },
+              "new_failure_body_key": { "type": "string" },
+              "new_failure_meta_href": { "type": "string" },
+              "new_failure_meta_key": { "type": "string" },
+              "baseline_case_response_href": { "type": "string" },
+              "baseline_case_response_key": { "type": "string" },
+              "new_case_response_href": { "type": "string" },
+              "new_case_response_key": { "type": "string" },
+              "baseline_tool_telemetry_href": { "type": "string" },
+              "baseline_tool_telemetry_key": { "type": "string" },
+              "new_tool_telemetry_href": { "type": "string" },
+              "new_tool_telemetry_key": { "type": "string" },
               "baseline_trace_anchor_href": { "type": "string" },
               "baseline_trace_anchor_key": { "type": "string" },
               "new_trace_anchor_href": { "type": "string" },
-              "new_trace_anchor_key": { "type": "string" }
+              "new_trace_anchor_key": { "type": "string" },
+              "baseline_run_meta_href": { "type": "string" },
+              "new_run_meta_href": { "type": "string" }
             }
           }
         }

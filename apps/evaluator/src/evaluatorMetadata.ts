@@ -25,6 +25,20 @@ export type ComplianceProfile = {
   coverage_requirements?: ComplianceCoverageRequirement[];
 };
 
+export const REQUIRED_ENVIRONMENT_FIELDS = [
+  "agent_id",
+  "agent_version",
+  "model",
+  "model_version",
+  "prompt_version",
+  "tools_version",
+  "config_hash",
+] as const;
+
+export const EU_AI_ACT_REQUIRED_ENVIRONMENT_FIELDS = REQUIRED_ENVIRONMENT_FIELDS;
+
+export type RequiredEnvironmentField = typeof REQUIRED_ENVIRONMENT_FIELDS[number];
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -145,20 +159,111 @@ export async function loadEnvironmentContext(params: {
   }
 
   const agent_id = processEnv.AGENT_ID;
+  const agent_version = processEnv.AGENT_VERSION;
   const model = processEnv.AGENT_MODEL;
+  const model_version = processEnv.MODEL_VERSION;
   const prompt_version = processEnv.PROMPT_VERSION;
   const tools_version = processEnv.TOOLS_VERSION;
+  const config_hash = processEnv.CONFIG_HASH;
 
-  if (!agent_id && !model && !prompt_version && !tools_version) {
+  if (!agent_id && !agent_version && !model && !model_version && !prompt_version && !tools_version && !config_hash) {
     return undefined;
   }
 
   const envObj: Record<string, unknown> = {};
   if (agent_id) envObj.agent_id = agent_id;
+  if (agent_version) envObj.agent_version = agent_version;
   if (model) envObj.model = model;
+  if (model_version) envObj.model_version = model_version;
   if (prompt_version) envObj.prompt_version = prompt_version;
   if (tools_version) envObj.tools_version = tools_version;
+  if (config_hash) envObj.config_hash = config_hash;
   return envObj;
+}
+
+export function listMissingRequiredEnvironmentFields(
+  environment: Record<string, unknown> | undefined
+): RequiredEnvironmentField[] {
+  if (!environment || typeof environment !== "object") {
+    return [...REQUIRED_ENVIRONMENT_FIELDS];
+  }
+  return REQUIRED_ENVIRONMENT_FIELDS.filter((field) => {
+    const value = environment[field];
+    return typeof value !== "string" || value.trim().length === 0;
+  });
+}
+
+export function listMissingEuAiActEnvironmentFields(
+  environment: Record<string, unknown> | undefined
+): string[] {
+  return listMissingRequiredEnvironmentFields(environment);
+}
+
+export function normalizeProvidedEnvironmentContext(
+  environment: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined {
+  if (!environment || typeof environment !== "object") {
+    return undefined;
+  }
+  const normalized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(environment)) {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) normalized[key] = trimmed;
+      continue;
+    }
+    if (value !== undefined) normalized[key] = value;
+  }
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+export function extractRunProvenance(
+  runMeta: Record<string, unknown> | undefined
+): Record<RequiredEnvironmentField, string> | undefined {
+  if (!runMeta || typeof runMeta !== "object") {
+    return undefined;
+  }
+  const provenance = isRecord(runMeta.provenance) ? runMeta.provenance : undefined;
+  if (!provenance) {
+    return undefined;
+  }
+  const missing = listMissingRequiredEnvironmentFields(provenance);
+  if (missing.length > 0) {
+    return undefined;
+  }
+  return Object.fromEntries(
+    REQUIRED_ENVIRONMENT_FIELDS.map((field) => [field, String(provenance[field]).trim()])
+  ) as Record<RequiredEnvironmentField, string>;
+}
+
+export function mergeEnvironmentWithCanonicalProvenance(params: {
+  providedEnvironment?: Record<string, unknown>;
+  canonicalProvenance: Record<RequiredEnvironmentField, string>;
+}): Record<string, unknown> {
+  const { canonicalProvenance } = params;
+  const providedEnvironment = normalizeProvidedEnvironmentContext(params.providedEnvironment);
+  if (!providedEnvironment) {
+    return { ...canonicalProvenance };
+  }
+
+  const mismatches: string[] = [];
+  for (const field of REQUIRED_ENVIRONMENT_FIELDS) {
+    const provided = providedEnvironment[field];
+    if (provided === undefined) continue;
+    if (typeof provided !== "string" || provided.trim() !== canonicalProvenance[field]) {
+      mismatches.push(field);
+    }
+  }
+  if (mismatches.length > 0) {
+    throw new Error(
+      `Provided environment metadata does not match new run provenance for: ${mismatches.join(", ")}`
+    );
+  }
+
+  return {
+    ...canonicalProvenance,
+    ...providedEnvironment,
+  };
 }
 
 export async function loadComplianceProfile(params: {

@@ -206,8 +206,31 @@ function extractToolResults(events) {
     .map((item) => ({
       call_id: String(asRecord(item)?.call_id ?? "").trim(),
       status: String(asRecord(item)?.status ?? "").trim(),
+      has_payload_summary: Object.prototype.hasOwnProperty.call(asRecord(item) || {}, "payload_summary"),
+      result_ref: String(asRecord(item)?.result_ref ?? "").trim(),
+      error_code: String(asRecord(item)?.error_code ?? "").trim(),
+      error_message: String(asRecord(item)?.error_message ?? "").trim(),
     }))
     .filter((item) => item.call_id.length > 0);
+}
+
+function validateToolResultEvidence(toolResults) {
+  const missingOutputEvidenceCallIds = [];
+  const missingErrorEvidenceCallIds = [];
+  for (const result of toolResults) {
+    const hasOutputEvidence = result.has_payload_summary || result.result_ref.length > 0;
+    const hasErrorEvidence = result.error_code.length > 0 || result.error_message.length > 0;
+    if (result.status === "ok" && !hasOutputEvidence) {
+      missingOutputEvidenceCallIds.push(result.call_id);
+    }
+    if ((result.status === "error" || result.status === "timeout") && !hasErrorEvidence) {
+      missingErrorEvidenceCallIds.push(result.call_id);
+    }
+  }
+  return {
+    missingOutputEvidenceCallIds,
+    missingErrorEvidenceCallIds,
+  };
 }
 
 function containsOrderedSubsequence(actual, expected) {
@@ -354,6 +377,7 @@ function validateCanaryResponse({ response, selectedCase, systemScope, qualityCo
   const toolResults = extractToolResults(events);
   const resultIds = new Set(toolResults.map((item) => item.call_id));
   const missingToolResultCallIds = toolCalls.filter((item) => !resultIds.has(item.call_id)).map((item) => item.call_id);
+  const toolResultEvidence = validateToolResultEvidence(toolResults);
   const expected = asRecord(selectedCase.caseItem.expected) || {};
   const requiredTools = uniqueStrings([
     ...uniqueStrings(expected.tool_required),
@@ -380,6 +404,24 @@ function validateCanaryResponse({ response, selectedCase, systemScope, qualityCo
           { missing_call_ids: missingPairs }
         );
       }
+    }
+    if (toolResultEvidence.missingOutputEvidenceCallIds.length > 0) {
+      pushIssue(
+        errors,
+        "error",
+        "adapter.run_case.tool_result_output_evidence",
+        "Quality-grade tool_result telemetry must include payload_summary or result_ref for successful tool calls",
+        { missing_call_ids: toolResultEvidence.missingOutputEvidenceCallIds }
+      );
+    }
+    if (toolResultEvidence.missingErrorEvidenceCallIds.length > 0) {
+      pushIssue(
+        errors,
+        "error",
+        "adapter.run_case.tool_result_error_evidence",
+        "Quality-grade tool_result telemetry must include error_code or error_message for failed/timeout tool calls",
+        { missing_call_ids: toolResultEvidence.missingErrorEvidenceCallIds }
+      );
     }
   } else if (qualityContract?.telemetry_requirements?.require_tool_call_result_pairs) {
     pushIssue(
@@ -458,6 +500,8 @@ function validateCanaryResponse({ response, selectedCase, systemScope, qualityCo
     proposed_action_types: uniqueStrings(proposedActionTypes),
     has_final_output_event: finalOutputEventPresent,
     missing_tool_result_call_ids: missingToolResultCallIds,
+    missing_tool_output_evidence_call_ids: toolResultEvidence.missingOutputEvidenceCallIds,
+    missing_tool_error_evidence_call_ids: toolResultEvidence.missingErrorEvidenceCallIds,
   };
 }
 
@@ -530,6 +574,8 @@ function buildAdapterCapabilityArtifact({
       has_assumption_state: canarySignals.has_assumption_state,
       has_final_output: canarySignals.has_final_output,
       has_final_output_event: canarySignals.has_final_output_event,
+      tool_results_with_missing_output_evidence: canarySignals.missing_tool_output_evidence_call_ids.length,
+      tool_results_with_missing_error_evidence: canarySignals.missing_tool_error_evidence_call_ids.length,
     },
     selected_case: selectedCase
       ? {
@@ -584,6 +630,8 @@ function buildAdapterCapabilityArtifact({
         tool_result_count: canarySignals.tool_results.length,
         observed_tools: uniqueStrings(observedTools),
         missing_tool_result_call_ids: uniqueStrings(canarySignals.missing_tool_result_call_ids),
+        missing_tool_output_evidence_call_ids: uniqueStrings(canarySignals.missing_tool_output_evidence_call_ids),
+        missing_tool_error_evidence_call_ids: uniqueStrings(canarySignals.missing_tool_error_evidence_call_ids),
         tool_call_result_pairs_supported: toolPairDepthSupported,
         has_trace_anchor: canarySignals.has_trace_anchor,
         has_assumption_state: canarySignals.has_assumption_state,
@@ -717,6 +765,8 @@ async function main() {
     proposed_action_types: [],
     has_final_output_event: false,
     missing_tool_result_call_ids: [],
+    missing_tool_output_evidence_call_ids: [],
+    missing_tool_error_evidence_call_ids: [],
   };
 
   if (selectedCase) {

@@ -1,0 +1,1183 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 3887 >>
+stream
+BT /F2 18 Tf 50 778 Td (Package reviewer EU AI Act) Tj ET
+BT /F1 10 Tf 50 754 Td () Tj ET
+BT /F1 10 Tf 50 744 Td (Report ID: `eu-ai-act-demo`) Tj ET
+BT /F1 10 Tf 50 730 Td (Generated: 2026-04-02T03:30:00.483Z) Tj ET
+BT /F1 10 Tf 50 716 Td () Tj ET
+BT /F2 14 Tf 50 706 Td (Resume) Tj ET
+BT /F1 10 Tf 50 686 Td (" Decision de release : reject.) Tj ET
+BT /F1 10 Tf 50 672 Td (" Qualite d'execution : healthy.) Tj ET
+BT /F1 10 Tf 50 658 Td (" Vue de couverture : 3 couvertes / 17 partielles / 0 clauses EU AI Act manquantes.) Tj ET
+BT /F1 10 Tf 50 644 Td (" File de revue humaine : 1 cas avec approbation, 1 cas bloquants.) Tj ET
+BT /F1 10 Tf 50 630 Td () Tj ET
+BT /F2 14 Tf 50 620 Td (Comment lire ce package) Tj ET
+BT /F1 10 Tf 50 600 Td (" Commencez par le PDF reviewer ou le HTML reviewer, pas par les fichiers JSON bruts.) Tj ET
+BT /F1 10 Tf 50 586 Td (" Lisez les sections dans l'ordre de l'annexe ; chaque section explique a quoi elle sert, ce qui est) Tj ET
+BT /F1 10 Tf 50 572 Td (  genere ici, ce que l'operateur complete encore et ce qui reste ouvert.) Tj ET
+BT /F1 10 Tf 50 558 Td (" Utilisez la correspondance affirmation-preuve avant d'ouvrir des fichiers techniques plus) Tj ET
+BT /F1 10 Tf 50 544 Td (  profonds.) Tj ET
+BT /F1 10 Tf 50 530 Td () Tj ET
+BT /F2 14 Tf 50 520 Td (Si vous ne lisez pas depuis les outils d'ingenierie) Tj ET
+BT /F1 10 Tf 50 500 Td (" Lisez d'abord le resume en tete de chaque section.) Tj ET
+BT /F1 10 Tf 50 486 Td (" Focus on 'Completed by the operator' and 'Encore ouvert' to see what remains outside the generated) Tj ET
+BT /F1 10 Tf 50 472 Td (  machine layer.) Tj ET
+BT /F1 10 Tf 50 458 Td (" Utilisez le PDF reviewer pour la transmission, l'impression, le procurement ou une revue oriente) Tj ET
+BT /F1 10 Tf 50 444 Td (  conseil juridique.) Tj ET
+BT /F1 10 Tf 50 430 Td () Tj ET
+BT /F2 14 Tf 50 420 Td (Si vous effectuez une verification technique) Tj ET
+BT /F1 10 Tf 50 400 Td (" Use the reviewer HTML as the readable map, then open the linked Rapport de comparaison, Pack) Tj ET
+BT /F1 10 Tf 50 386 Td (  technique etendu, and Manifeste where deeper verification is needed.) Tj ET
+BT /F1 10 Tf 50 372 Td (" Consultez d'abord les lignes affirmation-preuve pour savoir quel fichier repond a quelle question) Tj ET
+BT /F1 10 Tf 50 358 Td (  reviewer.) Tj ET
+BT /F1 10 Tf 50 344 Td (" Traitez les noms de fichiers comme secondaires ; l'ordre de l'annexe et le role de la section) Tj ET
+BT /F1 10 Tf 50 330 Td (  passent d'abord.) Tj ET
+BT /F1 10 Tf 50 316 Td () Tj ET
+BT /F2 14 Tf 50 306 Td (Ce que ce package demontre) Tj ET
+BT /F1 10 Tf 50 286 Td (" Quelle version exacte du systeme evalue a produit ce package.) Tj ET
+BT /F1 10 Tf 50 272 Td (" Comment la release s'est comportee sur la suite de cas revue.) Tj ET
+BT /F1 10 Tf 50 258 Td (" Quels risques derives par la machine, actions de revue et signaux de monitoring ont ete observes.) Tj ET
+BT /F1 10 Tf 50 244 Td (" Quels fichiers de support soutiennent chaque section orientee reviewer.) Tj ET
+BT /F1 10 Tf 50 230 Td () Tj ET
+BT /F2 14 Tf 50 220 Td (Ce que ce package ne complete pas pour vous) Tj ET
+BT /F1 10 Tf 50 200 Td (" Que le fournisseur a complete chaque champ redige par l'operateur dans l'Annexe IV ou l'Annexe V.) Tj ET
+BT /F1 10 Tf 50 186 Td (" Que les obligations sectorielles de validation juridique, actuarielle, clinique ou financiere sont) Tj ET
+BT /F1 10 Tf 50 172 Td (  entierement satisfaites.) Tj ET
+BT /F1 10 Tf 50 158 Td (" Que la declaration de conformite ou la decision de mise sur le marche peut etre signee sans revue) Tj ET
+BT /F1 10 Tf 50 144 Td (  humaine.) Tj ET
+BT /F1 10 Tf 50 130 Td () Tj ET
+BT /F2 14 Tf 50 120 Td (Sorties liees) Tj ET
+BT /F1 10 Tf 50 100 Td (" PDF reviewer <eu-ai-act-reviewer.pdf>  Dossier imprimable oriente reviewer genere pendant le) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 1 of 18) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Length 4559 >>
+stream
+BT /F1 10 Tf 50 778 Td (  packaging EU.) Tj ET
+BT /F1 10 Tf 50 764 Td (" HTML reviewer <eu-ai-act-reviewer.html>  Dossier lie, oriente reviewer, pour lecture dans le) Tj ET
+BT /F1 10 Tf 50 750 Td (  navigateur.) Tj ET
+BT /F1 10 Tf 50 736 Td (" Markdown reviewer <eu-ai-act-reviewer.md>  Source editable du dossier oriente reviewer.) Tj ET
+BT /F1 10 Tf 50 722 Td (" Pack technique etendu <eu-ai-act-report.html>  Dossier Annexe IV complet, oriente ingenierie,) Tj ET
+BT /F1 10 Tf 50 708 Td (  avec tables brutes et scaffolds detailles.) Tj ET
+BT /F1 10 Tf 50 694 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  Export Annexe IV structure et lisible par machine.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Article 10 data governance <article-10-data-governance.json>  System-specific data-governance) Tj ET
+BT /F1 10 Tf 50 666 Td (  scaffold for the evaluated release.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Article 16 provider obligations <article-16-provider-obligations.json>  Provider-obligations) Tj ET
+BT /F1 10 Tf 50 638 Td (  scaffold tied to the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 624 Td (" Article 43 conformity assessment <article-43-conformity-assessment.json>  Conformity-assessment) Tj ET
+BT /F1 10 Tf 50 610 Td (  scaffold and route inputs for the evaluated system.) Tj ET
+BT /F1 10 Tf 50 596 Td (" Article 47 declaration scaffold <article-47-declaration-of-conformity.json> ) Tj ET
+BT /F1 10 Tf 50 582 Td (  Declaration-of-conformity scaffold for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Annex V declaration content <annex-v-declaration-content.json>  Structured Annex V) Tj ET
+BT /F1 10 Tf 50 554 Td (  declaration-content scaffold.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Rapport de comparaison <../compare-report.json>  Rapport de qualification de release sous-jacent) Tj ET
+BT /F1 10 Tf 50 526 Td (  pour ce run.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Manifeste <../artifacts/manifest.json>  Index portable de preuves pour l'integrite des artefacts.) Tj ET
+BT /F1 10 Tf 50 498 Td (" Revue de release <release-review.json>  Decision de release et checklist reviewer generees par la) Tj ET
+BT /F1 10 Tf 50 484 Td (  machine.) Tj ET
+BT /F1 10 Tf 50 470 Td () Tj ET
+BT /F2 14 Tf 50 460 Td (Lisez ce package dans l'ordre de l'annexe) Tj ET
+BT /F1 10 Tf 50 440 Td (" 1. Description generale du systeme <#general-description>) Tj ET
+BT /F1 10 Tf 50 426 Td (" 2. Description detaillee du developpement <#development-description>) Tj ET
+BT /F1 10 Tf 50 412 Td (" 3. Monitoring, fonctionnement et controle <#operation-control>) Tj ET
+BT /F1 10 Tf 50 398 Td (" 4. Metriques de performance et limites <#performance-limits>) Tj ET
+BT /F1 10 Tf 50 384 Td (" 5. Systeme de gestion des risques \(Article 9\) <#risk-management>) Tj ET
+BT /F1 10 Tf 50 370 Td (" 6. Changements sur le cycle de vie <#lifecycle-changes>) Tj ET
+BT /F1 10 Tf 50 356 Td (" 7. Standards et controles alternatifs <#standards-specifications>) Tj ET
+BT /F1 10 Tf 50 342 Td (" 8. Limite de la Declaration UE de conformite \(Annexe V\) <#declaration-boundary>) Tj ET
+BT /F1 10 Tf 50 328 Td (" 9. Surveillance post-commercialisation et incidents graves <#post-market-serious-incidents>) Tj ET
+BT /F1 10 Tf 50 314 Td () Tj ET
+BT /F2 14 Tf 50 304 Td (1. Description generale du systeme) Tj ET
+BT /F1 10 Tf 50 284 Td () Tj ET
+BT /F2 11 Tf 50 274 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 258 Td (" This section identifies the exact agent, model, prompt, tools, and report scope used for the) Tj ET
+BT /F1 10 Tf 50 244 Td (  evaluated release.) Tj ET
+BT /F1 10 Tf 50 230 Td (" It is the reviewer-first entry point for understanding which system version produced the evidence) Tj ET
+BT /F1 10 Tf 50 216 Td (  in this package.) Tj ET
+BT /F1 10 Tf 50 202 Td () Tj ET
+BT /F2 11 Tf 50 192 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 176 Td (" Identifiant de rapport eu-ai-act-demo avec horodatage de generation 2026-04-02T03:30:00.483Z.) Tj ET
+BT /F1 10 Tf 50 162 Td (" Identite d'environnement : agent golden-eu-agent / golden-eu-agent-v2, modele golden-model-v1 /) Tj ET
+BT /F1 10 Tf 50 148 Td (  2026-03-01.) Tj ET
+BT /F1 10 Tf 50 134 Td (" Perimetre du package : cas _source_inputs/cases.json, baseline _source_inputs/baseline, nouveau) Tj ET
+BT /F1 10 Tf 50 120 Td (  _source_inputs/new.) Tj ET
+BT /F1 10 Tf 50 106 Td (" Classe de transfert internal_only et statut de redaction none.) Tj ET
+BT /F1 10 Tf 50 92 Td () Tj ET
+BT /F1 9 Tf 470 24 Td (Page 2 of 18) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Length 4054 >>
+stream
+BT /F2 11 Tf 50 778 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 762 Td (" Provider legal identity, authorised representative, and external contact details.) Tj ET
+BT /F1 10 Tf 50 748 Td (" Narrative intended purpose and target user/deployer description.) Tj ET
+BT /F1 10 Tf 50 734 Td (" Market placement form, hardware/software integration context, and user-interface description.) Tj ET
+BT /F1 10 Tf 50 720 Td () Tj ET
+BT /F2 11 Tf 50 710 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 694 Td (" Affirmation: The package identifies the exact evaluated system version and run scope.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 666 Td (" Reviewer use: Confirms that the dossier is tied to one concrete evaluated system rather than a) Tj ET
+BT /F1 10 Tf 50 652 Td (  generic product description.) Tj ET
+BT /F1 10 Tf 50 638 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 624 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  System identity block.) Tj ET
+BT /F1 10 Tf 50 610 Td (" Rapport de comparaison <../compare-report.json>  Release scope and runtime provenance.) Tj ET
+BT /F1 10 Tf 50 596 Td (" Manifeste <../artifacts/manifest.json>  Integrity index for included artifacts.) Tj ET
+BT /F1 10 Tf 50 582 Td (" Affirmation: Provider legal identity and intended-purpose narrative still need to be completed by) Tj ET
+BT /F1 10 Tf 50 568 Td (  the operator.) Tj ET
+BT /F1 10 Tf 50 554 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 540 Td (" Reviewer use: Separates the technical identity already present from the provider-authored context) Tj ET
+BT /F1 10 Tf 50 526 Td (  still needed for formal dossier completion.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 498 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  System identity block.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Affirmation: The generated bundle does not itself supply market-placement form or UI-description) Tj ET
+BT /F1 10 Tf 50 470 Td (  narrative.) Tj ET
+BT /F1 10 Tf 50 456 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 442 Td (" Reviewer use: Prevents a reviewer from mistaking technical identity for a full product-description) Tj ET
+BT /F1 10 Tf 50 428 Td (  section.) Tj ET
+BT /F1 10 Tf 50 414 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 400 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  System identity block.) Tj ET
+BT /F1 10 Tf 50 386 Td () Tj ET
+BT /F2 11 Tf 50 376 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 360 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  System identity block.) Tj ET
+BT /F1 10 Tf 50 346 Td (" Rapport de comparaison <../compare-report.json>  Release scope and runtime provenance.) Tj ET
+BT /F1 10 Tf 50 332 Td (" Manifeste <../artifacts/manifest.json>  Integrity index for included artifacts.) Tj ET
+BT /F1 10 Tf 50 318 Td () Tj ET
+BT /F2 11 Tf 50 308 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 292 Td (" None.) Tj ET
+BT /F1 10 Tf 50 278 Td () Tj ET
+BT /F2 14 Tf 50 268 Td (2. Description detaillee du developpement) Tj ET
+BT /F1 10 Tf 50 248 Td () Tj ET
+BT /F2 11 Tf 50 238 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 222 Td (" This section captures how the evaluated release was exercised and which machine-verifiable) Tj ET
+BT /F1 10 Tf 50 208 Td (  artifacts back the technical record.) Tj ET
+BT /F1 10 Tf 50 194 Td (" It is evidence-backed, but it does not replace provider-authored architecture and data-governance) Tj ET
+BT /F1 10 Tf 50 180 Td (  writing.) Tj ET
+BT /F1 10 Tf 50 166 Td () Tj ET
+BT /F2 11 Tf 50 156 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 140 Td (" 13 manifest-backed artifact\(s\) indexed across 20 EU AI Act coverage clause\(s\).) Tj ET
+BT /F1 10 Tf 50 126 Td (" 2 case artifact row\(s\) with response, replay, and trace references where available.) Tj ET
+BT /F1 10 Tf 50 112 Td (" Execution exercised on suite\(s\): release.) Tj ET
+BT /F1 10 Tf 50 98 Td () Tj ET
+BT /F1 9 Tf 470 24 Td (Page 3 of 18) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Length 4710 >>
+stream
+BT /F2 11 Tf 50 778 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 762 Td (" Architecture narrative, algorithmic design decisions, trade-offs, and computational resources.) Tj ET
+BT /F1 10 Tf 50 748 Td (" Training/data provenance, labelling, cleaning, and datasheet material.) Tj ET
+BT /F1 10 Tf 50 734 Td (" Cybersecurity design narrative beyond the emitted runtime and scanner evidence.) Tj ET
+BT /F1 10 Tf 50 720 Td () Tj ET
+BT /F2 11 Tf 50 710 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 694 Td (" Affirmation: The bundle preserves enough runtime artifacts to reconstruct how the evaluated) Tj ET
+BT /F1 10 Tf 50 680 Td (  release was exercised.) Tj ET
+BT /F1 10 Tf 50 666 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 652 Td (" Reviewer use: Lets the reviewer verify that development-stage claims are backed by retained) Tj ET
+BT /F1 10 Tf 50 638 Td (  evidence rather than narrative alone.) Tj ET
+BT /F1 10 Tf 50 624 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 610 Td (" Article 10 data governance <article-10-data-governance.json>  Data-governance scaffold for) Tj ET
+BT /F1 10 Tf 50 596 Td (  sources, representativeness, and preparation steps.) Tj ET
+BT /F1 10 Tf 50 582 Td (" Preuves index <evidence-index.json>  Clause-to-artifact mapping for the bundle.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Manifeste <../artifacts/manifest.json>  Artifact-level integrity data.) Tj ET
+BT /F1 10 Tf 50 554 Td (" Pack technique etendu <eu-ai-act-report.html>  Detailed tables and clause-by-clause scaffolds.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Affirmation: Architecture, training-data, and broader development-process narrative still need) Tj ET
+BT /F1 10 Tf 50 526 Td (  provider-authored text.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 498 Td (" Reviewer use: Shows where the evidence engine stops and provider engineering documentation still) Tj ET
+BT /F1 10 Tf 50 484 Td (  needs to be attached.) Tj ET
+BT /F1 10 Tf 50 470 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 456 Td (" Article 10 data governance <article-10-data-governance.json>  Data-governance scaffold for) Tj ET
+BT /F1 10 Tf 50 442 Td (  sources, representativeness, and preparation steps.) Tj ET
+BT /F1 10 Tf 50 428 Td (" Pack technique etendu <eu-ai-act-report.html>  Detailed tables and clause-by-clause scaffolds.) Tj ET
+BT /F1 10 Tf 50 414 Td (" Preuves index <evidence-index.json>  Clause-to-artifact mapping for the bundle.) Tj ET
+BT /F1 10 Tf 50 400 Td (" Affirmation: The generated section does not claim complete training-data governance or full) Tj ET
+BT /F1 10 Tf 50 386 Td (  architecture coverage.) Tj ET
+BT /F1 10 Tf 50 372 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 358 Td (" Reviewer use: Avoids over-reading runtime evidence as if it were the whole development record.) Tj ET
+BT /F1 10 Tf 50 344 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 330 Td (" Article 10 data governance <article-10-data-governance.json>  Data-governance scaffold for) Tj ET
+BT /F1 10 Tf 50 316 Td (  sources, representativeness, and preparation steps.) Tj ET
+BT /F1 10 Tf 50 302 Td (" Preuves index <evidence-index.json>  Clause-to-artifact mapping for the bundle.) Tj ET
+BT /F1 10 Tf 50 288 Td () Tj ET
+BT /F2 11 Tf 50 278 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 262 Td (" Article 10 data governance <article-10-data-governance.json>  Data-governance scaffold for) Tj ET
+BT /F1 10 Tf 50 248 Td (  sources, representativeness, and preparation steps.) Tj ET
+BT /F1 10 Tf 50 234 Td (" Preuves index <evidence-index.json>  Clause-to-artifact mapping for the bundle.) Tj ET
+BT /F1 10 Tf 50 220 Td (" Pack technique etendu <eu-ai-act-report.html>  Detailed tables and clause-by-clause scaffolds.) Tj ET
+BT /F1 10 Tf 50 206 Td (" Manifeste <../artifacts/manifest.json>  Artifact-level integrity data.) Tj ET
+BT /F1 10 Tf 50 192 Td () Tj ET
+BT /F2 11 Tf 50 182 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 166 Td (" Art_10: missing required evidence compare-report.json.environment.training_data_provenance) Tj ET
+BT /F1 10 Tf 50 152 Td (" Art_9: Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 138 Td (" Art_9: Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 124 Td (" Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime) Tj ET
+BT /F1 10 Tf 50 110 Td (  evaluation.) Tj ET
+BT /F1 10 Tf 50 96 Td (" Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 4 of 18) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Length 4543 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary,) Tj ET
+BT /F1 10 Tf 50 764 Td (  and deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 750 Td (" Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints) Tj ET
+BT /F1 10 Tf 50 736 Td (  remain required.) Tj ET
+BT /F1 10 Tf 50 722 Td (" Art_13: Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 708 Td (" Art_17: Written QMS procedures, training, document control, supplier management, and authority) Tj ET
+BT /F1 10 Tf 50 694 Td (  communication remain operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain) Tj ET
+BT /F1 10 Tf 50 666 Td (  operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and) Tj ET
+BT /F1 10 Tf 50 638 Td (  authority-facing obligations remain required.) Tj ET
+BT /F1 10 Tf 50 624 Td (" Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records) Tj ET
+BT /F1 10 Tf 50 610 Td (  where applicable, and Article 47 remains provider-owned.) Tj ET
+BT /F1 10 Tf 50 596 Td (" Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still) Tj ET
+BT /F1 10 Tf 50 582 Td (  require provider-authored records.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification) Tj ET
+BT /F1 10 Tf 50 554 Td (  workflow remains required.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Art_21: The provider-owned authority cooperation path, documentation response process, and) Tj ET
+BT /F1 10 Tf 50 526 Td (  log-access process remain required.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Art_43: The provider-owned conformity assessment route and any notified-body records remain) Tj ET
+BT /F1 10 Tf 50 498 Td (  required.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Art_47: The provider-signed EU declaration of conformity remains required before placing on the) Tj ET
+BT /F1 10 Tf 50 470 Td (  market or putting into service.) Tj ET
+BT /F1 10 Tf 50 456 Td (" Art_48: The provider-owned CE marking record, including digital or physical placement and) Tj ET
+BT /F1 10 Tf 50 442 Td (  notified-body identification where applicable, remains required.) Tj ET
+BT /F1 10 Tf 50 428 Td (" Art_49: The provider-owned EU database or national registration record remains required where) Tj ET
+BT /F1 10 Tf 50 414 Td (  Article 49 applies.) Tj ET
+BT /F1 10 Tf 50 400 Td (" Annex_V: Provider identification, system identification, legal references, and signatory details) Tj ET
+BT /F1 10 Tf 50 386 Td (  for the declaration remain provider-authored.) Tj ET
+BT /F1 10 Tf 50 372 Td () Tj ET
+BT /F2 14 Tf 50 362 Td (3. Monitoring, fonctionnement et controle) Tj ET
+BT /F1 10 Tf 50 342 Td () Tj ET
+BT /F2 11 Tf 50 332 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 316 Td (" This section gives reviewers a short view of how the evaluated release is meant to be operated,) Tj ET
+BT /F1 10 Tf 50 302 Td (  overseen, and escalated.) Tj ET
+BT /F1 10 Tf 50 288 Td (" It combines deployer-facing Article 13 scaffolding with human-oversight and release-review) Tj ET
+BT /F1 10 Tf 50 274 Td (  outputs.) Tj ET
+BT /F1 10 Tf 50 260 Td () Tj ET
+BT /F2 11 Tf 50 250 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 234 Td (" Execution quality is healthy with new pass rate 50.0%.) Tj ET
+BT /F1 10 Tf 50 220 Td (" 1 case\(s\) require approval and 1 case\(s\) are blocked in the current review queue.) Tj ET
+BT /F1 10 Tf 50 206 Td (" 2 case\(s\) show missing assumption-state capture.) Tj ET
+BT /F1 10 Tf 50 192 Td () Tj ET
+BT /F2 11 Tf 50 182 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 166 Td (" intended purpose statement for deployers) Tj ET
+BT /F1 10 Tf 50 152 Td (" known limitations and acceptable operating conditions) Tj ET
+BT /F1 10 Tf 50 138 Td (" human oversight and escalation instructions) Tj ET
+BT /F1 10 Tf 50 124 Td (" monitoring and maintenance contact path) Tj ET
+BT /F1 10 Tf 50 110 Td (" Named oversight roles, escalation owner, and customer/deployer contact path.) Tj ET
+BT /F1 10 Tf 50 96 Td (" Final instructions-for-use text and safe operating boundary wording.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 5 of 18) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Length 4643 >>
+stream
+BT /F1 10 Tf 50 778 Td () Tj ET
+BT /F2 11 Tf 50 768 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 752 Td (" Affirmation: The package shows the current oversight queue, release status, and deployer-facing) Tj ET
+BT /F1 10 Tf 50 738 Td (  instruction scaffold for this release.) Tj ET
+BT /F1 10 Tf 50 724 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 710 Td (" Reviewer use: Lets the reviewer see whether oversight and operation controls are grounded in the) Tj ET
+BT /F1 10 Tf 50 696 Td (  actual evaluated release.) Tj ET
+BT /F1 10 Tf 50 682 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 668 Td (" Article 13 instructions <article-13-instructions.json>  Instructions-for-use scaffold.) Tj ET
+BT /F1 10 Tf 50 654 Td (" Human oversight summary <human-oversight-summary.json>  Reviewer queue and action map.) Tj ET
+BT /F1 10 Tf 50 640 Td (" Revue de release <release-review.json>  Release gate status and signoff expectation.) Tj ET
+BT /F1 10 Tf 50 626 Td (" Affirmation: Named oversight roles, escalation ownership, and final instructions-for-use wording) Tj ET
+BT /F1 10 Tf 50 612 Td (  must be completed by the operator.) Tj ET
+BT /F1 10 Tf 50 598 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 584 Td (" Reviewer use: Separates generated release and review facts from the deployer instructions that) Tj ET
+BT /F1 10 Tf 50 570 Td (  still need human ownership.) Tj ET
+BT /F1 10 Tf 50 556 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 542 Td (" Article 13 instructions <article-13-instructions.json>  Instructions-for-use scaffold.) Tj ET
+BT /F1 10 Tf 50 528 Td (" Human oversight summary <human-oversight-summary.json>  Reviewer queue and action map.) Tj ET
+BT /F1 10 Tf 50 514 Td (" Affirmation: Known limitations and assumption-state gaps remain open until the operator closes) Tj ET
+BT /F1 10 Tf 50 500 Td (  them in the final dossier and workflow.) Tj ET
+BT /F1 10 Tf 50 486 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 472 Td (" Reviewer use: Keeps the reviewer focused on whether the operating boundary is complete enough for) Tj ET
+BT /F1 10 Tf 50 458 Td (  handoff.) Tj ET
+BT /F1 10 Tf 50 444 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 430 Td (" Article 13 instructions <article-13-instructions.json>  Instructions-for-use scaffold.) Tj ET
+BT /F1 10 Tf 50 416 Td (" Revue de release <release-review.json>  Release gate status and signoff expectation.) Tj ET
+BT /F1 10 Tf 50 402 Td () Tj ET
+BT /F2 11 Tf 50 392 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 376 Td (" Article 13 instructions <article-13-instructions.json>  Instructions-for-use scaffold.) Tj ET
+BT /F1 10 Tf 50 362 Td (" Human oversight summary <human-oversight-summary.json>  Reviewer queue and action map.) Tj ET
+BT /F1 10 Tf 50 348 Td (" Revue de release <release-review.json>  Release gate status and signoff expectation.) Tj ET
+BT /F1 10 Tf 50 334 Td () Tj ET
+BT /F2 11 Tf 50 324 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 308 Td (" Operator-authored intended-use, deployer-facing instructions, and operating constraints remain) Tj ET
+BT /F1 10 Tf 50 294 Td (  required.) Tj ET
+BT /F1 10 Tf 50 280 Td (" Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 266 Td (" The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 252 Td (" The generated dossier still requires operator-authored intended-use, system-boundary, and) Tj ET
+BT /F1 10 Tf 50 238 Td (  deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 224 Td (" Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator) Tj ET
+BT /F1 10 Tf 50 210 Td (  responsibilities.) Tj ET
+BT /F1 10 Tf 50 196 Td (" Art_10: missing required evidence compare-report.json.environment.training_data_provenance) Tj ET
+BT /F1 10 Tf 50 182 Td (" Art_9: Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 168 Td (" Art_9: Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 154 Td (" Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime) Tj ET
+BT /F1 10 Tf 50 140 Td (  evaluation.) Tj ET
+BT /F1 10 Tf 50 126 Td (" Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 112 Td (" Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary,) Tj ET
+BT /F1 10 Tf 50 98 Td (  and deployment-context inputs.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 6 of 18) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Length 4508 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints) Tj ET
+BT /F1 10 Tf 50 764 Td (  remain required.) Tj ET
+BT /F1 10 Tf 50 750 Td (" Art_13: Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 736 Td (" Art_17: Written QMS procedures, training, document control, supplier management, and authority) Tj ET
+BT /F1 10 Tf 50 722 Td (  communication remain operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 708 Td (" Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain) Tj ET
+BT /F1 10 Tf 50 694 Td (  operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and) Tj ET
+BT /F1 10 Tf 50 666 Td (  authority-facing obligations remain required.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records) Tj ET
+BT /F1 10 Tf 50 638 Td (  where applicable, and Article 47 remains provider-owned.) Tj ET
+BT /F1 10 Tf 50 624 Td (" Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still) Tj ET
+BT /F1 10 Tf 50 610 Td (  require provider-authored records.) Tj ET
+BT /F1 10 Tf 50 596 Td (" Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification) Tj ET
+BT /F1 10 Tf 50 582 Td (  workflow remains required.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Art_21: The provider-owned authority cooperation path, documentation response process, and) Tj ET
+BT /F1 10 Tf 50 554 Td (  log-access process remain required.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Art_43: The provider-owned conformity assessment route and any notified-body records remain) Tj ET
+BT /F1 10 Tf 50 526 Td (  required.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Art_47: The provider-signed EU declaration of conformity remains required before placing on the) Tj ET
+BT /F1 10 Tf 50 498 Td (  market or putting into service.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Art_48: The provider-owned CE marking record, including digital or physical placement and) Tj ET
+BT /F1 10 Tf 50 470 Td (  notified-body identification where applicable, remains required.) Tj ET
+BT /F1 10 Tf 50 456 Td (" Art_49: The provider-owned EU database or national registration record remains required where) Tj ET
+BT /F1 10 Tf 50 442 Td (  Article 49 applies.) Tj ET
+BT /F1 10 Tf 50 428 Td (" Annex_V: Provider identification, system identification, legal references, and signatory details) Tj ET
+BT /F1 10 Tf 50 414 Td (  for the declaration remain provider-authored.) Tj ET
+BT /F1 10 Tf 50 400 Td () Tj ET
+BT /F2 14 Tf 50 390 Td (4. Metriques de performance et limites) Tj ET
+BT /F1 10 Tf 50 370 Td () Tj ET
+BT /F2 11 Tf 50 360 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 344 Td (" This section is where a reviewer sees whether the release is technically healthy, what changed,) Tj ET
+BT /F1 10 Tf 50 330 Td (  and what limitations were observed.) Tj ET
+BT /F1 10 Tf 50 316 Td (" It is backed by comparable runs, but the business acceptability of those metrics remains) Tj ET
+BT /F1 10 Tf 50 302 Td (  operator-owned.) Tj ET
+BT /F1 10 Tf 50 288 Td () Tj ET
+BT /F2 11 Tf 50 278 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 262 Td (" Execution quality status healthy; regressions 0; improvements 1.) Tj ET
+BT /F1 10 Tf 50 248 Td (" Security signal snapshot: 2 case\(s\) with new signals; top kinds prompt_injection_marker,) Tj ET
+BT /F1 10 Tf 50 234 Td (  unsafe_code_execution.) Tj ET
+BT /F1 10 Tf 50 220 Td (" Release decision is reject with 1 approval case\(s\) and 1 blocking case\(s\).) Tj ET
+BT /F1 10 Tf 50 206 Td () Tj ET
+BT /F2 11 Tf 50 196 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 180 Td (" Domain-specific acceptance thresholds and explanation of why these metrics are sufficient for) Tj ET
+BT /F1 10 Tf 50 166 Td (  deployment.) Tj ET
+BT /F1 10 Tf 50 152 Td (" Business-harm narrative, acceptable error levels, and customer impact interpretation.) Tj ET
+BT /F1 10 Tf 50 138 Td () Tj ET
+BT /F2 11 Tf 50 128 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 112 Td (" Affirmation: The release's current quality and blocking status are backed by comparable-run) Tj ET
+BT /F1 10 Tf 50 98 Td (  evidence and release review outputs.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 7 of 18) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Length 4555 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 764 Td (" Reviewer use: Supports a fast decision on whether the technical release evidence is healthy enough) Tj ET
+BT /F1 10 Tf 50 750 Td (  to read further.) Tj ET
+BT /F1 10 Tf 50 736 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 722 Td (" Rapport de comparaison <../compare-report.json>  Comparable run results and execution-quality) Tj ET
+BT /F1 10 Tf 50 708 Td (  details.) Tj ET
+BT /F1 10 Tf 50 694 Td (" Revue de release <release-review.json>  Release gate summary and rationale.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Pack technique etendu <eu-ai-act-report.html>  Detailed highlighted cases and signal summaries.) Tj ET
+BT /F1 10 Tf 50 666 Td (" Affirmation: Acceptance thresholds and harm interpretation still need operator judgment.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 638 Td (" Reviewer use: Shows that technical metrics are present, but deployment acceptability is still a) Tj ET
+BT /F1 10 Tf 50 624 Td (  human decision.) Tj ET
+BT /F1 10 Tf 50 610 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 596 Td (" Rapport de comparaison <../compare-report.json>  Comparable run results and execution-quality) Tj ET
+BT /F1 10 Tf 50 582 Td (  details.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Revue de release <release-review.json>  Release gate summary and rationale.) Tj ET
+BT /F1 10 Tf 50 554 Td (" Affirmation: Any unresolved known limitations remain open unless explicitly dispositioned by the) Tj ET
+BT /F1 10 Tf 50 540 Td (  operator.) Tj ET
+BT /F1 10 Tf 50 526 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 512 Td (" Reviewer use: Prevents a reviewer from treating the measured outputs as a complete deployment) Tj ET
+BT /F1 10 Tf 50 498 Td (  approval by themselves.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 470 Td (" Pack technique etendu <eu-ai-act-report.html>  Detailed highlighted cases and signal summaries.) Tj ET
+BT /F1 10 Tf 50 456 Td (" Revue de release <release-review.json>  Release gate summary and rationale.) Tj ET
+BT /F1 10 Tf 50 442 Td () Tj ET
+BT /F2 11 Tf 50 432 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 416 Td (" Rapport de comparaison <../compare-report.json>  Comparable run results and execution-quality) Tj ET
+BT /F1 10 Tf 50 402 Td (  details.) Tj ET
+BT /F1 10 Tf 50 388 Td (" Revue de release <release-review.json>  Release gate summary and rationale.) Tj ET
+BT /F1 10 Tf 50 374 Td (" Pack technique etendu <eu-ai-act-report.html>  Detailed highlighted cases and signal summaries.) Tj ET
+BT /F1 10 Tf 50 360 Td () Tj ET
+BT /F2 11 Tf 50 350 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 334 Td (" Operator-authored intended-use, deployer-facing instructions, and operating constraints remain) Tj ET
+BT /F1 10 Tf 50 320 Td (  required.) Tj ET
+BT /F1 10 Tf 50 306 Td (" Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 292 Td (" The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 278 Td (" The generated dossier still requires operator-authored intended-use, system-boundary, and) Tj ET
+BT /F1 10 Tf 50 264 Td (  deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 250 Td (" Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator) Tj ET
+BT /F1 10 Tf 50 236 Td (  responsibilities.) Tj ET
+BT /F1 10 Tf 50 222 Td (" Art_10: missing required evidence compare-report.json.environment.training_data_provenance) Tj ET
+BT /F1 10 Tf 50 208 Td (" Art_9: Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 194 Td (" Art_9: Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 180 Td (" Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime) Tj ET
+BT /F1 10 Tf 50 166 Td (  evaluation.) Tj ET
+BT /F1 10 Tf 50 152 Td (" Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 138 Td (" Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary,) Tj ET
+BT /F1 10 Tf 50 124 Td (  and deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 110 Td (" Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints) Tj ET
+BT /F1 10 Tf 50 96 Td (  remain required.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 8 of 18) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Length 4515 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Art_13: Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 764 Td (" Art_17: Written QMS procedures, training, document control, supplier management, and authority) Tj ET
+BT /F1 10 Tf 50 750 Td (  communication remain operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 736 Td (" Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain) Tj ET
+BT /F1 10 Tf 50 722 Td (  operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 708 Td (" Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and) Tj ET
+BT /F1 10 Tf 50 694 Td (  authority-facing obligations remain required.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records) Tj ET
+BT /F1 10 Tf 50 666 Td (  where applicable, and Article 47 remains provider-owned.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still) Tj ET
+BT /F1 10 Tf 50 638 Td (  require provider-authored records.) Tj ET
+BT /F1 10 Tf 50 624 Td (" Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification) Tj ET
+BT /F1 10 Tf 50 610 Td (  workflow remains required.) Tj ET
+BT /F1 10 Tf 50 596 Td (" Art_21: The provider-owned authority cooperation path, documentation response process, and) Tj ET
+BT /F1 10 Tf 50 582 Td (  log-access process remain required.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Art_43: The provider-owned conformity assessment route and any notified-body records remain) Tj ET
+BT /F1 10 Tf 50 554 Td (  required.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Art_47: The provider-signed EU declaration of conformity remains required before placing on the) Tj ET
+BT /F1 10 Tf 50 526 Td (  market or putting into service.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Art_48: The provider-owned CE marking record, including digital or physical placement and) Tj ET
+BT /F1 10 Tf 50 498 Td (  notified-body identification where applicable, remains required.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Art_49: The provider-owned EU database or national registration record remains required where) Tj ET
+BT /F1 10 Tf 50 470 Td (  Article 49 applies.) Tj ET
+BT /F1 10 Tf 50 456 Td (" Annex_V: Provider identification, system identification, legal references, and signatory details) Tj ET
+BT /F1 10 Tf 50 442 Td (  for the declaration remain provider-authored.) Tj ET
+BT /F1 10 Tf 50 428 Td () Tj ET
+BT /F2 14 Tf 50 418 Td (5. Systeme de gestion des risques \(Article 9\)) Tj ET
+BT /F1 10 Tf 50 398 Td () Tj ET
+BT /F2 11 Tf 50 388 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 372 Td (" This section gives reviewers a machine-derived draft risk register tied to observed runs, review) Tj ET
+BT /F1 10 Tf 50 358 Td (  decisions, and monitoring signals.) Tj ET
+BT /F1 10 Tf 50 344 Td (" It is a starting point for Article 9, not a complete provider-authored risk management system.) Tj ET
+BT /F1 10 Tf 50 330 Td () Tj ET
+BT /F2 11 Tf 50 320 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 304 Td (" 5 machine-derived risk entry\(ies\): 2 from case behaviour, 2 from coverage gaps, 0 from execution) Tj ET
+BT /F1 10 Tf 50 290 Td (  quality, 1 from monitoring.) Tj ET
+BT /F1 10 Tf 50 276 Td (" 1 blocking, 4 review, and 0 monitor entry\(ies\).) Tj ET
+BT /F1 10 Tf 50 262 Td (" Post-release monitoring status history_current with 4 drift signal\(s\).) Tj ET
+BT /F1 10 Tf 50 248 Td () Tj ET
+BT /F2 11 Tf 50 238 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 222 Td (" likelihood and severity rationale owned by the operator) Tj ET
+BT /F1 10 Tf 50 208 Td (" control owner and target review date for each open risk) Tj ET
+BT /F1 10 Tf 50 194 Td (" residual-risk acceptance rationale for any accepted risk) Tj ET
+BT /F1 10 Tf 50 180 Td (" provider decision linkage for block or review risks) Tj ET
+BT /F1 10 Tf 50 166 Td (" Residual-risk acceptance, control owners, and target review dates.) Tj ET
+BT /F1 10 Tf 50 152 Td () Tj ET
+BT /F2 11 Tf 50 142 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 126 Td (" Affirmation: The bundle generates a machine-derived draft risk register from observed runs, review) Tj ET
+BT /F1 10 Tf 50 112 Td (  outcomes, and monitoring signals.) Tj ET
+BT /F1 10 Tf 50 98 Td (" Statut: Generated here) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 9 of 18) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Length 4210 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Reviewer use: Lets the reviewer see that Article 9 starts from runtime evidence rather than from a) Tj ET
+BT /F1 10 Tf 50 764 Td (  blank narrative template.) Tj ET
+BT /F1 10 Tf 50 750 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 736 Td (" Article 9 risk register <article-9-risk-register.json>  Machine-derived risk register scaffold.) Tj ET
+BT /F1 10 Tf 50 722 Td (" Revue de release <release-review.json>  Current release decision and escalation rationale.) Tj ET
+BT /F1 10 Tf 50 708 Td (" Post-market monitoring <post-market-monitoring.json>  Signals that reopen or update risks after) Tj ET
+BT /F1 10 Tf 50 694 Td (  release.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Affirmation: Likelihood rationale, owners, review dates, and residual-risk acceptance still need) Tj ET
+BT /F1 10 Tf 50 666 Td (  operator completion.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 638 Td (" Reviewer use: Shows exactly which parts of Article 9 remain human-owned even after the) Tj ET
+BT /F1 10 Tf 50 624 Td (  machine-derived draft is present.) Tj ET
+BT /F1 10 Tf 50 610 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 596 Td (" Article 9 risk register <article-9-risk-register.json>  Machine-derived risk register scaffold.) Tj ET
+BT /F1 10 Tf 50 582 Td (" Affirmation: Open residual gaps remain visible until the operator dispositiones them in the final) Tj ET
+BT /F1 10 Tf 50 568 Td (  governance workflow.) Tj ET
+BT /F1 10 Tf 50 554 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 540 Td (" Reviewer use: Prevents a reviewer from misreading the generated register as a final approved) Tj ET
+BT /F1 10 Tf 50 526 Td (  risk-management system.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 498 Td (" Article 9 risk register <article-9-risk-register.json>  Machine-derived risk register scaffold.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Post-market monitoring <post-market-monitoring.json>  Signals that reopen or update risks after) Tj ET
+BT /F1 10 Tf 50 470 Td (  release.) Tj ET
+BT /F1 10 Tf 50 456 Td () Tj ET
+BT /F2 11 Tf 50 446 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 430 Td (" Article 9 risk register <article-9-risk-register.json>  Machine-derived risk register scaffold.) Tj ET
+BT /F1 10 Tf 50 416 Td (" Revue de release <release-review.json>  Current release decision and escalation rationale.) Tj ET
+BT /F1 10 Tf 50 402 Td (" Post-market monitoring <post-market-monitoring.json>  Signals that reopen or update risks after) Tj ET
+BT /F1 10 Tf 50 388 Td (  release.) Tj ET
+BT /F1 10 Tf 50 374 Td () Tj ET
+BT /F2 11 Tf 50 364 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 348 Td (" Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 334 Td (" Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 320 Td (" This register is generated from runtime evidence and still requires operator-owned likelihood,) Tj ET
+BT /F1 10 Tf 50 306 Td (  impact, and acceptance rationale.) Tj ET
+BT /F1 10 Tf 50 292 Td () Tj ET
+BT /F2 14 Tf 50 282 Td (6. Changements sur le cycle de vie) Tj ET
+BT /F1 10 Tf 50 262 Td () Tj ET
+BT /F2 11 Tf 50 252 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 236 Td (" This section links QMS-lite controls and monitoring continuity into one lifecycle view.) Tj ET
+BT /F1 10 Tf 50 222 Td (" It shows whether the evaluated release triggered additional review, remediation, or follow-up) Tj ET
+BT /F1 10 Tf 50 208 Td (  process requirements.) Tj ET
+BT /F1 10 Tf 50 194 Td () Tj ET
+BT /F2 11 Tf 50 184 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 168 Td (" QMS-lite scaffold covers 6 process area\(s\) with 1 approval-required case\(s\) and 1 blocking) Tj ET
+BT /F1 10 Tf 50 154 Td (  case\(s\).) Tj ET
+BT /F1 10 Tf 50 140 Td (" Monitoring status history_current; execution quality healthy.) Tj ET
+BT /F1 10 Tf 50 126 Td (" 2 run\(s\) in monitoring window and 2 monitored case\(s\).) Tj ET
+BT /F1 10 Tf 50 112 Td () Tj ET
+BT /F2 11 Tf 50 102 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 10 of 18) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Length 4495 >>
+stream
+BT /F1 10 Tf 50 778 Td (" named quality management owner and document approver) Tj ET
+BT /F1 10 Tf 50 764 Td (" written change-management procedure and approval workflow) Tj ET
+BT /F1 10 Tf 50 750 Td (" incident, complaint, and corrective-action handling workflow) Tj ET
+BT /F1 10 Tf 50 736 Td (" document-control, retention, and versioning policy) Tj ET
+BT /F1 10 Tf 50 722 Td (" training, competency, and supplier-management responsibilities) Tj ET
+BT /F1 10 Tf 50 708 Td (" authority and customer communication procedure for material issues) Tj ET
+BT /F1 10 Tf 50 694 Td (" Formal change-control procedures, ownership matrix, training, and communications outside the) Tj ET
+BT /F1 10 Tf 50 680 Td (  generated scaffold.) Tj ET
+BT /F1 10 Tf 50 666 Td () Tj ET
+BT /F2 11 Tf 50 656 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 640 Td (" Affirmation: The bundle shows a machine-generated lifecycle view across QMS-lite controls and) Tj ET
+BT /F1 10 Tf 50 626 Td (  monitoring continuity.) Tj ET
+BT /F1 10 Tf 50 612 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 598 Td (" Reviewer use: Lets the reviewer check whether lifecycle evidence exists for this release instead) Tj ET
+BT /F1 10 Tf 50 584 Td (  of inferring process continuity from static prose.) Tj ET
+BT /F1 10 Tf 50 570 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 556 Td (" Article 17 QMS-lite <article-17-qms-lite.json>  Lifecycle and process scaffold.) Tj ET
+BT /F1 10 Tf 50 542 Td (" Revue de release <release-review.json>  Current promotion decision and checklist.) Tj ET
+BT /F1 10 Tf 50 528 Td (" Post-market monitoring <post-market-monitoring.json>  Monitoring continuity and drift signals.) Tj ET
+BT /F1 10 Tf 50 514 Td (" Affirmation: Formal procedures, accountable roles, and training expectations still need) Tj ET
+BT /F1 10 Tf 50 500 Td (  operator-authored process documentation.) Tj ET
+BT /F1 10 Tf 50 486 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 472 Td (" Reviewer use: Keeps the reviewer aware that QMS-lite is a technical scaffold, not a complete QMS) Tj ET
+BT /F1 10 Tf 50 458 Td (  document set.) Tj ET
+BT /F1 10 Tf 50 444 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 430 Td (" Article 17 QMS-lite <article-17-qms-lite.json>  Lifecycle and process scaffold.) Tj ET
+BT /F1 10 Tf 50 416 Td (" Affirmation: Residual process gaps remain open until they are closed in the provider's management) Tj ET
+BT /F1 10 Tf 50 402 Td (  system.) Tj ET
+BT /F1 10 Tf 50 388 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 374 Td (" Reviewer use: Makes lifecycle incompleteness visible instead of hiding it behind release status) Tj ET
+BT /F1 10 Tf 50 360 Td (  alone.) Tj ET
+BT /F1 10 Tf 50 346 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 332 Td (" Article 17 QMS-lite <article-17-qms-lite.json>  Lifecycle and process scaffold.) Tj ET
+BT /F1 10 Tf 50 318 Td (" Post-market monitoring <post-market-monitoring.json>  Monitoring continuity and drift signals.) Tj ET
+BT /F1 10 Tf 50 304 Td () Tj ET
+BT /F2 11 Tf 50 294 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 278 Td (" Article 17 QMS-lite <article-17-qms-lite.json>  Lifecycle and process scaffold.) Tj ET
+BT /F1 10 Tf 50 264 Td (" Revue de release <release-review.json>  Current promotion decision and checklist.) Tj ET
+BT /F1 10 Tf 50 250 Td (" Post-market monitoring <post-market-monitoring.json>  Monitoring continuity and drift signals.) Tj ET
+BT /F1 10 Tf 50 236 Td () Tj ET
+BT /F2 11 Tf 50 226 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 210 Td (" Written QMS procedures, training, document control, supplier management, and authority) Tj ET
+BT /F1 10 Tf 50 196 Td (  communication remain operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 182 Td (" Operator-authored instructions for use are still required before deployer handoff.) Tj ET
+BT /F1 10 Tf 50 168 Td (" This export summarizes technical evidence; it does not replace deployer-facing operating) Tj ET
+BT /F1 10 Tf 50 154 Td (  instructions.) Tj ET
+BT /F1 10 Tf 50 140 Td (" Operator-authored intended-use, deployer-facing instructions, and operating constraints remain) Tj ET
+BT /F1 10 Tf 50 126 Td (  required.) Tj ET
+BT /F1 10 Tf 50 112 Td (" Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 98 Td (" The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 11 of 18) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Length 5011 >>
+stream
+BT /F1 10 Tf 50 778 Td (" The generated dossier still requires operator-authored intended-use, system-boundary, and) Tj ET
+BT /F1 10 Tf 50 764 Td (  deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 750 Td (" Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator) Tj ET
+BT /F1 10 Tf 50 736 Td (  responsibilities.) Tj ET
+BT /F1 10 Tf 50 722 Td (" Art_10: missing required evidence compare-report.json.environment.training_data_provenance) Tj ET
+BT /F1 10 Tf 50 708 Td (" Art_9: Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 694 Td (" Art_9: Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime) Tj ET
+BT /F1 10 Tf 50 666 Td (  evaluation.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 638 Td (" Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary,) Tj ET
+BT /F1 10 Tf 50 624 Td (  and deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 610 Td (" Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints) Tj ET
+BT /F1 10 Tf 50 596 Td (  remain required.) Tj ET
+BT /F1 10 Tf 50 582 Td (" Art_13: Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Art_17: Written QMS procedures, training, document control, supplier management, and authority) Tj ET
+BT /F1 10 Tf 50 554 Td (  communication remain operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain) Tj ET
+BT /F1 10 Tf 50 526 Td (  operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and) Tj ET
+BT /F1 10 Tf 50 498 Td (  authority-facing obligations remain required.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records) Tj ET
+BT /F1 10 Tf 50 470 Td (  where applicable, and Article 47 remains provider-owned.) Tj ET
+BT /F1 10 Tf 50 456 Td (" Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still) Tj ET
+BT /F1 10 Tf 50 442 Td (  require provider-authored records.) Tj ET
+BT /F1 10 Tf 50 428 Td (" Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification) Tj ET
+BT /F1 10 Tf 50 414 Td (  workflow remains required.) Tj ET
+BT /F1 10 Tf 50 400 Td (" Art_21: The provider-owned authority cooperation path, documentation response process, and) Tj ET
+BT /F1 10 Tf 50 386 Td (  log-access process remain required.) Tj ET
+BT /F1 10 Tf 50 372 Td (" Art_43: The provider-owned conformity assessment route and any notified-body records remain) Tj ET
+BT /F1 10 Tf 50 358 Td (  required.) Tj ET
+BT /F1 10 Tf 50 344 Td (" Art_47: The provider-signed EU declaration of conformity remains required before placing on the) Tj ET
+BT /F1 10 Tf 50 330 Td (  market or putting into service.) Tj ET
+BT /F1 10 Tf 50 316 Td (" Art_48: The provider-owned CE marking record, including digital or physical placement and) Tj ET
+BT /F1 10 Tf 50 302 Td (  notified-body identification where applicable, remains required.) Tj ET
+BT /F1 10 Tf 50 288 Td (" Art_49: The provider-owned EU database or national registration record remains required where) Tj ET
+BT /F1 10 Tf 50 274 Td (  Article 49 applies.) Tj ET
+BT /F1 10 Tf 50 260 Td (" Annex_V: Provider identification, system identification, legal references, and signatory details) Tj ET
+BT /F1 10 Tf 50 246 Td (  for the declaration remain provider-authored.) Tj ET
+BT /F1 10 Tf 50 232 Td (" Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 218 Td (" Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 204 Td (" This register is generated from runtime evidence and still requires operator-owned likelihood,) Tj ET
+BT /F1 10 Tf 50 190 Td (  impact, and acceptance rationale.) Tj ET
+BT /F1 10 Tf 50 176 Td (" This plan is a technical scaffold and still requires operator-owned monitoring ownership, cadence,) Tj ET
+BT /F1 10 Tf 50 162 Td (  retention, and authority-reporting decisions.) Tj ET
+BT /F1 10 Tf 50 148 Td (" This QMS-lite export is a technical scaffold, not a complete quality management system.) Tj ET
+BT /F1 10 Tf 50 134 Td (" Competency management, supplier management, authority communication, and formal document-control) Tj ET
+BT /F1 10 Tf 50 120 Td (  procedures remain operator-authored.) Tj ET
+BT /F1 10 Tf 50 106 Td () Tj ET
+BT /F2 14 Tf 50 96 Td (7. Standards et controles alternatifs) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 12 of 18) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Length 4447 >>
+stream
+BT /F1 10 Tf 50 778 Td () Tj ET
+BT /F2 11 Tf 50 768 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 752 Td (" This section is intentionally narrow: the toolkit can point to the evidence that would support) Tj ET
+BT /F1 10 Tf 50 738 Td (  standards mapping, but it does not infer harmonised standards or common-specification claims.) Tj ET
+BT /F1 10 Tf 50 724 Td (" Reviewers should treat this as a support layer, not as an auto-generated conformity statement.) Tj ET
+BT /F1 10 Tf 50 710 Td () Tj ET
+BT /F2 11 Tf 50 700 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 684 Td (" Coverage snapshot: 3 covered, 17 partial, 0 missing clause\(s\).) Tj ET
+BT /F1 10 Tf 50 670 Td (" Machine-readable evidence selectors and bundle artifacts that can be referenced inside a) Tj ET
+BT /F1 10 Tf 50 656 Td (  standards-mapping appendix.) Tj ET
+BT /F1 10 Tf 50 642 Td () Tj ET
+BT /F2 11 Tf 50 632 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 616 Td (" Harmonised standards or common specifications actually relied upon.) Tj ET
+BT /F1 10 Tf 50 602 Td (" Alternative control rationale where harmonised standards are not used.) Tj ET
+BT /F1 10 Tf 50 588 Td (" Notified body references and any external conformity-assessment narrative.) Tj ET
+BT /F1 10 Tf 50 574 Td () Tj ET
+BT /F2 11 Tf 50 564 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 548 Td (" Affirmation: The bundle can support standards mapping by exposing clause coverage and evidence) Tj ET
+BT /F1 10 Tf 50 534 Td (  selectors.) Tj ET
+BT /F1 10 Tf 50 520 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 506 Td (" Reviewer use: Lets the reviewer anchor standards discussion to actual evidence instead of to) Tj ET
+BT /F1 10 Tf 50 492 Td (  unlinked narrative references.) Tj ET
+BT /F1 10 Tf 50 478 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 464 Td (" EU coverage export <eu-ai-act-coverage.json>  Clause status and residual gaps.) Tj ET
+BT /F1 10 Tf 50 450 Td (" Article 43 conformity assessment <article-43-conformity-assessment.json>  Conformity-assessment) Tj ET
+BT /F1 10 Tf 50 436 Td (  route and supporting record scaffold.) Tj ET
+BT /F1 10 Tf 50 422 Td (" Preuves index <evidence-index.json>  Selectors and manifest-backed links.) Tj ET
+BT /F1 10 Tf 50 408 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  Structured coverage-ready dossier data.) Tj ET
+BT /F1 10 Tf 50 394 Td (" Affirmation: Any actual standards reliance or alternative-control rationale must be completed by) Tj ET
+BT /F1 10 Tf 50 380 Td (  the operator.) Tj ET
+BT /F1 10 Tf 50 366 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 352 Td (" Reviewer use: Prevents readers from treating coverage selectors as if they were already a) Tj ET
+BT /F1 10 Tf 50 338 Td (  standards claim.) Tj ET
+BT /F1 10 Tf 50 324 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 310 Td (" EU coverage export <eu-ai-act-coverage.json>  Clause status and residual gaps.) Tj ET
+BT /F1 10 Tf 50 296 Td (" Article 43 conformity assessment <article-43-conformity-assessment.json>  Conformity-assessment) Tj ET
+BT /F1 10 Tf 50 282 Td (  route and supporting record scaffold.) Tj ET
+BT /F1 10 Tf 50 268 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  Structured coverage-ready dossier data.) Tj ET
+BT /F1 10 Tf 50 254 Td (" Affirmation: This section does not itself establish harmonised-standard or common-specification) Tj ET
+BT /F1 10 Tf 50 240 Td (  compliance.) Tj ET
+BT /F1 10 Tf 50 226 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 212 Td (" Reviewer use: Keeps the boundary explicit between technical evidence support and formal conformity) Tj ET
+BT /F1 10 Tf 50 198 Td (  positioning.) Tj ET
+BT /F1 10 Tf 50 184 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 170 Td (" EU coverage export <eu-ai-act-coverage.json>  Clause status and residual gaps.) Tj ET
+BT /F1 10 Tf 50 156 Td () Tj ET
+BT /F2 11 Tf 50 146 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 130 Td (" EU coverage export <eu-ai-act-coverage.json>  Clause status and residual gaps.) Tj ET
+BT /F1 10 Tf 50 116 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  Structured coverage-ready dossier data.) Tj ET
+BT /F1 10 Tf 50 102 Td (" Article 43 conformity assessment <article-43-conformity-assessment.json>  Conformity-assessment) Tj ET
+BT /F1 10 Tf 50 88 Td (  route and supporting record scaffold.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 13 of 18) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Length 4724 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Preuves index <evidence-index.json>  Selectors and manifest-backed links.) Tj ET
+BT /F1 10 Tf 50 764 Td () Tj ET
+BT /F2 11 Tf 50 754 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 738 Td (" Art_10: missing required evidence compare-report.json.environment.training_data_provenance) Tj ET
+BT /F1 10 Tf 50 724 Td (" Art_9: Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 710 Td (" Art_9: Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 696 Td (" Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime) Tj ET
+BT /F1 10 Tf 50 682 Td (  evaluation.) Tj ET
+BT /F1 10 Tf 50 668 Td (" Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 654 Td (" Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary,) Tj ET
+BT /F1 10 Tf 50 640 Td (  and deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 626 Td (" Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints) Tj ET
+BT /F1 10 Tf 50 612 Td (  remain required.) Tj ET
+BT /F1 10 Tf 50 598 Td (" Art_13: Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 584 Td (" Art_17: Written QMS procedures, training, document control, supplier management, and authority) Tj ET
+BT /F1 10 Tf 50 570 Td (  communication remain operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 556 Td (" Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain) Tj ET
+BT /F1 10 Tf 50 542 Td (  operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 528 Td (" Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and) Tj ET
+BT /F1 10 Tf 50 514 Td (  authority-facing obligations remain required.) Tj ET
+BT /F1 10 Tf 50 500 Td (" Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records) Tj ET
+BT /F1 10 Tf 50 486 Td (  where applicable, and Article 47 remains provider-owned.) Tj ET
+BT /F1 10 Tf 50 472 Td (" Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still) Tj ET
+BT /F1 10 Tf 50 458 Td (  require provider-authored records.) Tj ET
+BT /F1 10 Tf 50 444 Td (" Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification) Tj ET
+BT /F1 10 Tf 50 430 Td (  workflow remains required.) Tj ET
+BT /F1 10 Tf 50 416 Td (" Art_21: The provider-owned authority cooperation path, documentation response process, and) Tj ET
+BT /F1 10 Tf 50 402 Td (  log-access process remain required.) Tj ET
+BT /F1 10 Tf 50 388 Td (" Art_43: The provider-owned conformity assessment route and any notified-body records remain) Tj ET
+BT /F1 10 Tf 50 374 Td (  required.) Tj ET
+BT /F1 10 Tf 50 360 Td (" Art_47: The provider-signed EU declaration of conformity remains required before placing on the) Tj ET
+BT /F1 10 Tf 50 346 Td (  market or putting into service.) Tj ET
+BT /F1 10 Tf 50 332 Td (" Art_48: The provider-owned CE marking record, including digital or physical placement and) Tj ET
+BT /F1 10 Tf 50 318 Td (  notified-body identification where applicable, remains required.) Tj ET
+BT /F1 10 Tf 50 304 Td (" Art_49: The provider-owned EU database or national registration record remains required where) Tj ET
+BT /F1 10 Tf 50 290 Td (  Article 49 applies.) Tj ET
+BT /F1 10 Tf 50 276 Td (" Annex_V: Provider identification, system identification, legal references, and signatory details) Tj ET
+BT /F1 10 Tf 50 262 Td (  for the declaration remain provider-authored.) Tj ET
+BT /F1 10 Tf 50 248 Td () Tj ET
+BT /F2 14 Tf 50 238 Td (8. Limite de la Declaration UE de conformite \(Annexe V\)) Tj ET
+BT /F1 10 Tf 50 218 Td () Tj ET
+BT /F2 11 Tf 50 208 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 192 Td (" The toolkit does not generate the legal declaration itself.) Tj ET
+BT /F1 10 Tf 50 178 Td (" What it does provide is the technical record that can support the declaration's factual statements) Tj ET
+BT /F1 10 Tf 50 164 Td (  about system identity, review scope, and supporting evidence.) Tj ET
+BT /F1 10 Tf 50 150 Td () Tj ET
+BT /F2 11 Tf 50 140 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 124 Td (" Versioned system identity and release review status that can be cited in a declaration pack.) Tj ET
+BT /F1 10 Tf 50 110 Td (" Portable evidence links that can be attached or referenced from the declaration package.) Tj ET
+BT /F1 10 Tf 50 96 Td () Tj ET
+BT /F1 9 Tf 470 24 Td (Page 14 of 18) Tj ET
+endstream
+endobj
+17 0 obj
+<< /Length 4626 >>
+stream
+BT /F2 11 Tf 50 778 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 762 Td (" The Annex V declaration text, legal basis, and provider-responsibility statement.) Tj ET
+BT /F1 10 Tf 50 748 Td (" Applicable-law references, notified body details, date, place, signer name, and title.) Tj ET
+BT /F1 10 Tf 50 734 Td () Tj ET
+BT /F2 11 Tf 50 724 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 708 Td (" Affirmation: The bundle provides technical facts that can support declaration drafting.) Tj ET
+BT /F1 10 Tf 50 694 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 680 Td (" Reviewer use: Lets the reviewer reuse verified system identity and release evidence when) Tj ET
+BT /F1 10 Tf 50 666 Td (  assembling a declaration package.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 638 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  Technical support for declaration drafting.) Tj ET
+BT /F1 10 Tf 50 624 Td (" Article 43 conformity assessment <article-43-conformity-assessment.json>  Conformity-assessment) Tj ET
+BT /F1 10 Tf 50 610 Td (  route backing the declaration path.) Tj ET
+BT /F1 10 Tf 50 596 Td (" Article 47 declaration scaffold <article-47-declaration-of-conformity.json>  Provider declaration) Tj ET
+BT /F1 10 Tf 50 582 Td (  scaffold for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Annex V declaration content <annex-v-declaration-content.json>  Required Annex V) Tj ET
+BT /F1 10 Tf 50 554 Td (  declaration-content items and gaps.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Rapport de comparaison <../compare-report.json>  Technical release results backing the) Tj ET
+BT /F1 10 Tf 50 526 Td (  declaration.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Revue de release <release-review.json>  Current release status for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 498 Td (" Affirmation: The legal declaration text and sign-off remain operator-owned.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 470 Td (" Reviewer use: Makes it explicit that the technical pack supports the declaration but does not) Tj ET
+BT /F1 10 Tf 50 456 Td (  replace it.) Tj ET
+BT /F1 10 Tf 50 442 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 428 Td (" Article 43 conformity assessment <article-43-conformity-assessment.json>  Conformity-assessment) Tj ET
+BT /F1 10 Tf 50 414 Td (  route backing the declaration path.) Tj ET
+BT /F1 10 Tf 50 400 Td (" Article 47 declaration scaffold <article-47-declaration-of-conformity.json>  Provider declaration) Tj ET
+BT /F1 10 Tf 50 386 Td (  scaffold for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 372 Td (" Annex V declaration content <annex-v-declaration-content.json>  Required Annex V) Tj ET
+BT /F1 10 Tf 50 358 Td (  declaration-content items and gaps.) Tj ET
+BT /F1 10 Tf 50 344 Td (" Revue de release <release-review.json>  Current release status for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 330 Td (" Affirmation: No declaration of conformity is generated by the toolkit outputs.) Tj ET
+BT /F1 10 Tf 50 316 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 302 Td (" Reviewer use: Prevents a reviewer from mistaking technical support for a completed Annex V) Tj ET
+BT /F1 10 Tf 50 288 Td (  declaration.) Tj ET
+BT /F1 10 Tf 50 274 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 260 Td (" Article 47 declaration scaffold <article-47-declaration-of-conformity.json>  Provider declaration) Tj ET
+BT /F1 10 Tf 50 246 Td (  scaffold for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 232 Td (" Annex V declaration content <annex-v-declaration-content.json>  Required Annex V) Tj ET
+BT /F1 10 Tf 50 218 Td (  declaration-content items and gaps.) Tj ET
+BT /F1 10 Tf 50 204 Td () Tj ET
+BT /F2 11 Tf 50 194 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 178 Td (" JSON Annexe IV <eu-ai-act-annex-iv.json>  Technical support for declaration drafting.) Tj ET
+BT /F1 10 Tf 50 164 Td (" Article 43 conformity assessment <article-43-conformity-assessment.json>  Conformity-assessment) Tj ET
+BT /F1 10 Tf 50 150 Td (  route backing the declaration path.) Tj ET
+BT /F1 10 Tf 50 136 Td (" Article 47 declaration scaffold <article-47-declaration-of-conformity.json>  Provider declaration) Tj ET
+BT /F1 10 Tf 50 122 Td (  scaffold for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 108 Td (" Annex V declaration content <annex-v-declaration-content.json>  Required Annex V) Tj ET
+BT /F1 10 Tf 50 94 Td (  declaration-content items and gaps.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 15 of 18) Tj ET
+endstream
+endobj
+18 0 obj
+<< /Length 4317 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Rapport de comparaison <../compare-report.json>  Technical release results backing the) Tj ET
+BT /F1 10 Tf 50 764 Td (  declaration.) Tj ET
+BT /F1 10 Tf 50 750 Td (" Revue de release <release-review.json>  Current release status for the evaluated system version.) Tj ET
+BT /F1 10 Tf 50 736 Td () Tj ET
+BT /F2 11 Tf 50 726 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 710 Td (" Declaration drafting and legal signoff remain outside the generated toolkit outputs.) Tj ET
+BT /F1 10 Tf 50 696 Td () Tj ET
+BT /F2 14 Tf 50 686 Td (9. Surveillance post-commercialisation et incidents graves) Tj ET
+BT /F1 10 Tf 50 666 Td () Tj ET
+BT /F2 11 Tf 50 656 Td (A quoi sert cette section) Tj ET
+BT /F1 10 Tf 50 640 Td (" This section groups the post-market monitoring plan and serious-incident triage into one) Tj ET
+BT /F1 10 Tf 50 626 Td (  reviewer-facing end-of-dossier section.) Tj ET
+BT /F1 10 Tf 50 612 Td (" It is designed for fast external reading: what is being watched, what triggered concern, and what) Tj ET
+BT /F1 10 Tf 50 598 Td (  still requires human reporting judgment.) Tj ET
+BT /F1 10 Tf 50 584 Td () Tj ET
+BT /F2 11 Tf 50 574 Td (Genere ici \(genere par la machine\)) Tj ET
+BT /F1 10 Tf 50 558 Td (" Monitoring plan status history_current with 2 run\(s\) in window.) Tj ET
+BT /F1 10 Tf 50 544 Td (" Serious-incident machine triage review_for_serious_incident with 5 trigger\(s\).) Tj ET
+BT /F1 10 Tf 50 530 Td (" 2 high/critical signal\(s\) and release decision reject.) Tj ET
+BT /F1 10 Tf 50 516 Td () Tj ET
+BT /F2 11 Tf 50 506 Td (A completer par l'operateur avant transmission) Tj ET
+BT /F1 10 Tf 50 490 Td (" named monitoring owner and backup owner) Tj ET
+BT /F1 10 Tf 50 476 Td (" monitoring cadence and SLA by deployment context) Tj ET
+BT /F1 10 Tf 50 462 Td (" incident, customer, and authority notification workflow) Tj ET
+BT /F1 10 Tf 50 448 Td (" retention period and archive location for monitoring artifacts) Tj ET
+BT /F1 10 Tf 50 434 Td (" corrective-action and rollback authority for repeated drift or blocking findings) Tj ET
+BT /F1 10 Tf 50 420 Td (" named serious-incident owner and escalation backup) Tj ET
+BT /F1 10 Tf 50 406 Td (" human determination of whether the event meets Article 73 serious-incident threshold) Tj ET
+BT /F1 10 Tf 50 392 Td (" authority, customer, and internal notification routing by jurisdiction) Tj ET
+BT /F1 10 Tf 50 378 Td (" incident impact assessment and affected-person analysis) Tj ET
+BT /F1 10 Tf 50 364 Td (" reporting deadline calculation and external communications approver) Tj ET
+BT /F1 10 Tf 50 350 Td (" Legal incident threshold assessment, authority routing, and disclosure decision.) Tj ET
+BT /F1 10 Tf 50 336 Td () Tj ET
+BT /F2 11 Tf 50 326 Td (Affirmation-to-evidence map) Tj ET
+BT /F1 10 Tf 50 310 Td (" Affirmation: The package provides machine-generated monitoring and incident-triage scaffolds tied) Tj ET
+BT /F1 10 Tf 50 296 Td (  to current and historical signals.) Tj ET
+BT /F1 10 Tf 50 282 Td (" Statut: Generated here) Tj ET
+BT /F1 10 Tf 50 268 Td (" Reviewer use: Gives the reviewer a fast end-of-dossier view of what is being monitored and whether) Tj ET
+BT /F1 10 Tf 50 254 Td (  serious-incident triggers are already visible.) Tj ET
+BT /F1 10 Tf 50 240 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 226 Td (" Article 72 monitoring plan <article-72-monitoring-plan.json>  Technical monitoring-plan scaffold.) Tj ET
+BT /F1 10 Tf 50 212 Td (" Post-market monitoring <post-market-monitoring.json>  Observed history and drift/watchlist) Tj ET
+BT /F1 10 Tf 50 198 Td (  summary.) Tj ET
+BT /F1 10 Tf 50 184 Td (" Article 73 serious-incident pack <article-73-serious-incident-pack.json>  Machine-generated) Tj ET
+BT /F1 10 Tf 50 170 Td (  incident triage scaffold.) Tj ET
+BT /F1 10 Tf 50 156 Td (" Affirmation: Monitoring ownership, reporting obligations, and incident routing still need operator) Tj ET
+BT /F1 10 Tf 50 142 Td (  completion.) Tj ET
+BT /F1 10 Tf 50 128 Td (" Statut: Completed by the operator) Tj ET
+BT /F1 10 Tf 50 114 Td (" Reviewer use: Shows where operational and legal reporting duties still sit outside the generated) Tj ET
+BT /F1 10 Tf 50 100 Td (  machine layer.) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 16 of 18) Tj ET
+endstream
+endobj
+19 0 obj
+<< /Length 4677 >>
+stream
+BT /F1 10 Tf 50 778 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 764 Td (" Article 72 monitoring plan <article-72-monitoring-plan.json>  Technical monitoring-plan scaffold.) Tj ET
+BT /F1 10 Tf 50 750 Td (" Article 73 serious-incident pack <article-73-serious-incident-pack.json>  Machine-generated) Tj ET
+BT /F1 10 Tf 50 736 Td (  incident triage scaffold.) Tj ET
+BT /F1 10 Tf 50 722 Td (" Affirmation: Open monitoring and incident gaps remain visible until the operator closes them in) Tj ET
+BT /F1 10 Tf 50 708 Td (  the final post-market workflow.) Tj ET
+BT /F1 10 Tf 50 694 Td (" Statut: Encore ouvert) Tj ET
+BT /F1 10 Tf 50 680 Td (" Reviewer use: Keeps unresolved monitoring and reporting gaps visible instead of burying them) Tj ET
+BT /F1 10 Tf 50 666 Td (  inside the technical scaffolds.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Preuves:) Tj ET
+BT /F1 10 Tf 50 638 Td (" Post-market monitoring <post-market-monitoring.json>  Observed history and drift/watchlist) Tj ET
+BT /F1 10 Tf 50 624 Td (  summary.) Tj ET
+BT /F1 10 Tf 50 610 Td (" Article 73 serious-incident pack <article-73-serious-incident-pack.json>  Machine-generated) Tj ET
+BT /F1 10 Tf 50 596 Td (  incident triage scaffold.) Tj ET
+BT /F1 10 Tf 50 582 Td () Tj ET
+BT /F2 11 Tf 50 572 Td (Preuves files) Tj ET
+BT /F1 10 Tf 50 556 Td (" Article 72 monitoring plan <article-72-monitoring-plan.json>  Technical monitoring-plan scaffold.) Tj ET
+BT /F1 10 Tf 50 542 Td (" Post-market monitoring <post-market-monitoring.json>  Observed history and drift/watchlist) Tj ET
+BT /F1 10 Tf 50 528 Td (  summary.) Tj ET
+BT /F1 10 Tf 50 514 Td (" Article 73 serious-incident pack <article-73-serious-incident-pack.json>  Machine-generated) Tj ET
+BT /F1 10 Tf 50 500 Td (  incident triage scaffold.) Tj ET
+BT /F1 10 Tf 50 486 Td () Tj ET
+BT /F2 11 Tf 50 476 Td (Encore manquant ou encore ouvert) Tj ET
+BT /F1 10 Tf 50 460 Td (" Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 446 Td (" Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 432 Td (" This register is generated from runtime evidence and still requires operator-owned likelihood,) Tj ET
+BT /F1 10 Tf 50 418 Td (  impact, and acceptance rationale.) Tj ET
+BT /F1 10 Tf 50 404 Td (" Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator) Tj ET
+BT /F1 10 Tf 50 390 Td (  responsibilities.) Tj ET
+BT /F1 10 Tf 50 376 Td (" Operator-authored instructions for use are still required before deployer handoff.) Tj ET
+BT /F1 10 Tf 50 362 Td (" This export summarizes technical evidence; it does not replace deployer-facing operating) Tj ET
+BT /F1 10 Tf 50 348 Td (  instructions.) Tj ET
+BT /F1 10 Tf 50 334 Td (" Operator-authored intended-use, deployer-facing instructions, and operating constraints remain) Tj ET
+BT /F1 10 Tf 50 320 Td (  required.) Tj ET
+BT /F1 10 Tf 50 306 Td (" Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 292 Td (" The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 278 Td (" The generated dossier still requires operator-authored intended-use, system-boundary, and) Tj ET
+BT /F1 10 Tf 50 264 Td (  deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 250 Td (" Art_10: missing required evidence compare-report.json.environment.training_data_provenance) Tj ET
+BT /F1 10 Tf 50 236 Td (" Art_9: Operator-owned risk governance still sits outside the evaluator.) Tj ET
+BT /F1 10 Tf 50 222 Td (" Art_9: Annex III classification and legal interpretation still require counsel.) Tj ET
+BT /F1 10 Tf 50 208 Td (" Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime) Tj ET
+BT /F1 10 Tf 50 194 Td (  evaluation.) Tj ET
+BT /F1 10 Tf 50 180 Td (" Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.) Tj ET
+BT /F1 10 Tf 50 166 Td (" Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary,) Tj ET
+BT /F1 10 Tf 50 152 Td (  and deployment-context inputs.) Tj ET
+BT /F1 10 Tf 50 138 Td (" Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints) Tj ET
+BT /F1 10 Tf 50 124 Td (  remain required.) Tj ET
+BT /F1 10 Tf 50 110 Td (" Art_13: Human oversight procedures for deployers still require operator-authored narrative.) Tj ET
+BT /F1 10 Tf 50 96 Td (" Art_17: Written QMS procedures, training, document control, supplier management, and authority) Tj ET
+BT /F1 9 Tf 470 24 Td (Page 17 of 18) Tj ET
+endstream
+endobj
+20 0 obj
+<< /Length 3054 >>
+stream
+BT /F1 10 Tf 50 778 Td (  communication remain operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 764 Td (" Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain) Tj ET
+BT /F1 10 Tf 50 750 Td (  operator responsibilities.) Tj ET
+BT /F1 10 Tf 50 736 Td (" Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and) Tj ET
+BT /F1 10 Tf 50 722 Td (  authority-facing obligations remain required.) Tj ET
+BT /F1 10 Tf 50 708 Td (" Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records) Tj ET
+BT /F1 10 Tf 50 694 Td (  where applicable, and Article 47 remains provider-owned.) Tj ET
+BT /F1 10 Tf 50 680 Td (" Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still) Tj ET
+BT /F1 10 Tf 50 666 Td (  require provider-authored records.) Tj ET
+BT /F1 10 Tf 50 652 Td (" Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification) Tj ET
+BT /F1 10 Tf 50 638 Td (  workflow remains required.) Tj ET
+BT /F1 10 Tf 50 624 Td (" Art_21: The provider-owned authority cooperation path, documentation response process, and) Tj ET
+BT /F1 10 Tf 50 610 Td (  log-access process remain required.) Tj ET
+BT /F1 10 Tf 50 596 Td (" Art_43: The provider-owned conformity assessment route and any notified-body records remain) Tj ET
+BT /F1 10 Tf 50 582 Td (  required.) Tj ET
+BT /F1 10 Tf 50 568 Td (" Art_47: The provider-signed EU declaration of conformity remains required before placing on the) Tj ET
+BT /F1 10 Tf 50 554 Td (  market or putting into service.) Tj ET
+BT /F1 10 Tf 50 540 Td (" Art_48: The provider-owned CE marking record, including digital or physical placement and) Tj ET
+BT /F1 10 Tf 50 526 Td (  notified-body identification where applicable, remains required.) Tj ET
+BT /F1 10 Tf 50 512 Td (" Art_49: The provider-owned EU database or national registration record remains required where) Tj ET
+BT /F1 10 Tf 50 498 Td (  Article 49 applies.) Tj ET
+BT /F1 10 Tf 50 484 Td (" Annex_V: Provider identification, system identification, legal references, and signatory details) Tj ET
+BT /F1 10 Tf 50 470 Td (  for the declaration remain provider-authored.) Tj ET
+BT /F1 10 Tf 50 456 Td (" This plan is a technical scaffold and still requires operator-owned monitoring ownership, cadence,) Tj ET
+BT /F1 10 Tf 50 442 Td (  retention, and authority-reporting decisions.) Tj ET
+BT /F1 10 Tf 50 428 Td (" This export does not decide whether the legal threshold for a serious incident has been met.) Tj ET
+BT /F1 10 Tf 50 414 Td (" Authority reporting workflow, deadlines, and jurisdiction-specific notification content remain) Tj ET
+BT /F1 10 Tf 50 400 Td (  operator-authored.) Tj ET
+BT /F1 10 Tf 50 386 Td (" Final incident narrative, impact assessment, and external communications approval remain outside) Tj ET
+BT /F1 10 Tf 50 372 Td (  the evaluator.) Tj ET
+BT /F1 10 Tf 50 358 Td () Tj ET
+BT /F1 9 Tf 470 24 Td (Page 18 of 18) Tj ET
+endstream
+endobj
+21 0 obj
+<< /Type /Pages /Kids [22 0 R 23 0 R 24 0 R 25 0 R 26 0 R 27 0 R 28 0 R 29 0 R 30 0 R 31 0 R 32 0 R 33 0 R 34 0 R 35 0 R 36 0 R 37 0 R 38 0 R 39 0 R] /Count 18 >>
+endobj
+22 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+23 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+24 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+25 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 6 0 R >>
+endobj
+26 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+27 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 8 0 R >>
+endobj
+28 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+29 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 10 0 R >>
+endobj
+30 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 11 0 R >>
+endobj
+31 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 12 0 R >>
+endobj
+32 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 13 0 R >>
+endobj
+33 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 14 0 R >>
+endobj
+34 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 15 0 R >>
+endobj
+35 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 16 0 R >>
+endobj
+36 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 17 0 R >>
+endobj
+37 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 18 0 R >>
+endobj
+38 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 19 0 R >>
+endobj
+39 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 20 0 R >>
+endobj
+40 0 obj
+<< /Type /Outlines /First 41 0 R /Last 41 0 R /Count 18 >>
+endobj
+41 0 obj
+<< /Title (Package reviewer EU AI Act) /Parent 40 0 R /First 42 0 R /Last 58 0 R /Count 17 /Dest [22 0 R /XYZ 50 778 null] >>
+endobj
+42 0 obj
+<< /Title (Resume) /Parent 41 0 R /Next 43 0 R /Dest [22 0 R /XYZ 50 706 null] >>
+endobj
+43 0 obj
+<< /Title (Comment lire ce package) /Parent 41 0 R /Prev 42 0 R /Next 44 0 R /Dest [22 0 R /XYZ 50 620 null] >>
+endobj
+44 0 obj
+<< /Title (Si vous ne lisez pas depuis les outils d'ingenierie) /Parent 41 0 R /Prev 43 0 R /Next 45 0 R /Dest [22 0 R /XYZ 50 520 null] >>
+endobj
+45 0 obj
+<< /Title (Si vous effectuez une verification technique) /Parent 41 0 R /Prev 44 0 R /Next 46 0 R /Dest [22 0 R /XYZ 50 420 null] >>
+endobj
+46 0 obj
+<< /Title (Ce que ce package demontre) /Parent 41 0 R /Prev 45 0 R /Next 47 0 R /Dest [22 0 R /XYZ 50 306 null] >>
+endobj
+47 0 obj
+<< /Title (Ce que ce package ne complete pas pour vous) /Parent 41 0 R /Prev 46 0 R /Next 48 0 R /Dest [22 0 R /XYZ 50 220 null] >>
+endobj
+48 0 obj
+<< /Title (Sorties liees) /Parent 41 0 R /Prev 47 0 R /Next 49 0 R /Dest [22 0 R /XYZ 50 120 null] >>
+endobj
+49 0 obj
+<< /Title (Lisez ce package dans l'ordre de l'annexe) /Parent 41 0 R /Prev 48 0 R /Next 50 0 R /Dest [23 0 R /XYZ 50 460 null] >>
+endobj
+50 0 obj
+<< /Title (1. Description generale du systeme) /Parent 41 0 R /Prev 49 0 R /Next 51 0 R /Dest [23 0 R /XYZ 50 304 null] >>
+endobj
+51 0 obj
+<< /Title (2. Description detaillee du developpement) /Parent 41 0 R /Prev 50 0 R /Next 52 0 R /Dest [24 0 R /XYZ 50 268 null] >>
+endobj
+52 0 obj
+<< /Title (3. Monitoring, fonctionnement et controle) /Parent 41 0 R /Prev 51 0 R /Next 53 0 R /Dest [26 0 R /XYZ 50 362 null] >>
+endobj
+53 0 obj
+<< /Title (4. Metriques de performance et limites) /Parent 41 0 R /Prev 52 0 R /Next 54 0 R /Dest [28 0 R /XYZ 50 390 null] >>
+endobj
+54 0 obj
+<< /Title (5. Systeme de gestion des risques \(Article 9\)) /Parent 41 0 R /Prev 53 0 R /Next 55 0 R /Dest [30 0 R /XYZ 50 418 null] >>
+endobj
+55 0 obj
+<< /Title (6. Changements sur le cycle de vie) /Parent 41 0 R /Prev 54 0 R /Next 56 0 R /Dest [31 0 R /XYZ 50 282 null] >>
+endobj
+56 0 obj
+<< /Title (7. Standards et controles alternatifs) /Parent 41 0 R /Prev 55 0 R /Next 57 0 R /Dest [33 0 R /XYZ 50 96 null] >>
+endobj
+57 0 obj
+<< /Title (8. Limite de la Declaration UE de conformite \(Annexe V\)) /Parent 41 0 R /Prev 56 0 R /Next 58 0 R /Dest [35 0 R /XYZ 50 238 null] >>
+endobj
+58 0 obj
+<< /Title (9. Surveillance post-commercialisation et incidents graves) /Parent 41 0 R /Prev 57 0 R /Dest [37 0 R /XYZ 50 686 null] >>
+endobj
+59 0 obj
+<< /Title (Package reviewer EU AI Act) /Author (Agent QA Toolkit) /Subject (Package reviewer EU AI Act) /Keywords (EU AI Act, Annex IV, reviewer pack, evidence, dossier) /Creator (Agent QA Toolkit) /Producer (Agent QA Toolkit) /CreationDate (D:20260402033003Z) /ModDate (D:20260402033003Z) >>
+endobj
+60 0 obj
+<< /Type /Catalog /Pages 21 0 R /Outlines 40 0 R /PageMode /UseOutlines /ViewerPreferences << /DisplayDocTitle true >> >>
+endobj
+xref
+0 61
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000154 00000 n 
+0000004093 00000 n 
+0000008704 00000 n 
+0000012810 00000 n 
+0000017572 00000 n 
+0000022167 00000 n 
+0000026862 00000 n 
+0000031422 00000 n 
+0000036030 00000 n 
+0000040598 00000 n 
+0000044861 00000 n 
+0000049409 00000 n 
+0000054473 00000 n 
+0000058973 00000 n 
+0000063750 00000 n 
+0000068429 00000 n 
+0000072799 00000 n 
+0000077529 00000 n 
+0000080636 00000 n 
+0000080815 00000 n 
+0000080953 00000 n 
+0000081091 00000 n 
+0000081229 00000 n 
+0000081367 00000 n 
+0000081505 00000 n 
+0000081643 00000 n 
+0000081781 00000 n 
+0000081920 00000 n 
+0000082059 00000 n 
+0000082198 00000 n 
+0000082337 00000 n 
+0000082476 00000 n 
+0000082615 00000 n 
+0000082754 00000 n 
+0000082893 00000 n 
+0000083032 00000 n 
+0000083171 00000 n 
+0000083310 00000 n 
+0000083385 00000 n 
+0000083527 00000 n 
+0000083625 00000 n 
+0000083753 00000 n 
+0000083909 00000 n 
+0000084058 00000 n 
+0000084189 00000 n 
+0000084337 00000 n 
+0000084455 00000 n 
+0000084601 00000 n 
+0000084740 00000 n 
+0000084886 00000 n 
+0000085032 00000 n 
+0000085175 00000 n 
+0000085327 00000 n 
+0000085466 00000 n 
+0000085607 00000 n 
+0000085769 00000 n 
+0000085919 00000 n 
+0000086228 00000 n 
+trailer
+<< /Size 61 /Root 60 0 R /Info 59 0 R >>
+startxref
+86366
+%%EOF

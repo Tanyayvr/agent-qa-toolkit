@@ -1,0 +1,147 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "document_scope",
+    "current_assessment",
+    "triggers",
+    "notification_preparation",
+    "corrective_action_linkage",
+    "residual_gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "number" },
+    "bundle_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "annex_iv_href",
+        "article_10_data_governance_href",
+        "article_13_instructions_href",
+        "article_16_provider_obligations_href",
+        "article_43_conformity_assessment_href",
+        "article_47_declaration_of_conformity_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "annex_v_declaration_content_href",
+        "human_oversight_summary_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "article_10_data_governance_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "reviewer_html_href": { "type": "string" },
+        "reviewer_markdown_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_16_provider_obligations_href": { "type": "string" },
+        "article_43_conformity_assessment_href": { "type": "string" },
+        "article_47_declaration_of_conformity_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "annex_v_declaration_content_href": { "type": "string" },
+        "article_73_serious_incident_pack_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" }
+      }
+    },
+    "document_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["article", "generated_scope", "operator_inputs_required"],
+      "properties": {
+        "article": { "const": "Art_73" },
+        "generated_scope": { "const": "technical_serious_incident_triage_scaffold" },
+        "operator_inputs_required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "current_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "machine_triage_status",
+        "trigger_count",
+        "blocking_case_count",
+        "approval_case_count",
+        "high_or_critical_signal_count",
+        "drift_detected",
+        "release_decision_status",
+        "rationale"
+      ],
+      "properties": {
+        "machine_triage_status": { "enum": ["monitor", "review_for_serious_incident"] },
+        "trigger_count": { "type": "number", "minimum": 0 },
+        "blocking_case_count": { "type": "number", "minimum": 0 },
+        "approval_case_count": { "type": "number", "minimum": 0 },
+        "high_or_critical_signal_count": { "type": "number", "minimum": 0 },
+        "drift_detected": { "type": "boolean" },
+        "release_decision_status": { "enum": ["approve", "approve_with_review", "reject"] },
+        "rationale": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "trigger_type", "severity", "summary", "case_ids", "artifact_hrefs"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "trigger_type": {
+            "enum": [
+              "degraded_execution",
+              "blocking_case",
+              "high_critical_security_signal",
+              "drift_signal",
+              "release_reject",
+              "approval_queue"
+            ]
+          },
+          "severity": { "enum": ["review", "urgent"] },
+          "summary": { "type": "string", "minLength": 1 },
+          "case_ids": { "type": "array", "items": { "type": "string" } },
+          "artifact_hrefs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "notification_preparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recommended_artifacts", "reporting_fields_required", "operator_inputs_required"],
+      "properties": {
+        "recommended_artifacts": { "type": "array", "items": { "type": "string" } },
+        "reporting_fields_required": { "type": "array", "items": { "type": "string" } },
+        "operator_inputs_required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "corrective_action_linkage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_human_actions", "related_artifacts", "qms_process_refs"],
+      "properties": {
+        "required_human_actions": { "type": "array", "items": { "type": "string" } },
+        "related_artifacts": { "type": "array", "items": { "type": "string" } },
+        "qms_process_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "residual_gaps": { "type": "array", "items": { "type": "string" } }
+  }
+}

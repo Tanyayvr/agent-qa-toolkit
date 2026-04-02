@@ -1,6 +1,11 @@
+import { spawnSync } from "node:child_process";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { DEFAULT_ORIGIN, SITE_OUTPUT_ROOT, getSiteOutputs, writeSiteOutputs } from "./lib/eu-ai-site.mjs";
+
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const PUBLISH_SURFACES_SCRIPT = path.join(SCRIPT_DIR, "product-surface-publish.mjs");
 
 export function parseCliArgs(argv) {
   const args = {
@@ -31,9 +36,19 @@ export function parseCliArgs(argv) {
   return args;
 }
 
-export function buildSite({ origin = DEFAULT_ORIGIN, outputRoot = SITE_OUTPUT_ROOT } = {}) {
+export function buildSite({ origin = DEFAULT_ORIGIN, outputRoot = SITE_OUTPUT_ROOT, skipPublish = false } = {}) {
+  if (!skipPublish) {
+    const publishResult = spawnSync(process.execPath, [PUBLISH_SURFACES_SCRIPT, "--publishRoot", path.join(outputRoot, "demo")], {
+      cwd: path.resolve(SCRIPT_DIR, ".."),
+      encoding: "utf8",
+    });
+    if (publishResult.status !== 0) {
+      throw new Error(publishResult.stderr || publishResult.stdout || "Product surface publish failed");
+    }
+  }
   const { definition } = getSiteOutputs(origin, outputRoot);
   const outputs = writeSiteOutputs(origin, outputRoot);
+  const rootGeneratedFiles = 5;
   const localeCounts = definition.pages.reduce((acc, page) => {
     acc[page.locale] = (acc[page.locale] || 0) + 1;
     return acc;
@@ -45,7 +60,7 @@ export function buildSite({ origin = DEFAULT_ORIGIN, outputRoot = SITE_OUTPUT_RO
     output_root: outputRoot,
     outputs_written: outputs.length,
     page_count: definition.pages.length,
-    download_count: outputs.length - definition.pages.length - 3,
+    download_count: outputs.length - definition.pages.length - rootGeneratedFiles,
     locale_counts: localeCounts,
   };
 }

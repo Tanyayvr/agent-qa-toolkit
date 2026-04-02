@@ -117,7 +117,10 @@ function finish(args, payload) {
 }
 
 function packageVariant(params) {
-  const result = runNode(PACKAGE_SCRIPT, buildEuAiActFixtureArgs(REPO_ROOT, params));
+  const result = runNode(
+    PACKAGE_SCRIPT,
+    [...buildEuAiActFixtureArgs(REPO_ROOT, { ...params, contract: "full" }), "--sign-if-key-present"]
+  );
   if (result.status !== 0) {
     throw new Error(result.stderr || result.stdout || `EU AI Act demo packaging failed for ${params.variant}`);
   }

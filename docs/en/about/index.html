@@ -3,17 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>For technical teams evaluating fit | EU AI Evidence Builder</title>
-  <meta name="description" content="User-facing page for platform, security, and compliance engineering teams evaluating whether the core product is real enough to install and whether sector-specific work can sit above it cleanly." />
+  <title>Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder</title>
+  <meta name="description" content="Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time." />
+  <meta name="robots" content="noindex, nofollow" />
   
   <link rel="canonical" href="https://tanyayvr.github.io/agent-qa-toolkit/en/about/" />
   <link rel="alternate" hreflang="en" href="https://tanyayvr.github.io/agent-qa-toolkit/en/about/" />
 <link rel="alternate" hreflang="de" href="https://tanyayvr.github.io/agent-qa-toolkit/de/about/" />
 <link rel="alternate" hreflang="fr" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/about/" />
   <link rel="alternate" hreflang="x-default" href="https://tanyayvr.github.io/agent-qa-toolkit/en/" />
-  <link rel="stylesheet" href="../../site-assets/site.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder" />
+  <meta property="og:description" content="Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time." />
+  <meta property="og:url" content="https://tanyayvr.github.io/agent-qa-toolkit/en/about/" />
+  <meta property="og:site_name" content="EU AI Evidence Builder" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="de_DE" />
+<meta property="og:locale:alternate" content="fr_FR" />
+  <meta property="og:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
+  <meta property="og:image:alt" content="EU AI Evidence Builder proof surface" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder" />
+  <meta name="twitter:description" content="Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time." />
+  <meta name="twitter:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
+  <link rel="stylesheet" href="../../site-assets/site.css?v=3ac87834b7" />
   
-  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder","description":"Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time.","inLanguage":"en","url":"https://tanyayvr.github.io/agent-qa-toolkit/en/about/","isPartOf":{"@type":"WebSite","name":"EU AI Evidence Builder","url":"https://tanyayvr.github.io/agent-qa-toolkit/en/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tanyayvr.github.io/agent-qa-toolkit/en/"},{"@type":"ListItem","position":2,"name":"Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder","item":"https://tanyayvr.github.io/agent-qa-toolkit/en/about/"}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -30,10 +46,9 @@
         </a>
         <nav class="header-nav" aria-label="Primary">
           <a href="../how-it-works/">How it works</a>
-          <a href="../technology/">Technology</a>
+          <a href="../technology/">Technical Overview</a>
           <a href="../templates/">Templates</a>
           <a href="../pricing/">Pricing</a>
-          <a href="../docs/">Docs</a>
           <a class="button" href="../builder/" data-track-event="header_start_free">Start Free</a>
           <label class="sr-only" for="locale-switcher">Language</label>
           <select id="locale-switcher" class="locale-switch" data-locale-switcher>
@@ -45,69 +60,14 @@
   
     <main id="main">
       
+    <script>window.location.replace("../technology/");</script>
     <section class="section">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">Technical teams</p>
-          <h1>For technical teams evaluating fit</h1>
-          <p class="lead">Use this page when the question is not pricing or regulation, but whether the core evidence engine is technically serious enough to deserve installation time.</p>
-          <div class="button-row section-tight">
-            <a class="button" href="../technology/">Open technology page</a>
-            <a class="button-ghost" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Open live evidence</a>
-            <a class="button-soft" href="../docs/">Open OSS docs</a>
-          </div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">Live proof</p>
-          <h3>What should already exist before installation time</h3>
-          <div class="proof-frame">
-            <img src="../../assets/screenshots/05.png" alt="Verified evidence bundle screenshot" />
-          </div>
-          <p class="muted">A serious product should expose real artifacts, explicit gates, and, for authority-facing paths, an authenticity story rather than hash-only integrity before your team spends time integrating it.</p>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container">
-        <h2 class="section-title">What to check first</h2>
-        <p class="lead">A technical reviewer should be able to inspect concrete outputs, explicit gates, the split between core and sector-specific work, and an honest automation boundary before doing any deeper integration work.</p>
-        <div class="docs-grid">
-          
-            <article class="card fade-up">
-              <h3>Real outputs</h3>
-              <p class="muted">The product ends in a portable report, machine contract, manifest, retention controls, review record, and optional authority package.</p>
-            </article>
-            <article class="card fade-up">
-              <h3>Hard gates</h3>
-              <p class="muted">Packaging, verify, review, and authority packaging all have explicit checks. This is not a dashboard-only story.</p>
-            </article>
-            <article class="card fade-up">
-              <h3>Sector-ready core</h3>
-              <p class="muted">The core qualifies tool-using agents. Sector case libraries, scanners, and vertical exports can sit above it without turning the base product into a generic compliance suite.</p>
-            </article>
-            <article class="card fade-up">
-              <h3>Source-visible path</h3>
-              <p class="muted">Commands, schemas, and artifacts are visible in the repository and line up with the live proof surface.</p>
-            </article>
-            <article class="card fade-up">
-              <h3>Honest boundary</h3>
-              <p class="muted">The system automates evidence operations, not legal classification, business judgment, or final sign-off.</p>
-            </article>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
       <div class="container evidence-card fade-up">
-        <p class="eyebrow">First run</p>
-        <h3>Fastest honest first run</h3>
-        <p class="muted">If your adapter is already running, use quickstart to build a real starter evidence pack on your own infrastructure before doing any deeper setup work.</p>
-        <div class="code-snippet"><code>npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud</code></div>
-        <ul class="pricing-list section-tight">
-          <li>Runs the starter smoke path on your own adapter and packages a portable report.</li><li>Shows whether the toolkit can really execute, package, and verify evidence in your environment.</li><li>Stays honest: starter evidence pack only, not full qualification or compliance readiness.</li>
-        </ul>
+        <p class="eyebrow">Page moved</p>
+        <h1>Technical Overview</h1>
+        <p class="lead">Technical Overview now lives at a new URL. Use the button below if you are not redirected automatically.</p>
         <div class="button-row">
-          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/quickstart-your-agent.md" target="_blank" rel="noreferrer">Open quickstart guide</a>
-          <a class="button-soft" href="../technology/">Open technology page</a>
+          <a class="button" href="../technology/">Technical Overview</a>
         </div>
       </div>
     </section>
@@ -141,7 +101,7 @@
       </div>
     </div>
   
-  <script src="../../site-assets/site.js" defer></script>
+  <script src="../../site-assets/site.js?v=3a99f43199" defer></script>
   
 </body>
 </html>

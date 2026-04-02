@@ -26,17 +26,12 @@
         "compare_report_href",
         "evaluator_report_html_href",
         "manifest_href",
-        "coverage_href",
         "annex_iv_href",
-        "report_html_href",
-        "evidence_index_href",
         "article_13_instructions_href",
         "article_9_risk_register_href",
         "article_72_monitoring_plan_href",
         "article_17_qms_lite_href",
-        "human_oversight_summary_href",
-        "release_review_href",
-        "post_market_monitoring_href"
+        "human_oversight_summary_href"
       ],
       "properties": {
         "compare_report_href": { "type": "string" },
@@ -45,11 +40,14 @@
         "coverage_href": { "type": "string" },
         "annex_iv_href": { "type": "string" },
         "report_html_href": { "type": "string" },
+        "reviewer_html_href": { "type": "string" },
+        "reviewer_markdown_href": { "type": "string" },
         "evidence_index_href": { "type": "string" },
         "article_13_instructions_href": { "type": "string" },
         "article_9_risk_register_href": { "type": "string" },
         "article_72_monitoring_plan_href": { "type": "string" },
         "article_17_qms_lite_href": { "type": "string" },
+        "article_73_serious_incident_pack_href": { "type": "string" },
         "human_oversight_summary_href": { "type": "string" },
         "release_review_href": { "type": "string" },
         "post_market_monitoring_href": { "type": "string" }

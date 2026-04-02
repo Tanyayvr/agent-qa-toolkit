@@ -1,0 +1,29 @@
+[
+  {
+    "id": "starter-support-routing",
+    "title": "Ticket routing",
+    "suite": "starter",
+    "input": {
+      "user": "Route this issue to the right queue: customer cannot log in after password reset."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-support-info-lookup",
+    "title": "Information lookup",
+    "suite": "starter",
+    "input": {
+      "user": "Find the most relevant help information for a billing page error after card update."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-support-escalation",
+    "title": "Escalation support",
+    "suite": "starter",
+    "input": {
+      "user": "Summarize what should be included in an escalation note for a repeat outage complaint."
+    },
+    "expected": {}
+  }
+]

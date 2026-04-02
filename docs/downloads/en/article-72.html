@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EU AI Act Article 72 - Post-Market Monitoring Template</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; max-width: 860px; margin: 40px auto; color: #0f172a; line-height: 1.6; }
+    h1, h2 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -0.03em; }
+    section { border: 1px solid #dbe5f1; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #dbe5f1; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>EU AI Act Article 72 - Post-Market Monitoring Template</h1>
+  <section><p>Article 72 is where teams move from one-time packaging into continuous monitoring. The documentation has to show what signals are watched during operation, how often they are reviewed, what triggers escalation, and how monitoring links back to the original dossier.</p></section>
+  
+  <section>
+    <h2>What Article 72 expects, what the toolkit can add, and what your team still owns</h2>
+    <p>Without connecting your agent and collecting recurring history, the toolkit can only draft the monitoring plan from the current package. After adapter integration and recurring runs, it can add monitoring history, drift signals, and linked follow-up outputs.</p>
+    <table>
+      <thead><tr><th>Article 72 expects</th><th>Toolkit with generated package only</th><th>Toolkit after adapter integration</th><th>Still written and approved by your team</th></tr></thead>
+      <tbody>
+        <tr><td>A monitoring plan</td><td>Creates a draft monitoring-plan file with current objectives, signal sources, and operator inputs still required.</td><td>Keeps that plan tied to real monitoring history, signal sources, and recurring outputs from the connected system.</td><td>Set the final cadence, responsible teams, and the exact operating thresholds for your deployment.</td></tr><tr><td>Named triggers for new review or escalation</td><td>Can point to current execution-quality issues or open risks already visible in the package.</td><td>Can add drift signals, recurring failures, blocking constats, and linked follow-up outputs from recurring runs.</td><td>Decide which triggers require escalation, which require only review, and which require incident preparation.</td></tr><tr><td>A continuity loop back into governance</td><td>Can show how the current package already links open risks and unresolved gaps.</td><td>Can link monitoring outputs back to Article 9 risk updates and corrective-action follow-up.</td><td>Define the response workflow, owner, and timeline once a monitoring trigger fires.</td></tr><tr><td>Monitoring interpretation and response</td><td>Can expose the signals and the structured outputs generated from them.</td><td>Still does not decide the commercial, legal, or organizational meaning of those signals after integration.</td><td>Interpret the signal, choose the action, and approve any resulting operational or regulatory response.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>What your team still adds to Article 72</h2>
+    <p>The toolkit can scaffold the monitoring plan and package the evidence history. It does not choose your cadence, escalation workflow, or business thresholds for you.</p>
+    <table>
+      <thead><tr><th>What you add</th><th>When you add it</th><th>Practical format to use</th></tr></thead>
+      <tbody>
+        <tr><td>Monitoring cadence</td><td>Before the plan is used in operation or governance review.</td><td>A short schedule naming how often the signals are reviewed and by whom.</td></tr><tr><td>Business and governance thresholds</td><td>When you define what counts as a meaningful drift, recurring failure, or trend change.</td><td>A short threshold list or table naming the trigger and the action it causes.</td></tr><tr><td>Escalation workflow</td><td>Before monitoring outputs are used to trigger real follow-up work.</td><td>A simple path naming who reviews first, who escalates, and who approves the next step.</td></tr><tr><td>Corrective-action ownership</td><td>Whenever a monitoring trigger requires remediation or re-review.</td><td>A named owner and review date for each class of monitoring-driven follow-up.</td></tr><tr><td>Regulator, customer, or internal reporting obligations</td><td>If post-market signals may have external reporting consequences.</td><td>A short policy note naming what must be reported, to whom, and under which trigger.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Article 72 is built from monitoring, follow-up, and risk-update files</h2>
+    <p>The files below are the main evidence surfaces for Article 72. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.</p>
+    <table>
+      <thead><tr><th>File in the package</th><th>Why it matters for Article 72</th><th>Open file</th></tr></thead>
+      <tbody>
+        <tr><td>Article 72 monitoring plan - article-72-monitoring-plan.json</td><td>Main draft file for the Article 72 monitoring section.</td><td>demo/eu-ai-act/compliance/article-72-monitoring-plan.json</td></tr><tr><td>Post-market monitoring - post-market-monitoring.json</td><td>Current monitoring history and drift evidence used during operation.</td><td>demo/eu-ai-act/compliance/post-market-monitoring.json</td></tr><tr><td>Compare report - compare-report.json</td><td>Shows the current execution-quality signals and recurring case outcomes that monitoring can refer back to.</td><td>demo/eu-ai-act/compare-report.json</td></tr><tr><td>Article 9 risk register - article-9-risk-register.json</td><td>Shows how monitoring constats can reopen or update risk entries.</td><td>demo/eu-ai-act/compliance/article-9-risk-register.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <section><p>Use browser print to save this document as PDF.</p></section>
+</body>
+</html>

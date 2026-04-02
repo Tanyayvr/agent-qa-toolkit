@@ -35,6 +35,8 @@ export function buildQualityEntries(params: {
       ["items[].artifacts.new_failure_meta_href", a.new_failure_meta_href],
       ["items[].artifacts.baseline_case_response_href", a.baseline_case_response_href],
       ["items[].artifacts.new_case_response_href", a.new_case_response_href],
+      ["items[].artifacts.baseline_tool_telemetry_href", a.baseline_tool_telemetry_href],
+      ["items[].artifacts.new_tool_telemetry_href", a.new_tool_telemetry_href],
       ["items[].artifacts.baseline_trace_anchor_href", a.baseline_trace_anchor_href],
       ["items[].artifacts.new_trace_anchor_href", a.new_trace_anchor_href],
       ["items[].artifacts.baseline_run_meta_href", a.baseline_run_meta_href],
@@ -90,6 +92,7 @@ export function buildCompareReportDocument(params: {
   toolkitVersion: string;
   generatedAt: number;
   environment: Record<string, unknown> | undefined;
+  provenance?: CompareReport["provenance"];
   projectRoot: string;
   baselineDirAbs: string;
   newDirAbs: string;
@@ -142,6 +145,7 @@ export function buildCompareReportDocument(params: {
       run_id: params.reportId,
     },
     ...(params.environment ? { environment: params.environment } : {}),
+    ...(params.provenance ? { provenance: params.provenance } : {}),
     baseline_dir: normRel(params.projectRoot, params.baselineDirAbs),
     new_dir: normRel(params.projectRoot, params.newDirAbs),
     cases_path: normRel(params.projectRoot, params.casesPathAbs),

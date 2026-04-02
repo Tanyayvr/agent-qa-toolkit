@@ -95,10 +95,13 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const result = runNode(
     PACKAGE_SCRIPT,
-    buildAgentEvidenceFixtureArgs(REPO_ROOT, {
-      outDir: args.outDir,
-      reportId: args.reportId,
-    })
+    [
+      ...buildAgentEvidenceFixtureArgs(REPO_ROOT, {
+        outDir: args.outDir,
+        reportId: args.reportId,
+      }),
+      "--sign-if-key-present",
+    ]
   );
 
   if (result.status !== 0) {

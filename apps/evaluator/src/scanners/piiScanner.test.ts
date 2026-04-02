@@ -64,6 +64,13 @@ describe("piiScanner", () => {
     expect(out.some((x) => x.kind === "pii_in_output")).toBe(true);
   });
 
+  it("detects EU fintech identifiers such as IBAN and BIC/SWIFT", async () => {
+    const s = createPiiScanner({ maxSignals: 5 });
+    const out = await s.scan(makeResp("iban DE89 3704 0044 0532 0130 00 bic DEUTDEFF"));
+    expect(out.some((x) => x.message === "iban detected")).toBe(true);
+    expect(out.some((x) => x.message === "bic_swift detected")).toBe(true);
+  });
+
   it("handles non-serializable json final output safely", async () => {
     const s = createPiiScanner({ maxSignals: 5 });
     const circular: Record<string, unknown> = {};

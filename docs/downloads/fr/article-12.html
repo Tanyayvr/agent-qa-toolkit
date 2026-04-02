@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Article 12 de l'AI Act - Modele pour la journalisation et la tracabilite</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; max-width: 860px; margin: 40px auto; color: #0f172a; line-height: 1.6; }
+    h1, h2 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -0.03em; }
+    section { border: 1px solid #dbe5f1; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #dbe5f1; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>Article 12 de l'AI Act - Modele pour la journalisation et la tracabilite</h1>
+  <section><p>L'article 12 est l'endroit ou un evaluateur verifie si un run peut etre reconstruit en dehors de vos tableaux de bord internes. La difficulte n'est pas d'avoir des logs en principe. La difficulte est d'avoir une piste d'enregistrements qu'un autre evaluateur peut vraiment inspecter, suivre et conserver. Pour une revue a haut risque, cette piste doit tout de meme s'integrer dans un dossier plus large structure selon l'Annexe.</p></section>
+  
+  <section>
+    <h2>Ce que l'article 12 exige, ce que le toolkit peut ajouter, et ce que votre equipe garde en charge</h2>
+    <p>Sans connecter votre agent, le toolkit ne peut montrer que les artefacts de trace et de journalisation deja presents dans le dossier genere. Apres integration de l'adapter, il peut conserver les enregistrements d'execution, la telemetrie des outils, les artefacts de resultat et d'erreur, ainsi que les ancres de trace provenant de runs reels.</p>
+    <table>
+      <thead><tr><th>L'article 12 exige</th><th>Toolkit avec dossier deja genere seulement</th><th>Toolkit apres integration de l'adapter</th><th>Toujours defini et approuve par votre equipe</th></tr></thead>
+      <tbody>
+        <tr><td>Une piste d'evenements verifiable</td><td>Montre les donnees du rapport de comparaison, les artefacts de cas conserves et l'integrite des fichiers ancree par le manifest deja presents dans le dossier.</td><td>Ajoute les enregistrements d'execution, la telemetrie des outils, les artefacts de resultat, les artefacts d'erreur et les ancres de trace issues de runs reels.</td><td>Definissez quels systemes doivent etre journalises, ce qui compte comme enregistrement complet et quelles lacunes exigent des controles compensatoires.</td></tr><tr><td>Un lien entre le rapport et le run sous-jacent</td><td>Peut montrer les IDs de rapport, les entrees du manifest et les artefacts conserves deja regroupes.</td><td>Peut pointer depuis le rapport vers des fichiers de run concrets et des artefacts au niveau des cas provenant de l'agent connecte.</td><td>Expliquez les systemes de trace externes, couches de stockage ou identifiants qui vivent en dehors du toolkit.</td></tr><tr><td>Un chemin de revue quand quelque chose se passe mal</td><td>Permet a un evaluateur d'inspecter le rapport genere, le fichier de comparaison et les artefacts conserves deja dans le dossier.</td><td>Permet a un evaluateur d'ouvrir les enregistrements de run sous-jacents et les artefacts au niveau des outils lies aux memes cas.</td><td>Definissez qui peut acceder a ces enregistrements, selon quel workflow, et comment l'acces incident ou audit est accorde.</td></tr><tr><td>Des controles de retention et de suppression</td><td>Montre la sortie de retention control et les fichiers conserves deja a l'interieur du dossier.</td><td>Peut inclure les artefacts de run reels et les fichiers de telemetrie que votre politique de retention doit couvrir.</td><td>Definissez la periode de retention, les regles de suppression, la politique d'export et les regles de divulgation juridique.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Ce que votre equipe definit encore autour de l'article 12</h2>
+    <p>Le toolkit peut conserver et assembler ces enregistrements dans le dossier, mais il ne choisit ni votre posture de retention ni vos regles de divulgation. Ces decisions restent dans votre politique de journalisation et votre workflow de gouvernance. L'article 12 devient donc une couche relue a l'interieur du paquet a haut risque plus large, pas le paquet complet a lui seul.</p>
+    <table>
+      <thead><tr><th>Ce que vous definissez</th><th>Quand vous le definissez</th><th>Format pratique a utiliser</th></tr></thead>
+      <tbody>
+        <tr><td>Periode de retention et lieu de stockage</td><td>Avant de vous appuyer sur le dossier pour une revue de gouvernance ou une transmission externe.</td><td>Une courte regle indiquant combien de temps les enregistrements sont conserves et ou se trouvent les fichiers retenus.</td></tr><tr><td>Regles d'acces et de divulgation</td><td>Quand le dossier peut etre ouvert par la securite, la gouvernance, le conseil juridique ou un evaluateur externe.</td><td>Une courte matrice d'acces indiquant qui peut inspecter quels artefacts de journalisation et sous quel declencheur.</td></tr><tr><td>References a des systemes de trace externes</td><td>Des que votre chaine de trace traverse des systemes en dehors du dossier toolkit.</td><td>Nom du systeme, format d'identifiant et chemin de recherche necessaire pour poursuivre la trace hors du dossier.</td></tr><tr><td>Lacunes connues de journalisation et processus compensatoire</td><td>Quand l'adapter connecte n'emet pas toute la profondeur de journalisation souhaitee.</td><td>Une courte note de gap plus le processus manuel ou externe qui comble cette lacune.</td></tr><tr><td>Contraintes juridiques d'export et de suppression</td><td>Avant que les preuves ne soient transmises a une autre equipe ou conservees plus longtemps.</td><td>Un court texte de politique indiquant quand les enregistrements peuvent etre exportes, rediges ou supprimes.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>L'article 12 est demontre par plusieurs fichiers de journalisation et de trace</h2>
+    <p>Il n'existe pas de fichier JSON unique pour l'article 12 dans le dossier. L'exigence est couverte par les fichiers ci-dessous. Leur format est le format structure du toolkit pour ces exigences, et non une forme imposee par l'UE.</p>
+    <table>
+      <thead><tr><th>Fichier dans le dossier</th><th>Pourquoi il compte pour l'article 12</th><th>Ouvrir le fichier</th></tr></thead>
+      <tbody>
+        <tr><td>Rapport de comparaison - compare-report.json</td><td>Fichier principal de revue reliant les resultats des cas, l'integrite de la trace et les artefacts conserves.</td><td>demo/eu-ai-act/compare-report.json</td></tr><tr><td>Manifest - artifacts/manifest.json</td><td>Index d'integrite montrant quels fichiers appartiennent au dossier et comment ils sont ancres.</td><td>demo/eu-ai-act/artifacts/manifest.json</td></tr><tr><td>Fichier source du run - _source_inputs/new/run.json</td><td>Exemple d'enregistrement d'execution brut utilise pour reconstruire un chemin d'execution concret.</td><td>demo/eu-ai-act/_source_inputs/new/run.json</td></tr><tr><td>Controles de retention - archive/retention-controls.json</td><td>Observations d'archive et de retention attachees au dossier.</td><td>demo/eu-ai-act/archive/retention-controls.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <section><p>Use browser print to save this document as PDF.</p></section>
+</body>
+</html>

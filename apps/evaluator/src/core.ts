@@ -128,6 +128,27 @@ export function finalOutputEvents(events: RunEvent[] | undefined | null): FinalO
     return asEvents(events).filter((e): e is FinalOutputEvent => e.type === "final_output");
 }
 
+export type ToolTelemetryRequirement = {
+    required: boolean;
+    reasons: string[];
+};
+
+export function resolveToolTelemetryRequirement(expected: Expected): ToolTelemetryRequirement {
+    const reasons: string[] = [];
+    if (hasNonEmptyList(expected.tool_required)) reasons.push("tool_required");
+    if (hasNonEmptyList(expected.tool_sequence)) reasons.push("tool_sequence");
+    if (expected.evidence_required_for_actions === true) reasons.push("evidence_required_for_actions");
+    if (hasNonEmptyList(expected.action_required)) reasons.push("action_required");
+    const telemetryPolicy = expected.tool_telemetry && typeof expected.tool_telemetry === "object"
+        ? expected.tool_telemetry
+        : undefined;
+    if (telemetryPolicy !== undefined) reasons.push("tool_telemetry_policy");
+    return {
+        required: reasons.length > 0,
+        reasons,
+    };
+}
+
 export function extractToolCallNames(events: RunEvent[]): string[] {
     const calls = toolCalls(events);
     const withIdx = calls.map((e, idx) => ({ e, idx }));
@@ -175,19 +196,14 @@ export function extractToolResultsWithToolName(events: RunEvent[]): ToolResultWi
 }
 
 export function checkToolTelemetryAvailability(expected: Expected, resp: AgentResponse): AssertionResult {
-    const reasons: string[] = [];
-    if (hasNonEmptyList(expected.tool_required)) reasons.push("tool_required");
-    if (hasNonEmptyList(expected.tool_sequence)) reasons.push("tool_sequence");
-    if (expected.evidence_required_for_actions === true) reasons.push("evidence_required_for_actions");
-    if (hasNonEmptyList(expected.action_required)) reasons.push("action_required");
+    const requirement = resolveToolTelemetryRequirement(expected);
     const telemetryPolicy = expected.tool_telemetry && typeof expected.tool_telemetry === "object"
         ? expected.tool_telemetry
         : undefined;
-    const policyEnabled = telemetryPolicy !== undefined;
-    if (policyEnabled) reasons.push("tool_telemetry_policy");
-    if (reasons.length === 0) {
+    if (!requirement.required) {
         return { name: "tool_telemetry", pass: true, details: { note: "not_required" } };
     }
+    const policyEnabled = telemetryPolicy !== undefined;
 
     const events = asEvents(resp.events);
     const calls = toolCalls(events);
@@ -242,17 +258,41 @@ export function checkToolTelemetryAvailability(expected: Expected, resp: AgentRe
             }
         }
     }
+    const missingOutputEvidenceCallIds = results
+        .filter((result) => result.status === "ok")
+        .filter((result) => {
+            const hasSummary = result.payload_summary !== undefined;
+            const hasResultRef = typeof result.result_ref === "string" && result.result_ref.trim().length > 0;
+            return !(hasSummary || hasResultRef);
+        })
+        .map((result) => result.call_id);
+    if (missingOutputEvidenceCallIds.length > 0) {
+        violations.push("tool_result_missing_output_evidence");
+    }
+    const missingErrorEvidenceCallIds = results
+        .filter((result) => result.status === "error" || result.status === "timeout")
+        .filter((result) => {
+            const hasErrorCode = typeof result.error_code === "string" && result.error_code.trim().length > 0;
+            const hasErrorMessage = typeof result.error_message === "string" && result.error_message.trim().length > 0;
+            return !(hasErrorCode || hasErrorMessage);
+        })
+        .map((result) => result.call_id);
+    if (missingErrorEvidenceCallIds.length > 0) {
+        violations.push("tool_result_missing_error_evidence");
+    }
     const pass = violations.length === 0;
     return {
         name: "tool_telemetry",
         pass,
         details: {
-            required_by: reasons,
+            required_by: requirement.reasons,
             tool_call_count: calls.length,
             tool_result_count: results.length,
             wrapper_tool_call_count: wrapperCalls.length,
             non_wrapper_tool_call_count: nonWrapperCalls,
             telemetry_mode: mode,
+            tool_results_missing_output_evidence: missingOutputEvidenceCallIds,
+            tool_results_missing_error_evidence: missingErrorEvidenceCallIds,
             reason_code: pass ? undefined : violations[0],
             violations: pass ? [] : violations,
             known_tool_call_ids: Array.from(byCall.keys()),

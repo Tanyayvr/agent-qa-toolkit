@@ -5,7 +5,6 @@ It is intended for enterprise reporting (ISO 42001 / NIST AI RMF).
 For the broader positioning and roadmap of this direction, see:
 
 - `docs/eu-ai-act-evidence-engine.md`
-- `docs/eu-ai-act-evidence-engine-roadmap.md`
 
 ## Load from file (recommended)
 

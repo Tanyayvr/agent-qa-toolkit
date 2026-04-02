@@ -3,12 +3,16 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  extractRunProvenance,
   loadComplianceProfile,
   loadComplianceMapping,
   loadEnvironmentContext,
+  listMissingRequiredEnvironmentFields,
+  mergeEnvironmentWithCanonicalProvenance,
   resolveComplianceCoverageRequirements,
   resolveComplianceMapping,
   resolveTransferClass,
+  listMissingEuAiActEnvironmentFields,
 } from "./evaluatorMetadata";
 
 describe("evaluatorMetadata", () => {
@@ -41,17 +45,23 @@ describe("evaluatorMetadata", () => {
       maxMetaBytes: 1_000,
       processEnv: {
         AGENT_ID: "agent-x",
+        AGENT_VERSION: "agent-x-v2",
         AGENT_MODEL: "gpt-x",
+        MODEL_VERSION: "2026-03-01",
         PROMPT_VERSION: "p1",
         TOOLS_VERSION: "t1",
+        CONFIG_HASH: "cfg-123",
       },
     });
 
     expect(loaded).toEqual({
       agent_id: "agent-x",
+      agent_version: "agent-x-v2",
       model: "gpt-x",
+      model_version: "2026-03-01",
       prompt_version: "p1",
       tools_version: "t1",
+      config_hash: "cfg-123",
     });
   });
 
@@ -62,6 +72,63 @@ describe("evaluatorMetadata", () => {
       processEnv: {},
     });
     expect(loaded).toBeUndefined();
+  });
+
+  it("lists missing EU AI Act environment fields", () => {
+    expect(listMissingEuAiActEnvironmentFields(undefined)).toContain("agent_id");
+    expect(listMissingRequiredEnvironmentFields(undefined)).toContain("agent_version");
+    expect(
+      listMissingEuAiActEnvironmentFields({
+        agent_id: "agent-x",
+        agent_version: "v2",
+        model: "gpt-x",
+        prompt_version: "p1",
+      })
+    ).toEqual(expect.arrayContaining(["model_version", "tools_version", "config_hash"]));
+  });
+
+  it("extracts complete run provenance and merges optional environment assertions", () => {
+    expect(
+      extractRunProvenance({
+        provenance: {
+          agent_id: "agent-a",
+          agent_version: "v1",
+          model: "model-a",
+          model_version: "2026-03-01",
+          prompt_version: "prompt-v1",
+          tools_version: "tools-v1",
+          config_hash: "cfg-001",
+        },
+      })
+    ).toEqual({
+      agent_id: "agent-a",
+      agent_version: "v1",
+      model: "model-a",
+      model_version: "2026-03-01",
+      prompt_version: "prompt-v1",
+      tools_version: "tools-v1",
+      config_hash: "cfg-001",
+    });
+
+    expect(
+      mergeEnvironmentWithCanonicalProvenance({
+        providedEnvironment: { agent_id: "agent-a", model: "model-a", deployment_tier: "staging" },
+        canonicalProvenance: {
+          agent_id: "agent-a",
+          agent_version: "v1",
+          model: "model-a",
+          model_version: "2026-03-01",
+          prompt_version: "prompt-v1",
+          tools_version: "tools-v1",
+          config_hash: "cfg-001",
+        },
+      })
+    ).toMatchObject({
+      agent_id: "agent-a",
+      agent_version: "v1",
+      model: "model-a",
+      deployment_tier: "staging",
+    });
   });
 
   it("loads compliance mapping from array and object forms", async () => {

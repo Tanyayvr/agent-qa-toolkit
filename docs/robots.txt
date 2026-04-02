@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+# LLM-friendly summaries
+# https://tanyayvr.github.io/agent-qa-toolkit/llms.txt
+# https://tanyayvr.github.io/agent-qa-toolkit/llms-full.txt
+
 Sitemap: https://tanyayvr.github.io/agent-qa-toolkit/sitemap.xml

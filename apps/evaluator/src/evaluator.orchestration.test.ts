@@ -18,6 +18,26 @@ async function writeJson(absPath: string, value: unknown): Promise<void> {
   await writeFile(absPath, JSON.stringify(value, null, 2), "utf-8");
 }
 
+function buildRunMeta(
+  caseIds: string[],
+  version: "baseline" | "new",
+  overrides?: Record<string, unknown>
+): Record<string, unknown> {
+  return {
+    selected_case_ids: caseIds,
+    provenance: {
+      agent_id: "agent-demo",
+      agent_version: version === "new" ? "agent-demo-v2" : "agent-demo-v1",
+      model: "gpt-4.1",
+      model_version: version === "new" ? "2026-03-21" : "2026-03-01",
+      prompt_version: version === "new" ? "pv-2" : "pv-1",
+      tools_version: "tv-1",
+      config_hash: version === "new" ? "cfg-002" : "cfg-001",
+    },
+    ...(overrides ?? {}),
+  };
+}
+
 describe("evaluator orchestration", () => {
   const savedArgv = [...process.argv];
   let root = "";
@@ -31,9 +51,12 @@ describe("evaluator orchestration", () => {
   afterEach(async () => {
     process.argv = [...savedArgv];
     delete process.env.AGENT_ID;
+    delete process.env.AGENT_VERSION;
     delete process.env.AGENT_MODEL;
+    delete process.env.MODEL_VERSION;
     delete process.env.PROMPT_VERSION;
     delete process.env.TOOLS_VERSION;
+    delete process.env.CONFIG_HASH;
     await rm(root, { recursive: true, force: true });
   });
 
@@ -60,8 +83,34 @@ describe("evaluator orchestration", () => {
       proposed_actions: [],
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "agent-demo",
+          agent_version: "agent-demo-v1",
+          model: "gpt-4.1",
+          model_version: "2026-03-01",
+          prompt_version: "pv-1",
+          tools_version: "tv-1",
+          config_hash: "cfg-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "agent-demo",
+          agent_version: "agent-demo-v1",
+          model: "gpt-4.1",
+          model_version: "2026-03-01",
+          prompt_version: "pv-1",
+          tools_version: "tv-1",
+          config_hash: "cfg-001",
+        },
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
 
@@ -100,8 +149,34 @@ describe("evaluator orchestration", () => {
       },
     ]);
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "agent-from-file",
+          agent_version: "agent-from-file-v1",
+          model: "claude-sonnet",
+          model_version: "2026-03-01",
+          prompt_version: "pv-file",
+          tools_version: "tools-file-v1",
+          config_hash: "cfg-file-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "agent-from-file",
+          agent_version: "agent-from-file-v1",
+          model: "claude-sonnet",
+          model_version: "2026-03-01",
+          prompt_version: "pv-file",
+          tools_version: "tools-file-v1",
+          config_hash: "cfg-file-001",
+        },
+      })
+    );
 
     const hugeResp = {
       case_id: "c1",
@@ -180,16 +255,20 @@ describe("evaluator orchestration", () => {
       proposed_actions: [],
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), {
-      selected_case_ids: ["c1"],
-      redaction_applied: true,
-      redaction_preset: "transferable",
-    });
-    await writeJson(path.join(newDir, "run.json"), {
-      selected_case_ids: ["c1"],
-      redaction_applied: true,
-      redaction_preset: "transferable",
-    });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        redaction_applied: true,
+        redaction_preset: "transferable",
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        redaction_applied: true,
+        redaction_preset: "transferable",
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), unsafeResp);
     await writeJson(path.join(newDir, "c1.json"), { ...unsafeResp, version: "new" });
 
@@ -236,8 +315,34 @@ describe("evaluator orchestration", () => {
       proposed_actions: [],
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
 
@@ -269,9 +374,12 @@ describe("evaluator orchestration", () => {
     const compliancePath = path.join(root, "compliance.json");
 
     process.env.AGENT_ID = "agent-demo";
+    process.env.AGENT_VERSION = "agent-demo-v1";
     process.env.AGENT_MODEL = "gpt-4.1";
+    process.env.MODEL_VERSION = "2026-03-01";
     process.env.PROMPT_VERSION = "pv-1";
     process.env.TOOLS_VERSION = "tv-1";
+    process.env.CONFIG_HASH = "cfg-001";
 
     await writeJson(casesPath, [
       {
@@ -289,8 +397,34 @@ describe("evaluator orchestration", () => {
       events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
       proposed_actions: [],
     };
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "agent-demo",
+          agent_version: "agent-demo-v1",
+          model: "gpt-4.1",
+          model_version: "2026-03-01",
+          prompt_version: "pv-1",
+          tools_version: "tv-1",
+          config_hash: "cfg-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "agent-demo",
+          agent_version: "agent-demo-v1",
+          model: "gpt-4.1",
+          model_version: "2026-03-01",
+          prompt_version: "pv-1",
+          tools_version: "tv-1",
+          config_hash: "cfg-001",
+        },
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
     await writeJson(compliancePath, {
@@ -334,9 +468,12 @@ describe("evaluator orchestration", () => {
     };
     expect(report.environment).toMatchObject({
       agent_id: "agent-demo",
+      agent_version: "agent-demo-v1",
       model: "gpt-4.1",
+      model_version: "2026-03-01",
       prompt_version: "pv-1",
       tools_version: "tv-1",
+      config_hash: "cfg-001",
     });
     expect(report.compliance_mapping?.[0]).toMatchObject({ framework: "SOC2", clause: "CC7.2" });
     expect(report.compliance_coverage?.[0]).toMatchObject({
@@ -376,8 +513,34 @@ describe("evaluator orchestration", () => {
       events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
       proposed_actions: [],
     };
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "agent-from-file",
+          agent_version: "agent-from-file-v1",
+          model: "claude-sonnet",
+          model_version: "2026-03-01",
+          prompt_version: "pv-file",
+          tools_version: "tools-file-v1",
+          config_hash: "cfg-file-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "agent-from-file",
+          agent_version: "agent-from-file-v1",
+          model: "claude-sonnet",
+          model_version: "2026-03-01",
+          prompt_version: "pv-file",
+          tools_version: "tools-file-v1",
+          config_hash: "cfg-file-001",
+        },
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
 
@@ -413,12 +576,138 @@ describe("evaluator orchestration", () => {
     expect(report.compliance_coverage).toBeUndefined();
   });
 
+  it("fails when core packaging run provenance is missing", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const baselineDir = path.join(root, "runs", "baseline", "missing-prov");
+    const newDir = path.join(root, "runs", "new", "missing-prov");
+    const outDir = path.join(root, "reports", "missing-prov");
+
+    await writeJson(casesPath, [
+      {
+        id: "c1",
+        title: "missing provenance case",
+        input: { user: "hello" },
+        expected: { must_include: ["ok"] },
+      },
+    ]);
+    const okResp = {
+      case_id: "c1",
+      version: "baseline",
+      final_output: { content_type: "text", content: "ok" },
+      events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
+      proposed_actions: [],
+    };
+    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
+    await writeJson(path.join(baselineDir, "c1.json"), okResp);
+    await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
+
+    const mod = await loadEvaluatorWithArgv([
+      "node",
+      "evaluator",
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--outDir",
+      outDir,
+      "--reportId",
+      "missing-prov",
+      "--no-trend",
+    ]);
+
+    await expect(mod.runEvaluator()).rejects.toThrow("Core qualification packaging requires baseline run provenance");
+  });
+
+  it("fails when provided environment metadata conflicts with new run provenance", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const baselineDir = path.join(root, "runs", "baseline", "env-mismatch");
+    const newDir = path.join(root, "runs", "new", "env-mismatch");
+    const outDir = path.join(root, "reports", "env-mismatch");
+    const envPath = path.join(root, "env-mismatch.json");
+
+    await writeJson(casesPath, [
+      {
+        id: "c1",
+        title: "env mismatch case",
+        input: { user: "hello" },
+        expected: { must_include: ["ok"] },
+      },
+    ]);
+    await writeJson(envPath, {
+      agent_id: "agent-demo",
+      agent_version: "wrong-version",
+    });
+    const okResp = {
+      case_id: "c1",
+      version: "baseline",
+      final_output: { content_type: "text", content: "ok" },
+      events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
+      proposed_actions: [],
+    };
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
+    await writeJson(path.join(baselineDir, "c1.json"), okResp);
+    await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
+
+    const mod = await loadEvaluatorWithArgv([
+      "node",
+      "evaluator",
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--outDir",
+      outDir,
+      "--reportId",
+      "env-mismatch",
+      "--environment",
+      envPath,
+      "--no-trend",
+    ]);
+
+    await expect(mod.runEvaluator()).rejects.toThrow(
+      "Provided environment metadata does not match new run provenance"
+    );
+  });
+
   it("writes EU AI Act compliance bundle outputs when EU coverage is present", async () => {
     const casesPath = path.join(root, "cases.json");
     const baselineDir = path.join(root, "runs", "baseline", "r6-eu");
     const newDir = path.join(root, "runs", "new", "r6-eu");
     const outDir = path.join(root, "reports", "eu-bundle");
     const compliancePath = path.join(root, "eu-profile.json");
+    const envPath = path.join(root, "eu-environment.json");
 
     await writeJson(casesPath, [
       {
@@ -448,6 +737,15 @@ describe("evaluator orchestration", () => {
         },
       ],
     });
+    await writeJson(envPath, {
+      agent_id: "eu-agent",
+      agent_version: "eu-agent-v3",
+      model: "gpt-eu",
+      model_version: "2026-03-15",
+      prompt_version: "prompt-eu-v1",
+      tools_version: "tools-eu-v2",
+      config_hash: "cfg-eu-001",
+    });
 
     const okResp = {
       case_id: "c1",
@@ -467,8 +765,34 @@ describe("evaluator orchestration", () => {
       latency_ms: 1500,
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), {
       ...okResp,
@@ -489,8 +813,12 @@ describe("evaluator orchestration", () => {
       outDir,
       "--reportId",
       "eu-bundle",
+      "--environment",
+      envPath,
       "--complianceProfile",
       compliancePath,
+      "--euContract",
+      "full",
       "--no-trend",
     ]);
 
@@ -502,12 +830,20 @@ describe("evaluator orchestration", () => {
         eu_ai_act?: {
           coverage_href: string;
           annex_iv_href: string;
+          article_10_data_governance_href: string;
           report_html_href: string;
+          reviewer_html_href: string;
+          reviewer_markdown_href: string;
           evidence_index_href: string;
           article_13_instructions_href: string;
+          article_16_provider_obligations_href: string;
+          article_43_conformity_assessment_href: string;
+          article_47_declaration_of_conformity_href: string;
           article_9_risk_register_href: string;
           article_72_monitoring_plan_href: string;
           article_17_qms_lite_href: string;
+          annex_v_declaration_content_href: string;
+          article_73_serious_incident_pack_href: string;
           human_oversight_summary_href: string;
           release_review_href: string;
           post_market_monitoring_href: string;
@@ -518,23 +854,48 @@ describe("evaluator orchestration", () => {
     expect(report.compliance_exports?.eu_ai_act).toBeDefined();
     const coveragePath = path.join(outDir, report.compliance_exports?.eu_ai_act?.coverage_href ?? "");
     const annexPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.annex_iv_href ?? "");
+    const article10Path = path.join(outDir, report.compliance_exports?.eu_ai_act?.article_10_data_governance_href ?? "");
     const htmlPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.report_html_href ?? "");
+    const reviewerHtmlPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.reviewer_html_href ?? "");
+    const reviewerMarkdownPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.reviewer_markdown_href ?? "");
     const evidenceIndexPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.evidence_index_href ?? "");
     const article13Path = path.join(outDir, report.compliance_exports?.eu_ai_act?.article_13_instructions_href ?? "");
+    const article16Path = path.join(outDir, report.compliance_exports?.eu_ai_act?.article_16_provider_obligations_href ?? "");
+    const article43Path = path.join(
+      outDir,
+      report.compliance_exports?.eu_ai_act?.article_43_conformity_assessment_href ?? ""
+    );
+    const article47Path = path.join(
+      outDir,
+      report.compliance_exports?.eu_ai_act?.article_47_declaration_of_conformity_href ?? ""
+    );
     const riskRegisterPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.article_9_risk_register_href ?? "");
     const monitoringPlanPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.article_72_monitoring_plan_href ?? "");
     const qmsLitePath = path.join(outDir, report.compliance_exports?.eu_ai_act?.article_17_qms_lite_href ?? "");
+    const annexVPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.annex_v_declaration_content_href ?? "");
+    const incidentPackPath = path.join(
+      outDir,
+      report.compliance_exports?.eu_ai_act?.article_73_serious_incident_pack_href ?? ""
+    );
     const oversightPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.human_oversight_summary_href ?? "");
     const releaseReviewPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.release_review_href ?? "");
     const monitoringPath = path.join(outDir, report.compliance_exports?.eu_ai_act?.post_market_monitoring_href ?? "");
     await expect(stat(coveragePath)).resolves.toBeDefined();
     await expect(stat(annexPath)).resolves.toBeDefined();
+    await expect(stat(article10Path)).resolves.toBeDefined();
     await expect(stat(htmlPath)).resolves.toBeDefined();
+    await expect(stat(reviewerHtmlPath)).resolves.toBeDefined();
+    await expect(stat(reviewerMarkdownPath)).resolves.toBeDefined();
     await expect(stat(evidenceIndexPath)).resolves.toBeDefined();
     await expect(stat(article13Path)).resolves.toBeDefined();
+    await expect(stat(article16Path)).resolves.toBeDefined();
+    await expect(stat(article43Path)).resolves.toBeDefined();
+    await expect(stat(article47Path)).resolves.toBeDefined();
     await expect(stat(riskRegisterPath)).resolves.toBeDefined();
     await expect(stat(monitoringPlanPath)).resolves.toBeDefined();
     await expect(stat(qmsLitePath)).resolves.toBeDefined();
+    await expect(stat(annexVPath)).resolves.toBeDefined();
+    await expect(stat(incidentPackPath)).resolves.toBeDefined();
     await expect(stat(oversightPath)).resolves.toBeDefined();
     await expect(stat(releaseReviewPath)).resolves.toBeDefined();
     await expect(stat(monitoringPath)).resolves.toBeDefined();
@@ -555,6 +916,16 @@ describe("evaluator orchestration", () => {
     expect(htmlRaw).toContain("Article 17 QMS-lite scaffold");
     expect(htmlRaw).toContain("Human oversight");
     expect(htmlRaw).toContain("Release review");
+    const reviewerHtmlRaw = await readFile(reviewerHtmlPath, "utf-8");
+    expect(reviewerHtmlRaw).toContain("EU AI Act reviewer pack");
+    expect(reviewerHtmlRaw).toContain("1. General description of the system");
+    expect(reviewerHtmlRaw).toContain("Generated here (machine-generated)");
+    expect(reviewerHtmlRaw).toContain("Review this pack in Annex order");
+    expect(reviewerHtmlRaw).toContain("How to read this pack");
+    const reviewerMarkdownRaw = await readFile(reviewerMarkdownPath, "utf-8");
+    expect(reviewerMarkdownRaw).toContain("## 9. Post-market monitoring and serious incidents");
+    expect(reviewerMarkdownRaw).toContain("### Claim-to-evidence map");
+    expect(reviewerMarkdownRaw).toContain("## If you are not reading from engineering tooling");
 
     const oversightRaw = await readFile(oversightPath, "utf-8");
     const oversight = JSON.parse(oversightRaw) as {
@@ -581,6 +952,247 @@ describe("evaluator orchestration", () => {
     expect(monitoring.summary?.trend_ingest_enabled).toBe(false);
   });
 
+  it("fails EU AI Act bundle generation when run provenance is missing", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const baselineDir = path.join(root, "runs", "baseline", "r6-eu-missing-env");
+    const newDir = path.join(root, "runs", "new", "r6-eu-missing-env");
+    const outDir = path.join(root, "reports", "eu-bundle-missing-env");
+    const compliancePath = path.join(root, "eu-profile-missing-env.json");
+
+    await writeJson(casesPath, [
+      {
+        id: "c1",
+        title: "eu bundle identity case",
+        input: { user: "hello" },
+        expected: { must_include: ["ok"] },
+      },
+    ]);
+    await writeJson(compliancePath, {
+      compliance_mapping: [{ framework: "EU_AI_ACT", clause: "Art_12", title: "Record-keeping and logging" }],
+      coverage_requirements: [
+        {
+          framework: "EU_AI_ACT",
+          clause: "Art_12",
+          title: "Record-keeping and logging",
+          required_evidence: ["compare-report.json.items[].trace_integrity", "artifacts/manifest.json"],
+        },
+      ],
+    });
+    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
+    await writeJson(path.join(baselineDir, "c1.json"), {
+      case_id: "c1",
+      version: "baseline",
+      final_output: { content_type: "text", content: "ok" },
+      events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
+      proposed_actions: [],
+    });
+    await writeJson(path.join(newDir, "c1.json"), {
+      case_id: "c1",
+      version: "new",
+      final_output: { content_type: "text", content: "ok" },
+      events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
+      proposed_actions: [],
+    });
+
+    const mod = await loadEvaluatorWithArgv([
+      "node",
+      "evaluator",
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--outDir",
+      outDir,
+      "--reportId",
+      "eu-bundle-missing-env",
+      "--complianceProfile",
+      compliancePath,
+      "--no-trend",
+    ]);
+
+    await expect(mod.runEvaluator()).rejects.toThrow("Core qualification packaging requires baseline run provenance");
+  });
+
+  it("writes only minimum EU exports by default", async () => {
+    const casesPath = path.join(root, "eu-minimum-cases.json");
+    const baselineDir = path.join(root, "runs", "baseline", "r6-eu-minimum");
+    const newDir = path.join(root, "runs", "new", "r6-eu-minimum");
+    const outDir = path.join(root, "reports", "eu-minimum");
+    const envPath = path.join(root, "eu-minimum-environment.json");
+    const compliancePath = path.join(root, "eu-minimum-profile.json");
+
+    await writeJson(casesPath, [
+      {
+        id: "c1",
+        title: "eu minimum case",
+        input: { user: "hello" },
+        expected: { must_include: ["ok"] },
+      },
+    ]);
+    await writeJson(envPath, {
+      agent_id: "eu-agent",
+      agent_version: "eu-agent-v3",
+      model: "gpt-eu",
+      model_version: "2026-03-15",
+      prompt_version: "prompt-eu-v1",
+      tools_version: "tools-eu-v2",
+      config_hash: "cfg-eu-001",
+    });
+    await writeJson(compliancePath, {
+      compliance_mapping: [
+        { framework: "EU_AI_ACT", clause: "Art_12", title: "Record-keeping and logging" },
+        { framework: "EU_AI_ACT", clause: "Art_15", title: "Accuracy, robustness and cybersecurity" },
+      ],
+      coverage_requirements: [
+        {
+          framework: "EU_AI_ACT",
+          clause: "Art_12",
+          title: "Record-keeping and logging",
+          required_evidence: ["compare-report.json.items[].trace_integrity", "artifacts/manifest.json"],
+        },
+        {
+          framework: "EU_AI_ACT",
+          clause: "Art_15",
+          title: "Accuracy, robustness and cybersecurity",
+          required_evidence: ["compare-report.json.summary.execution_quality", "report.html"],
+        },
+      ],
+    });
+    await mkdir(baselineDir, { recursive: true });
+    await mkdir(newDir, { recursive: true });
+    const failureNew = {
+      class: "timeout",
+      code: "RUNNER_TIMEOUT",
+      detail: "adapter stalled",
+      stage: "runner.execute",
+      retryable: false,
+    };
+    const okResp = {
+      id: "c1",
+      version: "baseline",
+      response: { ok: true },
+      metrics: { score: 1 },
+      security_signals: [],
+      tool_calls: [],
+    };
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        provenance: {
+          agent_id: "eu-agent",
+          agent_version: "eu-agent-v3",
+          model: "gpt-eu",
+          model_version: "2026-03-15",
+          prompt_version: "prompt-eu-v1",
+          tools_version: "tools-eu-v2",
+          config_hash: "cfg-eu-001",
+        },
+      })
+    );
+    await writeJson(path.join(baselineDir, "c1.json"), okResp);
+    await writeJson(path.join(newDir, "c1.json"), {
+      ...okResp,
+      version: "new",
+      runner_failure: failureNew,
+    });
+
+    const mod = await loadEvaluatorWithArgv([
+      "node",
+      "evaluator",
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--outDir",
+      outDir,
+      "--reportId",
+      "eu-minimum",
+      "--environment",
+      envPath,
+      "--complianceProfile",
+      compliancePath,
+      "--no-trend",
+    ]);
+
+    await mod.runEvaluator();
+
+    const reportRaw = await readFile(path.join(outDir, "compare-report.json"), "utf-8");
+    const report = JSON.parse(reportRaw) as {
+      compliance_exports?: {
+        eu_ai_act?: {
+          annex_iv_href: string;
+          article_10_data_governance_href: string;
+          article_13_instructions_href: string;
+          article_16_provider_obligations_href: string;
+          article_43_conformity_assessment_href: string;
+          article_47_declaration_of_conformity_href: string;
+          article_9_risk_register_href: string;
+          article_72_monitoring_plan_href: string;
+          article_17_qms_lite_href: string;
+          annex_v_declaration_content_href: string;
+          human_oversight_summary_href: string;
+          post_market_monitoring_href: string;
+          release_review_href?: string;
+          coverage_href?: string;
+          report_html_href?: string;
+          reviewer_html_href?: string;
+          reviewer_markdown_href?: string;
+          evidence_index_href?: string;
+          article_73_serious_incident_pack_href?: string;
+        };
+      };
+    };
+
+    const eu = report.compliance_exports?.eu_ai_act;
+    expect(eu).toBeDefined();
+    expect(eu?.release_review_href).toBeUndefined();
+    expect(eu?.coverage_href).toBeUndefined();
+    expect(eu?.report_html_href).toBeUndefined();
+    expect(eu?.reviewer_html_href).toBeUndefined();
+    expect(eu?.reviewer_markdown_href).toBeUndefined();
+    expect(eu?.evidence_index_href).toBeUndefined();
+    expect(eu?.article_73_serious_incident_pack_href).toBeUndefined();
+
+    await expect(stat(path.join(outDir, eu?.annex_iv_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_10_data_governance_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_13_instructions_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_16_provider_obligations_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_43_conformity_assessment_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_47_declaration_of_conformity_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_9_risk_register_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_72_monitoring_plan_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.article_17_qms_lite_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.annex_v_declaration_content_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.human_oversight_summary_href ?? ""))).resolves.toBeDefined();
+    await expect(stat(path.join(outDir, eu?.post_market_monitoring_href ?? ""))).resolves.toBeDefined();
+
+    await expect(stat(path.join(outDir, "compliance", "release-review.json"))).rejects.toBeDefined();
+    await expect(stat(path.join(outDir, "compliance", "eu-ai-act-report.html"))).rejects.toBeDefined();
+    await expect(stat(path.join(outDir, "compliance", "eu-ai-act-reviewer.html"))).rejects.toBeDefined();
+    await expect(stat(path.join(outDir, "compliance", "eu-ai-act-reviewer.md"))).rejects.toBeDefined();
+    await expect(stat(path.join(outDir, "compliance", "evidence-index.json"))).rejects.toBeDefined();
+    await expect(stat(path.join(outDir, "compliance", "article-73-serious-incident-pack.json"))).rejects.toBeDefined();
+  });
+
   it("writes redaction summary when both run metas declare redaction applied", async () => {
     const casesPath = path.join(root, "cases.json");
     const baselineDir = path.join(root, "runs", "baseline", "r7");
@@ -602,16 +1214,20 @@ describe("evaluator orchestration", () => {
       events: [],
       proposed_actions: [],
     };
-    await writeJson(path.join(baselineDir, "run.json"), {
-      selected_case_ids: ["c1"],
-      redaction_applied: true,
-      redaction_preset: "internal_only",
-    });
-    await writeJson(path.join(newDir, "run.json"), {
-      selected_case_ids: ["c1"],
-      redaction_applied: true,
-      redaction_preset: "internal_only",
-    });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        redaction_applied: true,
+        redaction_preset: "internal_only",
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        redaction_applied: true,
+        redaction_preset: "internal_only",
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), safeResp);
     await writeJson(path.join(newDir, "c1.json"), { ...safeResp, version: "new" });
 
@@ -659,15 +1275,19 @@ describe("evaluator orchestration", () => {
       events: [],
       proposed_actions: [],
     };
-    await writeJson(path.join(baselineDir, "run.json"), {
-      selected_case_ids: ["c1"],
-      redaction_applied: true,
-      redaction_preset: "transferable",
-    });
-    await writeJson(path.join(newDir, "run.json"), {
-      selected_case_ids: ["c1"],
-      redaction_applied: false,
-    });
+    await writeJson(
+      path.join(baselineDir, "run.json"),
+      buildRunMeta(["c1"], "baseline", {
+        redaction_applied: true,
+        redaction_preset: "transferable",
+      })
+    );
+    await writeJson(
+      path.join(newDir, "run.json"),
+      buildRunMeta(["c1"], "new", {
+        redaction_applied: false,
+      })
+    );
     await writeJson(path.join(baselineDir, "c1.json"), safeResp);
     await writeJson(path.join(newDir, "c1.json"), { ...safeResp, version: "new" });
 
@@ -727,8 +1347,8 @@ describe("evaluator orchestration", () => {
       events: [],
       proposed_actions: [],
     };
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(baselineDir, "run.json"), buildRunMeta(["c1"], "baseline"));
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
 
@@ -775,8 +1395,8 @@ describe("evaluator orchestration", () => {
       proposed_actions: [],
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1", "c3"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1", "c3"] });
+    await writeJson(path.join(baselineDir, "run.json"), buildRunMeta(["c1", "c3"], "baseline"));
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1", "c3"], "new"));
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
 
@@ -826,8 +1446,8 @@ describe("evaluator orchestration", () => {
       proposed_actions: [],
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(baselineDir, "run.json"), buildRunMeta(["c1"], "baseline"));
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
 
@@ -869,8 +1489,8 @@ describe("evaluator orchestration", () => {
       proposed_actions: [],
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(baselineDir, "run.json"), buildRunMeta(["c1"], "baseline"));
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
     await writeJson(path.join(baselineDir, "c1.json"), resp);
     await writeJson(path.join(newDir, "c1.json"), { ...resp, version: "new" });
 
@@ -947,8 +1567,8 @@ describe("evaluator orchestration", () => {
       full_body_meta_saved_to: newMetaAbs,
     };
 
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(baselineDir, "run.json"), buildRunMeta(["c1"], "baseline"));
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
     await writeJson(path.join(baselineDir, "c1.json"), {
       case_id: "c1",
       version: "baseline",

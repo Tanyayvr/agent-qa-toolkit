@@ -4,17 +4,25 @@ export type EuAiActBundleArtifacts = {
   compare_report_href: string;
   evaluator_report_html_href: string;
   manifest_href: string;
-  coverage_href: string;
   annex_iv_href: string;
-  report_html_href: string;
-  evidence_index_href: string;
+  article_10_data_governance_href: string;
   article_13_instructions_href: string;
+  article_16_provider_obligations_href: string;
+  article_43_conformity_assessment_href: string;
+  article_47_declaration_of_conformity_href: string;
   article_9_risk_register_href: string;
   article_72_monitoring_plan_href: string;
   article_17_qms_lite_href: string;
+  annex_v_declaration_content_href: string;
   human_oversight_summary_href: string;
-  release_review_href: string;
   post_market_monitoring_href: string;
+  release_review_href?: string;
+  coverage_href?: string;
+  report_html_href?: string;
+  reviewer_html_href?: string;
+  reviewer_markdown_href?: string;
+  evidence_index_href?: string;
+  article_73_serious_incident_pack_href?: string;
 };
 
 export type ReviewerAction = "proceed" | "require_human_review" | "block_release";
@@ -120,8 +128,8 @@ function gateToAction(gateRecommendation: CompareReport["items"][number]["gate_r
 
 function caseRationale(item: CompareReport["items"][number]): string[] {
   const reasons: string[] = [];
-  if (item.gate_recommendation === "block") reasons.push("Gate recommends blocking release for this case.");
-  if (item.gate_recommendation === "require_approval") reasons.push("Gate requires a human approval decision before release.");
+  if (item.gate_recommendation === "block") reasons.push("Gate recommends blocking operation for this case.");
+  if (item.gate_recommendation === "require_approval") reasons.push("Gate requires a human approval decision before relying on the system.");
   if (item.risk_level === "high") reasons.push("Risk level is high.");
   if (item.security.new.signals.length) {
     const kinds = uniqueStrings(item.security.new.signals.map((signal) => signal.kind));
@@ -196,15 +204,15 @@ export function buildEuAiActHumanOversightSummary(params: {
     reviewer_action_map: {
       none: {
         action: "proceed",
-        guidance: "No additional reviewer action is required beyond normal release process.",
+        guidance: "No additional reviewer action is required beyond the normal operating process.",
       },
       require_approval: {
         action: "require_human_review",
-        guidance: "Assigned reviewer must inspect the replay diff and supporting artifacts before release.",
+        guidance: "Assigned reviewer must inspect the replay diff and supporting artifacts before the system is relied on in scope.",
       },
       block: {
         action: "block_release",
-        guidance: "Do not release until remediation is complete and the case is rerun.",
+        guidance: "Do not rely on the system until remediation is complete and the case is rerun.",
       },
     },
     overview: {
@@ -219,8 +227,8 @@ export function buildEuAiActHumanOversightSummary(params: {
     blocked_case_rationale_summary: blockedCaseRationaleSummary(blockedCases),
     reviewer_guidance: [
       "Use replay diffs first, then raw case responses and trace anchors when escalation is needed.",
-      "A case marked block_release should stop promotion until remediation and rerun are complete.",
-      "A case marked require_human_review needs an explicit reviewer decision before release.",
+      "A case marked block_release should stop operation until remediation and rerun are complete.",
+      "A case marked require_human_review needs an explicit reviewer decision before the system is relied on in scope.",
     ],
   };
 }
@@ -269,7 +277,9 @@ export function buildEuAiActReleaseReview(params: {
         ? "Execution quality is healthy."
         : `Execution quality is ${params.report.summary.execution_quality.status}.`,
       evidence_selectors: ["compare-report.json.summary.execution_quality"],
-      artifact_hrefs: ["compare-report.json", params.bundleArtifacts.report_html_href],
+      artifact_hrefs: ["compare-report.json", params.bundleArtifacts.report_html_href].filter(
+        (href): href is string => Boolean(href)
+      ),
     },
     {
       id: "blocking_cases",
@@ -315,7 +325,9 @@ export function buildEuAiActReleaseReview(params: {
         ? `${uncoveredAreas.length} residual gap(s) remain documented in the bundle.`
         : "No residual compliance gaps are documented.",
       evidence_selectors: ["compare-report.json.compliance_coverage", params.bundleArtifacts.annex_iv_href],
-      artifact_hrefs: [params.bundleArtifacts.annex_iv_href, params.bundleArtifacts.coverage_href],
+      artifact_hrefs: [params.bundleArtifacts.annex_iv_href, params.bundleArtifacts.coverage_href].filter(
+        (href): href is string => Boolean(href)
+      ),
     },
   ];
 

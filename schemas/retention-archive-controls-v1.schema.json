@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Retention Archive Controls v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "report_quality",
+    "retention_observations",
+    "archive_scope",
+    "residual_gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "retention_archive_controls" },
+    "framework": { "const": "AGENT_EVIDENCE" },
+    "report_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "number" },
+    "bundle_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compare_report_href",
+        "report_html_href",
+        "manifest_href",
+        "retention_archive_controls_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string", "minLength": 1 },
+        "report_html_href": { "type": "string", "minLength": 1 },
+        "manifest_href": { "type": "string", "minLength": 1 },
+        "retention_archive_controls_href": { "type": "string", "minLength": 1 }
+      }
+    },
+    "report_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "self_contained",
+        "portable_paths",
+        "transfer_class",
+        "redaction_status",
+        "redaction_preset_id"
+      ],
+      "properties": {
+        "self_contained": { "type": "boolean" },
+        "portable_paths": { "type": "boolean" },
+        "transfer_class": { "enum": ["internal_only", "transferable"] },
+        "redaction_status": { "enum": ["none", "applied"] },
+        "redaction_preset_id": {
+          "anyOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "retention_observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseline",
+        "new",
+        "evaluator_retention_days",
+        "settings_consistent",
+        "differences"
+      ],
+      "properties": {
+        "baseline": { "$ref": "#/definitions/runRetentionObservation" },
+        "new": { "$ref": "#/definitions/runRetentionObservation" },
+        "evaluator_retention_days": { "type": "number", "minimum": 0 },
+        "settings_consistent": { "type": "boolean" },
+        "differences": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "archive_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archive_entire_report_directory",
+        "immutable_archive_recommended",
+        "manifest_anchor_href",
+        "required_paths",
+        "operator_required_inputs",
+        "external_surfaces"
+      ],
+      "properties": {
+        "archive_entire_report_directory": { "type": "boolean" },
+        "immutable_archive_recommended": { "type": "boolean" },
+        "manifest_anchor_href": { "type": "string", "minLength": 1 },
+        "required_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "operator_required_inputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "external_surfaces": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "residual_gaps": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "definitions": {
+    "runRetentionObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "retention_days",
+        "keep_raw",
+        "save_full_body_on_error",
+        "redaction_applied",
+        "redaction_keep_raw"
+      ],
+      "properties": {
+        "run_id": {
+          "anyOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "null" }
+          ]
+        },
+        "retention_days": {
+          "anyOf": [
+            { "type": "number", "minimum": 0 },
+            { "type": "null" }
+          ]
+        },
+        "keep_raw": { "type": ["boolean", "null"] },
+        "save_full_body_on_error": { "type": ["boolean", "null"] },
+        "redaction_applied": { "type": ["boolean", "null"] },
+        "redaction_keep_raw": { "type": ["boolean", "null"] }
+      }
+    }
+  }
+}

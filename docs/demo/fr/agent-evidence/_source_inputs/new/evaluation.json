@@ -1,0 +1,172 @@
+[
+  {
+    "case_id": "c-approval",
+    "title": "approval review case",
+    "pass": false,
+    "assertions": [
+      {
+        "name": "tool_telemetry",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "must_include",
+        "pass": true,
+        "details": {
+          "missing_phrases": [],
+          "semantic_phrase_matches": []
+        }
+      },
+      {
+        "name": "semantic_quality",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "runner_transport_success",
+        "pass": true,
+        "details": {
+          "note": "no_runner_failure"
+        }
+      },
+      {
+        "name": "evidence_required_for_actions",
+        "pass": true,
+        "details": {
+          "note": "not required"
+        }
+      },
+      {
+        "name": "tool_execution",
+        "pass": true,
+        "details": {
+          "failed": []
+        }
+      },
+      {
+        "name": "hallucination_signal_check",
+        "pass": true,
+        "details": {
+          "note": "no ticket id in output"
+        }
+      },
+      {
+        "name": "planning_gate",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "repl_policy",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "assumption_state",
+        "pass": false,
+        "details": {
+          "reason_code": "assumption_state_missing",
+          "source": "missing",
+          "selected_count": 0,
+          "rejected_count": 0
+        }
+      }
+    ],
+    "preventable_by_policy": true,
+    "recommended_policy_rules": [
+      "Rule2",
+      "Rule4"
+    ],
+    "root_cause": "missing_required_data"
+  },
+  {
+    "case_id": "c-block",
+    "title": "blocking release case",
+    "pass": true,
+    "assertions": [
+      {
+        "name": "tool_telemetry",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "must_include",
+        "pass": true,
+        "details": {
+          "missing_phrases": [],
+          "semantic_phrase_matches": []
+        }
+      },
+      {
+        "name": "semantic_quality",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "runner_transport_success",
+        "pass": true,
+        "details": {
+          "note": "no_runner_failure"
+        }
+      },
+      {
+        "name": "evidence_required_for_actions",
+        "pass": true,
+        "details": {
+          "note": "not required"
+        }
+      },
+      {
+        "name": "tool_execution",
+        "pass": true,
+        "details": {
+          "failed": []
+        }
+      },
+      {
+        "name": "hallucination_signal_check",
+        "pass": true,
+        "details": {
+          "note": "no ticket id in output"
+        }
+      },
+      {
+        "name": "planning_gate",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "repl_policy",
+        "pass": true,
+        "details": {
+          "note": "not_required"
+        }
+      },
+      {
+        "name": "assumption_state",
+        "pass": true,
+        "details": {
+          "source": "derived",
+          "selected_count": 2,
+          "rejected_count": 0,
+          "violations": []
+        }
+      }
+    ],
+    "preventable_by_policy": false,
+    "recommended_policy_rules": []
+  }
+]

@@ -92,9 +92,18 @@ export type ReportMeta = {
 
 export type EnvironmentContext = {
   agent_id?: string;
+  agent_version?: string;
   model?: string;
+  model_version?: string;
   prompt_version?: string;
   tools_version?: string;
+  config_hash?: string;
+};
+
+export type CompareReportProvenance = {
+  baseline: Required<EnvironmentContext>;
+  new: Required<EnvironmentContext>;
+  changed_fields: Array<keyof EnvironmentContext>;
 };
 
 export type ComplianceCoverageStatus = "covered" | "partial" | "missing";
@@ -117,18 +126,30 @@ export type ComplianceCoverageEntry = {
 
 export type ComplianceExports = {
   eu_ai_act?: {
-    coverage_href: string;
     annex_iv_href: string;
-    report_html_href: string;
-    evidence_index_href: string;
+    article_10_data_governance_href: string;
     article_13_instructions_href: string;
+    article_16_provider_obligations_href: string;
+    article_43_conformity_assessment_href: string;
+    article_47_declaration_of_conformity_href: string;
     article_9_risk_register_href: string;
     article_72_monitoring_plan_href: string;
     article_17_qms_lite_href: string;
+    annex_v_declaration_content_href: string;
     human_oversight_summary_href: string;
-    release_review_href: string;
     post_market_monitoring_href: string;
+    release_review_href?: string;
+    coverage_href?: string;
+    report_html_href?: string;
+    reviewer_html_href?: string;
+    reviewer_markdown_href?: string;
+    evidence_index_href?: string;
+    article_73_serious_incident_pack_href?: string;
   };
+};
+
+export type BundleExports = {
+  retention_archive_controls_href: string;
 };
 
 export type ItemAssertion = {
@@ -142,6 +163,7 @@ export type CompareReport = {
   report_id: string;
   meta: ReportMeta;
   environment?: EnvironmentContext;
+  provenance?: CompareReportProvenance;
   baseline_dir: string;
   new_dir: string;
   cases_path: string;
@@ -277,6 +299,7 @@ export type CompareReport = {
   }>;
 
   compliance_coverage?: ComplianceCoverageEntry[];
+  bundle_exports?: BundleExports;
   compliance_exports?: ComplianceExports;
 
   items: Array<{
@@ -377,6 +400,10 @@ export type CompareReport = {
       baseline_case_response_key?: string;
       new_case_response_href?: string;
       new_case_response_key?: string;
+      baseline_tool_telemetry_href?: string;
+      baseline_tool_telemetry_key?: string;
+      new_tool_telemetry_href?: string;
+      new_tool_telemetry_key?: string;
       baseline_trace_anchor_href?: string;
       baseline_trace_anchor_key?: string;
       new_trace_anchor_href?: string;

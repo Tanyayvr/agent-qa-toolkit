@@ -3,17 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Technologie und Nachweisarchitektur | EU AI Evidence Builder</title>
-  <meta name="description" content="Architektur, Verifikationsmodell, Artefakt-Vertraege und Vertrauensgrenze des EU AI Evidence Builder ansehen." />
+  <title>Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen | EU AI Evidence Builder</title>
+  <meta name="description" content="Architektur, Verifikation und Vertrauensmodell fuer CTOs und Engineering-Leads, die entscheiden muessen, ob der EU-Nachweis-Workflow technische Zeit wert ist." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   
   <link rel="canonical" href="https://tanyayvr.github.io/agent-qa-toolkit/de/technology/" />
   <link rel="alternate" hreflang="en" href="https://tanyayvr.github.io/agent-qa-toolkit/en/technology/" />
 <link rel="alternate" hreflang="de" href="https://tanyayvr.github.io/agent-qa-toolkit/de/technology/" />
 <link rel="alternate" hreflang="fr" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/technology/" />
   <link rel="alternate" hreflang="x-default" href="https://tanyayvr.github.io/agent-qa-toolkit/en/" />
-  <link rel="stylesheet" href="../../site-assets/site.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen | EU AI Evidence Builder" />
+  <meta property="og:description" content="Architektur, Verifikation und Vertrauensmodell fuer CTOs und Engineering-Leads, die entscheiden muessen, ob der EU-Nachweis-Workflow technische Zeit wert ist." />
+  <meta property="og:url" content="https://tanyayvr.github.io/agent-qa-toolkit/de/technology/" />
+  <meta property="og:site_name" content="EU AI Evidence Builder" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:locale:alternate" content="en_US" />
+<meta property="og:locale:alternate" content="fr_FR" />
+  <meta property="og:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
+  <meta property="og:image:alt" content="EU AI Evidence Builder proof surface" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen | EU AI Evidence Builder" />
+  <meta name="twitter:description" content="Architektur, Verifikation und Vertrauensmodell fuer CTOs und Engineering-Leads, die entscheiden muessen, ob der EU-Nachweis-Workflow technische Zeit wert ist." />
+  <meta name="twitter:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
+  <link rel="stylesheet" href="../../site-assets/site.css?v=3ac87834b7" />
   
-  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen | EU AI Evidence Builder","description":"Architektur, Verifikation und Vertrauensmodell fuer CTOs und Engineering-Leads, die entscheiden muessen, ob der EU-Nachweis-Workflow technische Zeit wert ist.","inLanguage":"de","url":"https://tanyayvr.github.io/agent-qa-toolkit/de/technology/","isPartOf":{"@type":"WebSite","name":"EU AI Evidence Builder","url":"https://tanyayvr.github.io/agent-qa-toolkit/de/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://tanyayvr.github.io/agent-qa-toolkit/de/"},{"@type":"ListItem","position":2,"name":"Technischer Ueberblick","item":"https://tanyayvr.github.io/agent-qa-toolkit/de/technology/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was sollte ein technisches Team vor der Integration pruefen?","acceptedAnswer":{"@type":"Answer","text":"Pruefen Sie das Reviewer-Dossier, die expliziten Verify- und Review-Kontrollpunkte, die Trennung zwischen Maschinen-Nachweisen und operator-eigener Vervollstaendigung sowie die Produktgrenze."}},{"@type":"Question","name":"Koennen wir das auf unserem eigenen Agenten pruefen, bevor wir tiefer einsteigen?","acceptedAnswer":{"@type":"Answer","text":"Ja. Der Schnellstart ist der kuerzeste ehrliche Weg von der Live-Demo zu Ihrem laufenden Adapter. Er zeigt, ob das Toolkit in Ihrer Umgebung ein Starter-Nachweispaket ausfuehren, paketieren und verifizieren kann."}},{"@type":"Question","name":"Muss ich mit Dateinamen und rohem JSON anfangen?","acceptedAnswer":{"@type":"Answer","text":"Nein. Starten Sie mit dem Reviewer-Dossier und den produktnahen Fit-Fragen auf dieser Seite. Dateinamen, Befehle und tiefere technische Dokumente sind erst der naechste Schritt, wenn sich die Installation lohnt."}},{"@type":"Question","name":"Automatisiert das Toolkit rechtliche Freigabe?","acceptedAnswer":{"@type":"Answer","text":"Nein. Es automatisiert Nachweisbetrieb und Paketierung. Rechtsklassifizierung, Rest-Risiko-Urteil und finale Freigabe bleiben menschlich gefuehrt."}}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Zum Inhalt</a>
@@ -30,10 +47,9 @@
         </a>
         <nav class="header-nav" aria-label="Primary">
           <a href="../how-it-works/">So funktioniert es</a>
-          <a href="./">Technologie</a>
+          <a href="./">Technischer Ueberblick</a>
           <a href="../templates/">Vorlagen</a>
           <a href="../pricing/">Preise</a>
-          <a href="../docs/">Dokumentation</a>
           <a class="button" href="../builder/" data-track-event="header_start_free">Kostenlos starten</a>
           <label class="sr-only" for="locale-switcher">Sprache</label>
           <select id="locale-switcher" class="locale-switch" data-locale-switcher>
@@ -48,130 +64,62 @@
     <section class="section">
       <div class="container split-grid">
         <div class="card fade-up">
-          <p class="eyebrow">Technologie</p>
-          <h1>Wie die Nachweis-Engine funktioniert</h1>
-          <p class="lead">Hier geht es um Architektur, Verifikationsmodell, Artefakt-Vertraege, Vertrauensgrenze und das Modell sektoraler Schichten hinter dem Nachweispaket.</p>
+          <p class="eyebrow">Technischer Ueberblick</p>
+          <h1>Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen</h1>
+          <p class="lead">Fuer CTOs und Engineering-Leads, die entscheiden muessen, ob das Thema jetzt technische Zeit wert ist: was bereits real existiert, wie Sie den Fit am eigenen Agenten pruefen, was die Engine tatsaechlich leistet, wo menschliche Freigabe beginnt und dass der EU-Standardpfad hier die Provider-Seite eines Hochrisiko-KI-Systems adressiert.</p>
           <div class="button-row section-tight">
-            <a class="button" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Live-Nachweise oeffnen</a>
-            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/evidence-operations-model.md" target="_blank" rel="noreferrer">Operational Model öffnen</a>
-            <a class="button-soft" href="../docs/">OSS-Dokumentation oeffnen</a>
+            <a class="button" href="../../demo/de/eu-ai-act/compliance/eu-ai-act-reviewer.html" target="_blank" rel="noreferrer">Reviewer-Demo oeffnen</a>
+            <a class="button-ghost" href="../../demo/de/agent-evidence/report.html" target="_blank" rel="noreferrer">Demo-Agent-Report oeffnen</a>
+            <a class="button-ghost" href="../../demo/de" target="_blank" rel="noreferrer">Alle Demo-Dokumente oeffnen</a>
+            <a class="button-soft" href="#first-run">Ersten Lauf am eigenen Agenten sehen</a>
           </div>
         </div>
         <div class="proof-card fade-up">
-          <p class="eyebrow">Wie das verifizierte Paket aussieht</p>
-          <h3>Wie das verifizierte Paket aussieht</h3>
+          <p class="eyebrow">Live-Nachweise</p>
+          <h3>Was schon vor Integrationsaufwand sichtbar sein sollte</h3>
           <div class="proof-frame">
             <img src="../../assets/screenshots/05.png" alt="Screenshot eines verifizierten technischen Nachweispakets" />
           </div>
-          <p class="muted">So sollte das Paket aussehen, bevor Governance oder Rechtsberatung ueberhaupt in die Pruefung einsteigen.</p>
+          <p class="muted">Ein ernstzunehmendes Produkt sollte ein reviewer-orientiertes Dossier, explizite Verifikationsschritte und fuer Behoerdenpfade eine Authentizitaetsgeschichte statt nur Hash-Integritaet zeigen, bevor Ihr Team Integrationszeit investiert.</p>
         </div>
       </div>
     </section>
     <section class="section section-tight">
       <div class="container">
-        <p class="eyebrow">Kernprimitive</p>
-        <h2 class="section-title">Kernprimitive der Technologie</h2>
-        <p class="lead">Das System ist um verifizierte Nachweis-Artefakte herum gebaut, nicht um Dashboards oder reine Dokument-Workflows.</p>
+        <p class="eyebrow">Vor der Installation</p>
+        <h2 class="section-title">Was man zuerst pruefen sollte</h2>
+        <p class="lead">Vor jeder Installation sollte ein CTO konkrete Ausgaben, explizite Kontrollpunkte, die Trennung zwischen Maschinen-Nachweisen und menschlicher Vervollstaendigung sowie die minimalen Voraussetzungen fuer einen ehrlichen ersten Lauf sehen koennen.</p>
         <div class="docs-grid">
           
             <article class="card fade-up">
-              <h3>Vergleichbare Runs</h3>
-              <p class="muted">Baseline- und New-Runs sind zentrale Eingaben, sodass Nachweise an eine echte Aenderungsgrenze gebunden sind.</p>
+              <h3>Rollen-Scope</h3>
+              <p class="muted">Der Standardpfad fuer EU-Inhalte auf dieser Website ist der provider-seitige Pfad fuer Hochrisiko-KI-Systeme. Andere Rollen unterscheiden sich. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, ist dies der richtige Pfad.</p>
             </article>
             <article class="card fade-up">
-              <h3>Contract-Artefakte</h3>
-              <p class="muted">Der Evaluator erzeugt stabile Maschinenvertraege und Pruefartefakte statt nur einer interaktiven Oberflaeche.</p>
+              <h3>Reale Ausgaben</h3>
+              <p class="muted">Das Produkt endet in portablem Report, Maschinenvertrag, Manifest, Aufbewahrungskontrollen, Review Record und optionalem Behoerdenpaket.</p>
             </article>
             <article class="card fade-up">
-              <h3>Integritaets-Verifikation</h3>
-              <p class="muted">Manifest, Schema-Checks und Verify-Befehle machen das Ergebnis offline pruefbar.</p>
+              <h3>Reviewer-taugliche EU-Ausgaben</h3>
+              <p class="muted">Der EU-Pfad umfasst Reviewer-PDF, Reviewer-HTML, Reviewer-Markdown und Anhangs-orientierte Dossier-Ausgaben, die auf dasselbe Nachweispaket zurueckzeigen.</p>
             </article>
             <article class="card fade-up">
-              <h3>Prueffertige Uebergabe</h3>
-              <p class="muted">Pruefprotokolle, Aufbewahrungskontrollen und Behoerdenpakete liegen auf demselben Artefaktmodell wie die Laufzeit-Nachweise.</p>
+              <h3>Harte Kontrollpunkte und im Quellcode sichtbarer Pfad</h3>
+              <p class="muted">Packaging, Verify, Review und Authority Packaging haben explizite Checks, und die dazugehoerigen Befehle, Schemas und Artefakte sind im Repository sichtbar und in der Live-Proof-Oberflaeche wiederzufinden.</p>
             </article>
             <article class="card fade-up">
-              <h3>Sektorielle Aufsaetze</h3>
-              <p class="muted">Domain-Cases, Scanner und vertikale Exporte koennen auf demselben Kern aufsetzen, solange das Objekt der Pruefung ein tool-nutzender Agent bleibt.</p>
+              <h3>Was Ihr Team bereits haben muss</h3>
+              <p class="muted">Ein erreichbarer Adapter, eine klare Release-Grenze, erste Cases und benannte Owner fuer Schwellen und Freigabe reichen aus, um den Fit vor tieferer Integration ehrlich zu pruefen.</p>
             </article>
         </div>
       </div>
     </section>
-    <section class="section section-tight">
-      <div class="container">
-        <h2 class="section-title">Was diese Technologie tatsaechlich leistet</h2>
-        <p class="lead">Das Produkt macht aus vergleichbaren Runs ein verifiziertes Nachweispaket, fuegt Pruef- und Uebergabe-Struktur hinzu, erlaubt sektorielle Schichten ueber demselben Kern und laesst rechtliche sowie Policy-Verantwortung ausserhalb der Automatisierung.</p>
-        <div class="docs-grid">
-          
-            <article class="card fade-up">
-              <h3>Nachweiserzeugung</h3>
-              <ul class="pricing-list">
-                <li>Vergleichbare Baseline- und New-Runs werden zu einem portablen Nachweispaket</li><li>Das Paket enthaelt Report, Maschinenvertrag, Manifest und Aufbewahrungskontrollen</li><li>EU-Dossier-nahe Exporte haengen an denselben verifizierten Runtime-Nachweisen</li>
-              </ul>
-            </article>
-            <article class="card fade-up">
-              <h3>Verifikation und Kontrollpunkte</h3>
-              <ul class="pricing-list">
-                <li>Paketierung und Verifikation sind explizite Schritte, kein implizites Dashboard-Ergebnis</li><li>Pruefschritte und Behoerdenpakete haben harte Voraussetzungen</li><li>Im Strict-Modus kann ein signiertes Manifest verifiziert werden, wenn fuer Behoerdenpfade Authentizitaet wichtig ist</li>
-              </ul>
-            </article>
-            <article class="card fade-up">
-              <h3>Pruefung und Uebergabe</h3>
-              <ul class="pricing-list">
-                <li>Das Paket kann zwischen Engineering, Governance, Rechtsberatung und behoerdlicher Pruefung uebergeben werden</li><li>Pruefprotokolle, Uebergabe-Notizen und Behoerdenpakete sind Teil der Produktoberflaeche</li><li>Ziel ist ein Paket, das ohne interne Dashboards oder unsignierte Dateitausche geprueft werden kann</li>
-              </ul>
-            </article>
-            <article class="card fade-up">
-              <h3>Ehrliche Grenze</h3>
-              <ul class="pricing-list">
-                <li>Das Produkt entscheidet keine Rechtsklassifizierung und kein Signoff</li><li>Leitlinien-Schwellen und Urteile zum Rest-Risiko bleiben bei benannten Menschen</li><li>Die Staerke des Systems liegt in Nachweisprozessen, nicht in Rechtsautomatisierung</li>
-              </ul>
-            </article>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">Ablauf</p>
-          <h2 class="section-title">Wie die Technologie funktioniert</h2>
-          <p class="lead">Auf hoher Ebene verbindet der Stack Laufzeit-Nachweise, strikte Verifikation, Manifest-Authentizitaet bei Bedarf, Pruefprotokolle und Uebergabe-Paketierung zu einem bei Ihnen gehosteten Workflow. Sektorielle Case-Bibliotheken, Scanner und vertikale Exporte koennen denselben Kern erweitern, solange weiter ein tool-nutzender Agent geprueft wird.</p>
-          <div class="timeline section-tight">
-            
-              <article class="timeline-card">
-                <span class="timeline-step">1</span>
-                <p>Der Agent wird ueber gepruefte Adapter und vergleichbare Baseline/New-Runs ausgefuehrt.</p>
-              </article>
-              <article class="timeline-card">
-                <span class="timeline-step">2</span>
-                <p>Der Evaluator paketiert ein portables Nachweispaket und verifiziert Integritaet und Struktur.</p>
-              </article>
-              <article class="timeline-card">
-                <span class="timeline-step">3</span>
-                <p>EU-Dossier-Exporte, Pruefprotokolle und Aufbewahrungskontrollen haengen an demselben verifizierten Paket.</p>
-              </article>
-              <article class="timeline-card">
-                <span class="timeline-step">4</span>
-                <p>Bei Bedarf kann daraus ein scoped Authority-Paket erzeugt werden.</p>
-              </article>
-          </div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">Grenze</p>
-          <h3>Automationsgrenze</h3>
-          <p class="muted">Der staerkste Teil des Produkts ist der Weg von vorbereiteten Eingaben zu einem verifizierten Nachweispaket. Urteile ueber Systemgrenze, Leitlinien-Schwellen, Adapter-Tiefe und finale Freigabe bleiben bei benannten Menschen.</p>
-          <ul class="pricing-list section-tight">
-            <li><strong>Verwendungszweck:</strong> Systemzweck und Grenze bleiben von verantwortlichen Personen definiert.</li><li><strong>Geschaeftliche Schaeden:</strong> Einordnung von Auswirkungen und Rest-Risiko bleibt beim Operator.</li><li><strong>Freigabe-/Block-Leitlinie:</strong> Das Toolkit kann Governance-Schwellen nicht fuer das Team waehlen.</li><li><strong>Finales Narrativ und Freigabe:</strong> Release-, Compliance- und Rechtsfreigabe bleiben menschlich verantwortet.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
+    <section class="section section-tight" id="first-run">
       <div class="container evidence-card fade-up">
-        <p class="eyebrow">Schnellstart</p>
-        <h3>Schnellster Weg zum Test am eigenen Agenten</h3>
-        <p class="muted">Wenn der Adapter bereits laeuft, liefert der Schnellstart ein portables Starter-Paket, ohne so zu tun, als kenne es schon Ihren echten Qualifikationsrahmen.</p>
-        <div class="code-snippet"><code>npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud</code></div>
+        <p class="eyebrow">Am eigenen Agenten pruefen</p>
+        <h3>Schnellster ehrlicher erster Lauf</h3>
+        <p class="muted">Wenn Ihr Adapter bereits laeuft, nutzen Sie den Schnellstart, um vor tieferer Integrationsarbeit ein echtes erstes Nachweispaket auf Ihrer eigenen Infrastruktur zu erzeugen.</p>
+        
         <div class="docs-grid section-tight">
           
             <article class="card fade-up">
@@ -188,67 +136,106 @@
             </article>
         </div>
         <div class="button-row">
-          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/quickstart-your-agent.md" target="_blank" rel="noreferrer">Leitfaden zum Schnellstart oeffnen</a>
-          <a class="button-soft" href="../docs/">OSS-Dokumentation oeffnen</a>
+          <a class="button" href="../eu-ai-act-starter/">EU-Starter-Leitfaden auf GitHub oeffnen</a>
+          <a class="button-ghost" href="../../demo/de/agent-evidence/report.html" target="_blank" rel="noreferrer">Demo-Agent-Report oeffnen</a>
+          <a class="button-soft" href="../../demo/de/eu-ai-act/compliance/eu-ai-act-reviewer.html" target="_blank" rel="noreferrer">Reviewer-Demo oeffnen</a>
         </div>
       </div>
     </section>
     <section class="section section-tight">
+      <div class="container">
+        <h2 class="section-title">Was diese Technologie tatsaechlich leistet</h2>
+        <p class="lead">Das Produkt macht aus vergleichbaren Runs reviewer-taugliche EU-Nachweise, fuegt Pruef- und Uebergabe-Struktur hinzu, erlaubt sektorielle Schichten ueber demselben Kern und laesst rechtliche sowie Policy-Verantwortung ausserhalb der Automatisierung.</p>
+        <div class="docs-grid">
+          
+            <article class="card fade-up">
+              <h3>Nachweiserzeugung</h3>
+              <ul class="pricing-list">
+                <li>Vergleichbare Baseline- und New-Runs werden zu einem portablen Nachweispaket</li><li>Das Paket enthaelt Report, Maschinenvertrag, Manifest, Reviewer-PDF/HTML/Markdown und Aufbewahrungskontrollen</li><li>EU-Dossier-nahe Ausgaben haengen an denselben verifizierten Runtime-Nachweisen</li>
+              </ul>
+            </article>
+            <article class="card fade-up">
+              <h3>Verifikation und Kontrollpunkte</h3>
+              <ul class="pricing-list">
+                <li>Paketierung und Verifikation sind explizite Schritte, kein implizites Dashboard-Ergebnis</li><li>Pruefschritte und Behoerdenpakete haben harte Voraussetzungen</li><li>Im Strict-Modus kann ein signiertes Manifest verifiziert werden, wenn fuer Behoerdenpfade Authentizitaet wichtig ist</li>
+              </ul>
+            </article>
+            <article class="card fade-up">
+              <h3>Pruefung und Uebergabe</h3>
+              <ul class="pricing-list">
+                <li>Das Paket kann zwischen Engineering, Governance, Rechtsberatung und behoerdlicher Pruefung uebergeben werden</li><li>Pruefprotokolle, Uebergabe-Notizen, Reviewer-Ausgaben und Behoerdenpakete sind Teil der Produktoberflaeche</li><li>Ziel ist ein Paket, das ohne interne Dashboards oder unsignierte Dateitausche geprueft werden kann</li>
+              </ul>
+            </article>
+            <article class="card fade-up">
+              <h3>Ehrliche Grenze</h3>
+              <ul class="pricing-list">
+                <li>Das Produkt entscheidet keine Rechtsklassifizierung und kein Signoff</li><li>Leitlinien-Schwellen und Urteile zum Rest-Risiko bleiben bei benannten Menschen</li><li>Die Staerke des Systems liegt in Nachweisprozessen, nicht in Rechtsautomatisierung</li>
+              </ul>
+            </article>
+        </div>
+      </div>
+    </section>
+    <section class="section">
       <div class="container split-grid">
         <div class="card fade-up">
-          <p class="eyebrow">Kommandos</p>
-          <h2 class="section-title">Befehlsoberflaeche</h2>
-          <p class="muted">Diese Befehle entsprechen echten Schritten fuer Paketierung, Signatur, Verifikation, Pruefung und Behoerdenpfad im Live-Produkt.</p>
-          <div class="code-snippet"><code>npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt;
-AQ_MANIFEST_PRIVATE_KEY=... npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt; --verify-strict --sign
-npm run review:init -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
-npm run review:check -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
-npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt;</code></div>
+          <p class="eyebrow">Ablauf</p>
+          <h2 class="section-title">Was Ihr Team liefert und was die Engine danach uebernimmt</h2>
+          <p class="lead">Die Mitte der Entscheidung sollte praktisch bleiben. Ihr Team bringt einen erreichbaren Adapter, eine echte Aenderungsgrenze, erste Cases und benannte Owner mit. Von dort uebernimmt die Engine vergleichbare Runs, verifiziertes Packaging und reviewer-taugliche EU-Ausgaben auf demselben Bundle.</p>
+          <div class="timeline section-tight">
+            
+              <article class="timeline-card">
+                <span class="timeline-step">1</span>
+                <p>Ihr Team stellt einen erreichbaren Adapter und eine Baseline/New-Grenze bereit, die wirklich pruefenswert ist.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">2</span>
+                <p>Ihr Team liefert erste Cases, Intended-Use-Kontext und benannte Owner fuer Schwellen und Freigabe.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">3</span>
+                <p>Die Engine fuehrt vergleichbare Runs aus, paketiert das Bundle und verifiziert Integritaet und Struktur.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">4</span>
+                <p>Die Engine erzeugt reviewer-taugliche EU-Ausgaben aus demselben verifizierten Bundle; Rechtsurteil und finale Freigabe bleiben beim Team.</p>
+              </article>
+          </div>
         </div>
         <div class="proof-card fade-up">
-          <p class="eyebrow">Artefakte</p>
-          <h2 class="section-title">Was bei gesundem Workflow existieren muss</h2>
-          <p class="muted">Technische Teams sollten das Produkt an dauerhaften Artefakten und expliziten Verifikationsschritten messen, nicht nur an Screenshots oder Narrativ.</p>
-          <table class="section-table section-tight">
-            <thead>
-              <tr><th>Stufe</th><th>Artefakt</th><th>Ready-Signal</th></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>Intake-Vertrag</td>
-                  <td><code>system-scope.json</code>, <code>quality-contract.json</code>, <code>cases-coverage.json</code></td>
-                  <td>Systemrahmen und gepruefte Falldefinition sind explizit.</td>
-                </tr>
-                <tr>
-                  <td>Live-Integration</td>
-                  <td><code>adapter-capability.json</code>, <code>run-fingerprint.json</code></td>
-                  <td>Adapter sowie Baseline/New-Runs sind tief genug und vergleichbar.</td>
-                </tr>
-                <tr>
-                  <td>Verifiziertes Paket</td>
-                  <td><code>report.html</code>, <code>compare-report.json</code>, <code>manifest.json</code>, <code>archive/retention-controls.json</code></td>
-                  <td>Das portable Nachweispaket besteht die Verifikation und bleibt bei der Uebergabe erhalten.</td>
-                </tr>
-                <tr>
-                  <td>Pruefuebergabe</td>
-                  <td><code>review-decision.json</code>, <code>handoff-note.md</code>, optionales Behoerdenpaket</td>
-                  <td>Benannte Verantwortungsentscheidung und externe Uebergabe sind explizit.</td>
-                </tr>
-            </tbody>
-          </table>
+          <p class="eyebrow">Menschlich gefuehrt</p>
+          <h3>Was weiterhin menschlich gefuehrt bleibt</h3>
+          <p class="muted">Der staerkste Teil des Produkts ist der Weg von vorbereiteten Eingaben zu einem verifizierten Nachweispaket. Urteile ueber Systemgrenze, Leitlinien-Schwellen, Adapter-Tiefe und finale Freigabe bleiben bei benannten Menschen.</p>
+          <ul class="pricing-list section-tight">
+            <li><strong>Verwendungszweck:</strong> Systemzweck und Grenze bleiben von verantwortlichen Personen definiert.</li><li><strong>Geschaeftliche Schaeden:</strong> Einordnung von Auswirkungen und Rest-Risiko bleibt beim Operator.</li><li><strong>Freigabe-/Block-Leitlinie:</strong> Das Toolkit kann Governance-Schwellen nicht fuer das Team waehlen.</li><li><strong>Finales Narrativ und Freigabe:</strong> Release-, Compliance- und Rechtsfreigabe bleiben menschlich verantwortet.</li>
+          </ul>
         </div>
       </div>
     </section>
     <section class="section section-tight">
       <div class="container evidence-card fade-up">
-        <p class="eyebrow">Erweiterte Notizen</p>
-        <h3>Mehr technische Details noetig?</h3>
-        <p class="muted">Vertiefungen, Readiness-Bewertung, Trigger fuer neue Laeufe, Support-Umfang und laengere technische Notizen liegen auf der Holding-Seite.</p>
+        <p class="eyebrow">Tiefere technische Pruefung</p>
+        <h3>Befehlsoberflaeche</h3>
+        <p class="muted">Wenn der Fit real ist, sind das die echten Befehle hinter Packaging, Signatur, Verifikation, Review und Behoerdenpfad.</p>
+        <div class="code-snippet"><code>npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt;
+AQ_MANIFEST_PRIVATE_KEY=... npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt; --verify-strict --sign
+npm run review:init -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
+npm run review:check -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
+npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt;</code></div>
         <div class="button-row">
-          <a class="button" href="../holding/" data-track-event="technical_holding">Erweiterte Notizen oeffnen</a>
-          <a class="button-ghost" href="../builder/" data-track-event="technical_builder">Dokumentation starten</a>
-          <a class="button-soft" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Live-Nachweise oeffnen</a>
+          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">GitHub-Repository oeffnen</a>
+          <a class="button-ghost" href="../../demo/de/agent-evidence/report.html" target="_blank" rel="noreferrer">Demo-Agent-Report oeffnen</a>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container evidence-card fade-up">
+        <p class="eyebrow">Naechster Schritt</p>
+        <h3>Wenn der Fit real ist, oeffnen Sie das Repository</h3>
+        <p class="muted">Sobald Ausgaben, Kontrollpunkte und der Pfad fuer den ersten Lauf echt wirken, ist das Repository der richtige naechste Schritt fuer Adapter, Schemas, Befehle und Implementierungsdetails.</p>
+        <div class="button-row">
+          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">GitHub-Repository oeffnen</a>
+          <a class="button-ghost" href="#first-run">Ersten Lauf am eigenen Agenten sehen</a>
+          <a class="button-soft" href="../../demo/de" target="_blank" rel="noreferrer">Alle Demo-Dokumente oeffnen</a>
         </div>
       </div>
     </section>
@@ -282,7 +269,7 @@ npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt
       </div>
     </div>
   
-  <script src="../../site-assets/site.js" defer></script>
+  <script src="../../site-assets/site.js?v=3a99f43199" defer></script>
   
 </body>
 </html>

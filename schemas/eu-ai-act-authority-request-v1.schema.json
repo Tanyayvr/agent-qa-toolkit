@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EU AI Act Authority Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "framework",
+    "report_id",
+    "request_context",
+    "disclosure_scope",
+    "archive_controls",
+    "completion_status",
+    "residual_gap_acknowledgement"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "eu_ai_act_authority_request" },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string", "minLength": 1 },
+    "request_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_type",
+        "requesting_party",
+        "jurisdiction",
+        "legal_basis",
+        "submission_deadline",
+        "submission_channel",
+        "response_owner",
+        "legal_approver"
+      ],
+      "properties": {
+        "request_type": {
+          "enum": ["authority", "counsel", "incident_response", "internal_legal"]
+        },
+        "requesting_party": { "type": "string", "minLength": 1 },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "legal_basis": { "type": "string", "minLength": 1 },
+        "submission_deadline": { "type": "string", "minLength": 1 },
+        "submission_channel": { "type": "string", "minLength": 1 },
+        "response_owner": { "type": "string", "minLength": 1 },
+        "legal_approver": { "type": "string", "minLength": 1 }
+      }
+    },
+    "disclosure_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "include_source_inputs",
+        "include_review_artifacts",
+        "scope_rationale",
+        "source_inputs_approval"
+      ],
+      "properties": {
+        "include_source_inputs": { "type": "boolean" },
+        "include_review_artifacts": { "type": "boolean" },
+        "scope_rationale": { "type": "string", "minLength": 1 },
+        "source_inputs_approval": { "type": "string", "minLength": 1 }
+      }
+    },
+    "archive_controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retention_owner",
+        "archive_location",
+        "legal_hold_status",
+        "external_surfaces_reviewed",
+        "archive_export_recorded",
+        "note"
+      ],
+      "properties": {
+        "retention_owner": { "type": "string", "minLength": 1 },
+        "archive_location": { "type": "string", "minLength": 1 },
+        "legal_hold_status": {
+          "enum": ["not_set", "set", "not_applicable"]
+        },
+        "external_surfaces_reviewed": { "type": "boolean" },
+        "archive_export_recorded": { "type": "boolean" },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "completion_status": {
+      "enum": ["draft", "ready"]
+    },
+    "residual_gap_acknowledgement": { "type": "string", "minLength": 1 }
+  }
+}

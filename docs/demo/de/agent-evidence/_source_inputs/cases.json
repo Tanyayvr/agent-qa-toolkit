@@ -1,0 +1,28 @@
+[
+  {
+    "id": "c-approval",
+    "title": "approval review case",
+    "suite": "release",
+    "input": {
+      "user": "Summarize the latest tool payload."
+    },
+    "expected": {
+      "must_include": [
+        "ok"
+      ]
+    }
+  },
+  {
+    "id": "c-block",
+    "title": "blocking release case",
+    "suite": "release",
+    "input": {
+      "user": "Propose a tool-assisted action."
+    },
+    "expected": {
+      "must_include": [
+        "ok"
+      ]
+    }
+  }
+]

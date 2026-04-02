@@ -140,6 +140,16 @@ describe("htmlReport", () => {
     expect(html).toContain("case_1");
   });
 
+  it("renders localized HTML reports", () => {
+    const deHtml = renderHtmlReport({ ...baseReport, embedded_manifest_index: { items: [] } }, { locale: "de" });
+    const frHtml = renderHtmlReport({ ...baseReport, embedded_manifest_index: { items: [] } }, { locale: "fr" });
+
+    expect(deHtml).toContain('<html lang="de">');
+    expect(deHtml).toContain("Evaluator-Bericht");
+    expect(frHtml).toContain('<html lang="fr">');
+    expect(frHtml).toContain("Rapport d&#39;evaluation");
+  });
+
   it("embeds rows JSON and renders client-side table body", () => {
     const html = renderHtmlReport({ ...baseReport, embedded_manifest_index: { items: [] } });
     expect(html).toContain('id="casesBody"');
@@ -238,16 +248,27 @@ describe("htmlReport", () => {
       eu_ai_act: {
         coverage_href: "compliance/eu-ai-act-coverage.json",
         annex_iv_href: "compliance/eu-ai-act-annex-iv.json",
+        article_10_data_governance_href: "compliance/article-10-data-governance.json",
         report_html_href: "compliance/eu-ai-act-report.html",
+        reviewer_html_href: "compliance/eu-ai-act-reviewer.html",
+        reviewer_markdown_href: "compliance/eu-ai-act-reviewer.md",
         evidence_index_href: "compliance/evidence-index.json",
         article_13_instructions_href: "compliance/article-13-instructions.json",
+        article_16_provider_obligations_href: "compliance/article-16-provider-obligations.json",
+        article_43_conformity_assessment_href: "compliance/article-43-conformity-assessment.json",
+        article_47_declaration_of_conformity_href: "compliance/article-47-declaration-of-conformity.json",
         article_9_risk_register_href: "compliance/article-9-risk-register.json",
         article_72_monitoring_plan_href: "compliance/article-72-monitoring-plan.json",
         article_17_qms_lite_href: "compliance/article-17-qms-lite.json",
+        annex_v_declaration_content_href: "compliance/annex-v-declaration-content.json",
+        article_73_serious_incident_pack_href: "compliance/article-73-serious-incident-pack.json",
         human_oversight_summary_href: "compliance/human-oversight-summary.json",
         release_review_href: "compliance/release-review.json",
         post_market_monitoring_href: "compliance/post-market-monitoring.json",
       },
+    };
+    report.bundle_exports = {
+      retention_archive_controls_href: "archive/retention-controls.json",
     };
     report.quality_flags = {
       ...report.quality_flags,
@@ -272,11 +293,21 @@ describe("htmlReport", () => {
     expect(html).toContain("partial");
     expect(html).toContain("residual gaps");
     expect(html).toContain("eu-ai-act-report.html");
+    expect(html).toContain("eu-ai-act-reviewer.html");
+    expect(html).toContain("eu-ai-act-reviewer.md");
     expect(html).toContain("human-oversight-summary.json");
+    expect(html).toContain("article-10-data-governance.json");
     expect(html).toContain("article-13-instructions.json");
+    expect(html).toContain("article-16-provider-obligations.json");
+    expect(html).toContain("article-43-conformity-assessment.json");
+    expect(html).toContain("article-47-declaration-of-conformity.json");
     expect(html).toContain("article-9-risk-register.json");
     expect(html).toContain("article-72-monitoring-plan.json");
     expect(html).toContain("article-17-qms-lite.json");
+    expect(html).toContain("annex-v-declaration-content.json");
+    expect(html).toContain("article-73-serious-incident-pack.json");
+    expect(html).toContain("Bundle Controls");
+    expect(html).toContain("archive/retention-controls.json");
     expect(html).toContain("release-review.json");
     expect(html).toContain("post-market-monitoring.json");
     expect(html).not.toContain("Only one suite present in this report.");

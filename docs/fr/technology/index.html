@@ -3,17 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Technologie et architecture de preuve | EU AI Evidence Builder</title>
-  <meta name="description" content="Architecture, modele de verification, contrats d'artefacts et frontiere de confiance du EU AI Evidence Builder." />
+  <title>Vue technique : des runs agent aux preuves UE lisibles par un evaluateur | EU AI Evidence Builder</title>
+  <meta name="description" content="Architecture, verification et modele de confiance pour les CTO et engineering leads qui doivent decider si le workflow de preuve EU merite du temps technique." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   
   <link rel="canonical" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/technology/" />
   <link rel="alternate" hreflang="en" href="https://tanyayvr.github.io/agent-qa-toolkit/en/technology/" />
 <link rel="alternate" hreflang="de" href="https://tanyayvr.github.io/agent-qa-toolkit/de/technology/" />
 <link rel="alternate" hreflang="fr" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/technology/" />
   <link rel="alternate" hreflang="x-default" href="https://tanyayvr.github.io/agent-qa-toolkit/en/" />
-  <link rel="stylesheet" href="../../site-assets/site.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Vue technique : des runs agent aux preuves UE lisibles par un evaluateur | EU AI Evidence Builder" />
+  <meta property="og:description" content="Architecture, verification et modele de confiance pour les CTO et engineering leads qui doivent decider si le workflow de preuve EU merite du temps technique." />
+  <meta property="og:url" content="https://tanyayvr.github.io/agent-qa-toolkit/fr/technology/" />
+  <meta property="og:site_name" content="EU AI Evidence Builder" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:locale:alternate" content="en_US" />
+<meta property="og:locale:alternate" content="de_DE" />
+  <meta property="og:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
+  <meta property="og:image:alt" content="EU AI Evidence Builder proof surface" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Vue technique : des runs agent aux preuves UE lisibles par un evaluateur | EU AI Evidence Builder" />
+  <meta name="twitter:description" content="Architecture, verification et modele de confiance pour les CTO et engineering leads qui doivent decider si le workflow de preuve EU merite du temps technique." />
+  <meta name="twitter:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
+  <link rel="stylesheet" href="../../site-assets/site.css?v=3ac87834b7" />
   
-  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Vue technique : des runs agent aux preuves UE lisibles par un evaluateur | EU AI Evidence Builder","description":"Architecture, verification et modele de confiance pour les CTO et engineering leads qui doivent decider si le workflow de preuve EU merite du temps technique.","inLanguage":"fr","url":"https://tanyayvr.github.io/agent-qa-toolkit/fr/technology/","isPartOf":{"@type":"WebSite","name":"EU AI Evidence Builder","url":"https://tanyayvr.github.io/agent-qa-toolkit/fr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://tanyayvr.github.io/agent-qa-toolkit/fr/"},{"@type":"ListItem","position":2,"name":"Vue technique","item":"https://tanyayvr.github.io/agent-qa-toolkit/fr/technology/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Que doit verifier une equipe technique avant integration ?","acceptedAnswer":{"@type":"Answer","text":"Verifier le dossier reviewer, les verrous explicites de verification et de revue, la separation entre preuve machine et completion restee a l'operateur, ainsi que la frontiere du produit."}},{"@type":"Question","name":"Peut-on tester cela sur notre propre agent avant d'aller plus loin ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Le demarrage rapide est le chemin honnete le plus court entre la demo live et votre adapter deja en marche. Il montre si le toolkit peut executer, packager et verifier un premier dossier de preuve dans votre environnement."}},{"@type":"Question","name":"Faut-il commencer par des noms de fichiers et du JSON brut ?","acceptedAnswer":{"@type":"Answer","text":"Non. Commencez par le dossier reviewer et les questions de fit produit sur cette page. Les noms de fichiers, les commandes et la documentation technique plus profonde viennent ensuite, une fois que le produit merite du temps d'installation."}},{"@type":"Question","name":"Le toolkit automatise-t-il la validation juridique ?","acceptedAnswer":{"@type":"Answer","text":"Non. Il automatise les operations de preuve et le packaging. La classification legale, le jugement sur le risque residuel et la validation finale restent humains."}}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Aller au contenu</a>
@@ -30,10 +47,9 @@
         </a>
         <nav class="header-nav" aria-label="Primary">
           <a href="../how-it-works/">Fonctionnement</a>
-          <a href="./">Technologie</a>
+          <a href="./">Vue technique</a>
           <a href="../templates/">Modeles</a>
           <a href="../pricing/">Tarifs</a>
-          <a href="../docs/">Documentation</a>
           <a class="button" href="../builder/" data-track-event="header_start_free">Commencer</a>
           <label class="sr-only" for="locale-switcher">Langue</label>
           <select id="locale-switcher" class="locale-switch" data-locale-switcher>
@@ -48,130 +64,62 @@
     <section class="section">
       <div class="container split-grid">
         <div class="card fade-up">
-          <p class="eyebrow">Technologie</p>
-          <h1>Comment fonctionne le moteur de preuve</h1>
-          <p class="lead">Inspectez l'architecture, le modele de verification, les contrats d'artefacts, la frontiere de confiance et la logique de couches sectorielles derriere le dossier de preuve.</p>
+          <p class="eyebrow">Vue technique</p>
+          <h1>Vue technique : des runs agent aux preuves UE lisibles par un evaluateur</h1>
+          <p class="lead">Pour les CTO et engineering leads qui doivent decider si cela merite du temps technique maintenant : ce qui existe deja, comment tester l'adequation sur votre propre agent, ce que l'engine fait reellement, ou commence encore la validation humaine, et le fait que le parcours UE par defaut ici vise la partie fournisseur d'un systeme d'IA a haut risque.</p>
           <div class="button-row section-tight">
-            <a class="button" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Ouvrir la preuve live</a>
-            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/evidence-operations-model.md" target="_blank" rel="noreferrer">Ouvrir l'operating model</a>
-            <a class="button-soft" href="../docs/">Ouvrir les docs OSS</a>
+            <a class="button" href="../../demo/fr/eu-ai-act/compliance/eu-ai-act-reviewer.html" target="_blank" rel="noreferrer">Ouvrir la demo reviewer</a>
+            <a class="button-ghost" href="../../demo/fr/agent-evidence/report.html" target="_blank" rel="noreferrer">Ouvrir le rapport de demo agent</a>
+            <a class="button-ghost" href="../../demo/fr" target="_blank" rel="noreferrer">Ouvrir tous les documents de demo</a>
+            <a class="button-soft" href="#first-run">Voir le premier run sur votre propre agent</a>
           </div>
         </div>
         <div class="proof-card fade-up">
-          <p class="eyebrow">A quoi ressemble le dossier verifie</p>
-          <h3>A quoi ressemble le dossier verifie</h3>
+          <p class="eyebrow">Preuve live</p>
+          <h3>Ce qui doit deja exister avant de depenser du temps d'integration</h3>
           <div class="proof-frame">
             <img src="../../assets/screenshots/05.png" alt="Capture d'un dossier de preuve technique verifie" />
           </div>
-          <p class="muted">C'est le type de dossier que le chemin technique doit produire avant qu'une revue de gouvernance ou de conseil juridique commence.</p>
+          <p class="muted">Un produit serieux doit montrer un dossier oriente reviewer, des etapes de verification explicites et, pour les chemins tournes vers l'autorite, une histoire d'authenticite plutot qu'une simple integrite par hash avant que votre equipe n'investisse du temps d'integration.</p>
         </div>
       </div>
     </section>
     <section class="section section-tight">
       <div class="container">
-        <p class="eyebrow">Primitives centrales</p>
-        <h2 class="section-title">Primitives techniques centrales</h2>
-        <p class="lead">Le systeme est construit autour d'artefacts de preuve verifies, pas autour de tableaux de bord ou de documents seuls.</p>
+        <p class="eyebrow">Avant installation</p>
+        <h2 class="section-title">Ce qu'il faut verifier d'abord</h2>
+        <p class="lead">Avant toute installation, un CTO doit pouvoir voir des sorties concretes, des verrous explicites, la separation entre preuve machine et completion humaine, ainsi que le minimum que votre equipe doit deja avoir pour un premier run honnete.</p>
         <div class="docs-grid">
           
             <article class="card fade-up">
-              <h3>Runs comparables</h3>
-              <p class="muted">Les runs baseline et new sont des inputs de premier niveau, afin que l'evidence soit liee a une vraie frontiere de changement.</p>
+              <h3>Perimetre de role</h3>
+              <p class="muted">Le parcours UE par defaut sur ce site est le parcours cote fournisseur pour les systemes d'IA a haut risque. Les autres roles sont differents. Si l'article 25 fait de votre organisation le fournisseur, c'est le bon parcours.</p>
             </article>
             <article class="card fade-up">
-              <h3>Artefacts contractuels</h3>
-              <p class="muted">L'evaluator emet des contrats machine et des artefacts de revue stables, pas seulement une interface interactive.</p>
+              <h3>Sorties reelles</h3>
+              <p class="muted">Le produit se termine par un rapport portable, un contrat machine, un manifest, des controles de retention, une trace de revue et un package autorite en option.</p>
             </article>
             <article class="card fade-up">
-              <h3>Verification d'integrite</h3>
-              <p class="muted">Manifest, controles de schema et commandes de verification rendent le resultat verifiable hors ligne.</p>
+              <h3>Sorties UE lisibles par un evaluateur</h3>
+              <p class="muted">Le chemin UE comprend reviewer PDF, reviewer HTML, reviewer Markdown et des sorties dossier alignees sur les annexes, toutes reliees au meme bundle de preuve.</p>
             </article>
             <article class="card fade-up">
-              <h3>Transmission prete pour la revue</h3>
-              <p class="muted">Les traces de revue, controles de retention et la preparation pour une autorite reposent sur le meme modele d'artefacts que les preuves d'execution.</p>
+              <h3>Verrous stricts et chemin visible dans le code source</h3>
+              <p class="muted">Packaging, verify, review et authority packaging ont des controles explicites, et les commandes, schemas et artefacts associes sont visibles dans le depot et refletes dans la preuve live.</p>
             </article>
             <article class="card fade-up">
-              <h3>Couches sectorielles</h3>
-              <p class="muted">Des bibliotheques de cas, scanners et exports verticaux peuvent se poser sur le meme noyau tant que l'objet evalue reste un agent utilisant des outils.</p>
+              <h3>Ce que votre equipe doit deja avoir</h3>
+              <p class="muted">Un adapter joignable, une frontiere de release claire, des cas de depart et des responsables nommes pour les seuils et la validation suffisent pour tester l'adequation honnetement avant une integration plus profonde.</p>
             </article>
         </div>
       </div>
     </section>
-    <section class="section section-tight">
-      <div class="container">
-        <h2 class="section-title">Ce que cette technologie fait reellement</h2>
-        <p class="lead">Le produit transforme des runs comparables en dossier de preuve verifie, ajoute une structure de revue et de transmission, permet des couches sectorielles au-dessus du meme noyau, et laisse la responsabilite legale et de politique hors de la couche d'automatisation.</p>
-        <div class="docs-grid">
-          
-            <article class="card fade-up">
-              <h3>Generation de preuve</h3>
-              <ul class="pricing-list">
-                <li>Des runs baseline/new comparables deviennent un dossier de preuve portable</li><li>Le dossier inclut rapport, contrat machine, manifest et controles de retention</li><li>Les exports dossier UE s'attachent aux memes preuves d'execution verifiees</li>
-              </ul>
-            </article>
-            <article class="card fade-up">
-              <h3>Verification et controles</h3>
-              <ul class="pricing-list">
-                <li>La mise en forme et la verification sont des etapes explicites, pas un simple resultat de tableau de bord</li><li>Les controles de revue et la preparation pour autorite ont des prerequis stricts</li><li>Le mode strict peut verifier un manifeste signe quand l'authenticite compte pour un dossier tourne vers l'autorite</li>
-              </ul>
-            </article>
-            <article class="card fade-up">
-              <h3>Revue et transmission</h3>
-              <ul class="pricing-list">
-                <li>Le dossier peut circuler entre ingenierie, gouvernance, conseil juridique et revue tournee vers l'autorite</li><li>Les traces de revue, notes de transmission et dossiers pour autorite font partie du produit</li><li>Le but est un dossier qu'un autre evaluateur peut inspecter sans tableaux de bord internes ni echanges de fichiers non signes</li>
-              </ul>
-            </article>
-            <article class="card fade-up">
-              <h3>Frontiere honnete</h3>
-              <ul class="pricing-list">
-                <li>Le produit ne decide pas la classification legale ni la validation finale</li><li>Les seuils de politique et les jugements sur le risque residuel restent humains</li><li>La force du systeme est dans l'operation de preuve, pas dans l'automatisation juridique</li>
-              </ul>
-            </article>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">Parcours</p>
-          <h2 class="section-title">Comment la technologie fonctionne</h2>
-          <p class="lead">A haut niveau, le systeme relie les preuves d'execution, la verification stricte, l'authenticite par manifeste signe quand il le faut, les traces de revue et la mise en forme de transmission dans un workflow heberge chez vous. Des bibliotheques de cas, scanners et sorties verticales sectorielles peuvent etendre ce noyau tant que l'objet evalue reste un agent utilisant des outils.</p>
-          <div class="timeline section-tight">
-            
-              <article class="timeline-card">
-                <span class="timeline-step">1</span>
-                <p>L'agent est exerce via des adapters controles et des runs baseline/new comparables.</p>
-              </article>
-              <article class="timeline-card">
-                <span class="timeline-step">2</span>
-                <p>L'evaluator assemble un dossier de preuve portable et verifie son integrite et sa structure.</p>
-              </article>
-              <article class="timeline-card">
-                <span class="timeline-step">3</span>
-                <p>Les exports dossier UE, traces de revue et controles de retention s'attachent au meme dossier verifie.</p>
-              </article>
-              <article class="timeline-card">
-                <span class="timeline-step">4</span>
-                <p>Si necessaire, un dossier cible pour une autorite peut etre produit a partir du rapport verifie.</p>
-              </article>
-          </div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">Frontiere</p>
-          <h3>Frontiere d'automatisation</h3>
-          <p class="muted">La partie la plus forte du produit est le chemin entre des entrees preparees et un dossier de preuve verifie. Le jugement sur le perimetre, les seuils de politique, la profondeur de l'adapter et la validation finale restent humains.</p>
-          <ul class="pricing-list section-tight">
-            <li><strong>Finalite prevue:</strong> La finalite et la frontiere du systeme restent definies par le responsable.</li><li><strong>Dommages metier:</strong> Le cadrage de l'impact et du risque residuel reste du cote de l'operateur.</li><li><strong>Politique d'approbation / de blocage:</strong> Le toolkit ne peut pas choisir les seuils de gouvernance pour l'equipe.</li><li><strong>Narratif final et validation:</strong> La mise en production, la conformite et l'approbation juridique restent humaines.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
+    <section class="section section-tight" id="first-run">
       <div class="container evidence-card fade-up">
-        <p class="eyebrow">Demarrage rapide</p>
-        <h3>La facon la plus rapide de tester cela sur votre propre agent</h3>
-        <p class="muted">Si l'adapter tourne deja, le demarrage rapide produit un premier dossier portable sans pretendre comprendre deja votre vrai perimetre de qualification.</p>
-        <div class="code-snippet"><code>npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud</code></div>
+        <p class="eyebrow">Tester sur votre propre agent</p>
+        <h3>Chemin le plus rapide vers un premier run honnete</h3>
+        <p class="muted">Si votre adapter tourne deja, utilisez le demarrage rapide pour produire un vrai premier dossier de preuve sur votre propre infrastructure avant toute integration plus lourde.</p>
+        
         <div class="docs-grid section-tight">
           
             <article class="card fade-up">
@@ -188,67 +136,106 @@
             </article>
         </div>
         <div class="button-row">
-          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/quickstart-your-agent.md" target="_blank" rel="noreferrer">Ouvrir le guide de demarrage rapide</a>
-          <a class="button-soft" href="../docs/">Ouvrir les docs OSS</a>
+          <a class="button" href="../eu-ai-act-starter/">Ouvrir le guide du starter UE sur GitHub</a>
+          <a class="button-ghost" href="../../demo/fr/agent-evidence/report.html" target="_blank" rel="noreferrer">Ouvrir le rapport de demo agent</a>
+          <a class="button-soft" href="../../demo/fr/eu-ai-act/compliance/eu-ai-act-reviewer.html" target="_blank" rel="noreferrer">Ouvrir la demo reviewer</a>
         </div>
       </div>
     </section>
     <section class="section section-tight">
+      <div class="container">
+        <h2 class="section-title">Ce que cette technologie fait reellement</h2>
+        <p class="lead">Le produit transforme des runs comparables en preuves UE lisibles par un evaluateur, ajoute une structure de revue et de transmission, permet des couches sectorielles au-dessus du meme noyau, et laisse la responsabilite legale et de politique hors de la couche d'automatisation.</p>
+        <div class="docs-grid">
+          
+            <article class="card fade-up">
+              <h3>Generation de preuve</h3>
+              <ul class="pricing-list">
+                <li>Des runs baseline/new comparables deviennent un dossier de preuve portable</li><li>Le dossier inclut rapport, contrat machine, manifest, reviewer PDF/HTML/Markdown et controles de retention</li><li>Les sorties dossier UE s'attachent aux memes preuves d'execution verifiees</li>
+              </ul>
+            </article>
+            <article class="card fade-up">
+              <h3>Verification et controles</h3>
+              <ul class="pricing-list">
+                <li>La mise en forme et la verification sont des etapes explicites, pas un simple resultat de tableau de bord</li><li>Les controles de revue et la preparation pour autorite ont des prerequis stricts</li><li>Le mode strict peut verifier un manifeste signe quand l'authenticite compte pour un dossier tourne vers l'autorite</li>
+              </ul>
+            </article>
+            <article class="card fade-up">
+              <h3>Revue et transmission</h3>
+              <ul class="pricing-list">
+                <li>Le dossier peut circuler entre ingenierie, gouvernance, conseil juridique et revue tournee vers l'autorite</li><li>Les traces de revue, notes de transmission, sorties reviewer et dossiers pour autorite font partie du produit</li><li>Le but est un dossier qu'un autre evaluateur peut inspecter sans tableaux de bord internes ni echanges de fichiers non signes</li>
+              </ul>
+            </article>
+            <article class="card fade-up">
+              <h3>Frontiere honnete</h3>
+              <ul class="pricing-list">
+                <li>Le produit ne decide pas la classification legale ni la validation finale</li><li>Les seuils de politique et les jugements sur le risque residuel restent humains</li><li>La force du systeme est dans l'operation de preuve, pas dans l'automatisation juridique</li>
+              </ul>
+            </article>
+        </div>
+      </div>
+    </section>
+    <section class="section">
       <div class="container split-grid">
         <div class="card fade-up">
-          <p class="eyebrow">Commandes</p>
-          <h2 class="section-title">Surface de commande</h2>
-          <p class="muted">Ces commandes correspondent aux vraies etapes de mise en forme, signature, verification, revue et preparation pour une autorite dans le produit live.</p>
-          <div class="code-snippet"><code>npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt;
-AQ_MANIFEST_PRIVATE_KEY=... npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt; --verify-strict --sign
-npm run review:init -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
-npm run review:check -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
-npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt;</code></div>
+          <p class="eyebrow">Parcours</p>
+          <h2 class="section-title">Ce que votre equipe fournit et ce que l'engine fait ensuite</h2>
+          <p class="lead">Le milieu de la decision doit rester pratique. Votre equipe apporte un adapter joignable, une vraie frontiere de changement, des cas de depart et des responsables nommes. A partir de la, l'engine prend en charge les runs comparables, le packaging verifie et les sorties UE lisibles par un evaluateur sur le meme bundle.</p>
+          <div class="timeline section-tight">
+            
+              <article class="timeline-card">
+                <span class="timeline-step">1</span>
+                <p>Votre equipe expose un adapter joignable et une frontiere baseline/new qui vaut vraiment la peine d'etre revue.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">2</span>
+                <p>Votre equipe fournit des cas de depart, le contexte d'usage prevu et des responsables nommes pour les seuils et la validation.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">3</span>
+                <p>L'engine execute des runs comparables, package le bundle et verifie l'integrite et la structure.</p>
+              </article>
+              <article class="timeline-card">
+                <span class="timeline-step">4</span>
+                <p>L'engine genere les sorties UE lisibles par un evaluateur a partir du meme bundle verifie; le jugement legal et la validation finale restent a votre equipe.</p>
+              </article>
+          </div>
         </div>
         <div class="proof-card fade-up">
-          <p class="eyebrow">Artefacts</p>
-          <h2 class="section-title">Ce qui doit exister si le workflow est sain</h2>
-          <p class="muted">Les equipes techniques doivent juger le produit a ses artefacts durables et a ses verrous explicites, pas seulement a des captures ou a du narratif.</p>
-          <table class="section-table section-tight">
-            <thead>
-              <tr><th>Etape</th><th>Artefact</th><th>Signal de preparation</th></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>Contrat d'intake</td>
-                  <td><code>system-scope.json</code>, <code>quality-contract.json</code>, <code>cases-coverage.json</code></td>
-                  <td>Le perimetre du systeme et la definition validee des cas sont explicites.</td>
-                </tr>
-                <tr>
-                  <td>Integration live</td>
-                  <td><code>adapter-capability.json</code>, <code>run-fingerprint.json</code></td>
-                  <td>L'adapter et les runs baseline/new sont assez profonds et comparables.</td>
-                </tr>
-                <tr>
-                  <td>Dossier verifie</td>
-                  <td><code>report.html</code>, <code>compare-report.json</code>, <code>manifest.json</code>, <code>archive/retention-controls.json</code></td>
-                  <td>La preuve portable passe la verification et reste exploitable lors de la transmission.</td>
-                </tr>
-                <tr>
-                  <td>Transmission de revue</td>
-                  <td><code>review-decision.json</code>, <code>handoff-note.md</code>, dossier autorite optionnel</td>
-                  <td>La decision du responsable et la transmission externe sont explicites.</td>
-                </tr>
-            </tbody>
-          </table>
+          <p class="eyebrow">Reste humain</p>
+          <h3>Ce qui reste humain</h3>
+          <p class="muted">La partie la plus forte du produit est le chemin entre des entrees preparees et un dossier de preuve verifie. Le jugement sur le perimetre, les seuils de politique, la profondeur de l'adapter et la validation finale restent humains.</p>
+          <ul class="pricing-list section-tight">
+            <li><strong>Finalite prevue:</strong> La finalite et la frontiere du systeme restent definies par le responsable.</li><li><strong>Dommages metier:</strong> Le cadrage de l'impact et du risque residuel reste du cote de l'operateur.</li><li><strong>Politique d'approbation / de blocage:</strong> Le toolkit ne peut pas choisir les seuils de gouvernance pour l'equipe.</li><li><strong>Narratif final et validation:</strong> La mise en production, la conformite et l'approbation juridique restent humaines.</li>
+          </ul>
         </div>
       </div>
     </section>
     <section class="section section-tight">
       <div class="container evidence-card fade-up">
-        <p class="eyebrow">Notes etendues</p>
-        <h3>Besoin de plus de details techniques ?</h3>
-        <p class="muted">Les analyses detaillees, la mesure de readiness, les declencheurs de nouveau run, le perimetre du support et les notes techniques plus longues sont disponibles sur la holding page.</p>
+        <p class="eyebrow">Inspection technique plus profonde</p>
+        <h3>Surface de commande</h3>
+        <p class="muted">Si l'adequation est reelle, ce sont les vraies commandes derriere le packaging, la signature, la verification, la revue et la preparation pour une autorite.</p>
+        <div class="code-snippet"><code>npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt;
+AQ_MANIFEST_PRIVATE_KEY=... npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt; --verify-strict --sign
+npm run review:init -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
+npm run review:check -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
+npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt;</code></div>
         <div class="button-row">
-          <a class="button" href="../holding/" data-track-event="technical_holding">Ouvrir les notes detaillees</a>
-          <a class="button-ghost" href="../builder/" data-track-event="technical_builder">Commencer le dossier</a>
-          <a class="button-soft" href="../../demo/eu-ai-act/compliance/eu-ai-act-report.html" target="_blank" rel="noreferrer">Ouvrir la preuve live</a>
+          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">Ouvrir le depot GitHub</a>
+          <a class="button-ghost" href="../../demo/fr/agent-evidence/report.html" target="_blank" rel="noreferrer">Ouvrir le rapport de demo agent</a>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container evidence-card fade-up">
+        <p class="eyebrow">Etape suivante</p>
+        <h3>Si l'adequation est reelle, ouvrez le depot</h3>
+        <p class="muted">Une fois les sorties, les verrous et le chemin du premier run juges credibles, le depot devient la bonne etape suivante pour les adapters, schemas, commandes et details d'implementation.</p>
+        <div class="button-row">
+          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">Ouvrir le depot GitHub</a>
+          <a class="button-ghost" href="#first-run">Voir le premier run sur votre propre agent</a>
+          <a class="button-soft" href="../../demo/fr" target="_blank" rel="noreferrer">Ouvrir tous les documents de demo</a>
         </div>
       </div>
     </section>
@@ -282,7 +269,7 @@ npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt
       </div>
     </div>
   
-  <script src="../../site-assets/site.js" defer></script>
+  <script src="../../site-assets/site.js?v=3a99f43199" defer></script>
   
 </body>
 </html>

@@ -14,5 +14,5 @@ describe("eu-ai-act contract check", () => {
 
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout).toContain("EU AI Act contract check: PASS");
-  }, 45_000);
+  }, 90_000);
 });

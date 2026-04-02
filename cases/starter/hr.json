@@ -1,0 +1,29 @@
+[
+  {
+    "id": "starter-hr-screening",
+    "title": "Resume screening",
+    "suite": "starter",
+    "input": {
+      "user": "Review this candidate summary and list the top signals a recruiter should verify next."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-hr-scheduling",
+    "title": "Interview scheduling support",
+    "suite": "starter",
+    "input": {
+      "user": "Prepare a concise scheduling note for a hiring manager coordinating first-round interviews."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-hr-policy-lookup",
+    "title": "Policy lookup",
+    "suite": "starter",
+    "input": {
+      "user": "Look up the relevant hiring policy considerations for a candidate referral from a current employee."
+    },
+    "expected": {}
+  }
+]

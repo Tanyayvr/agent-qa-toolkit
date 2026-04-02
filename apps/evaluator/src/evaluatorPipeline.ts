@@ -16,9 +16,12 @@ import {
   manifestItemForCaseResponse,
   manifestItemForFinalOutput,
   manifestItemForTraceAnchor,
+  manifestItemForToolTelemetry,
+  manifestItemForToolResultArtifact,
+  manifestKeyForToolResultArtifact,
   manifestKeyFor,
 } from "./manifest";
-import type { ManifestItem, ThinIndex } from "./manifest";
+import type { ManifestDraftItem, ThinIndex } from "./manifest";
 import { runSecurityScanners } from "./securityScanner";
 import { TOOLKIT_VERSION } from "./version";
 import {
@@ -34,18 +37,22 @@ import {
 import {
   copyRawCaseJson,
   copyRunMetaJson,
-  fileBytesForRel,
   maybeCopyFailureAsset,
   normRel,
   renderMissingCaseHtml,
   resolveFromRoot,
 } from "./evaluatorIo";
 import {
+  extractRunProvenance,
+  listMissingRequiredEnvironmentFields,
+  listMissingEuAiActEnvironmentFields,
   loadComplianceProfile,
   loadEnvironmentContext,
+  mergeEnvironmentWithCanonicalProvenance,
   resolveComplianceCoverageRequirements,
   resolveComplianceMapping,
   resolveTransferClass,
+  type RequiredEnvironmentField,
   type ComplianceCoverageRequirement,
   type ComplianceMappingEntry,
 } from "./evaluatorMetadata";
@@ -57,9 +64,16 @@ import {
   maybeAttachLargePayloadWarnings,
 } from "./evaluatorSummary";
 import { computeComplianceCoverage } from "./complianceCoverage";
-import { buildEuAiActBundleArtifacts, buildEuAiActComplianceBundle } from "./euAiActDossier";
+import {
+  buildEuAiActBundleArtifacts,
+  buildEuAiActBundleExports,
+  buildEuAiActComplianceBundle,
+  type EuAiActContractMode,
+} from "./euAiActDossier";
 import { finalizeManifest, writeRedactionSummaryIfNeeded } from "./evaluatorFinalization";
 import { buildEuAiActPostMarketMonitoring, collectEuAiActMonitoring } from "./euAiActMonitoring";
+import { buildRetentionArchiveControls, RETENTION_ARCHIVE_CONTROLS_HREF } from "./retentionArchiveControls";
+import { buildNormalizedToolTelemetryArtifact } from "./toolTelemetryArtifacts";
 import { ingestTrendIfEnabled } from "./evaluatorTrend";
 import { HELP_TEXT } from "./evaluatorHelp";
 import { cleanupOldReports } from "./evaluatorRetention";
@@ -117,6 +131,16 @@ async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
   } catch {
     // audit logging must not fail the run
   }
+}
+
+function describeMissingRunProvenance(meta: Record<string, unknown>): RequiredEnvironmentField[] {
+  const provenance = meta && typeof meta === "object" && !Array.isArray(meta)
+    ? (meta.provenance as Record<string, unknown> | undefined)
+    : undefined;
+  if (!provenance || typeof provenance !== "object" || Array.isArray(provenance)) {
+    return listMissingRequiredEnvironmentFields(undefined);
+  }
+  return listMissingRequiredEnvironmentFields(provenance);
 }
 
 function deriveAssumptionStateSide(
@@ -210,6 +234,7 @@ export async function runEvaluator(): Promise<void> {
       "--retentionDays",
       "--environment",
       "--complianceProfile",
+      "--euContract",
       "--trend-db",
       "--no-trend",
       "--help",
@@ -222,6 +247,7 @@ export async function runEvaluator(): Promise<void> {
   assertHasValueOrThrow("--outDir");
   assertHasValueOrThrow("--reportId");
   assertHasValueOrThrow("--transferClass");
+  assertHasValueOrThrow("--euContract");
   assertHasValueOrThrow("--maxCaseBytes");
   assertHasValueOrThrow("--maxMetaBytes");
   assertHasValueOrThrow("--retentionDays");
@@ -249,6 +275,7 @@ export async function runEvaluator(): Promise<void> {
 
   const envFile = getArg("--environment");
   const complianceFile = getArg("--complianceProfile");
+  const euContractArg = getArg("--euContract");
   let environment: Record<string, unknown> | undefined;
   let complianceMapping: ComplianceMappingEntry[] | undefined;
   let complianceCoverageRequirements: ComplianceCoverageRequirement[] | undefined;
@@ -275,6 +302,10 @@ export async function runEvaluator(): Promise<void> {
   }
 
   const transferClass = resolveTransferClass(getArg("--transferClass") ?? undefined);
+  const euContract: EuAiActContractMode = euContractArg === "full" ? "full" : "minimum";
+  if (euContractArg && euContractArg !== "minimum" && euContractArg !== "full") {
+    throw new CliUsageError(`Invalid --euContract value: ${String(euContractArg)}. Must be \"minimum\" or \"full\".\n\n${HELP_TEXT}`);
+  }
   if (!transferClass) {
     throw new CliUsageError(`Invalid --transferClass value: ${String(getArg("--transferClass"))}. Must be "internal_only" or "transferable".\n\n${HELP_TEXT}`);
   }
@@ -355,6 +386,43 @@ export async function runEvaluator(): Promise<void> {
   const cases = await readCases(casesPathAbs, maxCaseBytes);
   const baselineRun = await readRunDir(baselineDirAbs, maxCaseBytes, maxMetaBytes);
   const newRun = await readRunDir(newDirAbs, maxCaseBytes, maxMetaBytes);
+  const baselineProvenance = extractRunProvenance(baselineRun.meta);
+  const newProvenance = extractRunProvenance(newRun.meta);
+  if (!baselineProvenance) {
+    const missing = describeMissingRunProvenance(baselineRun.meta);
+    throw new CliUsageError(
+      `Core qualification packaging requires baseline run provenance in run.json. Missing: ${missing.join(", ")}.\n`
+      + "Capture provenance in the runner via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH.\n\n"
+      + HELP_TEXT
+    );
+  }
+  if (!newProvenance) {
+    const missing = describeMissingRunProvenance(newRun.meta);
+    throw new CliUsageError(
+      `Core qualification packaging requires new run provenance in run.json. Missing: ${missing.join(", ")}.\n`
+      + "Capture provenance in the runner via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH.\n\n"
+      + HELP_TEXT
+    );
+  }
+  if (baselineProvenance.agent_id !== newProvenance.agent_id) {
+    throw new CliUsageError(
+      `Core qualification packaging requires baseline/new runs to share the same agent_id. `
+      + `Got baseline=${baselineProvenance.agent_id} new=${newProvenance.agent_id}.\n\n`
+      + HELP_TEXT
+    );
+  }
+  try {
+    environment = mergeEnvironmentWithCanonicalProvenance({
+      ...(environment ? { providedEnvironment: environment } : {}),
+      canonicalProvenance: newProvenance,
+    });
+  } catch (error) {
+    throw new CliUsageError(
+      `${error instanceof Error ? error.message : String(error)}.\n`
+      + "The evaluator uses new run provenance as the canonical identity source for the packaged report.\n\n"
+      + HELP_TEXT
+    );
+  }
   const scanners = buildSecurityScanners(hasFlag("--entropyScanner"));
 
   const baselineById = baselineRun.byId;
@@ -420,7 +488,7 @@ export async function runEvaluator(): Promise<void> {
     throw new CliUsageError(`Redaction check failed. See redaction-summary.json warnings.\n\n${HELP_TEXT}`);
   }
 
-  let manifestItems: ManifestItem[] = [];
+  let manifestItems: ManifestDraftItem[] = [];
   let casesWithAnchorBaseline = 0;
   let casesWithAnchorNew = 0;
 
@@ -528,8 +596,7 @@ export async function runEvaluator(): Promise<void> {
           ...(metaRel ? { metaRel } : {}),
         });
         for (const it of items) {
-          const bytes = await fileBytesForRel(reportDirAbs, it.rel_path);
-          manifestItems.push({ ...it, ...(bytes !== undefined ? { bytes } : {}) });
+          manifestItems.push(it);
         }
         if (bodyRel) artifactLinks.baseline_failure_body_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_body" });
         if (metaRel) artifactLinks.baseline_failure_meta_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure_meta" });
@@ -568,8 +635,7 @@ export async function runEvaluator(): Promise<void> {
           ...(metaRel ? { metaRel } : {}),
         });
         for (const it of items) {
-          const bytes = await fileBytesForRel(reportDirAbs, it.rel_path);
-          manifestItems.push({ ...it, ...(bytes !== undefined ? { bytes } : {}) });
+          manifestItems.push(it);
         }
         if (bodyRel) artifactLinks.new_failure_body_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_body" });
         if (metaRel) artifactLinks.new_failure_meta_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure_meta" });
@@ -586,22 +652,81 @@ export async function runEvaluator(): Promise<void> {
     if (newCaseHref) artifactLinks.new_case_response_href = newCaseHref;
 
     if (baseCaseHref) {
-      const bytes = await fileBytesForRel(reportDirAbs, baseCaseHref);
-      manifestItems.push({
-        ...manifestItemForCaseResponse({ caseId: c.id, version: "baseline", rel_path: baseCaseHref }),
-        ...(bytes !== undefined ? { bytes } : {}),
-      });
+      manifestItems.push(manifestItemForCaseResponse({ caseId: c.id, version: "baseline", rel_path: baseCaseHref }));
     }
     if (newCaseHref) {
-      const bytes = await fileBytesForRel(reportDirAbs, newCaseHref);
-      manifestItems.push({
-        ...manifestItemForCaseResponse({ caseId: c.id, version: "new", rel_path: newCaseHref }),
-        ...(bytes !== undefined ? { bytes } : {}),
-      });
+      manifestItems.push(manifestItemForCaseResponse({ caseId: c.id, version: "new", rel_path: newCaseHref }));
     }
 
     if (baseCaseHref) artifactLinks.baseline_case_response_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "case_response" });
     if (newCaseHref) artifactLinks.new_case_response_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "case_response" });
+
+    const writeToolTelemetryArtifactsForSide = async (
+      version: "baseline" | "new",
+      response: typeof baseResp | typeof newResp
+    ): Promise<void> => {
+      if (!response) return;
+
+      const normalized = buildNormalizedToolTelemetryArtifact({
+        caseId: c.id,
+        version,
+        expected: c.expected,
+        response,
+      });
+      const telemetryDirAbs = path.join(reportDirAbs, "assets", "tool_telemetry", c.id);
+      const resultDirAbs = path.join(telemetryDirAbs, version, "results");
+      if (normalized.tool_results.length > 0) await ensureDir(resultDirAbs);
+
+      for (let index = 0; index < normalized.tool_results.length; index += 1) {
+        const resultEntry = normalized.tool_results[index];
+        if (!resultEntry) continue;
+        const callSlug = String(resultEntry.call_id || `tool_result_${index + 1}`)
+          .replace(/[^A-Za-z0-9._-]+/g, "_")
+          .replace(/^_+|_+$/g, "")
+          .slice(0, 120) || `tool_result_${index + 1}`;
+        const resultAbs = path.join(resultDirAbs, `${String(index + 1).padStart(2, "0")}-${callSlug}.json`);
+        await writeJsonAtomic(resultAbs, resultEntry);
+        const rel = normRel(reportDirAbs, resultAbs);
+        const key = manifestKeyForToolResultArtifact({
+          caseId: c.id,
+          version,
+          callId: resultEntry.call_id,
+        });
+        resultEntry.normalized_result_artifact_href = rel;
+        resultEntry.normalized_result_artifact_key = key;
+        manifestItems.push(
+          manifestItemForToolResultArtifact({
+            caseId: c.id,
+            version,
+            callId: resultEntry.call_id,
+            rel_path: rel,
+          })
+        );
+      }
+
+      await ensureDir(telemetryDirAbs);
+      const telemetryAbs = path.join(telemetryDirAbs, `${version}.json`);
+      await writeJsonAtomic(telemetryAbs, normalized);
+      const telemetryRel = normRel(reportDirAbs, telemetryAbs);
+      const telemetryKey = manifestKeyFor({ caseId: c.id, version, kind: "tool_telemetry" });
+      manifestItems.push(
+        manifestItemForToolTelemetry({
+          caseId: c.id,
+          version,
+          rel_path: telemetryRel,
+        })
+      );
+      if (version === "baseline") {
+        artifactLinks.baseline_tool_telemetry_href = telemetryRel;
+        artifactLinks.baseline_tool_telemetry_key = telemetryKey;
+      } else {
+        artifactLinks.new_tool_telemetry_href = telemetryRel;
+        artifactLinks.new_tool_telemetry_key = telemetryKey;
+      }
+    };
+
+    await writeToolTelemetryArtifactsForSide("baseline", baseResp);
+    await writeToolTelemetryArtifactsForSide("new", newResp);
 
     const traceDir = path.join(reportDirAbs, "assets", "trace_anchor", c.id);
     if (baselineTraceAnchor) {
@@ -611,10 +736,7 @@ export async function runEvaluator(): Promise<void> {
       const rel = normRel(reportDirAbs, baseTraceAbs);
       artifactLinks.baseline_trace_anchor_href = rel;
       artifactLinks.baseline_trace_anchor_key = manifestKeyFor({ caseId: c.id, version: "baseline", kind: "trace_anchor" });
-      const bytes = await fileBytesForRel(reportDirAbs, rel);
-      const item = manifestItemForTraceAnchor({ caseId: c.id, version: "baseline", rel_path: rel });
-      if (bytes !== undefined) item.bytes = bytes;
-      manifestItems.push(item);
+      manifestItems.push(manifestItemForTraceAnchor({ caseId: c.id, version: "baseline", rel_path: rel }));
     }
     if (newTraceAnchor) {
       await ensureDir(traceDir);
@@ -623,10 +745,7 @@ export async function runEvaluator(): Promise<void> {
       const rel = normRel(reportDirAbs, newTraceAbs);
       artifactLinks.new_trace_anchor_href = rel;
       artifactLinks.new_trace_anchor_key = manifestKeyFor({ caseId: c.id, version: "new", kind: "trace_anchor" });
-      const bytes = await fileBytesForRel(reportDirAbs, rel);
-      const item = manifestItemForTraceAnchor({ caseId: c.id, version: "new", rel_path: rel });
-      if (bytes !== undefined) item.bytes = bytes;
-      manifestItems.push(item);
+      manifestItems.push(manifestItemForTraceAnchor({ caseId: c.id, version: "new", rel_path: rel }));
     }
 
     const trace: TraceIntegrity = {
@@ -640,29 +759,23 @@ export async function runEvaluator(): Promise<void> {
       const baseFinal = path.join(finalOutputDir, "baseline.json");
       await writeJsonAtomic(baseFinal, baseResp.final_output ?? {});
       const rel = normRel(reportDirAbs, baseFinal);
-      const bytes = await fileBytesForRel(reportDirAbs, rel);
-      const item = manifestItemForFinalOutput({
+      manifestItems.push(manifestItemForFinalOutput({
         caseId: c.id,
         version: "baseline",
         rel_path: rel,
         media_type: "application/json",
-      });
-      if (bytes !== undefined) item.bytes = bytes;
-      manifestItems.push(item);
+      }));
     }
     if (newResp) {
       const newFinal = path.join(finalOutputDir, "new.json");
       await writeJsonAtomic(newFinal, newResp.final_output ?? {});
       const rel = normRel(reportDirAbs, newFinal);
-      const bytes = await fileBytesForRel(reportDirAbs, rel);
-      const item = manifestItemForFinalOutput({
+      manifestItems.push(manifestItemForFinalOutput({
         caseId: c.id,
         version: "new",
         rel_path: rel,
         media_type: "application/json",
-      });
-      if (bytes !== undefined) item.bytes = bytes;
-      manifestItems.push(item);
+      }));
     }
 
     if (baseResp?.runner_failure) {
@@ -671,13 +784,11 @@ export async function runEvaluator(): Promise<void> {
       const baseSum = path.join(rfDir, "baseline.json");
       await writeJsonAtomic(baseSum, baseResp.runner_failure);
       const rel = normRel(reportDirAbs, baseSum);
-      const bytes = await fileBytesForRel(reportDirAbs, rel);
-      const item: ManifestItem = {
+      const item: ManifestDraftItem = {
         manifest_key: manifestKeyFor({ caseId: c.id, version: "baseline", kind: "runner_failure" }),
         rel_path: rel,
         media_type: "application/json",
       };
-      if (bytes !== undefined) item.bytes = bytes;
       manifestItems.push(item);
     }
     if (newResp?.runner_failure) {
@@ -686,13 +797,11 @@ export async function runEvaluator(): Promise<void> {
       const newSum = path.join(rfDir, "new.json");
       await writeJsonAtomic(newSum, newResp.runner_failure);
       const rel = normRel(reportDirAbs, newSum);
-      const bytes = await fileBytesForRel(reportDirAbs, rel);
-      const item: ManifestItem = {
+      const item: ManifestDraftItem = {
         manifest_key: manifestKeyFor({ caseId: c.id, version: "new", kind: "runner_failure" }),
         rel_path: rel,
         media_type: "application/json",
       };
-      if (bytes !== undefined) item.bytes = bytes;
       manifestItems.push(item);
     }
 
@@ -962,12 +1071,25 @@ export async function runEvaluator(): Promise<void> {
   }
 
   const summary_by_suite = computeSummaryBySuite(items);
+  const provenanceChangeCandidates = [
+    "agent_version",
+    "model",
+    "model_version",
+    "prompt_version",
+    "tools_version",
+    "config_hash",
+  ] as const;
 
   const report: CompareReport & { embedded_manifest_index?: ThinIndex } = buildCompareReportDocument({
     reportId,
     toolkitVersion: TOOLKIT_VERSION,
     generatedAt: Date.now(),
     environment,
+    provenance: {
+      baseline: baselineProvenance,
+      new: newProvenance,
+      changed_fields: provenanceChangeCandidates.filter((field) => baselineProvenance[field] !== newProvenance[field]),
+    },
     projectRoot,
     baselineDirAbs,
     newDirAbs,
@@ -1023,32 +1145,42 @@ export async function runEvaluator(): Promise<void> {
   if (complianceCoverage?.length) {
     report.compliance_coverage = complianceCoverage;
   }
+  const requiresEuAiActBundle = report.compliance_coverage?.some((entry) => entry.framework === "EU_AI_ACT") === true;
+  if (requiresEuAiActBundle) {
+    const missingEnvironmentFields = listMissingEuAiActEnvironmentFields(report.environment);
+    if (missingEnvironmentFields.length > 0) {
+      throw new CliUsageError(
+        `EU AI Act bundle requires environment identity fields: ${missingEnvironmentFields.join(", ")}.\n`
+        + "Provide them via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH.\n\n"
+        + HELP_TEXT
+      );
+    }
+  }
   const euAiActBundleArtifacts = report.compliance_coverage?.some((entry) => entry.framework === "EU_AI_ACT")
-    ? buildEuAiActBundleArtifacts()
+    ? buildEuAiActBundleArtifacts(euContract)
     : undefined;
   if (euAiActBundleArtifacts) {
     report.compliance_exports = {
       ...(report.compliance_exports ?? {}),
-      eu_ai_act: {
-        coverage_href: euAiActBundleArtifacts.coverage_href,
-        annex_iv_href: euAiActBundleArtifacts.annex_iv_href,
-        report_html_href: euAiActBundleArtifacts.report_html_href,
-        evidence_index_href: euAiActBundleArtifacts.evidence_index_href,
-        article_13_instructions_href: euAiActBundleArtifacts.article_13_instructions_href,
-        article_9_risk_register_href: euAiActBundleArtifacts.article_9_risk_register_href,
-        article_72_monitoring_plan_href: euAiActBundleArtifacts.article_72_monitoring_plan_href,
-        article_17_qms_lite_href: euAiActBundleArtifacts.article_17_qms_lite_href,
-        human_oversight_summary_href: euAiActBundleArtifacts.human_oversight_summary_href,
-        release_review_href: euAiActBundleArtifacts.release_review_href,
-        post_market_monitoring_href: euAiActBundleArtifacts.post_market_monitoring_href,
-      },
+      eu_ai_act: buildEuAiActBundleExports(euAiActBundleArtifacts),
     };
   }
+  report.bundle_exports = {
+    retention_archive_controls_href: RETENTION_ARCHIVE_CONTROLS_HREF,
+  };
+  const retentionArchiveControls = buildRetentionArchiveControls({
+    report,
+    baselineRunMeta: baselineRun.meta,
+    newRunMeta: newRun.meta,
+    evaluatorRetentionDays: retentionDays,
+  });
 
   await writeJsonAtomic(path.join(reportDirAbs, "compare-report.json"), report);
 
   const html = renderHtmlReport(report);
   await writeFileAtomic(path.join(reportDirAbs, "report.html"), html, "utf-8");
+  await ensureDir(path.join(reportDirAbs, "archive"));
+  await writeJsonAtomic(path.join(reportDirAbs, report.bundle_exports.retention_archive_controls_href), retentionArchiveControls);
 
   console.log(`html report: ${normRel(projectRoot, path.join(reportDirAbs, "report.html"))}`);
   console.log(`compare report: ${normRel(projectRoot, path.join(reportDirAbs, "compare-report.json"))}`);
@@ -1085,12 +1217,32 @@ export async function runEvaluator(): Promise<void> {
     if (euAiActBundle) {
       const complianceDirAbs = path.join(reportDirAbs, "compliance");
       await ensureDir(complianceDirAbs);
-      await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.coverage_href), euAiActBundle.coverageExport);
+      if (euAiActBundle.exports.coverage_href) {
+        await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.coverage_href), euAiActBundle.coverageExport);
+      }
       await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.annex_iv_href), euAiActBundle.annexIv);
-      await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.evidence_index_href), euAiActBundle.evidenceIndex);
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_10_data_governance_href),
+        euAiActBundle.article10DataGovernance
+      );
+      if (euAiActBundle.exports.evidence_index_href) {
+        await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.evidence_index_href), euAiActBundle.evidenceIndex);
+      }
       await writeJsonAtomic(
         path.join(reportDirAbs, euAiActBundle.exports.article_13_instructions_href),
         euAiActBundle.article13Instructions
+      );
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_16_provider_obligations_href),
+        euAiActBundle.article16ProviderObligations
+      );
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_43_conformity_assessment_href),
+        euAiActBundle.article43ConformityAssessment
+      );
+      await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.article_47_declaration_of_conformity_href),
+        euAiActBundle.article47DeclarationOfConformity
       );
       await writeJsonAtomic(
         path.join(reportDirAbs, euAiActBundle.exports.article_9_risk_register_href),
@@ -1105,15 +1257,43 @@ export async function runEvaluator(): Promise<void> {
         euAiActBundle.article17QmsLite
       );
       await writeJsonAtomic(
+        path.join(reportDirAbs, euAiActBundle.exports.annex_v_declaration_content_href),
+        euAiActBundle.annexVDeclarationContent
+      );
+      if (euAiActBundle.exports.article_73_serious_incident_pack_href && euAiActBundle.article73SeriousIncidentPack) {
+        await writeJsonAtomic(
+          path.join(reportDirAbs, euAiActBundle.exports.article_73_serious_incident_pack_href),
+          euAiActBundle.article73SeriousIncidentPack
+        );
+      }
+      await writeJsonAtomic(
         path.join(reportDirAbs, euAiActBundle.exports.human_oversight_summary_href),
         euAiActBundle.humanOversightSummary
       );
-      await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.release_review_href), euAiActBundle.releaseReview);
+      if (euAiActBundle.exports.release_review_href && euAiActBundle.releaseReview) {
+        await writeJsonAtomic(path.join(reportDirAbs, euAiActBundle.exports.release_review_href), euAiActBundle.releaseReview);
+      }
       await writeJsonAtomic(
         path.join(reportDirAbs, euAiActBundle.exports.post_market_monitoring_href),
         euAiActBundle.postMarketMonitoring
       );
-      await writeFileAtomic(path.join(reportDirAbs, euAiActBundle.exports.report_html_href), euAiActBundle.reportHtml, "utf-8");
+      if (euAiActBundle.exports.report_html_href && euAiActBundle.reportHtml) {
+        await writeFileAtomic(path.join(reportDirAbs, euAiActBundle.exports.report_html_href), euAiActBundle.reportHtml, "utf-8");
+      }
+      if (euAiActBundle.exports.reviewer_html_href && euAiActBundle.reviewerHtml) {
+        await writeFileAtomic(
+          path.join(reportDirAbs, euAiActBundle.exports.reviewer_html_href),
+          euAiActBundle.reviewerHtml,
+          "utf-8"
+        );
+      }
+      if (euAiActBundle.exports.reviewer_markdown_href && euAiActBundle.reviewerMarkdown) {
+        await writeFileAtomic(
+          path.join(reportDirAbs, euAiActBundle.exports.reviewer_markdown_href),
+          euAiActBundle.reviewerMarkdown,
+          "utf-8"
+        );
+      }
     }
   }
 

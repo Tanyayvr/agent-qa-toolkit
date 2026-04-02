@@ -10,7 +10,7 @@ import type { CaseFileItem } from "./runnerTypes";
 
 export const RUNNER_HELP_TEXT = `
 Usage:
-  runner [--repoRoot <path>] [--baseUrl <url>] [--cases <path>] [--outDir <dir>] [--runId <id>] [--incidentId <id>] [--agentId <id>] [--only <ids>] [--dryRun]
+  runner [--repoRoot <path>] [--baseUrl <url>] [--cases <path>] [--outDir <dir>] [--runId <id>] [--incidentId <id>] [--agentId <id>] [--environment <path>] [--only <ids>] [--dryRun]
          [--timeoutMs <ms>] [--retries <n>] [--backoffBaseMs <ms>] [--concurrency <n>]
          [--timeoutProfile <off|auto>] [--timeoutAutoCapMs <ms>] [--timeoutAutoLookbackRuns <n>] [--timeoutAutoMinSuccessSamples <n>] [--timeoutAutoMaxIncreaseFactor <n>]
          [--inactivityTimeoutMs <ms>] [--heartbeatIntervalMs <ms>]
@@ -27,6 +27,7 @@ Options:
   --runId                   Run id (default: random UUID)
   --incidentId              Incident/group id propagated via run_meta.incident_id (default: runId)
   --agentId                 Agent id propagated via run_meta.agent_id (optional)
+  --environment             JSON file with provenance metadata (agent_id, agent_version, model, model_version, prompt_version, tools_version, config_hash)
   --only                    Comma-separated case ids (e.g. tool_001,fmt_002)
   --dryRun                  Do not call the agent, only print selected cases
 

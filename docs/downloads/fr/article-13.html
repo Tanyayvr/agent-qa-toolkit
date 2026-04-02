@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Article 13 de l'AI Act - Modele pour les instructions d'utilisation</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; max-width: 860px; margin: 40px auto; color: #0f172a; line-height: 1.6; }
+    h1, h2 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -0.03em; }
+    section { border: 1px solid #dbe5f1; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #dbe5f1; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>Article 13 de l'AI Act - Modele pour les instructions d'utilisation</h1>
+  <section><p>L'article 13 est l'endroit ou un evaluateur verifie si vos instructions correspondent a la veritable limite technique du systeme. Un simple guide de deploiement ne suffit pas. Les instructions doivent dire a quoi sert le systeme, sur quelles conditions il repose et quand un humain doit intervenir.</p></section>
+  
+  <section>
+    <h2>Ce que l'article 13 exige, ce que le toolkit peut ajouter, et ce que votre equipe garde en charge</h2>
+    <p>Sans connecter votre agent, le toolkit ne peut que preparer le fichier d'instructions a partir du dossier genere. Apres integration de l'adapter, il peut aussi rattacher ces instructions a de vrais runs, a des sorties de revue et a des enregistrements de supervision.</p>
+    <table>
+      <thead><tr><th>L'article 13 exige</th><th>Toolkit avec dossier deja genere seulement</th><th>Toolkit apres integration de l'adapter</th><th>Toujours redige et approuve par votre equipe</th></tr></thead>
+      <tbody>
+        <tr><td>Une finalite prevue et une frontiere du systeme</td><td>Cree un brouillon du fichier d'instructions avec le perimetre technique, l'identite actuelle du systeme et les champs d'entree operateur encore ouverts.</td><td>Ajoute des liens depuis ce brouillon vers de vrais runs, des sorties de revue et des preuves d'execution du systeme connecte.</td><td>Redigez la finalite definitive, les usages exclus et la frontiere de deploiement en termes metier.</td></tr><tr><td>Des conditions d'utilisation sure</td><td>Peut pointer vers l'etat qualite actuel, les limites connues et les ecarts residuels deja visibles dans le dossier.</td><td>Peut relier ces limites a la qualite d'execution en conditions reelles, a la revue de mise en production et aux sorties de journalisation provenant de runs reels.</td><td>Definissez les prerequis, conditions d'exploitation locales et hypotheses de deploiement que l'operateur doit respecter.</td></tr><tr><td>Des instructions de revue humaine</td><td>Peut referencer les cas exigeant approbation et les sorties de revue de mise en production deja presentes dans le dossier.</td><td>Peut rattacher les instructions a la synthese de supervision humaine, aux cas bloques et aux preuves d'escalade issues de runs reels.</td><td>Redigez la vraie consigne operateur: quand revoir, quand arreter et qui doit etre implique.</td></tr><tr><td>Une re-evaluation apres changement</td><td>Peut indiquer que les instructions sont liees au dossier actuel et a ses lacunes non resolues.</td><td>Peut montrer les nouvelles preuves et sorties de revue creees apres des changements de modele, prompt, outil ou deploiement.</td><td>Decidez quand les instructions doivent etre reeditees et qui approuve la version mise a jour.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Ce que votre equipe ajoute encore a l'article 13</h2>
+    <p>Le toolkit peut structurer le fichier d'instructions et y rattacher les preuves techniques. Il ne redige pas pour vous les instructions finales destinees a l'equipe de deploiement.</p>
+    <table>
+      <thead><tr><th>Ce que vous ajoutez</th><th>Quand vous l'ajoutez</th><th>Format pratique a utiliser</th></tr></thead>
+      <tbody>
+        <tr><td>Enonce final de la finalite prevue</td><td>Quand vous preparez pour la premiere fois la section Article 13 et chaque fois que le perimetre du systeme change.</td><td>Un court paragraphe nommant la finalite du systeme, ses utilisateurs, les usages exclus et sa frontiere.</td></tr><tr><td>Hypotheses de deploiement et prerequis</td><td>Avant que le systeme ne soit remis a une equipe deployeur ou operateur.</td><td>Une liste des conditions requises comme les sources de donnees, hypotheses de workflow, approbations ou capacite de revue humaine.</td></tr><tr><td>Actions operateur et conditions d'arret</td><td>Quand les regles de revue, d'escalade ou de blocage doivent etre communiquees aux operateurs.</td><td>Une courte liste numerotee: quand revoir, quand arreter, qui contacter et quelles preuves inspecter.</td></tr><tr><td>Formulation destinee au deployeur</td><td>Avant une livraison externe, une revue client ou une validation interne de gouvernance.</td><td>Le texte exact que votre organisation veut montrer aux deployeurs, clients ou equipes operations.</td></tr><tr><td>Responsable de version et decision de reemise</td><td>A chaque fois que les instructions doivent etre mises a jour apres un changement technique.</td><td>Un responsable nomme plus l'etape d'approbation de la version mise a jour.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>L'article 13 est une couche d'instructions a l'interieur du dossier complet</h2>
+    <p>Les fichiers ci-dessous sont ceux qui comptent le plus pour l'article 13. Leur format est le format structure du toolkit pour ces exigences, et non une forme imposee par l'UE.</p>
+    <table>
+      <thead><tr><th>Fichier dans le dossier</th><th>Pourquoi il compte pour l'article 13</th><th>Ouvrir le fichier</th></tr></thead>
+      <tbody>
+        <tr><td>Instructions Article 13 - article-13-instructions.json</td><td>Fichier principal de brouillon pour la section d'instructions de l'article 13.</td><td>demo/eu-ai-act/compliance/article-13-instructions.json</td></tr><tr><td>Synthese de supervision humaine - human-oversight-summary.json</td><td>Soutient les instructions qui disent aux operateurs quand une revue humaine est requise.</td><td>demo/eu-ai-act/compliance/human-oversight-summary.json</td></tr><tr><td>Revue de mise en production - release-review.json</td><td>Soutient toute consigne operateur liee au statut de mise en production ou au suivi requis.</td><td>demo/eu-ai-act/compliance/release-review.json</td></tr><tr><td>Dossier Annexe IV - eu-ai-act-annex-iv.json</td><td>Montre comment les instructions de l'article 13 s'inserent dans le dossier technique plus large.</td><td>demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <section><p>Use browser print to save this document as PDF.</p></section>
+</body>
+</html>

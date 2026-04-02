@@ -1,9 +1,12 @@
-export type ManifestItem = {
+export type ManifestDraftItem = {
   manifest_key: string;
   rel_path: string;
   media_type: string;
-  bytes?: number;
-  sha256?: string;
+};
+
+export type ManifestItem = ManifestDraftItem & {
+  bytes: number;
+  sha256: string;
 };
 
 export type Manifest = {
@@ -23,12 +26,16 @@ export function manifestKeyFor(params: { caseId: string; version: "baseline" | "
   return `${params.caseId}/${params.version}/${params.kind}`;
 }
 
+function sanitizeManifestFragment(value: string): string {
+  return value.trim().replace(/[^A-Za-z0-9._-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 120) || "item";
+}
+
 export function manifestItemForFailure(params: {
   caseId: string;
   version: "baseline" | "new";
   rel_path: string;
   media_type: string;
-}): ManifestItem {
+}): ManifestDraftItem {
   return {
     manifest_key: manifestKeyFor({ caseId: params.caseId, version: params.version, kind: "runner_failure" }),
     rel_path: params.rel_path,
@@ -40,7 +47,7 @@ export function manifestItemForCaseResponse(params: {
   caseId: string;
   version: "baseline" | "new";
   rel_path: string;
-}): ManifestItem {
+}): ManifestDraftItem {
   return {
     manifest_key: manifestKeyFor({ caseId: params.caseId, version: params.version, kind: "case_response" }),
     rel_path: params.rel_path,
@@ -53,7 +60,7 @@ export function manifestItemForFinalOutput(params: {
   version: "baseline" | "new";
   rel_path: string;
   media_type: string;
-}): ManifestItem {
+}): ManifestDraftItem {
   return {
     manifest_key: manifestKeyFor({ caseId: params.caseId, version: params.version, kind: "final_output" }),
     rel_path: params.rel_path,
@@ -65,7 +72,7 @@ export function manifestItemForTraceAnchor(params: {
   caseId: string;
   version: "baseline" | "new";
   rel_path: string;
-}): ManifestItem {
+}): ManifestDraftItem {
   return {
     manifest_key: manifestKeyFor({ caseId: params.caseId, version: params.version, kind: "trace_anchor" }),
     rel_path: params.rel_path,
@@ -73,13 +80,54 @@ export function manifestItemForTraceAnchor(params: {
   };
 }
 
+export function manifestItemForToolTelemetry(params: {
+  caseId: string;
+  version: "baseline" | "new";
+  rel_path: string;
+}): ManifestDraftItem {
+  return {
+    manifest_key: manifestKeyFor({ caseId: params.caseId, version: params.version, kind: "tool_telemetry" }),
+    rel_path: params.rel_path,
+    media_type: "application/json",
+  };
+}
+
+export function manifestItemForToolResultArtifact(params: {
+  caseId: string;
+  version: "baseline" | "new";
+  callId: string;
+  rel_path: string;
+}): ManifestDraftItem {
+  return {
+    manifest_key: manifestKeyFor({
+      caseId: params.caseId,
+      version: params.version,
+      kind: `tool_result_${sanitizeManifestFragment(params.callId)}`,
+    }),
+    rel_path: params.rel_path,
+    media_type: "application/json",
+  };
+}
+
+export function manifestKeyForToolResultArtifact(params: {
+  caseId: string;
+  version: "baseline" | "new";
+  callId: string;
+}): string {
+  return manifestKeyFor({
+    caseId: params.caseId,
+    version: params.version,
+    kind: `tool_result_${sanitizeManifestFragment(params.callId)}`,
+  });
+}
+
 export function manifestItemForRunnerFailureArtifact(params: {
   caseId: string;
   version: "baseline" | "new";
   bodyRel?: string;
   metaRel?: string;
-}): ManifestItem[] {
-  const items: ManifestItem[] = [];
+}): ManifestDraftItem[] {
+  const items: ManifestDraftItem[] = [];
   if (params.bodyRel) {
     items.push({
       manifest_key: manifestKeyFor({ caseId: params.caseId, version: params.version, kind: "runner_failure_body" }),

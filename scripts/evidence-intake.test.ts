@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const REPO_ROOT = process.cwd();
 const tempRoots: string[] = [];
 const servers: Array<ReturnType<typeof createServer>> = [];
+const SCRIPT_TEST_TIMEOUT_MS = 20_000;
 
 function runScript(script: string, args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
@@ -20,7 +21,7 @@ function runScript(script: string, args: string[]): Promise<{ code: number; stdo
         stderr: stderr.toString(),
       });
     });
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 }
 
 async function makeTempRoot() {
@@ -170,7 +171,7 @@ function buildCompletenessReadyCasesFromScaffold(rawCases: Array<Record<string, 
       next.input.context.intake_scaffold.requires_human_review = false;
     }
     return next;
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 }
 
 async function startAdapterStub(handler: (payload: {
@@ -199,7 +200,7 @@ async function startAdapterStub(handler: (payload: {
     res.statusCode = response.status ?? 200;
     res.setHeader("content-type", "application/json");
     res.end(JSON.stringify(response.json));
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
   servers.push(server);
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", () => resolve()));
   const addr = server.address() as AddressInfo;
@@ -252,6 +253,15 @@ function buildRunJson(params: {
     run_id: params.runId,
     incident_id: params.runId,
     agent_id: "support-agent-v2",
+    provenance: {
+      agent_id: "support-agent-v2",
+      agent_version: params.runId === "r1-new" ? "support-agent-v3" : "support-agent-v2",
+      model: "support-model",
+      model_version: params.runId === "r1-new" ? "2026-03-21" : "2026-03-01",
+      prompt_version: params.runId === "r1-new" ? "prompt-v2" : "prompt-v1",
+      tools_version: "tools-v1",
+      config_hash: params.runId === "r1-new" ? "cfg-new-001" : "cfg-baseline-001",
+    },
     base_url: params.baseUrl,
     cases_path: params.casesPath,
     selected_case_ids: params.caseIds,
@@ -401,7 +411,7 @@ describe("evidence intake scripts", () => {
     const parsed = JSON.parse(validateResult.stdout.trim()) as { ok: boolean; errors: Array<{ field: string }> };
     expect(parsed.ok).toBe(false);
     expect(parsed.errors.some((issue) => issue.field.includes("intended_use"))).toBe(true);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("validates a completed intake pair and scaffolds draft cases from it", async () => {
     const root = await makeTempRoot();
@@ -465,7 +475,7 @@ describe("evidence intake scripts", () => {
     };
     expect(riskCase.expected?.action_required).toEqual(["create_ticket"]);
     expect(riskCase.expected?.evidence_required_for_actions).toBe(true);
-  });
+  }, 20_000);
 
   it("raises a hard error when scope tools overlap", async () => {
     const root = await makeTempRoot();
@@ -502,7 +512,7 @@ describe("evidence intake scripts", () => {
     const parsed = JSON.parse(validateResult.stdout.trim()) as { errors: Array<{ field: string; details?: { overlap?: string[] } }> };
     const toolIssue = parsed.errors.find((issue) => issue.field === "system_scope.tools");
     expect(toolIssue?.details?.overlap).toEqual(["search_kb"]);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("fails completeness checks for an untouched scaffold draft", async () => {
     const root = await makeTempRoot();
@@ -546,7 +556,7 @@ describe("evidence intake scripts", () => {
     };
     expect(artifact.ok).toBe(false);
     expect(artifact.coverage.case_index.some((item) => item.requires_human_review)).toBe(true);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("passes completeness checks after the scaffold is reviewed and completed", async () => {
     const root = await makeTempRoot();
@@ -622,7 +632,7 @@ describe("evidence intake scripts", () => {
     expect(artifact.files.artifact_href).toBe("cases-coverage.json");
     expect(artifact.summary.total_cases).toBe(5);
     expect(artifact.coverage.case_index).toHaveLength(5);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("passes adapter onboarding when the adapter exposes the required telemetry depth", async () => {
     const root = await makeTempRoot();
@@ -666,9 +676,23 @@ describe("evidence intake scripts", () => {
           },
           events: [
             { type: "tool_call", ts: 1, call_id: "call-1", tool: "search_kb", args: { query: "ticket" } },
-            { type: "tool_result", ts: 2, call_id: "call-1", status: "ok", payload_summary: { hit_count: 1 } },
+            {
+              type: "tool_result",
+              ts: 2,
+              call_id: "call-1",
+              status: "ok",
+              payload_summary: { hit_count: 1 },
+              result_ref: "tool://call-1",
+            },
             { type: "tool_call", ts: 3, call_id: "call-2", tool: "create_ticket", args: { priority: "normal" } },
-            { type: "tool_result", ts: 4, call_id: "call-2", status: "ok", payload_summary: { ticket_id: "T-123" } },
+            {
+              type: "tool_result",
+              ts: 4,
+              call_id: "call-2",
+              status: "ok",
+              payload_summary: { ticket_id: "T-123" },
+              result_ref: "tool://call-2",
+            },
             {
               type: "final_output",
               ts: 5,
@@ -768,7 +792,7 @@ describe("evidence intake scripts", () => {
       supported: null,
       note: "not_checked_by_intake_check_adapter",
     });
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("blocks adapter onboarding when cases are still an untouched scaffold draft", async () => {
     const root = await makeTempRoot();
@@ -791,7 +815,7 @@ describe("evidence intake scripts", () => {
     expect(parsed.errors.some((issue) => issue.field === "cases")).toBe(true);
     expect(parsed.summary.selected_case_id).toBeNull();
     expect(parsed.summary.health_ok).toBe(false);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("fails adapter onboarding when the live canary lacks required trace and tool telemetry", async () => {
     const root = await makeTempRoot();
@@ -876,7 +900,115 @@ describe("evidence intake scripts", () => {
     };
     expect(artifact.ok).toBe(false);
     expect(artifact.errors.some((issue) => issue.field === "adapter.run_case.trace_anchor")).toBe(true);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
+
+  it("fails adapter onboarding when tool_result output evidence is underspecified", async () => {
+    const root = await makeTempRoot();
+    const { intakeDir, casesPath } = await setupIntakeAndCases(root, "adapter-tool-result-depth", "completed");
+    const stub = await startAdapterStub(({ url, body }) => {
+      if (url === "/health") {
+        return {
+          json: {
+            ok: true,
+            auth_enabled: false,
+            runtime: {
+              timeout_ms: 60000,
+              server_request_timeout_ms: 90000,
+            },
+          },
+        };
+      }
+      if (url === "/run-case" && body.case_id === "__preflight__") {
+        return {
+          json: {
+            case_id: "__preflight__",
+            version: body.version,
+            final_output: { content_type: "text", content: "[adapter:preflight] ok" },
+            events: [],
+            preflight: { ok: true },
+          },
+        };
+      }
+      return {
+        json: {
+          case_id: body.case_id,
+          version: body.version,
+          workflow_id: "stub-adapter",
+          final_output: {
+            content_type: "json",
+            content: {
+              resolution: "Resolved via incomplete telemetry.",
+              ticket_id: "T-123",
+            },
+          },
+          events: [
+            { type: "tool_call", ts: 1, call_id: "call-1", tool: "search_kb", args: { query: "ticket" } },
+            { type: "tool_result", ts: 2, call_id: "call-1", status: "ok" },
+            { type: "tool_call", ts: 3, call_id: "call-2", tool: "create_ticket", args: { priority: "normal" } },
+            { type: "tool_result", ts: 4, call_id: "call-2", status: "timeout", payload_summary: "timeout" },
+            {
+              type: "final_output",
+              ts: 5,
+              content_type: "json",
+              content: { resolution: "Resolved via incomplete telemetry.", ticket_id: "T-123" },
+            },
+          ],
+          proposed_actions: [
+            {
+              action_id: "act-1",
+              action_type: "create_ticket",
+              tool_name: "create_ticket",
+              params: { priority: "normal" },
+              evidence_refs: [{ kind: "tool_result", call_id: "call-2" }],
+            },
+          ],
+          trace_anchor: {
+            trace_id: "11111111111111111111111111111111",
+            span_id: "2222222222222222",
+          },
+          assumption_state: {
+            selected: [
+              {
+                kind: "tool",
+                candidate_id: "search_kb",
+                decision: "selected",
+                reason_code: "selected_by_agent",
+                tool_name: "search_kb",
+              },
+            ],
+            rejected: [],
+          },
+          telemetry_mode: "native",
+        },
+      };
+    });
+
+    const checkResult = await runScript("scripts/evidence-intake-check-adapter.mjs", [
+      "--dir",
+      intakeDir,
+      "--cases",
+      casesPath,
+      "--baseUrl",
+      stub.baseUrl,
+      "--json",
+    ]);
+    expect(checkResult.code).toBe(1);
+    const parsed = JSON.parse(checkResult.stdout.trim()) as {
+      errors: Array<{ field: string }>;
+      summary: { canary_ok: boolean };
+      capabilities: {
+        run_case: {
+          missing_tool_output_evidence_call_ids: string[];
+          missing_tool_error_evidence_call_ids: string[];
+        };
+      };
+    };
+    expect(parsed.summary.canary_ok).toBe(false);
+    expect(parsed.errors.some((issue) => issue.field === "adapter.run_case.tool_result_output_evidence")).toBe(true);
+    expect(parsed.errors.some((issue) => issue.field === "adapter.run_case.tool_result_error_evidence")).toBe(true);
+    expect(parsed.capabilities.run_case.missing_tool_output_evidence_call_ids).toEqual(["call-1"]);
+    expect(parsed.capabilities.run_case.missing_tool_error_evidence_call_ids).toEqual(["call-2"]);
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("passes run comparability checks for a structurally aligned baseline/new pair", async () => {
     const root = await makeTempRoot();
@@ -901,6 +1033,8 @@ describe("evidence intake scripts", () => {
       summary: {
         selected_case_count: number;
         runner_mismatch_count: number;
+        provenance_changed_field_count: number;
+        provenance_missing_count: number;
         environment_difference_count: number;
         environment_missing_signal_count: number;
         missing_artifact_count: number;
@@ -918,6 +1052,8 @@ describe("evidence intake scripts", () => {
     expect(parsed.files.artifact_href).toBe("run-fingerprint.json");
     expect(parsed.summary.selected_case_count).toBe(5);
     expect(parsed.summary.runner_mismatch_count).toBe(0);
+    expect(parsed.summary.provenance_changed_field_count).toBe(0);
+    expect(parsed.summary.provenance_missing_count).toBe(0);
     expect(parsed.summary.environment_difference_count).toBe(0);
     expect(parsed.summary.environment_missing_signal_count).toBeGreaterThan(0);
     expect(parsed.summary.missing_artifact_count).toBe(0);
@@ -990,6 +1126,51 @@ describe("evidence intake scripts", () => {
     };
     expect(artifact.ok).toBe(false);
     expect(artifact.warnings.some((issue) => issue.field === "base_url")).toBe(true);
+  });
+
+  it("fails run comparability checks when baseline or new provenance is missing", async () => {
+    const root = await makeTempRoot();
+    const { intakeDir, casesPath } = await setupIntakeAndCases(root, "runs-missing-provenance", "completed");
+    const cases = JSON.parse(await readFile(casesPath, "utf8")) as Array<{ id: string }>;
+    const caseIds = cases.map((item) => item.id);
+    const baselineRunJson = buildRunJson({
+      runId: "r1",
+      baseUrl: "http://127.0.0.1:8788",
+      casesPath: path.relative(root, casesPath).split(path.sep).join("/"),
+      caseIds,
+      topLevelOverrides: {
+        provenance: undefined,
+      },
+    });
+    const newRunJson = buildRunJson({
+      runId: "r1",
+      baseUrl: "http://127.0.0.1:8788",
+      casesPath: path.relative(root, casesPath).split(path.sep).join("/"),
+      caseIds,
+    });
+    const { baselineDir, newDir } = await setupRunPair(root, casesPath, {
+      baselineRunJson,
+      newRunJson,
+    });
+
+    const checkResult = await runScript("scripts/evidence-intake-check-runs.mjs", [
+      "--dir",
+      intakeDir,
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--json",
+    ]);
+    expect(checkResult.code).toBe(1);
+    const parsed = JSON.parse(checkResult.stdout.trim()) as {
+      errors: Array<{ field: string }>;
+      summary: { provenance_missing_count: number };
+    };
+    expect(parsed.summary.provenance_missing_count).toBeGreaterThan(0);
+    expect(parsed.errors.some((issue) => issue.field === "baseline.run_json.provenance")).toBe(true);
   });
 
   it("fails run comparability checks when a run directory is structurally incomplete", async () => {

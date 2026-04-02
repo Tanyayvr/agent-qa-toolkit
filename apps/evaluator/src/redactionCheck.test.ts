@@ -16,8 +16,18 @@ describe("findUnredactedMarkers", () => {
   });
 
   it("detects extended markers for transferable_extended", () => {
-    const text = "ip 10.1.2.3 phone +1 415 555 1212 cc 4111-1111-1111-1111 jwt eyJaaa.bbb.ccc";
+    const text = "ip 10.1.2.3 phone +1 415 555 1212 cc 4111-1111-1111-1111 jwt eyJaaa.bbb.ccc iban DE89 3704 0044 0532 0130 00 bic DEUTDEFF";
     const hits = findUnredactedMarkers(text, "transferable_extended");
-    expect(hits).toEqual(expect.arrayContaining(["ip", "phone", "credit_card", "jwt"]));
+    expect(hits).toEqual(expect.arrayContaining(["ip", "phone", "credit_card", "jwt", "iban", "bic_swift"]));
+  });
+
+  it("detects configured custom markers", () => {
+    const text = "claim_ref=FIN-12345";
+    const hits = findUnredactedMarkers(text, "transferable_extended", {
+      REDACTION_CUSTOM_PATTERNS_JSON: JSON.stringify([
+        { name: "claim_ref", pattern: "\\bFIN-\\d{5}\\b", presets: ["transferable_extended"] },
+      ]),
+    });
+    expect(hits).toContain("claim_ref");
   });
 });

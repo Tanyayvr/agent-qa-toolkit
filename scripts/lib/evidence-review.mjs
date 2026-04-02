@@ -112,6 +112,9 @@ function buildBundleArtifacts(reportDir, compareReport, framework) {
     compare_report_href: "compare-report.json",
     report_html_href: "report.html",
     manifest_href: "artifacts/manifest.json",
+    ...(typeof compareReport?.bundle_exports?.retention_archive_controls_href === "string"
+      ? { retention_archive_controls_href: compareReport.bundle_exports.retention_archive_controls_href }
+      : {}),
   };
 
   if (framework === "EU_AI_ACT") {
@@ -124,7 +127,6 @@ function buildBundleArtifacts(reportDir, compareReport, framework) {
       coverage_href: eu.coverage_href,
       annex_iv_href: eu.annex_iv_href,
       compliance_report_html_href: eu.report_html_href,
-      evidence_index_href: eu.evidence_index_href,
       article_13_instructions_href: eu.article_13_instructions_href,
       article_9_risk_register_href: eu.article_9_risk_register_href,
       article_72_monitoring_plan_href: eu.article_72_monitoring_plan_href,
@@ -132,6 +134,27 @@ function buildBundleArtifacts(reportDir, compareReport, framework) {
       human_oversight_summary_href: eu.human_oversight_summary_href,
       release_review_href: eu.release_review_href,
       post_market_monitoring_href: eu.post_market_monitoring_href,
+      ...(typeof eu.article_10_data_governance_href === "string"
+        ? { article_10_data_governance_href: eu.article_10_data_governance_href }
+        : {}),
+      ...(typeof eu.reviewer_html_href === "string" ? { reviewer_html_href: eu.reviewer_html_href } : {}),
+      ...(typeof eu.reviewer_markdown_href === "string" ? { reviewer_markdown_href: eu.reviewer_markdown_href } : {}),
+      ...(typeof eu.evidence_index_href === "string" ? { evidence_index_href: eu.evidence_index_href } : {}),
+      ...(typeof eu.article_16_provider_obligations_href === "string"
+        ? { article_16_provider_obligations_href: eu.article_16_provider_obligations_href }
+        : {}),
+      ...(typeof eu.article_43_conformity_assessment_href === "string"
+        ? { article_43_conformity_assessment_href: eu.article_43_conformity_assessment_href }
+        : {}),
+      ...(typeof eu.article_47_declaration_of_conformity_href === "string"
+        ? { article_47_declaration_of_conformity_href: eu.article_47_declaration_of_conformity_href }
+        : {}),
+      ...(typeof eu.annex_v_declaration_content_href === "string"
+        ? { annex_v_declaration_content_href: eu.annex_v_declaration_content_href }
+        : {}),
+      ...(typeof eu.article_73_serious_incident_pack_href === "string"
+        ? { article_73_serious_incident_pack_href: eu.article_73_serious_incident_pack_href }
+        : {}),
     };
   }
 
@@ -336,6 +359,14 @@ function preferredEuScaffoldOwner(intake, sectionId) {
       [owners.release_owner, "release_owner"],
     ]);
   }
+  if (sectionId === "article_73_serious_incident_pack") {
+    return pick([
+      [owners.compliance_owner, "compliance_owner"],
+      [owners.system_owner, "system_owner"],
+      [owners.release_owner, "release_owner"],
+      [owners.legal_reviewer, "legal_reviewer"],
+    ]);
+  }
   return pick([
     [owners.system_owner, "system_owner"],
     [owners.compliance_owner, "compliance_owner"],
@@ -343,9 +374,40 @@ function preferredEuScaffoldOwner(intake, sectionId) {
   ]);
 }
 
-function collectEuScaffoldInputs(article13Instructions, article17QmsLite, article72MonitoringPlan) {
-  const sections = [
-    {
+function collectEuScaffoldInputs(
+  article10DataGovernance,
+  article13Instructions,
+  article16ProviderObligations,
+  article17QmsLite,
+  article43ConformityAssessment,
+  article47DeclarationOfConformity,
+  article72MonitoringPlan,
+  annexVDeclarationContent,
+  article73SeriousIncidentPack
+) {
+  const sections = [];
+  if (article10DataGovernance) {
+    sections.push({
+      section_id: "article_10_data_governance",
+      article: "Art_10",
+      title: "Article 10 data and data governance",
+      artifact_href: "article_10_data_governance_href",
+      inputs: [
+        ...((article10DataGovernance?.document_scope?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "document_scope.operator_inputs_required",
+        })) || []),
+        ...((article10DataGovernance?.data_governance_sections || []).flatMap((section) =>
+          (section?.operator_inputs_required || []).map((label) => ({
+            label,
+            source_ref: `data_governance_sections.${section.id}`,
+          }))
+        ) || []),
+      ],
+      residual_gaps: article10DataGovernance?.residual_gaps || [],
+    });
+  }
+  sections.push({
       section_id: "article_13_instructions",
       article: "Art_13",
       title: "Article 13 instructions for use",
@@ -355,8 +417,29 @@ function collectEuScaffoldInputs(article13Instructions, article17QmsLite, articl
         source_ref: "document_scope.operator_inputs_required",
       })),
       residual_gaps: article13Instructions?.residual_gaps || [],
-    },
-    {
+    });
+  if (article16ProviderObligations) {
+    sections.push({
+      section_id: "article_16_provider_obligations",
+      article: "Art_16",
+      title: "Article 16 provider obligations",
+      artifact_href: "article_16_provider_obligations_href",
+      inputs: [
+        ...((article16ProviderObligations?.document_scope?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "document_scope.operator_inputs_required",
+        })) || []),
+        ...((article16ProviderObligations?.obligations || []).flatMap((item) =>
+          (item?.operator_inputs_required || []).map((label) => ({
+            label,
+            source_ref: `obligations.${item.id}`,
+          }))
+        ) || []),
+      ],
+      residual_gaps: article16ProviderObligations?.residual_gaps || [],
+    });
+  }
+  sections.push({
       section_id: "article_17_qms_lite",
       article: "Art_17",
       title: "Article 17 QMS-lite",
@@ -374,8 +457,46 @@ function collectEuScaffoldInputs(article13Instructions, article17QmsLite, articl
         ) || []),
       ],
       residual_gaps: article17QmsLite?.residual_gaps || [],
-    },
-    {
+    });
+  if (article43ConformityAssessment) {
+    sections.push({
+      section_id: "article_43_conformity_assessment",
+      article: "Art_43",
+      title: "Article 43 conformity assessment",
+      artifact_href: "article_43_conformity_assessment_href",
+      inputs: [
+        ...((article43ConformityAssessment?.document_scope?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "document_scope.operator_inputs_required",
+        })) || []),
+        ...((article43ConformityAssessment?.conformity_route_inputs?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "conformity_route_inputs.operator_inputs_required",
+        })) || []),
+      ],
+      residual_gaps: article43ConformityAssessment?.residual_gaps || [],
+    });
+  }
+  if (article47DeclarationOfConformity) {
+    sections.push({
+      section_id: "article_47_declaration_of_conformity",
+      article: "Art_47",
+      title: "Article 47 declaration of conformity",
+      artifact_href: "article_47_declaration_of_conformity_href",
+      inputs: [
+        ...((article47DeclarationOfConformity?.document_scope?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "document_scope.operator_inputs_required",
+        })) || []),
+        ...((article47DeclarationOfConformity?.declaration_inputs?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "declaration_inputs.operator_inputs_required",
+        })) || []),
+      ],
+      residual_gaps: article47DeclarationOfConformity?.residual_gaps || [],
+    });
+  }
+  sections.push({
       section_id: "article_72_monitoring_plan",
       article: "Art_72",
       title: "Article 72 monitoring plan",
@@ -391,8 +512,45 @@ function collectEuScaffoldInputs(article13Instructions, article17QmsLite, articl
         })) || []),
       ],
       residual_gaps: article72MonitoringPlan?.residual_gaps || [],
-    },
-  ];
+    });
+  if (annexVDeclarationContent) {
+    sections.push({
+      section_id: "annex_v_declaration_content",
+      article: "Annex_V",
+      title: "Annex V declaration content",
+      artifact_href: "annex_v_declaration_content_href",
+      inputs: [
+        ...((annexVDeclarationContent?.document_scope?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "document_scope.operator_inputs_required",
+        })) || []),
+        ...((annexVDeclarationContent?.declaration_content_items || []).flatMap((item) =>
+          (item?.operator_inputs_required || []).map((label) => ({
+            label,
+            source_ref: `declaration_content_items.${item.id}`,
+          }))
+        ) || []),
+      ],
+      residual_gaps: annexVDeclarationContent?.residual_gaps || [],
+    });
+  }
+  sections.push({
+      section_id: "article_73_serious_incident_pack",
+      article: "Art_73",
+      title: "Article 73 serious incident pack",
+      artifact_href: "article_73_serious_incident_pack_href",
+      inputs: [
+        ...((article73SeriousIncidentPack?.document_scope?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "document_scope.operator_inputs_required",
+        })) || []),
+        ...((article73SeriousIncidentPack?.notification_preparation?.operator_inputs_required || []).map((label) => ({
+          label,
+          source_ref: "notification_preparation.operator_inputs_required",
+        })) || []),
+      ],
+      residual_gaps: article73SeriousIncidentPack?.residual_gaps || [],
+    });
 
   return sections.map((section) => {
     const byLabel = new Map();
@@ -421,9 +579,15 @@ function collectEuScaffoldInputs(article13Instructions, article17QmsLite, articl
 function buildEuScaffoldCompletion(context) {
   if (context.framework !== "EU_AI_ACT") return null;
   const sections = collectEuScaffoldInputs(
+    context.article10DataGovernance,
     context.article13Instructions,
+    context.article16ProviderObligations,
     context.article17QmsLite,
-    context.article72MonitoringPlan
+    context.article43ConformityAssessment,
+    context.article47DeclarationOfConformity,
+    context.article72MonitoringPlan,
+    context.annexVDeclarationContent,
+    context.article73SeriousIncidentPack
   );
 
   return Object.fromEntries(
@@ -592,28 +756,97 @@ export function resolveReviewContext({ cwd, reportDir, profile, explicitIntakeDi
   ensureFile(path.join(reportDirAbs, "artifacts", "manifest.json"), "artifacts/manifest.json");
 
   const compareReport = readJsonSafe(compareReportPath);
+  if (typeof compareReport?.bundle_exports?.retention_archive_controls_href === "string") {
+    ensureFile(
+      path.join(reportDirAbs, compareReport.bundle_exports.retention_archive_controls_href),
+      "retention archive controls export"
+    );
+  }
   const framework = compareReport?.compliance_exports?.eu_ai_act ? "EU_AI_ACT" : "AGENT_EVIDENCE";
   const bundleArtifacts = buildBundleArtifacts(reportDirAbs, compareReport, framework);
 
   let coverage = null;
   let releaseReview = null;
   let oversight = null;
+  let article10DataGovernance = null;
   let article13Instructions = null;
+  let article16ProviderObligations = null;
   let article17QmsLite = null;
+  let article43ConformityAssessment = null;
+  let article47DeclarationOfConformity = null;
   let article72MonitoringPlan = null;
+  let annexVDeclarationContent = null;
+  let article73SeriousIncidentPack = null;
   if (framework === "EU_AI_ACT") {
     ensureFile(path.join(reportDirAbs, bundleArtifacts.coverage_href), "EU coverage export");
+    if (typeof bundleArtifacts.reviewer_html_href === "string") {
+      ensureFile(path.join(reportDirAbs, bundleArtifacts.reviewer_html_href), "EU reviewer HTML export");
+    }
+    if (typeof bundleArtifacts.reviewer_markdown_href === "string") {
+      ensureFile(path.join(reportDirAbs, bundleArtifacts.reviewer_markdown_href), "EU reviewer markdown export");
+    }
     ensureFile(path.join(reportDirAbs, bundleArtifacts.release_review_href), "EU release-review export");
     ensureFile(path.join(reportDirAbs, bundleArtifacts.human_oversight_summary_href), "EU human-oversight export");
     ensureFile(path.join(reportDirAbs, bundleArtifacts.article_13_instructions_href), "EU Article 13 instructions export");
+    if (typeof bundleArtifacts.article_10_data_governance_href === "string") {
+      ensureFile(path.join(reportDirAbs, bundleArtifacts.article_10_data_governance_href), "EU Article 10 data-governance export");
+    }
+    if (typeof bundleArtifacts.article_16_provider_obligations_href === "string") {
+      ensureFile(
+        path.join(reportDirAbs, bundleArtifacts.article_16_provider_obligations_href),
+        "EU Article 16 provider-obligations export"
+      );
+    }
+    if (typeof bundleArtifacts.article_43_conformity_assessment_href === "string") {
+      ensureFile(
+        path.join(reportDirAbs, bundleArtifacts.article_43_conformity_assessment_href),
+        "EU Article 43 conformity-assessment export"
+      );
+    }
+    if (typeof bundleArtifacts.article_47_declaration_of_conformity_href === "string") {
+      ensureFile(
+        path.join(reportDirAbs, bundleArtifacts.article_47_declaration_of_conformity_href),
+        "EU Article 47 declaration-of-conformity export"
+      );
+    }
     ensureFile(path.join(reportDirAbs, bundleArtifacts.article_17_qms_lite_href), "EU Article 17 QMS-lite export");
     ensureFile(path.join(reportDirAbs, bundleArtifacts.article_72_monitoring_plan_href), "EU Article 72 monitoring-plan export");
+    if (typeof bundleArtifacts.annex_v_declaration_content_href === "string") {
+      ensureFile(path.join(reportDirAbs, bundleArtifacts.annex_v_declaration_content_href), "EU Annex V declaration-content export");
+    }
+    if (typeof bundleArtifacts.article_73_serious_incident_pack_href === "string") {
+      ensureFile(path.join(reportDirAbs, bundleArtifacts.article_73_serious_incident_pack_href), "EU Article 73 serious-incident pack export");
+    }
     coverage = readJsonSafe(path.join(reportDirAbs, bundleArtifacts.coverage_href)).coverage || [];
     releaseReview = readJsonSafe(path.join(reportDirAbs, bundleArtifacts.release_review_href));
     oversight = readJsonSafe(path.join(reportDirAbs, bundleArtifacts.human_oversight_summary_href));
     article13Instructions = readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_13_instructions_href));
+    article10DataGovernance =
+      typeof bundleArtifacts.article_10_data_governance_href === "string"
+        ? readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_10_data_governance_href))
+        : null;
+    article16ProviderObligations =
+      typeof bundleArtifacts.article_16_provider_obligations_href === "string"
+        ? readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_16_provider_obligations_href))
+        : null;
+    article43ConformityAssessment =
+      typeof bundleArtifacts.article_43_conformity_assessment_href === "string"
+        ? readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_43_conformity_assessment_href))
+        : null;
+    article47DeclarationOfConformity =
+      typeof bundleArtifacts.article_47_declaration_of_conformity_href === "string"
+        ? readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_47_declaration_of_conformity_href))
+        : null;
     article17QmsLite = readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_17_qms_lite_href));
     article72MonitoringPlan = readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_72_monitoring_plan_href));
+    annexVDeclarationContent =
+      typeof bundleArtifacts.annex_v_declaration_content_href === "string"
+        ? readJsonSafe(path.join(reportDirAbs, bundleArtifacts.annex_v_declaration_content_href))
+        : null;
+    article73SeriousIncidentPack =
+      typeof bundleArtifacts.article_73_serious_incident_pack_href === "string"
+        ? readJsonSafe(path.join(reportDirAbs, bundleArtifacts.article_73_serious_incident_pack_href))
+        : null;
   }
 
   let intake = null;
@@ -634,9 +867,15 @@ export function resolveReviewContext({ cwd, reportDir, profile, explicitIntakeDi
     coverage,
     releaseReview,
     oversight,
+    article10DataGovernance,
     article13Instructions,
+    article16ProviderObligations,
     article17QmsLite,
+    article43ConformityAssessment,
+    article47DeclarationOfConformity,
     article72MonitoringPlan,
+    annexVDeclarationContent,
+    article73SeriousIncidentPack,
     intake,
     correctiveActionRegister: null,
   };
@@ -1030,11 +1269,21 @@ export function validateReviewDecision({ context, reviewDecision, handoffNoteTex
 
   if (context.framework === "EU_AI_ACT") {
     const euScaffoldCompletion = reviewDecision?.human_completion?.eu_scaffold_completion;
-    const sectionIds = ["article_13_instructions", "article_17_qms_lite", "article_72_monitoring_plan"];
+    const sectionIds = [
+      "article_13_instructions",
+      "article_17_qms_lite",
+      "article_72_monitoring_plan",
+      ...(context.article10DataGovernance ? ["article_10_data_governance"] : []),
+      ...(context.article16ProviderObligations ? ["article_16_provider_obligations"] : []),
+      ...(context.article43ConformityAssessment ? ["article_43_conformity_assessment"] : []),
+      ...(context.article47DeclarationOfConformity ? ["article_47_declaration_of_conformity"] : []),
+      ...(context.annexVDeclarationContent ? ["annex_v_declaration_content"] : []),
+      ...(context.article73SeriousIncidentPack ? ["article_73_serious_incident_pack"] : []),
+    ];
     if (!asRecord(euScaffoldCompletion)) {
       errors.push({
         field: "human_completion.eu_scaffold_completion",
-        message: "EU bundles require a structured owner-completion record for Article 13, Article 17, and Article 72 scaffolds",
+        message: "EU bundles require a structured owner-completion record for each statutory scaffold present in the bundle",
       });
     } else {
       for (const sectionId of sectionIds) {

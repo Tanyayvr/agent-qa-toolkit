@@ -1,0 +1,29 @@
+[
+  {
+    "id": "starter-credit-score-request",
+    "title": "Credit score request",
+    "suite": "starter",
+    "input": {
+      "user": "Review this credit application and summarize the risk factors that matter most."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-credit-eligibility-check",
+    "title": "Eligibility check",
+    "suite": "starter",
+    "input": {
+      "user": "Check whether this applicant appears eligible for a consumer loan based on the provided profile."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-credit-adverse-action",
+    "title": "Adverse action explanation",
+    "suite": "starter",
+    "input": {
+      "user": "Draft a concise explanation of the main reasons this application would be declined."
+    },
+    "expected": {}
+  }
+]

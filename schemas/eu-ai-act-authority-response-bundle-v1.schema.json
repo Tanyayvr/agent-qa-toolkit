@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EU AI Act Authority Response Bundle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "framework",
+    "report_id",
+    "generated_at",
+    "source_verification",
+    "authority_request_summary",
+    "package_scope",
+    "source_bundle_summary",
+    "included_artifacts",
+    "operator_required_inputs",
+    "residual_gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "eu_ai_act_authority_response_bundle" },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "number" },
+    "source_verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "strict", "status"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "strict": { "type": "boolean" },
+        "status": { "const": "passed" }
+      }
+    },
+    "authority_request_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_type",
+        "requesting_party",
+        "jurisdiction",
+        "submission_deadline",
+        "response_owner",
+        "legal_approver",
+        "include_source_inputs",
+        "legal_hold_status",
+        "external_surfaces_reviewed"
+      ],
+      "properties": {
+        "request_type": { "type": "string", "minLength": 1 },
+        "requesting_party": { "type": "string", "minLength": 1 },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "submission_deadline": { "type": "string", "minLength": 1 },
+        "response_owner": { "type": "string", "minLength": 1 },
+        "legal_approver": { "type": "string", "minLength": 1 },
+        "include_source_inputs": { "type": "boolean" },
+        "legal_hold_status": { "type": "string", "minLength": 1 },
+        "external_surfaces_reviewed": { "type": "boolean" }
+      }
+    },
+    "package_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "includes_source_inputs",
+        "includes_review_artifacts",
+        "case_replay_count",
+        "copied_top_level_paths",
+        "copied_file_count"
+      ],
+      "properties": {
+        "includes_source_inputs": { "type": "boolean" },
+        "includes_review_artifacts": { "type": "boolean" },
+        "case_replay_count": { "type": "number", "minimum": 0 },
+        "copied_top_level_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "copied_file_count": { "type": "number", "minimum": 0 }
+      }
+    },
+    "source_bundle_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_quality_status",
+        "cases_requiring_approval",
+        "cases_block_recommended",
+        "release_review_status",
+        "monitoring_status"
+      ],
+      "properties": {
+        "execution_quality_status": { "enum": ["healthy", "degraded"] },
+        "cases_requiring_approval": { "type": "number", "minimum": 0 },
+        "cases_block_recommended": { "type": "number", "minimum": 0 },
+        "release_review_status": { "type": ["string", "null"] },
+        "monitoring_status": { "type": ["string", "null"] }
+      }
+    },
+    "included_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compare_report_href",
+        "report_html_href",
+        "manifest_href",
+        "retention_archive_controls_href",
+        "compliance_dir_href",
+        "authority_request_href",
+        "case_replay_hrefs",
+        "coverage_href",
+        "annex_iv_href",
+        "article_10_data_governance_href",
+        "reviewer_html_href",
+        "reviewer_markdown_href",
+        "evidence_index_href",
+        "article_13_instructions_href",
+        "article_16_provider_obligations_href",
+        "article_43_conformity_assessment_href",
+        "article_47_declaration_of_conformity_href",
+        "article_9_risk_register_href",
+        "article_17_qms_lite_href",
+        "article_72_monitoring_plan_href",
+        "annex_v_declaration_content_href",
+        "article_73_serious_incident_pack_href",
+        "human_oversight_summary_href",
+        "release_review_href",
+        "post_market_monitoring_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string", "minLength": 1 },
+        "report_html_href": { "type": "string", "minLength": 1 },
+        "manifest_href": { "type": "string", "minLength": 1 },
+        "retention_archive_controls_href": { "type": "string", "minLength": 1 },
+        "assets_dir_href": { "type": "string", "minLength": 1 },
+        "compliance_dir_href": { "type": "string", "minLength": 1 },
+        "review_dir_href": { "type": "string", "minLength": 1 },
+        "authority_request_href": { "type": "string", "minLength": 1 },
+        "source_inputs_href": { "type": "string", "minLength": 1 },
+        "review_decision_href": { "type": "string", "minLength": 1 },
+        "handoff_note_href": { "type": "string", "minLength": 1 },
+        "case_replay_hrefs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "coverage_href": { "type": "string", "minLength": 1 },
+        "annex_iv_href": { "type": "string", "minLength": 1 },
+        "article_10_data_governance_href": { "type": "string", "minLength": 1 },
+        "compliance_report_html_href": { "type": "string", "minLength": 1 },
+        "reviewer_html_href": { "type": "string", "minLength": 1 },
+        "reviewer_markdown_href": { "type": "string", "minLength": 1 },
+        "reviewer_pdf_href": { "type": "string", "minLength": 1 },
+        "evidence_index_href": { "type": "string", "minLength": 1 },
+        "article_13_instructions_href": { "type": "string", "minLength": 1 },
+        "article_16_provider_obligations_href": { "type": "string", "minLength": 1 },
+        "article_43_conformity_assessment_href": { "type": "string", "minLength": 1 },
+        "article_47_declaration_of_conformity_href": { "type": "string", "minLength": 1 },
+        "article_9_risk_register_href": { "type": "string", "minLength": 1 },
+        "article_17_qms_lite_href": { "type": "string", "minLength": 1 },
+        "article_72_monitoring_plan_href": { "type": "string", "minLength": 1 },
+        "annex_v_declaration_content_href": { "type": "string", "minLength": 1 },
+        "article_73_serious_incident_pack_href": { "type": "string", "minLength": 1 },
+        "human_oversight_summary_href": { "type": "string", "minLength": 1 },
+        "release_review_href": { "type": "string", "minLength": 1 },
+        "post_market_monitoring_href": { "type": "string", "minLength": 1 }
+      }
+    },
+    "operator_required_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "residual_gaps": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

@@ -49,6 +49,17 @@ export type RunnerConfig = {
   retentionDays: number;
 
   runs: number;
+  provenance?: ProvenanceIdentity;
+};
+
+export type ProvenanceIdentity = {
+  agent_id: string;
+  agent_version: string;
+  model: string;
+  model_version: string;
+  prompt_version: string;
+  tools_version: string;
+  config_hash: string;
 };
 
 export type TimeoutAutoResolution = {

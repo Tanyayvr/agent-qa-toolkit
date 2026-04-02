@@ -27,6 +27,7 @@ Per run, the toolkit produces a portable release-evidence package you can inspec
 - per-case replay diffs (`case-<id>.html`)
 - machine contract (`compare-report.json`)
 - manifest-indexed evidence with sha256 integrity
+- retention and archive controls scaffold (`archive/retention-controls.json`)
 - strict offline verify for portability and integrity
 - deterministic per-case gate: `none | require_approval | block`
 - structured review handoff (`review/review-decision.json`, `review/handoff-note.md`)
@@ -185,6 +186,5 @@ The toolkit itself is reproducible and claim-verifiable: see [VERIFY.md](VERIFY.
 | CI thresholds and gates | [ci.md](ci.md) |
 | Agent integration contract | [agent-integration-contract.md](agent-integration-contract.md) |
 | Architecture | [architecture.md](architecture.md) |
-| Operations model | [evidence-operations-model.md](evidence-operations-model.md) |
 | Reproducibility checklist | [VERIFY.md](VERIFY.md) |
-| Product surface | [agent-evidence-platform.md](agent-evidence-platform.md) |
+| Self-hosted deployment | [self-hosted.md](self-hosted.md) |

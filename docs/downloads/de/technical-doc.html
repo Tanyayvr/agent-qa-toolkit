@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EU KI-Verordnung Annex IV - Vorlage fuer technische Dokumentation</title>
+  <title>EU KI-Verordnung Anhang IV - Vorlage fuer technische Dokumentation</title>
   <style>
     body { font-family: Inter, Arial, sans-serif; max-width: 860px; margin: 40px auto; color: #0f172a; line-height: 1.6; }
     h1, h2 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -0.03em; }
@@ -13,17 +13,44 @@
   </style>
 </head>
 <body>
-  <h1>EU KI-Verordnung Annex IV - Vorlage fuer technische Dokumentation</h1>
-  <section><p>Annex IV ist der Ort, an dem das gesamte Paket konsistent werden muss: Systemidentitaet, Zweck, Architektur, Logging und Evidence muessen zusammenpassen.</p></section>
+  <h1>EU KI-Verordnung Anhang IV - Vorlage fuer technische Dokumentation</h1>
+  <section><p>Anhang IV ist der Ort, an dem das gesamte Paket konsistent werden muss: Systemidentitaet, Zweck, Architektur, Journalisierung und Nachweise muessen zusammenpassen.</p></section>
+  
   <section>
-    <h2>Section guide</h2>
+    <h2>Was Anhang IV verlangt, was das Toolkit beitragen kann und was Ihr Team weiter verantwortet</h2>
+    <p>Ohne Verbindung zu Ihrem Agenten kann das Toolkit das Dossier nur aus dem bereits erzeugten Paket entwerfen. Nach der Adapter-Integration kann es die Dossier-Referenzen mit echten Runs, Artikel-Ausgaben und wiederkehrenden Nachweisen verknuepfen.</p>
     <table>
-      <thead><tr><th>Section</th><th>Meaning</th><th>Evidence</th></tr></thead>
+      <thead><tr><th>Anhang IV verlangt</th><th>Toolkit nur mit bereits erzeugtem Paket</th><th>Toolkit nach Adapter-Integration</th><th>Weiter von Ihrem Team geschrieben und freigegeben</th></tr></thead>
       <tbody>
-        <tr><td>Systemidentitaet</td><td>Name, Version und Einsatzkontext.</td><td>Report-Metadaten und Environment.</td></tr><tr><td>Zweck</td><td>Wofuer wird das System genutzt?</td><td>Builder-Export plus ergaenzender Text.</td></tr><tr><td>Risikokontrollen</td><td>Kontrollen und Rest-Risiken.</td><td>Artikel-9-Evidence und Scanner-Ergebnisse.</td></tr><tr><td>Traceability</td><td>Wie bleiben Artefakte nachvollziehbar?</td><td>Manifest und Logging-Evidence.</td></tr><tr><td>Oversight</td><td>Wie wird freigegeben?</td><td>Oversight Summary und Release Review.</td></tr>
+        <tr><td>Systemidentitaet und technischer Kontext</td><td>Erzeugt einen Dossier-Entwurf mit aktueller Systemidentitaet, Umgebung, Nachweis-Referenzen und offenen Bereichen.</td><td>Verknuepft diese Identitaet mit echten Runs, Versionen und den zugehoerigen Artikel-Ausgaben des verbundenen Systems.</td><td>Schreiben Sie den finalen Einsatzkontext, die organisationsspezifische Systemgrenze und die Erlaeuterung zu externen Komponenten.</td></tr><tr><td>Zweck und operative Randbedingungen</td><td>Kann offene Operator-Eingaben fuer Zweck und Randbedingungen sichtbar machen.</td><td>Kann diese Felder mit den neuesten Ausgaben aus Artikel 13, Aufsicht und Pruefung fuer das verbundene System verknuepfen.</td><td>Schreiben Sie den finalen Zweck, Zielnutzer, ausgeschlossene Nutzungen und Einsatzannahmen.</td></tr><tr><td>Verknuepfte Nachweise ueber Risiko, Journalisierung, Aufsicht und Qualitaet</td><td>Kann das Dossier bereits mit den erzeugten Ausgaben zu Artikel 9, 12, 13, 14, 15, 17, 72 und 73 verknuepfen.</td><td>Haelt diese Verknuepfungen aktuell, waehrend das verbundene System erneut ausgefuehrt und ueberwacht wird.</td><td>Entscheiden Sie, ob die verknuepften Nachweise fuer die Aussage im Dossier ausreichen.</td></tr><tr><td>Ein vollstaendiges Dossier fuer die finale Freigabe</td><td>Kann offene Bereiche und Rest-Luecken im erzeugten Dossier auflisten.</td><td>Schreibt die fehlenden Abschnitte auch nach der Integration nicht selbst und trifft keine Freigabeentscheidung ueber die Suffizienz des Dossiers.</td><td>Vervollstaendigen Sie die restlichen Abschnitte, fuegen Sie die juristische Interpretation hinzu und geben Sie das finale Anhang-IV-Paket frei.</td></tr>
       </tbody>
     </table>
   </section>
+  
+  
+  <section>
+    <h2>Was Ihr Team noch zu Anhang IV ergaenzt</h2>
+    <p>Das Toolkit kann das technische Rueckgrat des Dossiers erzeugen. Es ersetzt nicht die von Menschen verfassten Teile des finalen Anhang-IV-Pakets.</p>
+    <table>
+      <thead><tr><th>Was Sie ergaenzen</th><th>Wann Sie es ergaenzen</th><th>Praktisches Format</th></tr></thead>
+      <tbody>
+        <tr><td>Zweck und Zielnutzer</td><td>Wenn das Dossier erstmals zusammengestellt wird und immer dann, wenn sich der Einsatzumfang aendert.</td><td>Ein kurzer Zweck-Abschnitt mit System, Zielnutzern, Einsatzkontext und ausgeschlossenen Nutzungen.</td></tr><tr><td>Einsatzkontext und Systemgrenze</td><td>Bevor das Dossier ausserhalb des Engineering-Workflows geteilt wird.</td><td>Eine knappe Architektur- oder Abgrenzungsnotiz mit externen Systemen, Abhaengigkeiten und der Produktgrenze.</td></tr><tr><td>Organisation und Rollen des Operators</td><td>Wenn das Dossier zeigen muss, wer Aufsicht, Inbetriebnahme und die Beobachtung nach dem Inverkehrbringen verantwortet.</td><td>Eine kurze Rollenkarte mit verantwortlichen Teams und Freigabepunkten.</td></tr><tr><td>Von Menschen geschriebene Erklaerung fuer offene Bereiche</td><td>Wenn im generierten Dossier noch Rest-Luecken oder Operator-Eingaben offen sind.</td><td>Eine kurze Erlaeuterung, wie diese Luecken behandelt werden oder warum sie akzeptabel bleiben.</td></tr><tr><td>Finale juristische und Governance-Freigabe</td><td>An dem Punkt, an dem das Anhang-IV-Paket als offizielles Dossier gilt.</td><td>Ein Freigabe-Eintrag mit Name, Datum und eventuellen Bedingungen der Freigabe.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Anhang IV ist das Top-Level-Dossier, das die Artikel-Ausgaben zusammenfuehrt</h2>
+    <p>Die folgenden Dateien sind die wichtigsten Nachweisflaechen fuer Anhang IV. Ihr Layout ist das strukturierte Format des Toolkits fuer diese Anforderungen, nicht eine gesetzlich vorgeschriebene Form.</p>
+    <table>
+      <thead><tr><th>Datei im Paket</th><th>Warum sie fuer Anhang IV wichtig ist</th><th>Datei oeffnen</th></tr></thead>
+      <tbody>
+        <tr><td>Anhang-IV-Dossier - eu-ai-act-annex-iv.json</td><td>Hauptentwurf des Dossiers mit Systemidentitaet, Klauselabdeckung und verknuepften Artikel-Ausgaben.</td><td>demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json</td></tr><tr><td>Nachweisindex - evidence-index.json</td><td>Zeigt die abschnittsbezogenen Nachweis-Selektoren und Rest-Luecken hinter dem Dossier.</td><td>demo/eu-ai-act/compliance/evidence-index.json</td></tr><tr><td>Artikel-9-Risikoregister - article-9-risk-register.json</td><td>Eine der verknuepften Artikel-Ausgaben, auf die sich das Dossier fuer Risikomanagement stuetzt.</td><td>demo/eu-ai-act/compliance/article-9-risk-register.json</td></tr><tr><td>Artikel-13-Anweisungen - article-13-instructions.json</td><td>Eine der verknuepften Artikel-Ausgaben fuer Zweck und Betriebsanweisungen.</td><td>demo/eu-ai-act/compliance/article-13-instructions.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
   <section><p>Use browser print to save this document as PDF.</p></section>
 </body>
 </html>

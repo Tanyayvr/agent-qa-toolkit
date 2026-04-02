@@ -69,7 +69,7 @@ The repository now keeps a tighter split between public product docs and interna
 
 - public entrypoint: [../README.md](../README.md)
 - public engineering path: [engineering-qualification-path.md](engineering-qualification-path.md)
-- public EU governance path: [eu-governance-evidence-path.md](eu-governance-evidence-path.md)
+- public EU path: [eu-ai-act-evidence-engine.md](eu-ai-act-evidence-engine.md)
 - public architecture and operator docs: this directory
 - internal messaging and GTM source of truth: `docs/internal/market/`
 
@@ -120,7 +120,7 @@ Automation boundary:
 - automated: schema validation, cross-file consistency checks, starter case scaffolding, case completeness checks against the intake contract, adapter onboarding probes against `/health` plus live `/run-case`, and baseline/new run comparability checks before packaging
 - still human-owned: intended use, business harms, deployment assumptions, approval/block policy choices, final narrative, legal signoff
 
-For the exact split between intentional manual work, current operational tech debt, and optional expansion backlog, see [Automation Boundary and Tech Debt](automation-boundary-and-tech-debt.md).
+For a public view of what is automated and how to verify the generated package, use [EU AI Act Self-Hosted Guidance](eu-ai-act-self-hosted-guidance.md) and [VERIFY.md](VERIFY.md).
 
 ## Core pipeline
 

@@ -14,16 +14,43 @@
 </head>
 <body>
   <h1>EU AI Act Article 14 - Human Oversight Template</h1>
-  <section><p>Article 14 asks whether humans can supervise, intervene, and stop the system when needed. For agent workflows, the question is practical: when do you require approval, when do you block actions, and where is that decision stored?</p></section>
+  <section><p>Article 14 is where the documentation has to show that humans can actually supervise, intervene, and stop the system when needed. For agent workflows, that means the oversight path has to be concrete: what escalates, what blocks, who reviews it, and where that outcome is recorded.</p></section>
+  
   <section>
-    <h2>Section guide</h2>
+    <h2>What Article 14 expects, what the toolkit can add, and what your team still owns</h2>
+    <p>Without connecting your agent, the toolkit can only summarize the oversight path already present in the generated package. After adapter integration, it can attach that oversight path to real runs, case outcomes, and review records from your connected agent.</p>
     <table>
-      <thead><tr><th>Section</th><th>Meaning</th><th>Evidence</th></tr></thead>
+      <thead><tr><th>Article 14 expects</th><th>Toolkit with generated package only</th><th>Toolkit after adapter integration</th><th>Still written and approved by your team</th></tr></thead>
       <tbody>
-        <tr><td>Escalation criteria</td><td>What triggers approval or block?</td><td>Gate recommendation and scanner severity.</td></tr><tr><td>Reviewer role</td><td>Who approves and on what basis?</td><td>Oversight summary and release review.</td></tr><tr><td>Operator controls</td><td>What can a human stop or override?</td><td>Manual approval flow and documented controls.</td></tr><tr><td>Review evidence</td><td>What record remains after a review?</td><td>Approval queue and governance outputs.</td></tr>
+        <tr><td>Cases that require human review</td><td>Can summarize approval-required and blocked cases already visible in the package.</td><td>Can keep those cases linked to the real runs, case IDs, and policy evaluations from the connected agent.</td><td>Define which situations must always escalate even if they are not flagged automatically.</td></tr><tr><td>Reasons for escalation or block</td><td>Can show gate recommendations, blocked cases, and review-needed signals already in the package.</td><td>Can attach those reasons to specific real runs, constats, and policy evaluation outputs.</td><td>Write the final organizational threshold for escalation, rejection, or exception handling.</td></tr><tr><td>A record of what the reviewer saw and decided</td><td>Can show approval-required cases, blocked cases, and the current oversight summary already in the package.</td><td>Can preserve a case-linked review queue and approval or block trail tied to the connected agent.</td><td>Decide what notes, approvals, or sign-offs must be captured in your governance process.</td></tr><tr><td>Human authority to stop or override the system</td><td>Can show where the package recommends approval or block.</td><td>Can tie those recommendations back to the cases and runs that triggered them.</td><td>Define who may override, who may stop the system, and what authority that person has.</td></tr>
       </tbody>
     </table>
   </section>
+  
+  
+  <section>
+    <h2>What your team still defines around Article 14</h2>
+    <p>The toolkit can show the review path and its outputs. It does not choose your approval policy or assign authority for you.</p>
+    <table>
+      <thead><tr><th>What you define</th><th>When you define it</th><th>Practical format to use</th></tr></thead>
+      <tbody>
+        <tr><td>Review roles</td><td>Before the oversight process is used in real operation or governance review.</td><td>A short role list naming who reviews, who can block, and who can approve exceptional cases.</td></tr><tr><td>Escalation and block thresholds</td><td>When you formalize the oversight rules for your deployment.</td><td>A short threshold table or numbered list describing what always escalates and what always blocks.</td></tr><tr><td>Override and stop authority</td><td>When the organization needs an explicit stop or override rule.</td><td>One concise rule naming who may stop the system, under what trigger, and what record must remain.</td></tr><tr><td>Review notes and sign-off expectations</td><td>Before oversight records are used in governance or external review.</td><td>A short note template describing what the reviewer must record with each approval, block, or escalation.</td></tr><tr><td>Final accountability assignment</td><td>At governance approval or when the oversight process is formally assigned.</td><td>A named owner or approving role for the final oversight process.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Article 14 is documented through oversight and operating outputs</h2>
+    <p>The files below are the main evidence surfaces for Article 14. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.</p>
+    <table>
+      <thead><tr><th>File in the package</th><th>Why it matters for Article 14</th><th>Open file</th></tr></thead>
+      <tbody>
+        <tr><td>Human oversight summary - human-oversight-summary.json</td><td>Main oversight output listing the review queue, approval-required cases, and blocked cases.</td><td>demo/eu-ai-act/compliance/human-oversight-summary.json</td></tr><tr><td>Article 9 risk register - article-9-risk-register.json</td><td>Shows where blocked cases, escalation triggers, and human-review controls affect the wider risk picture.</td><td>demo/eu-ai-act/compliance/article-9-risk-register.json</td></tr><tr><td>Compare report - compare-report.json</td><td>Shows case-level gate recommendations and policy-evaluation fields that feed Article 14.</td><td>demo/eu-ai-act/compare-report.json</td></tr><tr><td>Article 13 instructions - article-13-instructions.json</td><td>Supports the operator-facing instructions that tell humans when to review or intervene.</td><td>demo/eu-ai-act/compliance/article-13-instructions.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
   <section><p>Use browser print to save this document as PDF.</p></section>
 </body>
 </html>

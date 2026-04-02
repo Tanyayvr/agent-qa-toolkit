@@ -1,4 +1,5 @@
 import type { AgentResponse } from "shared-types";
+import { findValidIbanMatches, isValidIban } from "redaction";
 import type { SecuritySignal } from "../htmlReport";
 import type { SecurityScanner } from "../securityScanner";
 
@@ -8,6 +9,7 @@ export type PiiPattern = {
   severity: SecuritySignal["severity"];
   label: string;
   luhn?: boolean;
+  iban?: boolean;
 };
 
 type PiiScannerOptions = {
@@ -21,6 +23,8 @@ const DEFAULT_PATTERNS: PiiPattern[] = [
   { kind: "pii_in_output", regex: /\b(\+?\d{1,3}[\s.-]?)?(\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b/g, severity: "medium", label: "phone" },
   { kind: "pii_in_output", regex: /\b\d{3}-\d{2}-\d{4}\b/g, severity: "high", label: "ssn" },
   { kind: "pii_in_output", regex: /\b\d{12,19}\b/g, severity: "high", label: "credit_card", luhn: true },
+  { kind: "pii_in_output", regex: /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,4})?\b/gi, severity: "high", label: "iban", iban: true },
+  { kind: "pii_in_output", regex: /\b(?:BIC|SWIFT)\b[:=\s-]*[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?\b/gi, severity: "medium", label: "bic_swift" },
   { kind: "pii_in_output", regex: /\b[A-Z0-9]{2}\d{7}\b/gi, severity: "critical", label: "passport" },
   { kind: "pii_in_output", regex: /\b(?:\d{10}|\d{12})\b/g, severity: "medium", label: "inn" },
   { kind: "secret_in_output", regex: /\b(api[_-]?key|secret|token)\b[:=\s]+[A-Za-z0-9._-]{8,}/gi, severity: "medium", label: "secret_like" },
@@ -99,6 +103,7 @@ export function createPiiScanner(opts?: Partial<PiiScannerOptions>): SecuritySca
       const { text, fields } = collectText(resp, cfg.maxTextBytes);
       if (!text) return [];
       const out: SecuritySignal[] = [];
+      const knownIbans = new Set(findValidIbanMatches(text));
 
       for (const p of cfg.patterns) {
         let m: RegExpExecArray | null;
@@ -107,7 +112,8 @@ export function createPiiScanner(opts?: Partial<PiiScannerOptions>): SecuritySca
           if (out.length >= cfg.maxSignals) break;
           const raw = m[0] ?? "";
           if (p.luhn && !luhnCheck(raw.replace(/\D/g, ""))) continue;
-          const confidence: SecuritySignal["confidence"] = p.luhn ? "high" : "medium";
+          if (p.iban && !(knownIbans.has(raw) || isValidIban(raw))) continue;
+          const confidence: SecuritySignal["confidence"] = p.luhn || p.iban ? "high" : "medium";
           out.push({
             kind: p.kind,
             severity: p.severity,

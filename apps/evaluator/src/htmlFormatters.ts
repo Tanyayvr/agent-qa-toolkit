@@ -5,6 +5,7 @@ import type {
   TraceIntegrity,
   TraceIntegritySide,
 } from "./htmlReport";
+import { getReportCopy, type ReportCopy } from "./reportI18n";
 
 export function escHtml(s: string): string {
   return s
@@ -26,10 +27,10 @@ export function badge(text: string, tone: "ok" | "bad" | "mid" = "mid"): string 
   return `<span class="badge ${cls}">${escHtml(text)}</span>`;
 }
 
-export function riskBadge(level: "low" | "medium" | "high"): string {
-  if (level === "high") return badge("high", "bad");
-  if (level === "medium") return badge("medium", "mid");
-  return badge("low", "ok");
+export function riskBadge(level: "low" | "medium" | "high", copy: ReportCopy = getReportCopy()): string {
+  if (level === "high") return badge(copy.riskHighOption.replace("Risk: ", "").replace("Risiko: ", "").replace("Risque : ", ""), "bad");
+  if (level === "medium") return badge(copy.riskMediumOption.replace("Risk: ", "").replace("Risiko: ", "").replace("Risque : ", ""), "mid");
+  return badge(copy.riskLowOption.replace("Risk: ", "").replace("Risiko: ", "").replace("Risque : ", ""), "ok");
 }
 
 export function pct(v: number | undefined): string {
@@ -37,16 +38,19 @@ export function pct(v: number | undefined): string {
   return `${(v * 100).toFixed(1)}%`;
 }
 
-export function executionQualityBadge(status: "healthy" | "degraded" | undefined): string {
-  if (status === "healthy") return badge("execution: healthy", "ok");
-  if (status === "degraded") return badge("execution: degraded", "bad");
-  return badge("execution: unknown", "mid");
+export function executionQualityBadge(
+  status: "healthy" | "degraded" | undefined,
+  copy: ReportCopy = getReportCopy()
+): string {
+  if (status === "healthy") return badge(copy.executionHealthyBadge, "ok");
+  if (status === "degraded") return badge(copy.executionDegradedBadge, "bad");
+  return badge(copy.executionUnknownBadge, "mid");
 }
 
-export function gateBadge(g: "none" | "require_approval" | "block"): string {
-  if (g === "block") return badge("block", "bad");
-  if (g === "require_approval") return badge("approve", "mid");
-  return badge("none", "ok");
+export function gateBadge(g: "none" | "require_approval" | "block", copy: ReportCopy = getReportCopy()): string {
+  if (g === "block") return badge(copy.gateBlockBadge, "bad");
+  if (g === "require_approval") return badge(copy.gateApprovalBadge, "mid");
+  return badge(copy.gateNoneBadge, "ok");
 }
 
 export function fmtFailureKinds(kinds: Record<string, number> | undefined): string {
@@ -59,8 +63,8 @@ export function fmtFailureKinds(kinds: Record<string, number> | undefined): stri
     .join(" · ");
 }
 
-export function failureBadge(): string {
-  return badge("runner_failure", "bad");
+export function failureBadge(copy: ReportCopy = getReportCopy()): string {
+  return badge(copy.runnerFailureBadge, "bad");
 }
 
 export function linkIfPresent(href: string | undefined, label: string): string {
@@ -89,13 +93,13 @@ export function rootCell(root: string | undefined): string {
   return `<code>${escHtml(root)}</code>`;
 }
 
-export function traceSideBadge(side: TraceIntegritySide): string {
-  if (side.status === "ok") return badge("ok", "ok");
-  if (side.status === "partial") return badge("partial", "mid");
-  return badge("broken", "bad");
+export function traceSideBadge(side: TraceIntegritySide, copy: ReportCopy = getReportCopy()): string {
+  if (side.status === "ok") return badge(copy.traceOkBadge, "ok");
+  if (side.status === "partial") return badge(copy.tracePartialBadge, "mid");
+  return badge(copy.traceBrokenBadge, "bad");
 }
 
-export function traceCell(t: TraceIntegrity): string {
+export function traceCell(t: TraceIntegrity, copy: ReportCopy = getReportCopy()): string {
   const b = t.baseline;
   const n = t.new;
 
@@ -104,9 +108,9 @@ export function traceCell(t: TraceIntegrity): string {
 
   return `
 <div>
-  <div><span class="muted">baseline:</span> ${traceSideBadge(b)}</div>
+  <div><span class="muted">${escHtml(copy.baselineSideLabel)}:</span> ${traceSideBadge(b, copy)}</div>
   ${bIssues}
-  <div style="margin-top:6px;"><span class="muted">new:</span> ${traceSideBadge(n)}</div>
+  <div style="margin-top:6px;"><span class="muted">${escHtml(copy.newSideLabel)}:</span> ${traceSideBadge(n, copy)}</div>
   ${nIssues}
 </div>`.trim();
 }
@@ -127,7 +131,7 @@ function maxSeverity(signals: SecuritySignal[]): SignalSeverity | null {
   return best;
 }
 
-export function securityCell(p: SecurityPack): string {
+export function securityCell(p: SecurityPack, copy: ReportCopy = getReportCopy()): string {
   const bMax = maxSeverity(p.baseline.signals);
   const nMax = maxSeverity(p.new.signals);
 
@@ -142,10 +146,10 @@ export function securityCell(p: SecurityPack): string {
 
   return `
 <div>
-  <div><span class="muted">baseline:</span> ${badge(`sec: ${bLabel}`, bTone as "ok" | "bad" | "mid")}</div>
-  <div style="margin-top:6px;"><span class="muted">new:</span> ${badge(`sec: ${nLabel}`, nTone as "ok" | "bad" | "mid")}</div>
+  <div><span class="muted">${escHtml(copy.baselineSideLabel)}:</span> ${badge(`${copy.securityPrefix}: ${bLabel}`, bTone as "ok" | "bad" | "mid")}</div>
+  <div style="margin-top:6px;"><span class="muted">${escHtml(copy.newSideLabel)}:</span> ${badge(`${copy.securityPrefix}: ${nLabel}`, nTone as "ok" | "bad" | "mid")}</div>
   ${p.new.requires_gate_recommendation
-      ? `<div class="muted" style="margin-top:6px;">${badge("gate: recommended", "bad")}</div>`
+      ? `<div class="muted" style="margin-top:6px;">${badge(copy.gateRecommendedBadge, "bad")}</div>`
       : ""
     }
 </div>`.trim();

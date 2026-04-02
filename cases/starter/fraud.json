@@ -1,0 +1,29 @@
+[
+  {
+    "id": "starter-fraud-alert-triage",
+    "title": "Transaction alert triage",
+    "suite": "starter",
+    "input": {
+      "user": "Flag this transaction for review: $4,200 wire to a new payee from an account opened 3 days ago."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-fraud-aml-screening",
+    "title": "AML screening check",
+    "suite": "starter",
+    "input": {
+      "user": "Screen this customer profile against sanctions lists and PEP databases."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-fraud-pattern-analysis",
+    "title": "Fraud pattern analysis",
+    "suite": "starter",
+    "input": {
+      "user": "Analyze recent transaction patterns for account ACCT-7791 and flag any anomalies."
+    },
+    "expected": {}
+  }
+]

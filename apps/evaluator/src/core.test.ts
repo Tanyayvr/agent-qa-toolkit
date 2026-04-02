@@ -311,6 +311,40 @@ describe("tool telemetry assertion", () => {
             non_wrapper_tool_call_count: 0,
         });
     });
+
+    it("fails when successful tool_result is missing output evidence", () => {
+        const res = checkToolTelemetryAvailability(
+            { tool_required: ["search"] },
+            mkResp({
+                events: [
+                    { type: "tool_call", ts: 1, call_id: "c1", tool: "search", args: {} },
+                    { type: "tool_result", ts: 2, call_id: "c1", status: "ok" },
+                ],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            reason_code: "tool_result_missing_output_evidence",
+            tool_results_missing_output_evidence: ["c1"],
+        });
+    });
+
+    it("fails when failed tool_result is missing error evidence", () => {
+        const res = checkToolTelemetryAvailability(
+            { tool_required: ["search"] },
+            mkResp({
+                events: [
+                    { type: "tool_call", ts: 1, call_id: "c1", tool: "search", args: {} },
+                    { type: "tool_result", ts: 2, call_id: "c1", status: "timeout", payload_summary: "timeout" },
+                ],
+            })
+        );
+        expect(res.pass).toBe(false);
+        expect(res.details).toMatchObject({
+            reason_code: "tool_result_missing_error_evidence",
+            tool_results_missing_error_evidence: ["c1"],
+        });
+    });
 });
 
 describe("semantic quality assertion", () => {

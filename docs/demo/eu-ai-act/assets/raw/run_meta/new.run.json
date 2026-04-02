@@ -2,5 +2,14 @@
   "selected_case_ids": [
     "c-approval",
     "c-block"
-  ]
+  ],
+  "provenance": {
+    "agent_id": "golden-eu-agent",
+    "agent_version": "golden-eu-agent-v2",
+    "model": "golden-model-v1",
+    "model_version": "2026-03-01",
+    "prompt_version": "prompt-golden-v1",
+    "tools_version": "tools-golden-v1",
+    "config_hash": "cfg-golden-eu-v1"
+  }
 }

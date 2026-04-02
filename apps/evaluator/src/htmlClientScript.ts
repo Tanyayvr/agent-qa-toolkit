@@ -1,11 +1,32 @@
-export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
+import { type ReportCopy } from "./reportI18n";
+
+export function renderReportClientScript(copy: ReportCopy): string {
+  const messages = JSON.stringify({
+    noSavedFiltersBlocked: copy.noSavedFiltersBlocked,
+    noSavedFilters: copy.noSavedFilters,
+    savedFilterPrefix: copy.savedFilterPrefix,
+    removeButton: copy.removeButton,
+    pageEmpty: copy.pageEmpty,
+    pageRendering: copy.pageRendering,
+    showingCount: copy.showingCount,
+    pageCounter: copy.pageCounter,
+    largeReportMode: copy.largeReportMode,
+    rowsRendering: copy.rowsRendering,
+    copiedButton: copy.copiedButton,
+    copyFilterLinkButton: copy.copyFilterLinkButton,
+    copyPrompt: copy.copyPrompt,
+    savePrompt: copy.savePrompt,
+  });
+
+  return String.raw`    (function() {
+      var ui = ` + messages + String.raw`;
       var el = document.getElementById("embedded-manifest-index");
       if (!el) return;
       var raw = el.textContent || "";
       var idx = null;
       try { idx = JSON.parse(raw); } catch (e) { idx = null; }
+      var map = new Map();
       if (idx && Array.isArray(idx.items)) {
-        var map = new Map();
         for (var i = 0; i < idx.items.length; i++) {
           var it = idx.items[i];
           if (it && it.manifest_key && it.rel_path) map.set(String(it.manifest_key), String(it.rel_path));
@@ -60,6 +81,12 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
         pageSize.value = "25";
       }
 
+      function format(template, values) {
+        return String(template || "").replace(/\{([a-z_]+)\}/g, function(_, key) {
+          return Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : "";
+        });
+      }
+
       function getFilters() {
         return {
           text: filterText && filterText.value || "",
@@ -84,9 +111,9 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
       }
 
       function parseHash() {
-        var raw = window.location.hash || "";
-        if (!raw || raw.length < 2) return null;
-        var qs = raw.startsWith("#?") ? raw.slice(2) : raw.slice(1);
+        var rawHash = window.location.hash || "";
+        if (!rawHash || rawHash.length < 2) return null;
+        var qs = rawHash.startsWith("#?") ? rawHash.slice(2) : rawHash.slice(1);
         var params = new URLSearchParams(qs);
         return {
           text: params.get("text") || "",
@@ -115,21 +142,21 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
       function loadSavedFilters() {
         if (!savedFilters) return;
         savedFilters.innerHTML = "";
-        var raw = null;
-        try { raw = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { raw = null; }
-        if (!raw) {
+        var rawSaved = null;
+        try { rawSaved = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { rawSaved = null; }
+        if (!rawSaved) {
           var empty = document.createElement("div");
           empty.className = "muted";
-          empty.textContent = "No saved filters (localStorage may be blocked).";
+          empty.textContent = ui.noSavedFiltersBlocked;
           savedFilters.appendChild(empty);
           return;
         }
         var list = [];
-        try { list = JSON.parse(raw) || []; } catch (e) { list = []; }
+        try { list = JSON.parse(rawSaved) || []; } catch (e) { list = []; }
         if (!Array.isArray(list) || list.length === 0) {
           var empty2 = document.createElement("div");
           empty2.className = "muted";
-          empty2.textContent = "No saved filters.";
+          empty2.textContent = ui.noSavedFilters;
           savedFilters.appendChild(empty2);
           return;
         }
@@ -138,14 +165,14 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
           row.className = "savedItem";
           var btn = document.createElement("button");
           btn.className = "btn";
-          btn.textContent = it.name || ("Filter " + (idx + 1));
+          btn.textContent = it.name || (ui.savedFilterPrefix + " " + (idx + 1));
           btn.onclick = function() {
             setFilters(it.filters || {});
             applyFilters({ preservePage: false });
           };
           var del = document.createElement("button");
           del.className = "btn";
-          del.textContent = "Remove";
+          del.textContent = ui.removeButton;
           del.onclick = function() {
             var next = list.slice();
             next.splice(idx, 1);
@@ -218,114 +245,86 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
       }
 
       function renderPage(sorted, totalFiltered) {
-        if (!casesBody) return;
-        var jobId = ++renderJobId;
-        var size = Number(pageSize && pageSize.value ? pageSize.value : "50");
+        var size = pageSize ? Number(pageSize.value || 50) : 50;
         if (!Number.isFinite(size) || size <= 0) size = 50;
-        var totalPages = Math.max(1, Math.ceil(totalFiltered / size));
+        var totalPages = Math.max(1, Math.ceil(sorted.length / size));
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
-
         var start = (currentPage - 1) * size;
-        var end = start + size;
-        var pageRows = sorted.slice(start, end);
-        if (pageInfo) {
-          if (totalFiltered === 0) pageInfo.textContent = "Page 0 / 0";
-          else pageInfo.textContent = "Rendering " + pageRows.length + " row(s)...";
-        }
-        if (pagePrev) pagePrev.disabled = true;
-        if (pageNext) pageNext.disabled = true;
+        var pageRows = sorted.slice(start, start + size);
 
-        if (totalFiltered === 0 || pageRows.length === 0) {
+        if (pageInfo) {
+          if (totalFiltered === 0) pageInfo.textContent = ui.pageEmpty;
+          else pageInfo.textContent = format(ui.pageRendering, { count: pageRows.length });
+        }
+        if (!casesBody) return;
+        renderJobId += 1;
+        var thisJob = renderJobId;
+
+        if (pageRows.length === 0) {
           casesBody.innerHTML = "";
-          if (pageInfo) pageInfo.textContent = "Page 0 / 0";
-          if (pagePrev) pagePrev.disabled = true;
-          if (pageNext) pageNext.disabled = true;
+          hydrateManifestLinks();
+          if (pageInfo) pageInfo.textContent = ui.pageEmpty;
           return;
         }
 
-        casesBody.innerHTML = '<tr><td colspan="10" class="muted">Rendering rows...</td></tr>';
+        casesBody.innerHTML = '<tr><td colspan="10" class="muted">' + ui.rowsRendering + '</td></tr>';
+        var index = 0;
 
-        var finalize = function () {
-          if (jobId !== renderJobId) return;
-          hydrateManifestLinks();
+        function renderChunk() {
+          if (thisJob !== renderJobId) return;
+          if (index === 0) casesBody.innerHTML = "";
+          var end = Math.min(index + RENDER_CHUNK_SIZE, pageRows.length);
           if (pageInfo) {
-            var largeHint = rowsData.length >= LARGE_REPORT_ROWS ? " (incremental)" : "";
-            pageInfo.textContent = "Page " + currentPage + " / " + totalPages + largeHint;
+            var largeHint = pageRows.length >= LARGE_REPORT_ROWS ? " · " + ui.largeReportMode : "";
+            pageInfo.textContent = format(ui.pageCounter, { current: currentPage, total: totalPages }) + largeHint;
           }
-          if (pagePrev) pagePrev.disabled = currentPage <= 1;
-          if (pageNext) pageNext.disabled = currentPage >= totalPages;
-        };
+          var chunkHtml = "";
+          while (index < end) {
+            chunkHtml += pageRows[index].row_html || "";
+            index += 1;
+          }
+          casesBody.insertAdjacentHTML("beforeend", chunkHtml);
+          hydrateManifestLinks();
+          if (index < pageRows.length) {
+            window.requestAnimationFrame(renderChunk);
+          }
+        }
 
-        var appendChunk = function (offset) {
-          if (jobId !== renderJobId) return;
-          if (offset === 0) casesBody.innerHTML = "";
-          var next = Math.min(offset + RENDER_CHUNK_SIZE, pageRows.length);
-          var chunkHtml = pageRows
-            .slice(offset, next)
-            .map(function (r) { return r.row_html || ""; })
-            .join("");
-          if (chunkHtml) {
-            casesBody.insertAdjacentHTML("beforeend", chunkHtml);
-          }
-          if (next >= pageRows.length) {
-            finalize();
-            return;
-          }
-          if (window.requestAnimationFrame) {
-            window.requestAnimationFrame(function () { appendChunk(next); });
-          } else {
-            setTimeout(function () { appendChunk(next); }, 0);
-          }
-        };
-
-        appendChunk(0);
+        window.requestAnimationFrame(renderChunk);
       }
 
-      function applyFilters(opts) {
-        var preservePage = opts && opts.preservePage === true;
-        if (!preservePage) currentPage = 1;
+      function applyFilters(options) {
+        options = options || {};
+        var preservePage = options.preservePage === true;
         var f = getFilters();
-        var text = (f.text || "").toLowerCase();
-        var suite = f.suite || "";
-        var diff = f.diff || "";
-        var risk = f.risk || "";
-        var gate = f.gate || "";
-        var status = f.status || "";
-
-        var filtered = rowsData.filter(function (r) {
-          var caseId = String(r.case_id || "").toLowerCase();
-          var title = String(r.title || "").toLowerCase();
-          var rRisk = String(r.risk || "");
-          var rGate = String(r.gate || "");
-          var rStatus = String(r.status || "");
-          var rSuite = String(r.suite || "");
-          var rDiff = String(r.diff || "");
-
-          if (text && !(caseId.includes(text) || title.includes(text))) return false;
-          if (suite && rSuite !== suite) return false;
-          if (diff && rDiff !== diff) return false;
-          if (risk && rRisk !== risk) return false;
-          if (gate && rGate !== gate) return false;
-          if (status && rStatus !== status) return false;
+        updateHash(f);
+        var needle = String(f.text || "").trim().toLowerCase();
+        var filtered = rowsData.filter(function (entry) {
+          if (needle) {
+            var hay = String(entry.case_id || "") + " " + String(entry.title || "");
+            if (hay.toLowerCase().indexOf(needle) === -1) return false;
+          }
+          if (f.suite && entry.suite !== f.suite) return false;
+          if (f.diff && entry.diff !== f.diff) return false;
+          if (f.risk && entry.risk !== f.risk) return false;
+          if (f.gate && entry.gate !== f.gate) return false;
+          if (f.status && entry.status !== f.status) return false;
           return true;
         });
         var sorted = sortRows(filtered, f);
+        if (!preservePage) currentPage = 1;
         renderPage(sorted, filtered.length);
-
         if (filterCount) {
-          filterCount.textContent = "Showing " + filtered.length + " / " + rowsData.length;
+          filterCount.textContent = format(ui.showingCount, { filtered: filtered.length, total: rowsData.length });
         }
-
-        updateHash(f);
-        updateTabActive();
+        syncSuiteTabs();
       }
 
       if (filterText) {
         filterText.addEventListener("input", function () {
-          if (textFilterDebounceTimer) clearTimeout(textFilterDebounceTimer);
-          textFilterDebounceTimer = setTimeout(function () {
-            textFilterDebounceTimer = null;
+          if (textFilterDebounceTimer) window.clearTimeout(textFilterDebounceTimer);
+          textFilterDebounceTimer = window.setTimeout(function () {
             applyFilters({ preservePage: false });
           }, 120);
         });
@@ -344,7 +343,7 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
       }
       if (pagePrev) {
         pagePrev.addEventListener("click", function () {
-          currentPage = Math.max(1, currentPage - 1);
+          currentPage -= 1;
           applyFilters({ preservePage: true });
         });
       }
@@ -356,21 +355,20 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
       }
 
       var suiteButtons = document.querySelectorAll(".suiteBtn");
-      if (suiteButtons && filterSuite) {
-        for (var k = 0; k < suiteButtons.length; k++) {
-          suiteButtons[k].addEventListener("click", function (e) {
-            var btn = e.currentTarget;
-            var value = btn && btn.getAttribute("data-suite");
-            filterSuite.value = value || "";
-            applyFilters({ preservePage: false });
-          });
-        }
+      for (var k = 0; k < suiteButtons.length; k++) {
+        suiteButtons[k].addEventListener("click", function (e) {
+          var btn = e.currentTarget;
+          var value = btn && btn.getAttribute("data-suite");
+          if (filterSuite) filterSuite.value = value || "";
+          applyFilters({ preservePage: false });
+        });
       }
 
-      function updateTabActive() {
-        var suite = filterSuite && filterSuite.value || "";
-        for (var t = 0; t < suiteButtons.length; t++) {
-          var btn = suiteButtons[t];
+      function syncSuiteTabs() {
+        if (!suiteButtons) return;
+        var suite = filterSuite ? filterSuite.value || "" : "";
+        for (var m = 0; m < suiteButtons.length; m++) {
+          var btn = suiteButtons[m];
           var value = btn.getAttribute("data-suite") || "";
           if (value === suite) btn.classList.add("active");
           else btn.classList.remove("active");
@@ -380,26 +378,25 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
       if (copyFilterLink) {
         copyFilterLink.addEventListener("click", function () {
           var link = window.location.href;
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link);
-            copyFilterLink.textContent = "Copied";
-            setTimeout(function () { copyFilterLink.textContent = "Copy filter link"; }, 1200);
-          } else {
-            window.prompt("Copy filter link:", link);
-          }
+          navigator.clipboard.writeText(link).then(function () {
+            copyFilterLink.textContent = ui.copiedButton;
+            setTimeout(function () { copyFilterLink.textContent = ui.copyFilterLinkButton; }, 1200);
+          }).catch(function () {
+            window.prompt(ui.copyPrompt, link);
+          });
         });
       }
 
       if (saveFilters) {
         saveFilters.addEventListener("click", function () {
-          var name = window.prompt("Save filters as:") || "";
+          var name = window.prompt(ui.savePrompt) || "";
           var f = getFilters();
-          var raw = null;
-          try { raw = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { raw = null; }
+          var rawSaved = null;
+          try { rawSaved = window.localStorage.getItem("pvip_saved_filters"); } catch (e) { rawSaved = null; }
           var list = [];
-          try { list = raw ? JSON.parse(raw) : []; } catch (e) { list = []; }
+          try { list = rawSaved ? JSON.parse(rawSaved) || [] : []; } catch (e) { list = []; }
           if (!Array.isArray(list)) list = [];
-          list.push({ name: name.trim() || ("Filter " + (list.length + 1)), filters: f });
+          list.push({ name: name.trim() || (ui.savedFilterPrefix + " " + (list.length + 1)), filters: f });
           try { window.localStorage.setItem("pvip_saved_filters", JSON.stringify(list)); } catch (e) {}
           loadSavedFilters();
         });
@@ -413,13 +410,16 @@ export const REPORT_CLIENT_SCRIPT = String.raw`    (function() {
         });
       }
 
-      var fromHash = parseHash();
-      if (fromHash) setFilters(fromHash);
-      applyFilters({ preservePage: false });
-      try { window.localStorage.setItem("__pvip_ls__", "1"); window.localStorage.removeItem("__pvip_ls__"); } catch (e) {
+      try {
+        window.localStorage.setItem("__aq_probe__", "1");
+        window.localStorage.removeItem("__aq_probe__");
+      } catch (e) {
         var warn = document.getElementById("localStorageWarning");
         if (warn) warn.style.display = "block";
       }
+
+      setFilters(parseHash() || {});
       loadSavedFilters();
-    })();
-`;
+      applyFilters({ preservePage: false });
+    })();`;
+}

@@ -14,16 +14,43 @@
 </head>
 <body>
   <h1>EU AI Act Article 15 - Accuracy and Robustness Template</h1>
-  <section><p>Article 15 is where performance claims need numbers. Teams often know their target quality bar, but they struggle to connect those claims to recurring evidence across changes.</p></section>
+  <section><p>Article 15 is where performance claims stop being slogans and start needing evidence. The documentation has to show quality signals, robustness and security constats, version-to-version comparison, and a clear point where the system no longer meets the provider's accepted threshold.</p></section>
+  
   <section>
-    <h2>Section guide</h2>
+    <h2>What Article 15 expects, what the toolkit can add, and what your team still owns</h2>
+    <p>Without connecting your agent, the toolkit can only expose the quality and security outputs already present in the generated package. After adapter integration, it can keep those outputs tied to real runs, version changes, and repeatable evidence over time.</p>
     <table>
-      <thead><tr><th>Section</th><th>Meaning</th><th>Evidence</th></tr></thead>
+      <thead><tr><th>Article 15 expects</th><th>Toolkit with generated package only</th><th>Toolkit after adapter integration</th><th>Still written and approved by your team</th></tr></thead>
       <tbody>
-        <tr><td>Accuracy signals</td><td>What metrics matter to the task?</td><td>Pass rate, admissibility KPI, per-case outcomes.</td></tr><tr><td>Robustness checks</td><td>How are failures explored?</td><td>Matrix cases, degraded execution handling, regression evidence.</td></tr><tr><td>Repeatability</td><td>Can the team compare versions over time?</td><td>Baseline vs new report and trend history.</td></tr><tr><td>Release threshold</td><td>When is the model not ready?</td><td>Gate decisions and execution-quality status.</td></tr>
+        <tr><td>Quality and accuracy signals</td><td>Shows pass rate, execution-quality status, and case outcomes already present in the rapport de comparaison.</td><td>Keeps those signals tied to the connected agent's real runs, versions, and case-level evidence.</td><td>Define which task metrics matter, what score is acceptable, and what counts as success for your use case.</td></tr><tr><td>Robustness and security constats</td><td>Shows current security constats and risk levels already present in the package.</td><td>Can keep those constats linked to the actual runs, tool behavior, and case outputs that triggered them.</td><td>Explain which robustness or security constats are acceptable, and which require remediation before the system is relied on.</td></tr><tr><td>Version-to-version comparison</td><td>Shows baseline versus new comparison already built into the rapport de comparaison.</td><td>Lets that comparison stay attached to real run inputs, outputs, and retained artifacts over time.</td><td>Decide whether the chosen cases are sufficient to justify the claim you want to make.</td></tr><tr><td>A documented performance threshold</td><td>Shows current execution-quality status and case outcomes already in the package.</td><td>Can keep the threshold evidence tied to recurring runs and monitoring history as the system changes.</td><td>Set the final threshold for acceptance, escalation, or block and approve that decision.</td></tr>
       </tbody>
     </table>
   </section>
+  
+  
+  <section>
+    <h2>What your team still defines around Article 15</h2>
+    <p>The toolkit can generate the evidence dossier. It does not decide what quality level is acceptable for your domain or whether the chosen case set is sufficient.</p>
+    <table>
+      <thead><tr><th>What you define</th><th>When you define it</th><th>Practical format to use</th></tr></thead>
+      <tbody>
+        <tr><td>Task-specific success threshold</td><td>Before you rely on the package to support performance or conformity claims.</td><td>A short threshold statement or table naming the metric, target, and minimum acceptable result.</td></tr><tr><td>Why this case suite is sufficient</td><td>When you claim the current evidence is enough to support a quality statement.</td><td>A short rationale naming which cases cover the main risks, failure modes, or edge conditions.</td></tr><tr><td>Business impact of remaining failures</td><td>When open regressions, degraded execution, or risky cases remain in the package.</td><td>One or two sentences describing what those failures mean for your deployment and users.</td></tr><tr><td>Accepted robustness and security risk</td><td>Before sign-off if any significant issue remains open.</td><td>A short acceptance, block, or escalate decision plus the owner who approved it.</td></tr><tr><td>Broader performance claims</td><td>Whenever you want to claim more than the package directly proves.</td><td>A plain-language note separating what the evidence proves from any wider claim your organization wants to make.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Article 15 is documented through comparison, integrity, and performance outputs</h2>
+    <p>The files below are the main evidence surfaces for Article 15. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.</p>
+    <table>
+      <thead><tr><th>File in the package</th><th>Why it matters for Article 15</th><th>Open file</th></tr></thead>
+      <tbody>
+        <tr><td>Compare report - compare-report.json</td><td>Main machine-readable comparison showing pass rates, execution quality, security constats, and highlighted cases.</td><td>demo/eu-ai-act/compare-report.json</td></tr><tr><td>Evaluator report - report.html</td><td>Human-readable report used to inspect the same quality and regression outputs.</td><td>demo/eu-ai-act/report.html</td></tr><tr><td>Manifest - artifacts/manifest.json</td><td>Integrity index anchoring the files that support the Article 15 claims.</td><td>demo/eu-ai-act/artifacts/manifest.json</td></tr><tr><td>Article 9 risk register - article-9-risk-register.json</td><td>Shows how serious performance or security issues can reopen or update risk entries.</td><td>demo/eu-ai-act/compliance/article-9-risk-register.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
   <section><p>Use browser print to save this document as PDF.</p></section>
 </body>
 </html>

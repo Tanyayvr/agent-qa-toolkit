@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1775100600483,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "article_10_data_governance_href": "compliance/article-10-data-governance.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_16_provider_obligations_href": "compliance/article-16-provider-obligations.json",
+    "article_43_conformity_assessment_href": "compliance/article-43-conformity-assessment.json",
+    "article_47_declaration_of_conformity_href": "compliance/article-47-declaration-of-conformity.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json",
+    "release_review_href": "compliance/release-review.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
+    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
+  },
+  "document_scope": {
+    "article": "Art_16",
+    "generated_scope": "provider_obligations_scaffold",
+    "operator_inputs_required": [
+      "provider-owned record of how Articles 9 to 15 are satisfied for the relevant AI system",
+      "provider-owned record that technical documentation and QMS records are kept for 10 years after the system is placed on the market or put into service",
+      "provider-owned record that automatically generated logs are kept for at least six months where those logs are under provider control",
+      "provider-owned corrective-action and duty-to-inform record for non-conformity or risk situations",
+      "provider-owned authority cooperation record covering documentation requests and access to automatically generated logs",
+      "provider-owned record of CE marking application and access path where applicable",
+      "provider-owned registration record for the relevant AI system where Article 49 applies",
+      "provider-owned record of conformity assessment, declaration, CE marking, and registration where applicable"
+    ]
+  },
+  "provider_identity": {
+    "report_id": "eu-ai-act-demo",
+    "environment": {
+      "agent_id": "golden-eu-agent",
+      "agent_version": "golden-eu-agent-v2",
+      "model": "golden-model-v1",
+      "model_version": "2026-03-01",
+      "prompt_version": "prompt-golden-v1",
+      "tools_version": "tools-golden-v1",
+      "config_hash": "cfg-golden-eu-v1"
+    },
+    "toolkit_version": "1.4.0",
+    "spec_version": "aepf-v1"
+  },
+  "obligations": [
+    {
+      "id": "ensure_section_2_compliance_article_16",
+      "article_ref": "Art_16",
+      "title": "Provider responsibility to ensure compliance with Articles 9 to 15",
+      "supporting_artifacts": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compliance/article-9-risk-register.json",
+        "compliance/article-13-instructions.json"
+      ],
+      "operator_inputs_required": [
+        "identify the provider owner who approves the Section 2 compliance record"
+      ]
+    },
+    {
+      "id": "documentation_keeping_article_18",
+      "article_ref": "Art_18",
+      "title": "Keep technical documentation, QMS documentation, and related records available for 10 years",
+      "supporting_artifacts": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compliance/article-17-qms-lite.json",
+        "compliance/article-43-conformity-assessment.json",
+        "compliance/article-47-declaration-of-conformity.json"
+      ],
+      "operator_inputs_required": [
+        "state where the Article 11 technical documentation is stored and how it stays available for 10 years after placing on the market or putting into service",
+        "state where the Article 17 quality-management documentation is stored and how it stays available for 10 years after placing on the market or putting into service",
+        "state where notified-body decisions and other applicable conformity records are retained when that route applies"
+      ]
+    },
+    {
+      "id": "automatically_generated_logs_article_19",
+      "article_ref": "Art_19",
+      "title": "Keep automatically generated logs for an appropriate period of at least six months",
+      "supporting_artifacts": [
+        "compare-report.json",
+        "artifacts/manifest.json",
+        "compliance/article-13-instructions.json"
+      ],
+      "operator_inputs_required": [
+        "state which automatically generated logs are under provider control for the relevant AI system",
+        "state the retention period applied to those logs and confirm that it is at least six months unless another Union or national law requires otherwise",
+        "state how those logs can be retrieved when needed for conformity, monitoring, or authority access"
+      ]
+    },
+    {
+      "id": "run_conformity_assessment_article_43",
+      "article_ref": "Art_43",
+      "title": "Ensure the required conformity assessment procedure is completed before placing on the market or putting into service",
+      "supporting_artifacts": [
+        "compliance/article-43-conformity-assessment.json",
+        "compliance/article-17-qms-lite.json"
+      ],
+      "operator_inputs_required": [
+        "record the conformity assessment route used for the relevant AI system"
+      ]
+    },
+    {
+      "id": "ce_marking_article_48",
+      "article_ref": "Art_48",
+      "title": "Affix CE marking in the required form for the relevant high-risk AI system",
+      "supporting_artifacts": [
+        "compliance/article-43-conformity-assessment.json",
+        "compliance/article-47-declaration-of-conformity.json",
+        "compliance/annex-v-declaration-content.json"
+      ],
+      "operator_inputs_required": [
+        "record how CE marking is affixed or made digitally accessible for the relevant AI system",
+        "record whether notified-body identification must accompany the CE marking where that route applies",
+        "record where the CE marking appears in packaging, documentation, interface, or other delivery material for the relevant AI system"
+      ]
+    },
+    {
+      "id": "registration_article_49",
+      "article_ref": "Art_49",
+      "title": "Register the provider and the relevant AI system where Article 49 applies",
+      "supporting_artifacts": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compliance/article-43-conformity-assessment.json",
+        "compliance/article-47-declaration-of-conformity.json",
+        "compliance/annex-v-declaration-content.json"
+      ],
+      "operator_inputs_required": [
+        "record whether Article 49 registration applies to the relevant AI system",
+        "record the EU database or national registration route used where registration applies",
+        "record the registration reference and the owner responsible for keeping it current where registration applies"
+      ]
+    },
+    {
+      "id": "keep_declaration_and_marking_records_article_47_annex_v",
+      "article_ref": "Art_47",
+      "title": "Draw up and keep the EU declaration of conformity and related records",
+      "supporting_artifacts": [
+        "compliance/article-47-declaration-of-conformity.json",
+        "compliance/annex-v-declaration-content.json"
+      ],
+      "operator_inputs_required": [
+        "record the signed declaration, references, and any CE marking or registration records that apply"
+      ]
+    },
+    {
+      "id": "corrective_actions_and_duty_of_information_article_20",
+      "article_ref": "Art_20",
+      "title": "Take corrective action and inform relevant parties when the system is not in conformity or presents a risk",
+      "supporting_artifacts": [
+        "compliance/article-9-risk-register.json",
+        "compliance/article-72-monitoring-plan.json",
+        "compliance/post-market-monitoring.json",
+        "compliance/article-17-qms-lite.json"
+      ],
+      "operator_inputs_required": [
+        "record the corrective-action owner and the workflow used to bring the system back into conformity",
+        "record when withdrawal, disabling, or recall would be used for the relevant AI system",
+        "record who must be informed without undue delay, including distributors, importers, deployers, authorised representatives, competent authorities, and the notified body where applicable"
+      ]
+    },
+    {
+      "id": "cooperation_with_competent_authorities_article_21",
+      "article_ref": "Art_21",
+      "title": "Provide information, documentation, and access to logs to competent authorities upon a reasoned request",
+      "supporting_artifacts": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compare-report.json",
+        "compliance/article-13-instructions.json"
+      ],
+      "operator_inputs_required": [
+        "record the contact route used to answer a reasoned request from a competent authority",
+        "record how the provider supplies the information and documentation necessary to demonstrate conformity in an easily understood language requested by the authority",
+        "record how access to automatically generated logs under provider control is granted when requested by a competent authority"
+      ]
+    }
+  ],
+  "residual_gaps": [
+    "Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.",
+    "The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.",
+    "Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.",
+    "The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.",
+    "The provider-owned authority cooperation path, documentation response process, and log-access process remain required.",
+    "The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.",
+    "The provider-owned EU database or national registration record remains required where Article 49 applies.",
+    "Operator-owned risk governance still sits outside the evaluator.",
+    "Annex III classification and legal interpretation still require counsel.",
+    "This register is generated from runtime evidence and still requires operator-owned likelihood, impact, and acceptance rationale.",
+    "Operator-authored instructions for use are still required before deployer handoff.",
+    "This export summarizes technical evidence; it does not replace deployer-facing operating instructions.",
+    "Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+    "Human oversight procedures for deployers still require operator-authored narrative.",
+    "The evaluator emits evidence inputs, not the full Article 11 technical file.",
+    "The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.",
+    "Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.",
+    "Art_10: missing required evidence compare-report.json.environment.training_data_provenance",
+    "Art_9: Operator-owned risk governance still sits outside the evaluator.",
+    "Art_9: Annex III classification and legal interpretation still require counsel.",
+    "Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.",
+    "Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.",
+    "Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.",
+    "Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+    "Art_13: Human oversight procedures for deployers still require operator-authored narrative.",
+    "Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.",
+    "Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.",
+    "Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.",
+    "Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.",
+    "Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.",
+    "Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.",
+    "Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.",
+    "Art_43: The provider-owned conformity assessment route and any notified-body records remain required.",
+    "Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.",
+    "Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.",
+    "Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.",
+    "Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.",
+    "Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.",
+    "This plan is a technical scaffold and still requires operator-owned monitoring ownership, cadence, retention, and authority-reporting decisions.",
+    "This QMS-lite export is a technical scaffold, not a complete quality management system.",
+    "Competency management, supplier management, authority communication, and formal document-control procedures remain operator-authored.",
+    "Article 16 remains provider-owned and requires completion of the formal provider obligations record."
+  ]
+}

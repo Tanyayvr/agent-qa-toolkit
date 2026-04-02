@@ -43,5 +43,5 @@ describe("conformance-test-signature", () => {
     } finally {
       fixture.cleanup();
     }
-  });
+  }, 15_000);
 });

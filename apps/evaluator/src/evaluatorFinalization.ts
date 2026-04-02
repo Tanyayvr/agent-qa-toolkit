@@ -1,6 +1,6 @@
 import path from "node:path";
 import { ensureDir, writeFileAtomic, writeJsonAtomic } from "cli-utils";
-import type { Manifest, ManifestItem, ThinIndex } from "./manifest";
+import type { Manifest, ManifestDraftItem, ManifestItem, ThinIndex } from "./manifest";
 import { fileBytesForRel, fileSha256ForRel, sha256Hex } from "./evaluatorIo";
 
 export async function writeRedactionSummaryIfNeeded(params: {
@@ -8,7 +8,7 @@ export async function writeRedactionSummaryIfNeeded(params: {
   redactionStatus: "none" | "applied";
   redactionPresetId?: string;
   redactionWarnings: string[];
-  manifestItems: ManifestItem[];
+  manifestItems: ManifestDraftItem[];
 }): Promise<void> {
   const { reportDirAbs, redactionStatus, redactionPresetId, redactionWarnings, manifestItems } = params;
   if (redactionStatus !== "applied") return;
@@ -34,27 +34,32 @@ export async function writeRedactionSummaryIfNeeded(params: {
 
 export async function finalizeManifest(params: {
   reportDirAbs: string;
-  manifestItems: ManifestItem[];
+  manifestItems: ManifestDraftItem[];
 }): Promise<{ manifest: Manifest; thinIndex: ThinIndex }> {
   const { reportDirAbs } = params;
-  let manifestItems = params.manifestItems;
+  const manifestItems = params.manifestItems;
 
-  const enriched: ManifestItem[] = [];
+  const finalizedItems: ManifestItem[] = [];
   for (const it of manifestItems) {
     const bytes = await fileBytesForRel(reportDirAbs, it.rel_path);
     const sha256 = await fileSha256ForRel(reportDirAbs, it.rel_path);
-    enriched.push({
+    if (bytes === undefined) {
+      throw new Error(`Manifest item file is missing: ${it.rel_path}`);
+    }
+    if (!sha256) {
+      throw new Error(`Manifest item sha256 could not be computed: ${it.rel_path}`);
+    }
+    finalizedItems.push({
       ...it,
-      ...(bytes !== undefined ? { bytes } : {}),
-      ...(sha256 ? { sha256 } : {}),
+      bytes,
+      sha256,
     });
   }
-  manifestItems = enriched;
 
   const manifest: Manifest = {
     manifest_version: "v1",
     generated_at: Date.now(),
-    items: manifestItems,
+    items: finalizedItems,
   };
   const manifestJson = JSON.stringify(manifest, null, 2);
   await ensureDir(path.join(reportDirAbs, "artifacts"));
@@ -73,4 +78,3 @@ export async function finalizeManifest(params: {
 
   return { manifest, thinIndex };
 }
-

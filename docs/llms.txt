@@ -1,0 +1,31 @@
+# EU AI Evidence Builder
+
+> Self-hosted reviewer-ready EU AI Act evidence built from verified runtime data for tool-using AI agents.
+
+## Start here
+- [English homepage](https://tanyayvr.github.io/agent-qa-toolkit/en/)
+- [Technical Overview](https://tanyayvr.github.io/agent-qa-toolkit/en/technology/)
+- [How it works](https://tanyayvr.github.io/agent-qa-toolkit/en/how-it-works/)
+- [Builder](https://tanyayvr.github.io/agent-qa-toolkit/en/builder/)
+- [Documentation templates](https://tanyayvr.github.io/agent-qa-toolkit/en/templates/)
+
+## Live proof
+- [EU reviewer dossier HTML](https://tanyayvr.github.io/agent-qa-toolkit/demo/eu-ai-act/compliance/eu-ai-act-reviewer.html)
+- [EU reviewer dossier PDF](https://tanyayvr.github.io/agent-qa-toolkit/demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf)
+- [EU proof hub](https://tanyayvr.github.io/agent-qa-toolkit/demo/)
+- [Machine-readable proof index](https://tanyayvr.github.io/agent-qa-toolkit/demo/product-surfaces.json)
+
+## Product boundary
+- Core evidence engine for tool-using AI agents
+- EU AI Act vertical with reviewer dossier plus expanded technical pack
+- Article 12-style record-keeping is necessary but not sufficient for high-risk review on its own
+- Not legal advice, legal classification, or final sign-off automation
+
+## Languages
+- [English](https://tanyayvr.github.io/agent-qa-toolkit/en/)
+- [Deutsch](https://tanyayvr.github.io/agent-qa-toolkit/de/)
+- [Français](https://tanyayvr.github.io/agent-qa-toolkit/fr/)
+
+## Source docs
+- [README](https://github.com/Tanyayvr/agent-qa-toolkit#readme)
+- [EU operator runbook](https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-operator-runbook.md)

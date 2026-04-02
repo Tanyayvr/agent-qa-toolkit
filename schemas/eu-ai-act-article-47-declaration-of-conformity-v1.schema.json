@@ -1,0 +1,91 @@
+{
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "report_id",
+    "generated_at",
+    "bundle_artifacts",
+    "document_scope",
+    "declared_system",
+    "declaration_inputs",
+    "residual_gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "framework": { "const": "EU_AI_ACT" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "integer" },
+    "bundle_artifacts": {
+      "type": "object",
+      "required": [
+        "compare_report_href",
+        "evaluator_report_html_href",
+        "manifest_href",
+        "annex_iv_href",
+        "article_10_data_governance_href",
+        "article_13_instructions_href",
+        "article_16_provider_obligations_href",
+        "article_43_conformity_assessment_href",
+        "article_47_declaration_of_conformity_href",
+        "article_9_risk_register_href",
+        "article_72_monitoring_plan_href",
+        "article_17_qms_lite_href",
+        "annex_v_declaration_content_href",
+        "human_oversight_summary_href"
+      ],
+      "properties": {
+        "compare_report_href": { "type": "string" },
+        "evaluator_report_html_href": { "type": "string" },
+        "manifest_href": { "type": "string" },
+        "coverage_href": { "type": "string" },
+        "annex_iv_href": { "type": "string" },
+        "article_10_data_governance_href": { "type": "string" },
+        "article_13_instructions_href": { "type": "string" },
+        "article_16_provider_obligations_href": { "type": "string" },
+        "article_43_conformity_assessment_href": { "type": "string" },
+        "article_47_declaration_of_conformity_href": { "type": "string" },
+        "article_9_risk_register_href": { "type": "string" },
+        "article_72_monitoring_plan_href": { "type": "string" },
+        "article_17_qms_lite_href": { "type": "string" },
+        "annex_v_declaration_content_href": { "type": "string" },
+        "human_oversight_summary_href": { "type": "string" },
+        "release_review_href": { "type": "string" },
+        "post_market_monitoring_href": { "type": "string" },
+        "report_html_href": { "type": "string" },
+        "reviewer_html_href": { "type": "string" },
+        "reviewer_markdown_href": { "type": "string" },
+        "evidence_index_href": { "type": "string" },
+        "article_73_serious_incident_pack_href": { "type": "string" }
+      }
+    },
+    "document_scope": {
+      "type": "object",
+      "required": ["article", "generated_scope", "operator_inputs_required"],
+      "properties": {
+        "article": { "const": "Art_47" },
+        "generated_scope": { "const": "declaration_of_conformity_scaffold" },
+        "operator_inputs_required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "declared_system": {
+      "type": "object",
+      "required": ["report_id", "toolkit_version", "spec_version"],
+      "properties": {
+        "report_id": { "type": "string" },
+        "environment": { "type": "object" },
+        "toolkit_version": { "type": "string" },
+        "spec_version": { "type": "string" }
+      }
+    },
+    "declaration_inputs": {
+      "type": "object",
+      "required": ["supporting_artifacts", "operator_inputs_required"],
+      "properties": {
+        "supporting_artifacts": { "type": "array", "items": { "type": "string" } },
+        "operator_inputs_required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "residual_gaps": { "type": "array", "items": { "type": "string" } }
+  }
+}

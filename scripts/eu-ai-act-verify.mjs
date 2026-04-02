@@ -4,20 +4,69 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Ajv from "ajv";
+import { EU_REVIEWER_PDF_REL_PATH } from "./lib/reviewer-pdf.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..");
 const CORE_VERIFY_SCRIPT = path.join(REPO_ROOT, "scripts", "agent-evidence-verify.mjs");
+const EU_CONTRACTS = new Set(["minimum", "full"]);
+const REQUIRED_EU_AI_ACT_ENVIRONMENT_FIELDS = [
+  "agent_id",
+  "agent_version",
+  "model",
+  "model_version",
+  "prompt_version",
+  "tools_version",
+  "config_hash",
+];
+
+const MINIMUM_REQUIRED_EXPORT_KEYS = [
+  "annex_iv_href",
+  "article_10_data_governance_href",
+  "article_13_instructions_href",
+  "article_16_provider_obligations_href",
+  "article_43_conformity_assessment_href",
+  "article_47_declaration_of_conformity_href",
+  "article_9_risk_register_href",
+  "article_72_monitoring_plan_href",
+  "article_17_qms_lite_href",
+  "annex_v_declaration_content_href",
+  "human_oversight_summary_href",
+];
+
+const FULL_REQUIRED_EXPORT_KEYS = [
+  "coverage_href",
+  "annex_iv_href",
+  "article_10_data_governance_href",
+  "report_html_href",
+  "reviewer_html_href",
+  "reviewer_markdown_href",
+  "evidence_index_href",
+  "article_13_instructions_href",
+  "article_16_provider_obligations_href",
+  "article_43_conformity_assessment_href",
+  "article_47_declaration_of_conformity_href",
+  "article_9_risk_register_href",
+  "article_72_monitoring_plan_href",
+  "article_17_qms_lite_href",
+  "annex_v_declaration_content_href",
+  "article_73_serious_incident_pack_href",
+  "human_oversight_summary_href",
+  "release_review_href",
+  "post_market_monitoring_href",
+];
 
 function usage(exitCode = 0) {
   const msg = [
     "Usage:",
-    "  node scripts/eu-ai-act-verify.mjs --reportDir <path> [--strict] [--json]",
+    "  node scripts/eu-ai-act-verify.mjs --reportDir <path> [--contract <minimum|full>] [--strict] [--json]",
     "",
     "Options:",
     "  --reportDir <path>  Evaluator report directory to verify",
+    "  --contract <minimum|full>  EU compliance contract to verify (default: minimum)",
     "  --strict            Run underlying pvip verification in strict mode",
     "  --json              Print machine-readable JSON result",
+    `  Reviewer PDF is required at ${EU_REVIEWER_PDF_REL_PATH} for --contract full`,
     "  --help              Show this help",
   ].join("\n");
   if (exitCode === 0) console.log(msg);
@@ -28,6 +77,7 @@ function usage(exitCode = 0) {
 function parseArgs(argv) {
   const args = {
     reportDir: null,
+    contract: "minimum",
     strict: false,
     json: false,
   };
@@ -41,6 +91,20 @@ function parseArgs(argv) {
     }
     if (arg === "--strict") {
       args.strict = true;
+      continue;
+    }
+    if (arg === "--contract") {
+      const value = argv[i + 1];
+      if (!value || value.startsWith("--")) {
+        console.error("Missing value for --contract");
+        usage(2);
+      }
+      if (!EU_CONTRACTS.has(value)) {
+        console.error(`Unsupported --contract value: ${value}`);
+        usage(2);
+      }
+      args.contract = value;
+      i += 1;
       continue;
     }
     if (arg === "--reportDir") {
@@ -86,8 +150,29 @@ function checkFileExists(reportDir, relPath) {
   return isPortableHref(relPath) && pathInsideReport(reportDir, relPath) && existsSync(path.join(reportDir, relPath));
 }
 
+function sortKeys(value) {
+  if (Array.isArray(value)) {
+    return value.map(sortKeys);
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, sortKeys(value[key])])
+    );
+  }
+  return value;
+}
+
 function sameObject(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b);
+  return JSON.stringify(sortKeys(a)) === JSON.stringify(sortKeys(b));
+}
+
+function objectContainsSubset(actual, expected) {
+  if (!actual || typeof actual !== "object") return false;
+  return Object.entries(expected).every(([key, value]) => {
+    return Object.prototype.hasOwnProperty.call(actual, key) && sameObject(actual[key], value);
+  });
 }
 
 function pushCheck(checks, name, pass, message, details) {
@@ -145,20 +230,23 @@ function main() {
   }
 
   const report = readJson(compareReportPath);
+  const environment = report?.environment && typeof report.environment === "object" ? report.environment : null;
+  const missingEnvironmentFields = REQUIRED_EU_AI_ACT_ENVIRONMENT_FIELDS.filter((field) => {
+    const value = environment?.[field];
+    return typeof value !== "string" || value.trim().length === 0;
+  });
+  pushCheck(
+    checks,
+    "eu_ai_act_environment_identity",
+    missingEnvironmentFields.length === 0,
+    "EU AI Act bundle must include environment identity fields",
+    missingEnvironmentFields.length === 0
+      ? { environment }
+      : { missing_fields: missingEnvironmentFields, environment }
+  );
+
   const exportsBlock = report?.compliance_exports?.eu_ai_act;
-  const requiredExportKeys = [
-    "coverage_href",
-    "annex_iv_href",
-    "report_html_href",
-    "evidence_index_href",
-    "article_13_instructions_href",
-    "article_9_risk_register_href",
-    "article_72_monitoring_plan_href",
-    "article_17_qms_lite_href",
-    "human_oversight_summary_href",
-    "release_review_href",
-    "post_market_monitoring_href",
-  ];
+  const requiredExportKeys = args.contract === "full" ? FULL_REQUIRED_EXPORT_KEYS : MINIMUM_REQUIRED_EXPORT_KEYS;
   const exportsPresent = Boolean(exportsBlock) && requiredExportKeys.every((key) => typeof exportsBlock[key] === "string");
   pushCheck(
     checks,
@@ -176,39 +264,69 @@ function main() {
     compare_report_href: "compare-report.json",
     evaluator_report_html_href: "report.html",
     manifest_href: "artifacts/manifest.json",
-    coverage_href: exportsBlock.coverage_href,
     annex_iv_href: exportsBlock.annex_iv_href,
-    report_html_href: exportsBlock.report_html_href,
-    evidence_index_href: exportsBlock.evidence_index_href,
+    article_10_data_governance_href: exportsBlock.article_10_data_governance_href,
     article_13_instructions_href: exportsBlock.article_13_instructions_href,
+    article_16_provider_obligations_href: exportsBlock.article_16_provider_obligations_href,
+    article_43_conformity_assessment_href: exportsBlock.article_43_conformity_assessment_href,
+    article_47_declaration_of_conformity_href: exportsBlock.article_47_declaration_of_conformity_href,
     article_9_risk_register_href: exportsBlock.article_9_risk_register_href,
     article_72_monitoring_plan_href: exportsBlock.article_72_monitoring_plan_href,
     article_17_qms_lite_href: exportsBlock.article_17_qms_lite_href,
+    annex_v_declaration_content_href: exportsBlock.annex_v_declaration_content_href,
     human_oversight_summary_href: exportsBlock.human_oversight_summary_href,
+  };
+  const expectedFullBundleArtifacts = {
+    ...expectedBundleArtifacts,
+    coverage_href: exportsBlock.coverage_href,
+    report_html_href: exportsBlock.report_html_href,
+    reviewer_html_href: exportsBlock.reviewer_html_href,
+    reviewer_markdown_href: exportsBlock.reviewer_markdown_href,
+    evidence_index_href: exportsBlock.evidence_index_href,
+    article_73_serious_incident_pack_href: exportsBlock.article_73_serious_incident_pack_href,
     release_review_href: exportsBlock.release_review_href,
     post_market_monitoring_href: exportsBlock.post_market_monitoring_href,
   };
 
   const artifactSpecs = [
-    {
-      name: "coverage",
-      href: exportsBlock.coverage_href,
-      schema: "eu-ai-act-coverage-v1.schema.json",
-    },
+    ...(args.contract === "full"
+      ? [
+          {
+            name: "coverage",
+            href: exportsBlock.coverage_href,
+            schema: "eu-ai-act-coverage-v1.schema.json",
+          },
+        ]
+      : []),
     {
       name: "annex",
       href: exportsBlock.annex_iv_href,
       schema: "eu-ai-act-annex-iv-v1.schema.json",
     },
     {
-      name: "evidence_index",
-      href: exportsBlock.evidence_index_href,
-      schema: "eu-ai-act-evidence-index-v1.schema.json",
+      name: "article_10_data_governance",
+      href: exportsBlock.article_10_data_governance_href,
+      schema: "eu-ai-act-article-10-data-governance-v1.schema.json",
     },
     {
       name: "article_13_instructions",
       href: exportsBlock.article_13_instructions_href,
       schema: "eu-ai-act-article-13-instructions-v1.schema.json",
+    },
+    {
+      name: "article_16_provider_obligations",
+      href: exportsBlock.article_16_provider_obligations_href,
+      schema: "eu-ai-act-article-16-provider-obligations-v1.schema.json",
+    },
+    {
+      name: "article_43_conformity_assessment",
+      href: exportsBlock.article_43_conformity_assessment_href,
+      schema: "eu-ai-act-article-43-conformity-assessment-v1.schema.json",
+    },
+    {
+      name: "article_47_declaration_of_conformity",
+      href: exportsBlock.article_47_declaration_of_conformity_href,
+      schema: "eu-ai-act-article-47-declaration-of-conformity-v1.schema.json",
     },
     {
       name: "article_9_risk_register",
@@ -226,30 +344,75 @@ function main() {
       schema: "eu-ai-act-article-17-qms-lite-v1.schema.json",
     },
     {
+      name: "annex_v_declaration_content",
+      href: exportsBlock.annex_v_declaration_content_href,
+      schema: "eu-ai-act-annex-v-declaration-content-v1.schema.json",
+    },
+    {
       name: "human_oversight",
       href: exportsBlock.human_oversight_summary_href,
       schema: "eu-ai-act-human-oversight-v1.schema.json",
     },
-    {
-      name: "release_review",
-      href: exportsBlock.release_review_href,
-      schema: "eu-ai-act-release-review-v1.schema.json",
-    },
-    {
-      name: "post_market_monitoring",
-      href: exportsBlock.post_market_monitoring_href,
-      schema: "eu-ai-act-post-market-monitoring-v1.schema.json",
-    },
+    ...(args.contract === "full"
+      ? [
+          {
+            name: "evidence_index",
+            href: exportsBlock.evidence_index_href,
+            schema: "eu-ai-act-evidence-index-v1.schema.json",
+          },
+          {
+            name: "article_73_serious_incident_pack",
+            href: exportsBlock.article_73_serious_incident_pack_href,
+            schema: "eu-ai-act-article-73-serious-incident-pack-v1.schema.json",
+          },
+          {
+            name: "release_review",
+            href: exportsBlock.release_review_href,
+            schema: "eu-ai-act-release-review-v1.schema.json",
+          },
+          {
+            name: "post_market_monitoring",
+            href: exportsBlock.post_market_monitoring_href,
+            schema: "eu-ai-act-post-market-monitoring-v1.schema.json",
+          },
+        ]
+      : []),
   ];
 
-  const dossierHtmlPresent = checkFileExists(reportDir, exportsBlock.report_html_href);
-  pushCheck(
-    checks,
-    "compliance_dossier_html_present",
-    dossierHtmlPresent,
-    "Compliance dossier HTML must exist",
-    dossierHtmlPresent ? { href: exportsBlock.report_html_href } : { href: exportsBlock.report_html_href }
-  );
+  const dossierHtmlPresent = args.contract === "full" ? checkFileExists(reportDir, exportsBlock.report_html_href) : true;
+  const reviewerHtmlPresent = args.contract === "full" ? checkFileExists(reportDir, exportsBlock.reviewer_html_href) : true;
+  const reviewerMarkdownPresent = args.contract === "full" ? checkFileExists(reportDir, exportsBlock.reviewer_markdown_href) : true;
+  const reviewerPdfPresent = args.contract === "full" ? checkFileExists(reportDir, EU_REVIEWER_PDF_REL_PATH) : true;
+  if (args.contract === "full") {
+    pushCheck(
+      checks,
+      "compliance_dossier_html_present",
+      dossierHtmlPresent,
+      "Compliance dossier HTML must exist",
+      dossierHtmlPresent ? { href: exportsBlock.report_html_href } : { href: exportsBlock.report_html_href }
+    );
+    pushCheck(
+      checks,
+      "reviewer_html_present",
+      reviewerHtmlPresent,
+      "Reviewer HTML must exist",
+      { href: exportsBlock.reviewer_html_href }
+    );
+    pushCheck(
+      checks,
+      "reviewer_markdown_present",
+      reviewerMarkdownPresent,
+      "Reviewer markdown must exist",
+      { href: exportsBlock.reviewer_markdown_href }
+    );
+    pushCheck(
+      checks,
+      "reviewer_pdf_present",
+      reviewerPdfPresent,
+      "Reviewer PDF must exist",
+      { href: EU_REVIEWER_PDF_REL_PATH }
+    );
+  }
 
   const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
   const complianceDocs = [];
@@ -285,13 +448,21 @@ function main() {
       { expected: report.report_id, actual: doc.report_id }
     );
     if (doc.bundle_artifacts && typeof doc.bundle_artifacts === "object") {
-      const bundleArtifactsMatch = sameObject(doc.bundle_artifacts, expectedBundleArtifacts);
+      const bundleArtifactsMatch =
+        args.contract === "full"
+          ? sameObject(doc.bundle_artifacts, expectedFullBundleArtifacts)
+          : objectContainsSubset(doc.bundle_artifacts, expectedBundleArtifacts);
       pushCheck(
         checks,
         `${spec.name}_bundle_artifacts_match`,
         bundleArtifactsMatch,
         `${spec.name} bundle_artifacts must match compare-report exports`,
-        bundleArtifactsMatch ? undefined : { expected: expectedBundleArtifacts, actual: doc.bundle_artifacts }
+        bundleArtifactsMatch
+          ? undefined
+          : {
+              expected: args.contract === "full" ? expectedFullBundleArtifacts : expectedBundleArtifacts,
+              actual: doc.bundle_artifacts,
+            }
       );
     } else {
       pushCheck(
@@ -308,17 +479,18 @@ function main() {
   pushCheck(
     checks,
     "all_compliance_artifacts_present",
-    allArtifactsPresent && dossierHtmlPresent,
+    allArtifactsPresent && dossierHtmlPresent && reviewerHtmlPresent && reviewerMarkdownPresent && reviewerPdfPresent,
     "All compliance artifacts must exist before handoff"
   );
 
-  if (dossierHtmlPresent) {
+  if (args.contract === "full" && dossierHtmlPresent) {
     const dossierHtml = readFileSync(path.join(reportDir, exportsBlock.report_html_href), "utf8");
     const dossierLinksOk =
       dossierHtml.includes("article-13-instructions.json") &&
       dossierHtml.includes("article-9-risk-register.json") &&
       dossierHtml.includes("article-72-monitoring-plan.json") &&
       dossierHtml.includes("article-17-qms-lite.json") &&
+      dossierHtml.includes("article-73-serious-incident-pack.json") &&
       dossierHtml.includes("human-oversight-summary.json") &&
       dossierHtml.includes("release-review.json") &&
       dossierHtml.includes("post-market-monitoring.json");
@@ -330,14 +502,50 @@ function main() {
     );
   }
 
-  if (existsSync(reportHtmlPath)) {
+  if (args.contract === "full" && reviewerHtmlPresent) {
+    const reviewerHtml = readFileSync(path.join(reportDir, exportsBlock.reviewer_html_href), "utf8");
+    const reviewerLinksOk =
+      reviewerHtml.includes("eu-ai-act-report.html") &&
+      reviewerHtml.includes("eu-ai-act-annex-iv.json") &&
+      reviewerHtml.includes("article-13-instructions.json") &&
+      reviewerHtml.includes("article-9-risk-register.json") &&
+      reviewerHtml.includes("article-72-monitoring-plan.json") &&
+      reviewerHtml.includes("article-17-qms-lite.json") &&
+      reviewerHtml.includes("article-73-serious-incident-pack.json");
+    pushCheck(
+      checks,
+      "reviewer_html_links",
+      reviewerLinksOk,
+      "Reviewer HTML must link to the expanded technical pack and the core EU article artifacts"
+    );
+  }
+
+  if (args.contract === "full" && reviewerMarkdownPresent) {
+    const reviewerMarkdown = readFileSync(path.join(reportDir, exportsBlock.reviewer_markdown_href), "utf8");
+    const reviewerMarkdownSectionsOk =
+      reviewerMarkdown.includes("# EU AI Act reviewer pack") &&
+      reviewerMarkdown.includes("## 1. General description of the system") &&
+      reviewerMarkdown.includes("## 5. Risk management system (Article 9)") &&
+      reviewerMarkdown.includes("## 8. EU Declaration of Conformity boundary (Annex V)");
+    pushCheck(
+      checks,
+      "reviewer_markdown_sections",
+      reviewerMarkdownSectionsOk,
+      "Reviewer markdown must expose the expected Annex-shaped reviewer section order"
+    );
+  }
+
+  if (args.contract === "full" && existsSync(reportHtmlPath)) {
     const reportHtml = readFileSync(reportHtmlPath, "utf8");
     const mainLinksOk =
+      reportHtml.includes(exportsBlock.reviewer_html_href) &&
+      reportHtml.includes(exportsBlock.reviewer_markdown_href) &&
       reportHtml.includes(exportsBlock.report_html_href) &&
       reportHtml.includes(exportsBlock.article_13_instructions_href) &&
       reportHtml.includes(exportsBlock.article_9_risk_register_href) &&
       reportHtml.includes(exportsBlock.article_72_monitoring_plan_href) &&
       reportHtml.includes(exportsBlock.article_17_qms_lite_href) &&
+      reportHtml.includes(exportsBlock.article_73_serious_incident_pack_href) &&
       reportHtml.includes(exportsBlock.post_market_monitoring_href);
     pushCheck(
       checks,
@@ -365,6 +573,7 @@ function finish(args, reportDir, reportId, checks) {
     report_dir: reportDir,
     ...(reportId ? { report_id: reportId } : {}),
     mode: args.strict ? "strict" : "pvip",
+    contract: args.contract,
     summary: {
       total_checks: checks.length,
       failed_checks: failed.length,

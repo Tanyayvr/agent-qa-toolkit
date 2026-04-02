@@ -24,14 +24,23 @@
         "compare_report_href": { "type": "string", "minLength": 1 },
         "report_html_href": { "type": "string", "minLength": 1 },
         "manifest_href": { "type": "string", "minLength": 1 },
+        "retention_archive_controls_href": { "type": "string", "minLength": 1 },
         "coverage_href": { "type": "string", "minLength": 1 },
         "annex_iv_href": { "type": "string", "minLength": 1 },
+        "article_10_data_governance_href": { "type": "string", "minLength": 1 },
         "compliance_report_html_href": { "type": "string", "minLength": 1 },
+        "reviewer_html_href": { "type": "string", "minLength": 1 },
+        "reviewer_markdown_href": { "type": "string", "minLength": 1 },
         "evidence_index_href": { "type": "string", "minLength": 1 },
         "article_13_instructions_href": { "type": "string", "minLength": 1 },
+        "article_16_provider_obligations_href": { "type": "string", "minLength": 1 },
+        "article_43_conformity_assessment_href": { "type": "string", "minLength": 1 },
+        "article_47_declaration_of_conformity_href": { "type": "string", "minLength": 1 },
         "article_9_risk_register_href": { "type": "string", "minLength": 1 },
         "article_72_monitoring_plan_href": { "type": "string", "minLength": 1 },
         "article_17_qms_lite_href": { "type": "string", "minLength": 1 },
+        "annex_v_declaration_content_href": { "type": "string", "minLength": 1 },
+        "article_73_serious_incident_pack_href": { "type": "string", "minLength": 1 },
         "human_oversight_summary_href": { "type": "string", "minLength": 1 },
         "release_review_href": { "type": "string", "minLength": 1 },
         "post_market_monitoring_href": { "type": "string", "minLength": 1 }
@@ -154,7 +163,21 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["gap_id", "source", "severity", "description", "artifact_hrefs", "continuity_key", "continuity_status", "previous_occurrence_count", "last_seen_report_id", "last_seen_decision_status", "owner_name", "disposition", "note"],
+            "required": [
+              "gap_id",
+              "source",
+              "severity",
+              "description",
+              "artifact_hrefs",
+              "continuity_key",
+              "continuity_status",
+              "previous_occurrence_count",
+              "last_seen_report_id",
+              "last_seen_decision_status",
+              "owner_name",
+              "disposition",
+              "note"
+            ],
             "properties": {
               "gap_id": { "type": "string", "minLength": 1 },
               "source": { "type": "string", "minLength": 1 },
@@ -187,8 +210,59 @@
             {
               "type": "object",
               "additionalProperties": false,
-              "required": ["article_13_instructions", "article_17_qms_lite", "article_72_monitoring_plan"],
+              "required": [
+                "article_13_instructions",
+                "article_17_qms_lite",
+                "article_72_monitoring_plan",
+                "article_73_serious_incident_pack"
+              ],
               "properties": {
+                "article_10_data_governance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "article",
+                    "title",
+                    "artifact_href",
+                    "owner_name",
+                    "owner_role",
+                    "status",
+                    "completion_note",
+                    "required_inputs",
+                    "residual_gap_count",
+                    "residual_gap_examples",
+                    "residual_gap_acknowledged",
+                    "residual_gap_note"
+                  ],
+                  "properties": {
+                    "article": { "const": "Art_10" },
+                    "title": { "type": "string", "minLength": 1 },
+                    "artifact_href": { "type": "string", "minLength": 1 },
+                    "owner_name": { "type": "string" },
+                    "owner_role": { "type": "string" },
+                    "status": { "enum": ["pending", "completed"] },
+                    "completion_note": { "type": "string" },
+                    "required_inputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["input_id", "label", "source_refs", "status", "note"],
+                        "properties": {
+                          "input_id": { "type": "string", "minLength": 1 },
+                          "label": { "type": "string", "minLength": 1 },
+                          "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                          "status": { "enum": ["pending", "completed", "deferred"] },
+                          "note": { "type": "string" }
+                        }
+                      }
+                    },
+                    "residual_gap_count": { "type": "number" },
+                    "residual_gap_examples": { "type": "array", "items": { "type": "string" } },
+                    "residual_gap_acknowledged": { "type": "boolean" },
+                    "residual_gap_note": { "type": "string" }
+                  }
+                },
                 "article_13_instructions": {
                   "type": "object",
                   "additionalProperties": false,
@@ -208,6 +282,52 @@
                   ],
                   "properties": {
                     "article": { "const": "Art_13" },
+                    "title": { "type": "string", "minLength": 1 },
+                    "artifact_href": { "type": "string", "minLength": 1 },
+                    "owner_name": { "type": "string" },
+                    "owner_role": { "type": "string" },
+                    "status": { "enum": ["pending", "completed"] },
+                    "completion_note": { "type": "string" },
+                    "required_inputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["input_id", "label", "source_refs", "status", "note"],
+                        "properties": {
+                          "input_id": { "type": "string", "minLength": 1 },
+                          "label": { "type": "string", "minLength": 1 },
+                          "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                          "status": { "enum": ["pending", "completed", "deferred"] },
+                          "note": { "type": "string" }
+                        }
+                      }
+                    },
+                    "residual_gap_count": { "type": "number" },
+                    "residual_gap_examples": { "type": "array", "items": { "type": "string" } },
+                    "residual_gap_acknowledged": { "type": "boolean" },
+                    "residual_gap_note": { "type": "string" }
+                  }
+                },
+                "article_16_provider_obligations": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "article",
+                    "title",
+                    "artifact_href",
+                    "owner_name",
+                    "owner_role",
+                    "status",
+                    "completion_note",
+                    "required_inputs",
+                    "residual_gap_count",
+                    "residual_gap_examples",
+                    "residual_gap_acknowledged",
+                    "residual_gap_note"
+                  ],
+                  "properties": {
+                    "article": { "const": "Art_16" },
                     "title": { "type": "string", "minLength": 1 },
                     "artifact_href": { "type": "string", "minLength": 1 },
                     "owner_name": { "type": "string" },
@@ -281,6 +401,98 @@
                     "residual_gap_note": { "type": "string" }
                   }
                 },
+                "article_43_conformity_assessment": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "article",
+                    "title",
+                    "artifact_href",
+                    "owner_name",
+                    "owner_role",
+                    "status",
+                    "completion_note",
+                    "required_inputs",
+                    "residual_gap_count",
+                    "residual_gap_examples",
+                    "residual_gap_acknowledged",
+                    "residual_gap_note"
+                  ],
+                  "properties": {
+                    "article": { "const": "Art_43" },
+                    "title": { "type": "string", "minLength": 1 },
+                    "artifact_href": { "type": "string", "minLength": 1 },
+                    "owner_name": { "type": "string" },
+                    "owner_role": { "type": "string" },
+                    "status": { "enum": ["pending", "completed"] },
+                    "completion_note": { "type": "string" },
+                    "required_inputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["input_id", "label", "source_refs", "status", "note"],
+                        "properties": {
+                          "input_id": { "type": "string", "minLength": 1 },
+                          "label": { "type": "string", "minLength": 1 },
+                          "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                          "status": { "enum": ["pending", "completed", "deferred"] },
+                          "note": { "type": "string" }
+                        }
+                      }
+                    },
+                    "residual_gap_count": { "type": "number" },
+                    "residual_gap_examples": { "type": "array", "items": { "type": "string" } },
+                    "residual_gap_acknowledged": { "type": "boolean" },
+                    "residual_gap_note": { "type": "string" }
+                  }
+                },
+                "article_47_declaration_of_conformity": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "article",
+                    "title",
+                    "artifact_href",
+                    "owner_name",
+                    "owner_role",
+                    "status",
+                    "completion_note",
+                    "required_inputs",
+                    "residual_gap_count",
+                    "residual_gap_examples",
+                    "residual_gap_acknowledged",
+                    "residual_gap_note"
+                  ],
+                  "properties": {
+                    "article": { "const": "Art_47" },
+                    "title": { "type": "string", "minLength": 1 },
+                    "artifact_href": { "type": "string", "minLength": 1 },
+                    "owner_name": { "type": "string" },
+                    "owner_role": { "type": "string" },
+                    "status": { "enum": ["pending", "completed"] },
+                    "completion_note": { "type": "string" },
+                    "required_inputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["input_id", "label", "source_refs", "status", "note"],
+                        "properties": {
+                          "input_id": { "type": "string", "minLength": 1 },
+                          "label": { "type": "string", "minLength": 1 },
+                          "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                          "status": { "enum": ["pending", "completed", "deferred"] },
+                          "note": { "type": "string" }
+                        }
+                      }
+                    },
+                    "residual_gap_count": { "type": "number" },
+                    "residual_gap_examples": { "type": "array", "items": { "type": "string" } },
+                    "residual_gap_acknowledged": { "type": "boolean" },
+                    "residual_gap_note": { "type": "string" }
+                  }
+                },
                 "article_72_monitoring_plan": {
                   "type": "object",
                   "additionalProperties": false,
@@ -322,6 +534,98 @@
                       }
                     },
                     "residual_gap_count": { "type": "number" },
+                    "residual_gap_examples": { "type": "array", "items": { "type": "string" } },
+                    "residual_gap_acknowledged": { "type": "boolean" },
+                    "residual_gap_note": { "type": "string" }
+                  }
+                },
+                "annex_v_declaration_content": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "article",
+                    "title",
+                    "artifact_href",
+                    "owner_name",
+                    "owner_role",
+                    "status",
+                    "completion_note",
+                    "required_inputs",
+                    "residual_gap_count",
+                    "residual_gap_examples",
+                    "residual_gap_acknowledged",
+                    "residual_gap_note"
+                  ],
+                  "properties": {
+                    "article": { "const": "Annex_V" },
+                    "title": { "type": "string", "minLength": 1 },
+                    "artifact_href": { "type": "string", "minLength": 1 },
+                    "owner_name": { "type": "string" },
+                    "owner_role": { "type": "string" },
+                    "status": { "enum": ["pending", "completed"] },
+                    "completion_note": { "type": "string" },
+                    "required_inputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["input_id", "label", "source_refs", "status", "note"],
+                        "properties": {
+                          "input_id": { "type": "string", "minLength": 1 },
+                          "label": { "type": "string", "minLength": 1 },
+                          "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                          "status": { "enum": ["pending", "completed", "deferred"] },
+                          "note": { "type": "string" }
+                        }
+                      }
+                    },
+                    "residual_gap_count": { "type": "number" },
+                    "residual_gap_examples": { "type": "array", "items": { "type": "string" } },
+                    "residual_gap_acknowledged": { "type": "boolean" },
+                    "residual_gap_note": { "type": "string" }
+                  }
+                },
+                "article_73_serious_incident_pack": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "article",
+                    "title",
+                    "artifact_href",
+                    "owner_name",
+                    "owner_role",
+                    "status",
+                    "completion_note",
+                    "required_inputs",
+                    "residual_gap_count",
+                    "residual_gap_examples",
+                    "residual_gap_acknowledged",
+                    "residual_gap_note"
+                  ],
+                  "properties": {
+                    "article": { "const": "Art_73" },
+                    "title": { "type": "string", "minLength": 1 },
+                    "artifact_href": { "type": "string", "minLength": 1 },
+                    "owner_name": { "type": "string" },
+                    "owner_role": { "type": "string" },
+                    "status": { "enum": ["pending", "completed"] },
+                    "completion_note": { "type": "string" },
+                    "required_inputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["input_id", "label", "source_refs", "status", "note"],
+                        "properties": {
+                          "input_id": { "type": "string", "minLength": 1 },
+                          "label": { "type": "string", "minLength": 1 },
+                          "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                          "status": { "enum": ["pending", "completed", "deferred"] },
+                          "note": { "type": "string" }
+                        }
+                      }
+                    },
+                    "residual_gap_count": { "type": "number", "minimum": 0 },
                     "residual_gap_examples": { "type": "array", "items": { "type": "string" } },
                     "residual_gap_acknowledged": { "type": "boolean" },
                     "residual_gap_note": { "type": "string" }

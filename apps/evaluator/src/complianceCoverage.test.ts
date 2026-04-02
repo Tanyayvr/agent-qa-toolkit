@@ -127,7 +127,13 @@ describe("complianceCoverage", () => {
       manifest: {
         manifest_version: "v1",
         generated_at: 1,
-        items: [{ manifest_key: "c1/new/case_response", rel_path: "assets/c1.json", media_type: "application/json" }],
+        items: [{
+          manifest_key: "c1/new/case_response",
+          rel_path: "assets/c1.json",
+          media_type: "application/json",
+          bytes: 42,
+          sha256: "a".repeat(64),
+        }],
       },
       requirements: [
         {

@@ -339,7 +339,7 @@ function governanceReviewAttachment(bundleArtifacts: EuAiActBundleArtifacts): Eu
       bundleArtifacts.article_17_qms_lite_href,
       bundleArtifacts.annex_iv_href,
       bundleArtifacts.compare_report_href,
-    ],
+    ].filter((href): href is string => typeof href === "string" && href.length > 0),
     recurring_review_questions: [
       "Did approval-required or blocking cases increase compared with the previous monitored run?",
       "Is pass rate declining or are high/critical security findings accumulating over time?",

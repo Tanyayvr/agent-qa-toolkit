@@ -12,6 +12,7 @@ import {
   traceCell,
 } from "./htmlFormatters";
 import type { CompareReport, ItemAssertion } from "./reportTypes";
+import { getReportCopy, type ReportCopy } from "./reportI18n";
 
 export type ReportRowEntry = {
   case_id: string;
@@ -25,37 +26,47 @@ export type ReportRowEntry = {
   row_html: string;
 };
 
-export function buildSuiteBlocks(suiteSummaries: NonNullable<CompareReport["summary_by_suite"]>): string {
+function formatCaseStatus(status: string, copy: ReportCopy): string {
+  if (status === "executed") return copy.statusExecutedBadge;
+  if (status === "filtered_out") return copy.statusFilteredBadge;
+  if (status === "missing") return copy.statusMissingBadge;
+  return status;
+}
+
+export function buildSuiteBlocks(
+  suiteSummaries: NonNullable<CompareReport["summary_by_suite"]>,
+  copy: ReportCopy = getReportCopy()
+): string {
   const suiteEntries = Object.entries(suiteSummaries);
   return suiteEntries
     .map(([suite, ss]) => {
       const suiteNote =
         suite === "robustness"
-          ? `<div class="muted" style="margin-top:8px;">Robustness has no correctness assertions. PASS means the pipeline completed without fatal errors.</div>`
+          ? `<div class="muted" style="margin-top:8px;">${escHtml(copy.robustnessNote)}</div>`
           : "";
       return `
 <div class="card" style="margin-top:12px;">
-  <div style="font-size:14px;font-weight:900;">Suite: ${escHtml(suite)}</div>
+  <div style="font-size:14px;font-weight:900;">${escHtml(copy.suitePrefix)}: ${escHtml(suite)}</div>
   <div class="kpi" style="margin-top:10px;">
-    <div class="k"><div class="v">${escHtml(String(ss.baseline_pass))}</div><div class="l">baseline pass</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.new_pass))}</div><div class="l">new pass</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.regressions))}</div><div class="l">regressions</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.improvements))}</div><div class="l">improvements</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.baseline_pass))}</div><div class="l">${escHtml(copy.baselinePassLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.new_pass))}</div><div class="l">${escHtml(copy.newPassLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.regressions))}</div><div class="l">${escHtml(copy.regressionsLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.improvements))}</div><div class="l">${escHtml(copy.improvementsLabel)}</div></div>
   </div>
   <div class="kpi" style="margin-top:10px;">
-    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.low))}</div><div class="l">risk low</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.medium))}</div><div class="l">risk medium</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.high))}</div><div class="l">risk high</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.low))}</div><div class="l">${escHtml(copy.riskLowLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.medium))}</div><div class="l">${escHtml(copy.riskMediumLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.risk_summary.high))}</div><div class="l">${escHtml(copy.riskHighLabel)}</div></div>
   </div>
   <div class="kpi" style="margin-top:10px;">
-    <div class="k"><div class="v">${escHtml(String(ss.cases_requiring_approval))}</div><div class="l">require approval</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.cases_block_recommended))}</div><div class="l">block recommended</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.cases_requiring_approval))}</div><div class="l">${escHtml(copy.requireApprovalLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.cases_block_recommended))}</div><div class="l">${escHtml(copy.blockRecommendedLabel)}</div></div>
   </div>
   <div class="kpi" style="margin-top:10px;">
-    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.missing_baseline_artifacts))}</div><div class="l">missing baseline</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.missing_new_artifacts))}</div><div class="l">missing new</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_baseline_artifacts))}</div><div class="l">broken baseline</div></div>
-    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_new_artifacts))}</div><div class="l">broken new</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.missing_baseline_artifacts))}</div><div class="l">${escHtml(copy.missingBaselineLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.missing_new_artifacts))}</div><div class="l">${escHtml(copy.missingNewLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_baseline_artifacts))}</div><div class="l">${escHtml(copy.brokenBaselineLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(ss.data_coverage.broken_new_artifacts))}</div><div class="l">${escHtml(copy.brokenNewLabel)}</div></div>
   </div>
   ${suiteNote}
 </div>`;
@@ -63,14 +74,17 @@ export function buildSuiteBlocks(suiteSummaries: NonNullable<CompareReport["summ
     .join("");
 }
 
-export function buildSuiteControls(suiteSummaries: NonNullable<CompareReport["summary_by_suite"]>): {
+export function buildSuiteControls(
+  suiteSummaries: NonNullable<CompareReport["summary_by_suite"]>,
+  copy: ReportCopy = getReportCopy()
+): {
   options: string;
   quickButtons: string;
 } {
   const suiteEntries = Object.entries(suiteSummaries);
   return {
     options: suiteEntries
-      .map(([suite]) => `<option value="${escHtml(suite)}">Suite: ${escHtml(suite)}</option>`)
+      .map(([suite]) => `<option value="${escHtml(suite)}">${escHtml(copy.suitePrefix)}: ${escHtml(suite)}</option>`)
       .join(""),
     quickButtons: suiteEntries
       .map(([suite]) => `<button class="btn tab suiteBtn" data-suite="${escHtml(suite)}">${escHtml(suite)}</button>`)
@@ -78,48 +92,51 @@ export function buildSuiteControls(suiteSummaries: NonNullable<CompareReport["su
   };
 }
 
-export function buildSecuritySummaryBlock(sec: CompareReport["summary"]["security"]): string {
+export function buildSecuritySummaryBlock(
+  sec: CompareReport["summary"]["security"],
+  copy: ReportCopy = getReportCopy()
+): string {
   return `
 <div class="card" style="margin-top:14px;">
-  <div style="font-size:16px;font-weight:900;">Security summary</div>
+  <div style="font-size:16px;font-weight:900;">${escHtml(copy.securitySummaryTitle)}</div>
   <div class="kpi" style="margin-top:10px;">
-    <div class="k"><div class="v">${escHtml(String(sec.total_cases))}</div><div class="l">total_cases</div></div>
-    <div class="k"><div class="v">${escHtml(String(sec.cases_with_signals_baseline))}</div><div class="l">cases_with_signals_baseline</div></div>
-    <div class="k"><div class="v">${escHtml(String(sec.cases_with_signals_new))}</div><div class="l">cases_with_signals_new</div></div>
+    <div class="k"><div class="v">${escHtml(String(sec.total_cases))}</div><div class="l">${escHtml(copy.totalCasesLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(sec.cases_with_signals_baseline))}</div><div class="l">${escHtml(copy.casesWithSignalsBaselineLabel)}</div></div>
+    <div class="k"><div class="v">${escHtml(String(sec.cases_with_signals_new))}</div><div class="l">${escHtml(copy.casesWithSignalsNewLabel)}</div></div>
   </div>
   <div class="muted" style="margin-top:10px;">
-    baseline severity counts:
+    ${escHtml(copy.baselineSeverityCountsLabel)}:
     low=${escHtml(String(sec.signal_counts_baseline.low))},
     medium=${escHtml(String(sec.signal_counts_baseline.medium))},
     high=${escHtml(String(sec.signal_counts_baseline.high))},
     critical=${escHtml(String(sec.signal_counts_baseline.critical))}
   </div>
   <div class="muted" style="margin-top:6px;">
-    new severity counts:
+    ${escHtml(copy.newSeverityCountsLabel)}:
     low=${escHtml(String(sec.signal_counts_new.low))},
     medium=${escHtml(String(sec.signal_counts_new.medium))},
     high=${escHtml(String(sec.signal_counts_new.high))},
     critical=${escHtml(String(sec.signal_counts_new.critical))}
   </div>
   <div class="muted" style="margin-top:10px;">
-    top_signal_kinds_baseline: ${sec.top_signal_kinds_baseline.length ? escHtml(sec.top_signal_kinds_baseline.join(", ")) : "—"}
+    ${escHtml(copy.topSignalKindsBaselineLabel)}: ${sec.top_signal_kinds_baseline.length ? escHtml(sec.top_signal_kinds_baseline.join(", ")) : "—"}
   </div>
   <div class="muted" style="margin-top:6px;">
-    top_signal_kinds_new: ${sec.top_signal_kinds_new.length ? escHtml(sec.top_signal_kinds_new.join(", ")) : "—"}
+    ${escHtml(copy.topSignalKindsNewLabel)}: ${sec.top_signal_kinds_new.length ? escHtml(sec.top_signal_kinds_new.join(", ")) : "—"}
   </div>
 </div>`.trim();
 }
 
-function renderAssertionRows(label: string, rows: ItemAssertion[]): string {
+function renderAssertionRows(label: string, rows: ItemAssertion[], copy: ReportCopy): string {
   return rows
     .map(
       (a) =>
-        `<div class="assertionRow"><span class="muted">${escHtml(label)}:</span><span class="name">${escHtml(a.name)}</span><span class="${a.pass ? "pass" : "fail"}">${a.pass ? "pass" : "fail"}</span></div>`
+        `<div class="assertionRow"><span class="muted">${escHtml(label)}:</span><span class="name">${escHtml(a.name)}</span><span class="${a.pass ? "pass" : "fail"}">${a.pass ? escHtml(copy.passLabel) : escHtml(copy.failLabel)}</span></div>`
     )
     .join("");
 }
 
-export function buildRowEntries(items: CompareReport["items"]): ReportRowEntry[] {
+export function buildRowEntries(items: CompareReport["items"], copy: ReportCopy = getReportCopy()): ReportRowEntry[] {
   return items.map((it) => {
     const suite = it.suite ?? "default";
     const base = it.baseline_pass ? badge("PASS", "ok") : badge("FAIL", "bad");
@@ -159,6 +176,16 @@ export function buildRowEntries(items: CompareReport["items"]): ReportRowEntry[]
       it.artifacts.new_case_response_key,
       "new.json"
     );
+    const bTelemetry = linkIfPresentWithKey(
+      it.artifacts.baseline_tool_telemetry_href,
+      it.artifacts.baseline_tool_telemetry_key,
+      "tool-telemetry.json"
+    );
+    const nTelemetry = linkIfPresentWithKey(
+      it.artifacts.new_tool_telemetry_href,
+      it.artifacts.new_tool_telemetry_key,
+      "tool-telemetry.json"
+    );
     const bTrace = linkIfPresentWithKey(
       it.artifacts.baseline_trace_anchor_href,
       it.artifacts.baseline_trace_anchor_key,
@@ -173,9 +200,9 @@ export function buildRowEntries(items: CompareReport["items"]): ReportRowEntry[]
     const bRun = linkIfPresent(it.artifacts.baseline_run_meta_href, "baseline.run.json");
     const nRun = linkIfPresent(it.artifacts.new_run_meta_href, "new.run.json");
 
-    const baselineAssets = [bBody, bMeta, bCase, bTrace, bRun].filter(Boolean).join(" · ");
-    const newAssets = [nBody, nMeta, nCase, nTrace, nRun].filter(Boolean).join(" · ");
-    const preventable = it.preventable_by_policy ? badge("preventable", "mid") : `<span class="muted">—</span>`;
+    const baselineAssets = [bBody, bMeta, bCase, bTelemetry, bTrace, bRun].filter(Boolean).join(" · ");
+    const newAssets = [nBody, nMeta, nCase, nTelemetry, nTrace, nRun].filter(Boolean).join(" · ");
+    const preventable = it.preventable_by_policy ? badge(copy.preventableBadge, "mid") : `<span class="muted">—</span>`;
     const hasFailure = Boolean(it.failure_summary?.baseline || it.failure_summary?.new);
     const rowClass =
       it.baseline_pass && !it.new_pass
@@ -187,33 +214,33 @@ export function buildRowEntries(items: CompareReport["items"]): ReportRowEntry[]
     const assertions = it.assertions ?? [];
     const failedAssertions = assertions.filter((a) => a.pass === false).map((a) => a.name);
     const assertionChip = assertions.length
-      ? `<span class="metaChip" title="${escHtml(failedAssertions.join(", "))}">assertions: ${assertions.length} (fail: ${failedAssertions.length})</span>`
+      ? `<span class="metaChip" title="${escHtml(failedAssertions.join(", "))}">${escHtml(copy.assertionCountLabel)}: ${assertions.length} (${escHtml(copy.failCountLabel)}: ${failedAssertions.length})</span>`
       : "";
     const assertionsBaseline = it.assertions_baseline ?? [];
     const failedBaseline = assertionsBaseline.filter((a) => a.pass === false).map((a) => a.name);
     const assertionBaselineChip = assertionsBaseline.length
-      ? `<span class="metaChip" title="${escHtml(failedBaseline.join(", "))}">baseline assertions: ${assertionsBaseline.length} (fail: ${failedBaseline.length})</span>`
+      ? `<span class="metaChip" title="${escHtml(failedBaseline.join(", "))}">${escHtml(copy.baselineAssertionCountLabel)}: ${assertionsBaseline.length} (${escHtml(copy.failCountLabel)}: ${failedBaseline.length})</span>`
       : "";
     const assertionsNew = it.assertions_new ?? [];
     const failedNew = assertionsNew.filter((a) => a.pass === false).map((a) => a.name);
     const assertionNewChip = assertionsNew.length
-      ? `<span class="metaChip" title="${escHtml(failedNew.join(", "))}">new assertions: ${assertionsNew.length} (fail: ${failedNew.length})</span>`
+      ? `<span class="metaChip" title="${escHtml(failedNew.join(", "))}">${escHtml(copy.newAssertionCountLabel)}: ${assertionsNew.length} (${escHtml(copy.failCountLabel)}: ${failedNew.length})</span>`
       : "";
 
     const assertionDetails =
       assertionsBaseline.length || assertionsNew.length
         ? `<details class="assertions">
-              <summary>Assertions details</summary>
-              <div class="assertionList">
-                ${assertionsBaseline.length ? renderAssertionRows("baseline", assertionsBaseline) : ""}
-                ${assertionsNew.length ? renderAssertionRows("new", assertionsNew) : ""}
-              </div>
-            </details>`
+                <summary>${escHtml(copy.assertionDetailsSummary)}</summary>
+                <div class="assertionList">
+                  ${assertionsBaseline.length ? renderAssertionRows(copy.baselineAssertionsLabel, assertionsBaseline, copy) : ""}
+                  ${assertionsNew.length ? renderAssertionRows(copy.newAssertionsLabel, assertionsNew, copy) : ""}
+                </div>
+              </details>`
         : assertions.length
           ? `<details class="assertions">
-                <summary>Assertions details</summary>
+                <summary>${escHtml(copy.assertionDetailsSummary)}</summary>
                 <div class="assertionList">
-                  ${renderAssertionRows("case", assertions)}
+                  ${renderAssertionRows(copy.caseAssertionsLabel, assertions, copy)}
                 </div>
               </details>`
           : "";
@@ -223,13 +250,13 @@ export function buildRowEntries(items: CompareReport["items"]): ReportRowEntry[]
     <div class="caseTitle">${titleLink}</div>
     <div class="muted">${escHtml(it.title || "")}</div>
     <div class="caseMeta">
-      ${riskBadge(it.risk_level)}
-      ${gateBadge(it.gate_recommendation)}
-      <span class="metaChip">${escHtml(it.case_status)}</span>
+      ${riskBadge(it.risk_level, copy)}
+      ${gateBadge(it.gate_recommendation, copy)}
+      <span class="metaChip">${escHtml(formatCaseStatus(it.case_status, copy))}</span>
       <span class="metaChip">${escHtml(suite)}</span>
-      ${suite === "robustness" ? `<span class="metaChip">no assertions</span>` : ""}
+      ${suite === "robustness" ? `<span class="metaChip">${escHtml(copy.noAssertionsChip)}</span>` : ""}
       ${assertionChip}${assertionBaselineChip}${assertionNewChip}
-      ${hasFailure ? failureBadge() : ""}
+      ${hasFailure ? failureBadge(copy) : ""}
     </div>
     ${assertionDetails}
   </td>
@@ -239,11 +266,11 @@ export function buildRowEntries(items: CompareReport["items"]): ReportRowEntry[]
   <td>${rootCell(it.new_root)}</td>
   <td>${preventable}</td>
   <td>${rulesCell(it.recommended_policy_rules)}</td>
-  <td>${traceCell(it.trace_integrity)}</td>
-  <td>${securityCell(it.security)}</td>
+  <td>${traceCell(it.trace_integrity, copy)}</td>
+  <td>${securityCell(it.security, copy)}</td>
   <td>
-    <div><span class="muted">baseline:</span> ${baselineAssets || `<span class="muted">—</span>`}</div>
-    <div><span class="muted">new:</span> ${newAssets || `<span class="muted">—</span>`}</div>
+    <div><span class="muted">${escHtml(copy.baselineAssetsLabel)}:</span> ${baselineAssets || `<span class="muted">—</span>`}</div>
+    <div><span class="muted">${escHtml(copy.newAssetsLabel)}:</span> ${newAssets || `<span class="muted">—</span>`}</div>
   </td>
 </tr>`;
 

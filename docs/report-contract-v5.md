@@ -123,13 +123,69 @@ Redaction MUST update manifest hashes (manifest is the integrity source).
 
 Redaction preset IDs are implementation-defined strings (e.g., `internal_only`, `transferable`, `transferable_extended`).
 
+4.4 Canonical run provenance (MUST for qualification)
+Qualification packaging depends on canonical run provenance recorded in both `baseline/run.json` and `new/run.json`.
+
+Each run record MUST include:
+```json
+{
+  "agent_id": "support-agent",
+  "provenance": {
+    "agent_id": "support-agent",
+    "agent_version": "2026.03.21",
+    "model": "gpt-4.1",
+    "model_version": "2026-02-15",
+    "prompt_version": "prompt-v7",
+    "tools_version": "tools-v5",
+    "config_hash": "cfg_123"
+  }
+}
+```
+
+All provenance fields above are required for qualification packaging.
+
+Core rules:
+- baseline and new runs MUST both include a complete `provenance` object.
+- `baseline.provenance.agent_id` and `new.provenance.agent_id` MUST match.
+- missing or incomplete provenance MUST fail qualification packaging.
+- evaluator-provided environment metadata MAY add non-identity context, but it MUST NOT contradict canonical run provenance.
+
 5. compare-report.json (v5)
 Top-level shape:
 {
   "contract_version": 5,
   "report_id": "...",
   "meta": { "toolkit_version": "...", "spec_version": "...", "generated_at": 0, "run_id": "..." },
-  "environment": { "agent_id": "...", "model": "...", "prompt_version": "...", "tools_version": "..." },
+  "environment": {
+    "agent_id": "...",
+    "agent_version": "...",
+    "model": "...",
+    "model_version": "...",
+    "prompt_version": "...",
+    "tools_version": "...",
+    "config_hash": "..."
+  },
+  "provenance": {
+    "baseline": {
+      "agent_id": "...",
+      "agent_version": "...",
+      "model": "...",
+      "model_version": "...",
+      "prompt_version": "...",
+      "tools_version": "...",
+      "config_hash": "..."
+    },
+    "new": {
+      "agent_id": "...",
+      "agent_version": "...",
+      "model": "...",
+      "model_version": "...",
+      "prompt_version": "...",
+      "tools_version": "...",
+      "config_hash": "..."
+    },
+    "changed_fields": ["agent_version", "model_version", "config_hash"]
+  },
   "baseline_dir": "...",
   "new_dir": "...",
   "cases_path": "...",
@@ -145,6 +201,13 @@ Top-level shape:
 
 Schema file:
 - schemas/compare-report-v5.schema.json (validated in scripts/toolkit-tests.mjs)
+
+Environment and provenance rules:
+- `environment` is the report-level environment context used for the evaluated release.
+- for qualification packaging, identity fields in `environment` are derived from canonical `new/run.json.provenance`.
+- optional evaluator-supplied metadata MAY extend `environment`, but identity fields MUST match canonical new-run provenance.
+- `provenance.baseline` and `provenance.new` capture the exact qualification identity for both sides.
+- `provenance.changed_fields` is the machine-readable list of identity/config fields that changed between baseline and new.
 
 Quality flags (recommended fields):
 - self_contained: boolean

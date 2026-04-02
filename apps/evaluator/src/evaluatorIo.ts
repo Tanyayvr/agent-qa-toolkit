@@ -37,10 +37,11 @@ export function escHtml(s: string): string {
 
 export function findUnredactedMarkersSafe(
   text: string,
-  preset: "internal_only" | "transferable" | "transferable_extended" | null | undefined
+  preset: "internal_only" | "transferable" | "transferable_extended" | null | undefined,
+  processEnv?: NodeJS.ProcessEnv
 ): string[] {
   if (!preset) return [];
-  return findUnredactedMarkers(text, preset);
+  return findUnredactedMarkers(text, preset, processEnv);
 }
 
 export async function readUtf8WithLimit(absPath: string, maxBytes: number): Promise<string> {

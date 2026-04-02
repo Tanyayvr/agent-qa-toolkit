@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EU AI Act Article 73 - Serious Incident Template</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; max-width: 860px; margin: 40px auto; color: #0f172a; line-height: 1.6; }
+    h1, h2 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -0.03em; }
+    section { border: 1px solid #dbe5f1; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #dbe5f1; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>EU AI Act Article 73 - Serious Incident Template</h1>
+  <section><p>Article 73 is not just about writing an incident memo after something goes wrong. The hard part is having a structured path that can detect likely incidents, gather the relevant evidence quickly, and prepare a handoff without pretending that the toolkit decides the legal threshold by itself.</p></section>
+  
+  <section>
+    <h2>What Article 73 expects, what the toolkit can add, and what your team still owns</h2>
+    <p>Without connecting your agent, the toolkit can only draft the dossier d'incident grave from the current package. After adapter integration and monitoring history, it can add real triggers, linked evidence, and corrective-action references from live outputs.</p>
+    <table>
+      <thead><tr><th>Article 73 expects</th><th>Toolkit with generated package only</th><th>Toolkit after adapter integration</th><th>Still written and approved by your team</th></tr></thead>
+      <tbody>
+        <tr><td>A trigger list for incident review</td><td>Creates a serious-incident draft with current machine triage, trigger categories, and open operator inputs.</td><td>Can link that draft to real monitoring signals, blocked cases, approval cases, and release-review outcomes.</td><td>Decide which triggers count as serious-incident review triggers in your legal and operational context.</td></tr><tr><td>A technical evidence dossier for triage</td><td>Can point to the current rapport de comparaison, review outputs, and linked dossier files already in the package.</td><td>Can assemble those files around the specific cases and signals that triggered the incident review.</td><td>Decide which additional documents, witnesses, or external records must be added for a real incident review.</td></tr><tr><td>Corrective-action linkage</td><td>Can show the current corrective-action references already present in the generated pack.</td><td>Can keep those references linked to monitoring history, revue de mise en production, and related article outputs over time.</td><td>Choose the remediation owner, deadline, and approval workflow for the corrective action.</td></tr><tr><td>A reporting decision boundary</td><td>Can show that incident triggers and supporting evidence exist.</td><td>Still does not decide whether the legal threshold for reporting is met after integration.</td><td>Make the legal reportability decision, write the notification text, and approve any authority communication.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>What your team still adds to Article 73</h2>
+    <p>The toolkit can prepare the technical side of incident triage. It does not make the legal reporting decision or author the final notification for you.</p>
+    <table>
+      <thead><tr><th>What you add</th><th>When you add it</th><th>Practical format to use</th></tr></thead>
+      <tbody>
+        <tr><td>Legal threshold analysis</td><td>As soon as the draft incident pack indicates a likely serious incident.</td><td>A short legal or policy note stating whether the event appears reportable and why.</td></tr><tr><td>Notification recipients and timeline</td><td>Before any formal reporting or escalation leaves the team.</td><td>A short contact and timeline list naming who must be informed and by when.</td></tr><tr><td>Final reportability decision</td><td>At incident review or counsel sign-off.</td><td>Accepted as reportable, not reportable, or needs more review, plus the named approver.</td></tr><tr><td>Authority or customer-facing narrative</td><td>When the incident pack needs to be turned into an external communication.</td><td>The written summary your organization uses for the final notification or briefing.</td></tr><tr><td>Corrective-action owner and closure rule</td><td>Once the incident review results in remediation work.</td><td>A named owner, target date, and the rule for when the action is considered closed.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Article 73 is built from incident, monitoring, review, and risk-update files</h2>
+    <p>The files below are the main evidence surfaces for Article 73. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.</p>
+    <table>
+      <thead><tr><th>File in the package</th><th>Why it matters for Article 73</th><th>Open file</th></tr></thead>
+      <tbody>
+        <tr><td>Article 73 dossier d'incident grave - article-73-serious-incident-pack.json</td><td>Main draft file for technical incident triage and preparation.</td><td>demo/eu-ai-act/compliance/article-73-serious-incident-pack.json</td></tr><tr><td>Post-market monitoring - post-market-monitoring.json</td><td>Provides ongoing monitoring signals that can feed incident triage.</td><td>demo/eu-ai-act/compliance/post-market-monitoring.json</td></tr><tr><td>Release review - release-review.json</td><td>Provides review status and required human actions linked to the same package.</td><td>demo/eu-ai-act/compliance/release-review.json</td></tr><tr><td>Article 9 risk register - article-9-risk-register.json</td><td>Shows how a serious incident can feed back into documented risk updates.</td><td>demo/eu-ai-act/compliance/article-9-risk-register.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <section><p>Use browser print to save this document as PDF.</p></section>
+</body>
+</html>

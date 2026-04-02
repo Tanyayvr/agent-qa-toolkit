@@ -84,6 +84,15 @@ function runNode(scriptAbs, scriptArgs, cwd = REPO_ROOT) {
   });
 }
 
+function normalizeReviewerMarkdownPreview(lines) {
+  return lines.map((line) => {
+    if (typeof line === "string" && line.startsWith("Generated: ")) {
+      return "Generated: <normalized>";
+    }
+    return line;
+  });
+}
+
 function buildSnapshot(reportDir) {
   const report = readJson(path.join(reportDir, "compare-report.json"));
   const manifest = readJson(path.join(reportDir, "artifacts", "manifest.json"));
@@ -94,16 +103,25 @@ function buildSnapshot(reportDir) {
 
   const coverage = readJson(path.join(reportDir, exportsBlock.coverage_href));
   const annexIv = readJson(path.join(reportDir, exportsBlock.annex_iv_href));
+  const article10DataGovernance = readJson(path.join(reportDir, exportsBlock.article_10_data_governance_href));
   const evidenceIndex = readJson(path.join(reportDir, exportsBlock.evidence_index_href));
   const article13Instructions = readJson(path.join(reportDir, exportsBlock.article_13_instructions_href));
+  const article16ProviderObligations = readJson(path.join(reportDir, exportsBlock.article_16_provider_obligations_href));
+  const article43ConformityAssessment = readJson(path.join(reportDir, exportsBlock.article_43_conformity_assessment_href));
+  const article47DeclarationOfConformity = readJson(path.join(reportDir, exportsBlock.article_47_declaration_of_conformity_href));
   const article9RiskRegister = readJson(path.join(reportDir, exportsBlock.article_9_risk_register_href));
   const article72MonitoringPlan = readJson(path.join(reportDir, exportsBlock.article_72_monitoring_plan_href));
   const article17QmsLite = readJson(path.join(reportDir, exportsBlock.article_17_qms_lite_href));
+  const annexVDeclarationContent = readJson(path.join(reportDir, exportsBlock.annex_v_declaration_content_href));
+  const article73SeriousIncidentPack = readJson(path.join(reportDir, exportsBlock.article_73_serious_incident_pack_href));
   const humanOversight = readJson(path.join(reportDir, exportsBlock.human_oversight_summary_href));
   const releaseReview = readJson(path.join(reportDir, exportsBlock.release_review_href));
   const postMarketMonitoring = readJson(path.join(reportDir, exportsBlock.post_market_monitoring_href));
   const reportHtml = readFileSync(path.join(reportDir, "report.html"), "utf8");
   const dossierHtml = readFileSync(path.join(reportDir, exportsBlock.report_html_href), "utf8");
+  const reviewerHtml = readFileSync(path.join(reportDir, exportsBlock.reviewer_html_href), "utf8");
+  const reviewerMarkdown = readFileSync(path.join(reportDir, exportsBlock.reviewer_markdown_href), "utf8");
+  const reviewerPdfPresent = existsSync(path.join(reportDir, "compliance", "eu-ai-act-reviewer.pdf"));
 
   return {
     fixture_version: 1,
@@ -112,11 +130,17 @@ function buildSnapshot(reportDir) {
     eu_ai_act_exports: {
       coverage: normalizeValue(coverage),
       annex_iv: normalizeValue(annexIv),
+      article_10_data_governance: normalizeValue(article10DataGovernance),
       evidence_index: normalizeValue(evidenceIndex),
       article_13_instructions: normalizeValue(article13Instructions),
+      article_16_provider_obligations: normalizeValue(article16ProviderObligations),
+      article_43_conformity_assessment: normalizeValue(article43ConformityAssessment),
+      article_47_declaration_of_conformity: normalizeValue(article47DeclarationOfConformity),
       article_9_risk_register: normalizeValue(article9RiskRegister),
       article_72_monitoring_plan: normalizeValue(article72MonitoringPlan),
       article_17_qms_lite: normalizeValue(article17QmsLite),
+      annex_v_declaration_content: normalizeValue(annexVDeclarationContent),
+      article_73_serious_incident_pack: normalizeValue(article73SeriousIncidentPack),
       human_oversight_summary: normalizeValue(humanOversight),
       release_review: normalizeValue(releaseReview),
       post_market_monitoring: normalizeValue(postMarketMonitoring),
@@ -124,12 +148,15 @@ function buildSnapshot(reportDir) {
     html_contract: {
       main_report_hrefs: extractHrefs(reportHtml),
       dossier_report_hrefs: extractHrefs(dossierHtml),
+      reviewer_report_hrefs: extractHrefs(reviewerHtml),
+      reviewer_markdown_preview: normalizeReviewerMarkdownPreview(reviewerMarkdown.split("\n").slice(0, 40)),
+      reviewer_pdf_present: reviewerPdfPresent,
     },
   };
 }
 
 function packageFixture(params) {
-  const result = runNode(PACKAGE_SCRIPT, buildEuAiActFixtureArgs(REPO_ROOT, params));
+  const result = runNode(PACKAGE_SCRIPT, buildEuAiActFixtureArgs(REPO_ROOT, { ...params, contract: "full" }));
   if (result.status !== 0) {
     throw new Error(result.stderr || result.stdout || `Packaging failed for ${params.variant}`);
   }

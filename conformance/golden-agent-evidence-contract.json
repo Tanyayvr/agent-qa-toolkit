@@ -201,7 +201,11 @@
           "baseline_case_response_href": "assets/raw/case_responses/c-approval/baseline.json",
           "new_case_response_href": "assets/raw/case_responses/c-approval/new.json",
           "baseline_case_response_key": "c-approval/baseline/case_response",
-          "new_case_response_key": "c-approval/new/case_response"
+          "new_case_response_key": "c-approval/new/case_response",
+          "baseline_tool_telemetry_href": "assets/tool_telemetry/c-approval/baseline.json",
+          "baseline_tool_telemetry_key": "c-approval/baseline/tool_telemetry",
+          "new_tool_telemetry_href": "assets/tool_telemetry/c-approval/new.json",
+          "new_tool_telemetry_key": "c-approval/new/tool_telemetry"
         },
         "trace_integrity": {
           "baseline": {
@@ -522,7 +526,11 @@
           "baseline_case_response_href": "assets/raw/case_responses/c-block/baseline.json",
           "new_case_response_href": "assets/raw/case_responses/c-block/new.json",
           "baseline_case_response_key": "c-block/baseline/case_response",
-          "new_case_response_key": "c-block/new/case_response"
+          "new_case_response_key": "c-block/new/case_response",
+          "baseline_tool_telemetry_href": "assets/tool_telemetry/c-block/baseline.json",
+          "baseline_tool_telemetry_key": "c-block/baseline/tool_telemetry",
+          "new_tool_telemetry_href": "assets/tool_telemetry/c-block/new.json",
+          "new_tool_telemetry_key": "c-block/new/tool_telemetry"
         },
         "trace_integrity": {
           "baseline": {
@@ -838,6 +846,16 @@
           "media_type": "application/json"
         },
         {
+          "manifest_key": "c-approval/baseline/tool_telemetry",
+          "rel_path": "assets/tool_telemetry/c-approval/baseline.json",
+          "media_type": "application/json"
+        },
+        {
+          "manifest_key": "c-approval/new/tool_telemetry",
+          "rel_path": "assets/tool_telemetry/c-approval/new.json",
+          "media_type": "application/json"
+        },
+        {
           "manifest_key": "c-approval/baseline/final_output",
           "rel_path": "assets/final_output/c-approval/baseline.json",
           "media_type": "application/json"
@@ -858,6 +876,21 @@
           "media_type": "application/json"
         },
         {
+          "manifest_key": "c-block/baseline/tool_telemetry",
+          "rel_path": "assets/tool_telemetry/c-block/baseline.json",
+          "media_type": "application/json"
+        },
+        {
+          "manifest_key": "c-block/new/tool_result_call-1",
+          "rel_path": "assets/tool_telemetry/c-block/new/results/01-call-1.json",
+          "media_type": "application/json"
+        },
+        {
+          "manifest_key": "c-block/new/tool_telemetry",
+          "rel_path": "assets/tool_telemetry/c-block/new.json",
+          "media_type": "application/json"
+        },
+        {
           "manifest_key": "c-block/baseline/final_output",
           "rel_path": "assets/final_output/c-block/baseline.json",
           "media_type": "application/json"
@@ -868,10 +901,13 @@
           "media_type": "application/json"
         }
       ]
+    },
+    "bundle_exports": {
+      "retention_archive_controls_href": "archive/retention-controls.json"
     }
   },
   "manifest": {
-    "item_count": 8,
+    "item_count": 13,
     "items": [
       {
         "manifest_key": "c-approval/baseline/case_response",
@@ -881,6 +917,16 @@
       {
         "manifest_key": "c-approval/new/case_response",
         "rel_path": "assets/raw/case_responses/c-approval/new.json",
+        "media_type": "application/json"
+      },
+      {
+        "manifest_key": "c-approval/baseline/tool_telemetry",
+        "rel_path": "assets/tool_telemetry/c-approval/baseline.json",
+        "media_type": "application/json"
+      },
+      {
+        "manifest_key": "c-approval/new/tool_telemetry",
+        "rel_path": "assets/tool_telemetry/c-approval/new.json",
         "media_type": "application/json"
       },
       {
@@ -904,6 +950,21 @@
         "media_type": "application/json"
       },
       {
+        "manifest_key": "c-block/baseline/tool_telemetry",
+        "rel_path": "assets/tool_telemetry/c-block/baseline.json",
+        "media_type": "application/json"
+      },
+      {
+        "manifest_key": "c-block/new/tool_result_call-1",
+        "rel_path": "assets/tool_telemetry/c-block/new/results/01-call-1.json",
+        "media_type": "application/json"
+      },
+      {
+        "manifest_key": "c-block/new/tool_telemetry",
+        "rel_path": "assets/tool_telemetry/c-block/new.json",
+        "media_type": "application/json"
+      },
+      {
         "manifest_key": "c-block/baseline/final_output",
         "rel_path": "assets/final_output/c-block/baseline.json",
         "media_type": "application/json"
@@ -915,7 +976,76 @@
       }
     ]
   },
+  "retention_archive_controls": {
+    "schema_version": 1,
+    "artifact_type": "retention_archive_controls",
+    "framework": "AGENT_EVIDENCE",
+    "report_id": "golden-agent-evidence",
+    "generated_at": "<generated_at>",
+    "bundle_artifacts": {
+      "compare_report_href": "compare-report.json",
+      "report_html_href": "report.html",
+      "manifest_href": "artifacts/manifest.json",
+      "retention_archive_controls_href": "archive/retention-controls.json"
+    },
+    "report_quality": {
+      "self_contained": true,
+      "portable_paths": true,
+      "transfer_class": "internal_only",
+      "redaction_status": "none",
+      "redaction_preset_id": null
+    },
+    "retention_observations": {
+      "baseline": {
+        "run_id": null,
+        "retention_days": null,
+        "keep_raw": null,
+        "save_full_body_on_error": null,
+        "redaction_applied": null,
+        "redaction_keep_raw": null
+      },
+      "new": {
+        "run_id": null,
+        "retention_days": null,
+        "keep_raw": null,
+        "save_full_body_on_error": null,
+        "redaction_applied": null,
+        "redaction_keep_raw": null
+      },
+      "evaluator_retention_days": 0,
+      "settings_consistent": true,
+      "differences": []
+    },
+    "archive_scope": {
+      "archive_entire_report_directory": true,
+      "immutable_archive_recommended": true,
+      "manifest_anchor_href": "artifacts/manifest.json",
+      "required_paths": [
+        "compare-report.json",
+        "report.html",
+        "artifacts/manifest.json",
+        "archive/retention-controls.json",
+        "_source_inputs/cases.json",
+        "_source_inputs/baseline/run.json",
+        "_source_inputs/new/run.json"
+      ],
+      "operator_required_inputs": [
+        "archive storage location",
+        "retention owner",
+        "approved retention period by artifact class",
+        "deletion and legal-hold procedure",
+        "authority export procedure"
+      ],
+      "external_surfaces": []
+    },
+    "residual_gaps": [
+      "Archive storage location, immutability controls, and access policy are operator-defined.",
+      "Deletion, legal hold, and authority export procedures are operator-defined."
+    ]
+  },
   "html_contract": {
-    "main_report_hrefs": []
+    "main_report_hrefs": [
+      "archive/retention-controls.json"
+    ]
   }
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
+import { createPrivateKey, createPublicKey, sign } from "node:crypto";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,6 +23,8 @@ function usage(exitCode = 0) {
     "  --verifyProfile <agent|eu-ai-act>  Verification profile to run after packaging (default: agent)",
     "  --no-verify                        Skip post-run evidence verification",
     "  --verify-strict                    Run strict PVIP mode inside verification",
+    "  --sign                             Generate artifacts/manifest.sig after packaging (requires AQ_MANIFEST_PRIVATE_KEY)",
+    "  --sign-if-key-present              Generate artifacts/manifest.sig when AQ_MANIFEST_PRIVATE_KEY is set",
     "  --help                             Show this help",
     "",
     "All other options are passed through to the evaluator.",
@@ -36,6 +39,8 @@ function parseArgs(argv) {
     verify: true,
     verifyStrict: false,
     verifyProfile: "agent",
+    sign: false,
+    signIfKeyPresent: false,
     evaluatorArgs: [],
   };
 
@@ -53,6 +58,14 @@ function parseArgs(argv) {
     if (arg === "--verify-strict") {
       control.verify = true;
       control.verifyStrict = true;
+      continue;
+    }
+    if (arg === "--sign") {
+      control.sign = true;
+      continue;
+    }
+    if (arg === "--sign-if-key-present") {
+      control.signIfKeyPresent = true;
       continue;
     }
     if (arg === "--verifyProfile") {
@@ -137,6 +150,35 @@ function runCommand(command, args, cwd, env = process.env) {
   return result.status ?? 1;
 }
 
+function getManifestPaths(outDir) {
+  const manifestPath = path.join(outDir, "artifacts", "manifest.json");
+  const signaturePath = path.join(outDir, "artifacts", "manifest.sig");
+  return { manifestPath, signaturePath };
+}
+
+function derivePublicKeyB64(privateKeyB64) {
+  const privateKey = createPrivateKey({
+    key: Buffer.from(privateKeyB64, "base64"),
+    format: "der",
+    type: "pkcs8",
+  });
+  const publicKey = createPublicKey(privateKey).export({ format: "der", type: "spki" });
+  return Buffer.from(publicKey).toString("base64");
+}
+
+function signManifest(outDir, privateKeyB64) {
+  const { manifestPath, signaturePath } = getManifestPaths(outDir);
+  const manifestText = readFileSync(manifestPath, "utf8");
+  const privateKey = createPrivateKey({
+    key: Buffer.from(privateKeyB64, "base64"),
+    format: "der",
+    type: "pkcs8",
+  });
+  const signature = sign(null, Buffer.from(manifestText, "utf8"), privateKey).toString("base64");
+  writeFileSync(signaturePath, `${signature}\n`, "utf8");
+  return signaturePath;
+}
+
 function main() {
   const parsed = parseArgs(process.argv.slice(2));
   const evaluatorArgs = [...parsed.evaluatorArgs];
@@ -181,6 +223,19 @@ function main() {
     process.exit(evaluatorStatus);
   }
 
+  const privateKeyB64 = process.env.AQ_MANIFEST_PRIVATE_KEY;
+  const shouldSign = parsed.sign || (parsed.signIfKeyPresent && Boolean(privateKeyB64));
+  let verifyEnv = process.env;
+  if (shouldSign) {
+    if (!privateKeyB64) {
+      throw new Error("--sign requires AQ_MANIFEST_PRIVATE_KEY (base64 DER PKCS8 private key)");
+    }
+    const signaturePath = signManifest(outDir, privateKeyB64);
+    const publicKeyB64 = process.env.AQ_MANIFEST_PUBLIC_KEY || derivePublicKeyB64(privateKeyB64);
+    verifyEnv = { ...process.env, AQ_MANIFEST_PUBLIC_KEY: publicKeyB64 };
+    console.log(`Manifest signed: ${signaturePath}`);
+  }
+
   if (!parsed.verify) {
     console.log(`Agent evidence package generated: ${outDir}`);
     process.exit(0);
@@ -189,7 +244,7 @@ function main() {
   const verifyScript = VERIFY_SCRIPT_BY_PROFILE[parsed.verifyProfile];
   const verifyArgs = [verifyScript, "--reportDir", outDir];
   if (parsed.verifyStrict) verifyArgs.push("--strict");
-  const verifyStatus = runCommand(process.execPath, verifyArgs, REPO_ROOT);
+  const verifyStatus = runCommand(process.execPath, verifyArgs, REPO_ROOT, verifyEnv);
   process.exit(verifyStatus);
 }
 

@@ -111,6 +111,84 @@ describe("runner orchestration", () => {
     expect(newer.final_output.content).toContain("ok:new");
   });
 
+  it("records canonical provenance in run.json when environment metadata is provided", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const outDir = path.join(root, "runs");
+    const envPath = path.join(root, "environment.json");
+    await writeJson(casesPath, [
+      {
+        id: "c1",
+        title: "provenance case",
+        input: { user: "hello" },
+      },
+    ]);
+    await writeJson(envPath, {
+      agent_id: "provenance-agent",
+      agent_version: "provenance-agent-v2",
+      model: "provenance-model",
+      model_version: "2026-03-21",
+      prompt_version: "prompt-v2",
+      tools_version: "tools-v1",
+      config_hash: "cfg-002",
+    });
+
+    globalThis.fetch = vi.fn(async (_input: unknown, init?: RequestInit) => {
+      const payload = JSON.parse(String(init?.body ?? "{}")) as {
+        case_id: string;
+        version: "baseline" | "new";
+      };
+      return new Response(
+        JSON.stringify({
+          case_id: payload.case_id,
+          version: payload.version,
+          final_output: { content_type: "text", content: "ok" },
+          events: [],
+          proposed_actions: [],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    }) as typeof fetch;
+
+    const mod = await loadRunnerWithArgv([
+      "node",
+      "runner",
+      "--repoRoot",
+      root,
+      "--baseUrl",
+      "http://127.0.0.1:8788",
+      "--cases",
+      casesPath,
+      "--outDir",
+      outDir,
+      "--runId",
+      "provenance-run",
+      "--environment",
+      envPath,
+      "--timeoutMs",
+      "2000",
+      "--retries",
+      "0",
+      "--backoffBaseMs",
+      "1",
+      "--concurrency",
+      "1",
+    ]);
+    await mod.runRunner();
+
+    const runRaw = await readFile(path.join(outDir, "baseline", "provenance-run", "run.json"), "utf-8");
+    const runMeta = JSON.parse(runRaw) as { provenance?: Record<string, string>; agent_id?: string };
+    expect(runMeta.agent_id).toBe("provenance-agent");
+    expect(runMeta.provenance).toMatchObject({
+      agent_id: "provenance-agent",
+      agent_version: "provenance-agent-v2",
+      model: "provenance-model",
+      model_version: "2026-03-21",
+      prompt_version: "prompt-v2",
+      tools_version: "tools-v1",
+      config_hash: "cfg-002",
+    });
+  });
+
   it("auto timeout profile increases timeout from historical successful latency samples", async () => {
     const casesPath = path.join(root, "cases.json");
     const outDir = path.join(root, "runs");
@@ -322,6 +400,7 @@ describe("runner orchestration", () => {
   it("forwards metadata.handoff and run_meta routing fields to /run-case", async () => {
     const casesPath = path.join(root, "cases.json");
     const outDir = path.join(root, "runs");
+    const envPath = path.join(root, "handoff-environment.json");
     const handoff = validateAndNormalizeHandoffEnvelope(
       {
         incident_id: "inc-01",
@@ -357,6 +436,15 @@ describe("runner orchestration", () => {
         },
       },
     ]);
+    await writeJson(envPath, {
+      agent_id: "agent-executor",
+      agent_version: "agent-executor-v1",
+      model: "executor-model",
+      model_version: "2026-03-01",
+      prompt_version: "executor-prompt-v1",
+      tools_version: "executor-tools-v1",
+      config_hash: "executor-cfg-001",
+    });
 
     globalThis.fetch = vi.fn(async (_input: unknown, init?: RequestInit) => {
       const payload = JSON.parse(String(init?.body ?? "{}")) as {
@@ -416,6 +504,8 @@ describe("runner orchestration", () => {
       "inc-01",
       "--agentId",
       "agent-executor",
+      "--environment",
+      envPath,
       "--timeoutMs",
       "2000",
       "--retries",

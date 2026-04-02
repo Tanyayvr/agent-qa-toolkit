@@ -64,6 +64,17 @@
     },
     {
       "framework": "EU_AI_ACT",
+      "clause": "Art_16",
+      "title": "Provider obligations",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.quality_flags",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
       "clause": "Art_17",
       "title": "Quality management system",
       "evidence": [
@@ -72,6 +83,26 @@
         "compare-report.json.summary.cases_block_recommended",
         "compare-report.json.quality_flags",
         "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_18",
+      "title": "Documentation keeping",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_19",
+      "title": "Automatically generated logs",
+      "evidence": [
+        "compare-report.json.items[].trace_integrity",
+        "compare-report.json.items[].artifacts",
+        "artifacts/manifest.json"
       ]
     },
     {
@@ -93,6 +124,78 @@
         "compare-report.json.summary.security",
         "compare-report.json.items[].risk_level",
         "compare-report.json.items[].security"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_20",
+      "title": "Corrective actions and duty of information",
+      "evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.cases_block_recommended",
+        "compare-report.json.items[].gate_recommendation",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_21",
+      "title": "Cooperation with competent authorities",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.quality_flags",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_43",
+      "title": "Conformity assessment",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.quality_flags",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_47",
+      "title": "EU declaration of conformity",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_48",
+      "title": "CE marking",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_49",
+      "title": "Registration",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta",
+        "report.html"
+      ]
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Annex_V",
+      "title": "Declaration content",
+      "evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta",
+        "report.html"
       ]
     },
     {
@@ -271,6 +374,199 @@
       ],
       "residual_gaps": [
         "Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_16",
+      "title": "Provider obligations",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.quality_flags"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required."
+      ],
+      "notes": [
+        "This clause is scored as a provider-obligations scaffold, not a finished provider obligations record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_18",
+      "title": "Documentation keeping",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta",
+        "artifacts/manifest.json"
+      ],
+      "supporting_evidence": [
+        "compare-report.json.quality_flags"
+      ],
+      "residual_gaps": [
+        "The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned."
+      ],
+      "notes": [
+        "This clause is scored as a documentation-keeping scaffold, not a completed retention and authority-availability record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_19",
+      "title": "Automatically generated logs",
+      "required_evidence": [
+        "compare-report.json.items[].trace_integrity",
+        "compare-report.json.items[].artifacts",
+        "artifacts/manifest.json"
+      ],
+      "residual_gaps": [
+        "Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records."
+      ],
+      "notes": [
+        "This clause is scored as a logging scaffold, not a full provider log-retention record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_20",
+      "title": "Corrective actions and duty of information",
+      "required_evidence": [
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.summary.cases_block_recommended",
+        "compare-report.json.items[].gate_recommendation"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required."
+      ],
+      "notes": [
+        "This clause is scored as a corrective-action scaffold, not a finished Article 20 response record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_21",
+      "title": "Cooperation with competent authorities",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "artifacts/manifest.json"
+      ],
+      "supporting_evidence": [
+        "compare-report.json.quality_flags",
+        "report.html"
+      ],
+      "residual_gaps": [
+        "The provider-owned authority cooperation path, documentation response process, and log-access process remain required."
+      ],
+      "notes": [
+        "This clause is scored as an authority-cooperation scaffold, not a finished Article 21 cooperation record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_43",
+      "title": "Conformity assessment",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.summary.execution_quality",
+        "compare-report.json.quality_flags"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "The provider-owned conformity assessment route and any notified-body records remain required."
+      ],
+      "notes": [
+        "This clause is scored as a conformity-assessment scaffold, not a completed Article 43 record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_47",
+      "title": "EU declaration of conformity",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "The provider-signed EU declaration of conformity remains required before placing on the market or putting into service."
+      ],
+      "notes": [
+        "This clause is scored as a declaration scaffold, not a completed Article 47 declaration."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_48",
+      "title": "CE marking",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required."
+      ],
+      "notes": [
+        "This clause is scored as a CE-marking scaffold, not a completed Article 48 record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Art_49",
+      "title": "Registration",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "The provider-owned EU database or national registration record remains required where Article 49 applies."
+      ],
+      "notes": [
+        "This clause is scored as a registration scaffold, not a completed Article 49 record."
+      ],
+      "status_cap": "partial"
+    },
+    {
+      "framework": "EU_AI_ACT",
+      "clause": "Annex_V",
+      "title": "Declaration content",
+      "required_evidence": [
+        "compare-report.json.environment",
+        "compare-report.json.meta"
+      ],
+      "supporting_evidence": [
+        "report.html"
+      ],
+      "residual_gaps": [
+        "Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored."
+      ],
+      "notes": [
+        "This clause is scored as an Annex V content scaffold, not a completed declaration content record."
       ],
       "status_cap": "partial"
     }

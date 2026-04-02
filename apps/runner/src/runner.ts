@@ -18,6 +18,7 @@ import {
 import { sanitizeValue, type RedactionPreset } from "./sanitize";
 import type {
   RunnerConfig,
+  ProvenanceIdentity,
   TimeoutAutoResolution,
 } from "./runnerTypes";
 import {
@@ -69,6 +70,15 @@ const { assertNoUnknownOptionsOrThrow, assertHasValueOrThrow, parseIntFlagOrThro
   { assertNoUnknownOptions, assertHasValue, parseIntFlag }
 );
 const AUDIT_LOG_ENV = process.env.AUDIT_LOG_PATH;
+const REQUIRED_PROVENANCE_FIELDS = [
+  "agent_id",
+  "agent_version",
+  "model",
+  "model_version",
+  "prompt_version",
+  "tools_version",
+  "config_hash",
+] as const;
 
 async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
   if (!AUDIT_LOG_ENV) return;
@@ -78,6 +88,79 @@ async function appendAuditLog(entry: Record<string, unknown>): Promise<void> {
   } catch {
     // audit logging must not fail the run
   }
+}
+
+function trimOptionalString(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+async function loadRunnerProvenance(params: {
+  repoRoot: string;
+  envFile?: string;
+  cliAgentId?: string;
+  processEnv?: NodeJS.ProcessEnv;
+}): Promise<ProvenanceIdentity | undefined> {
+  const processEnv = params.processEnv ?? process.env;
+  let source: Record<string, unknown> | undefined;
+
+  if (params.envFile) {
+    const envAbs = resolveFromRoot(params.repoRoot, params.envFile);
+    const parsed = JSON.parse(await readFile(envAbs, "utf-8")) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new CliUsageError(`Invalid --environment file: expected a JSON object.\n\n${RUNNER_HELP_TEXT}`);
+    }
+    source = parsed as Record<string, unknown>;
+  }
+
+  const candidate: Record<(typeof REQUIRED_PROVENANCE_FIELDS)[number], string | undefined> = {
+    agent_id: params.cliAgentId
+      ?? trimOptionalString(source?.agent_id)
+      ?? trimOptionalString(processEnv.AGENT_ID),
+    agent_version: trimOptionalString(source?.agent_version) ?? trimOptionalString(processEnv.AGENT_VERSION),
+    model: trimOptionalString(source?.model) ?? trimOptionalString(processEnv.AGENT_MODEL),
+    model_version: trimOptionalString(source?.model_version) ?? trimOptionalString(processEnv.MODEL_VERSION),
+    prompt_version: trimOptionalString(source?.prompt_version) ?? trimOptionalString(processEnv.PROMPT_VERSION),
+    tools_version: trimOptionalString(source?.tools_version) ?? trimOptionalString(processEnv.TOOLS_VERSION),
+    config_hash: trimOptionalString(source?.config_hash) ?? trimOptionalString(processEnv.CONFIG_HASH),
+  };
+
+  if (params.cliAgentId && source?.agent_id && trimOptionalString(source.agent_id) !== params.cliAgentId) {
+    throw new CliUsageError(
+      `--agentId must match environment.agent_id when both are provided.\n\n${RUNNER_HELP_TEXT}`
+    );
+  }
+
+  const anyProvided = REQUIRED_PROVENANCE_FIELDS.some((field) => {
+    const value = candidate[field];
+    return typeof value === "string" && value.length > 0;
+  });
+  if (!anyProvided) {
+    return undefined;
+  }
+
+  const missing = REQUIRED_PROVENANCE_FIELDS.filter((field) => {
+    const value = candidate[field];
+    return typeof value !== "string" || value.length === 0;
+  });
+  if (missing.length > 0) {
+    throw new CliUsageError(
+      `Incomplete runner provenance metadata. Missing: ${missing.join(", ")}.\n`
+      + "Provide them via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH.\n\n"
+      + RUNNER_HELP_TEXT
+    );
+  }
+
+  return {
+    agent_id: candidate.agent_id!,
+    agent_version: candidate.agent_version!,
+    model: candidate.model!,
+    model_version: candidate.model_version!,
+    prompt_version: candidate.prompt_version!,
+    tools_version: candidate.tools_version!,
+    config_hash: candidate.config_hash!,
+  };
 }
 
 export async function runRunner(): Promise<void> {
@@ -124,6 +207,7 @@ export async function runRunner(): Promise<void> {
       "--runId",
       "--incidentId",
       "--agentId",
+      "--environment",
       "--only",
       "--dryRun",
       "--timeoutMs",
@@ -159,6 +243,7 @@ export async function runRunner(): Promise<void> {
   assertHasValueOrThrow("--runId");
   assertHasValueOrThrow("--incidentId");
   assertHasValueOrThrow("--agentId");
+  assertHasValueOrThrow("--environment");
   assertHasValueOrThrow("--only");
   assertHasValueOrThrow("--timeoutMs");
   assertHasValueOrThrow("--timeoutProfile");
@@ -203,6 +288,11 @@ export async function runRunner(): Promise<void> {
   const parsedRunId = getArg("--runId") ?? randomUUID();
   const parsedIncidentId = normalizeOptionalId(getArg("--incidentId"), "--incidentId") ?? parsedRunId;
   const parsedAgentId = normalizeOptionalId(getArg("--agentId"), "--agentId");
+  const provenance = await loadRunnerProvenance({
+    repoRoot,
+    ...(getArg("--environment") ? { envFile: getArg("--environment") as string } : {}),
+    ...(parsedAgentId ? { cliAgentId: parsedAgentId } : {}),
+  });
 
   const cfg: RunnerConfig = {
     repoRoot,
@@ -212,6 +302,7 @@ export async function runRunner(): Promise<void> {
     runId: parsedRunId,
     incidentId: parsedIncidentId,
     ...(parsedAgentId ? { agentId: parsedAgentId } : {}),
+    ...(provenance ? { provenance } : {}),
     onlyCaseIds: parseOnlyCaseIds(getArg("--only")),
     dryRun: getFlag("--dryRun"),
     redactionPreset,
@@ -345,7 +436,7 @@ export async function runRunner(): Promise<void> {
   const runMeta = {
     run_id: cfg.runId,
     incident_id: cfg.incidentId,
-    ...(cfg.agentId ? { agent_id: cfg.agentId } : {}),
+    ...(cfg.provenance?.agent_id ? { agent_id: cfg.provenance.agent_id } : cfg.agentId ? { agent_id: cfg.agentId } : {}),
     base_url: cfg.baseUrl,
     cases_path: rel(cfg.casesPath),
     selected_case_ids: selectedCases.map((c) => c.id),
@@ -354,6 +445,7 @@ export async function runRunner(): Promise<void> {
     redaction_applied: cfg.redactionPreset !== "none",
     redaction_preset: cfg.redactionPreset,
     redaction_keep_raw: useRaw,
+    ...(cfg.provenance ? { provenance: cfg.provenance } : {}),
     // Scenario 3: git context for prompt version tracing
     ...gitContext,
     runner: {
@@ -401,7 +493,7 @@ export async function runRunner(): Promise<void> {
   emitStructuredLog("runner", "info", "start", {
     run_id: cfg.runId,
     incident_id: cfg.incidentId,
-    ...(cfg.agentId ? { agent_id: cfg.agentId } : {}),
+    ...(cfg.provenance?.agent_id ? { agent_id: cfg.provenance.agent_id } : cfg.agentId ? { agent_id: cfg.agentId } : {}),
     base_url: cfg.baseUrl,
     cases_path: rel(cfg.casesPath),
     selected_cases: selectedCases.length,
@@ -425,7 +517,8 @@ export async function runRunner(): Promise<void> {
   console.log("cases:", selectedCases.length);
   console.log("runId:", cfg.runId);
   console.log("incidentId:", cfg.incidentId);
-  if (cfg.agentId) console.log("agentId:", cfg.agentId);
+  if (cfg.provenance?.agent_id || cfg.agentId) console.log("agentId:", cfg.provenance?.agent_id ?? cfg.agentId);
+  if (cfg.provenance) console.log("provenance:", JSON.stringify(cfg.provenance));
   console.log("outDir:", fmtRel(cfg.outDir));
   if (cfg.onlyCaseIds) console.log("only:", cfg.onlyCaseIds.join(", "));
   if (cfg.dryRun) console.log("dryRun:", true);

@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -6,12 +7,32 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "../..");
 export const SITE_OUTPUT_ROOT = path.join(REPO_ROOT, "docs");
 const GITHUB_REPO = "https://github.com/Tanyayvr/agent-qa-toolkit";
+const SITE_NAME = "EU AI Evidence Builder";
 
 export const DEFAULT_ORIGIN = process.env.EU_AI_SITE_ORIGIN || "https://tanyayvr.github.io/agent-qa-toolkit";
 const PLAUSIBLE_DOMAIN = process.env.EU_AI_SITE_PLAUSIBLE_DOMAIN || "";
 const SITE_LOCALES = ["en", "de", "fr"];
-const TEMPLATE_PAGE_KEYS = ["article-9", "article-12", "article-13", "article-14", "article-15", "article-17", "article-72", "article-73", "technical-doc"];
+const TEMPLATE_PAGE_KEYS = [
+  "article-9",
+  "article-10",
+  "article-12",
+  "article-13",
+  "article-14",
+  "article-15",
+  "article-16",
+  "article-17",
+  "article-22",
+  "article-43",
+  "article-47",
+  "article-48",
+  "article-49",
+  "article-72",
+  "article-73",
+  "annex-v",
+  "technical-doc",
+];
 const TEMPLATE_DOWNLOAD_KEYS = TEMPLATE_PAGE_KEYS;
+const ASSET_VERSION_CACHE = new Map();
 
 const LOCALES = {
   en: {
@@ -20,7 +41,7 @@ const LOCALES = {
     htmlLang: "en",
     nav: {
       how: "How it works",
-      technical: "Technology",
+      technical: "Technical Overview",
       templates: "Templates",
       pricing: "Pricing",
       docs: "Docs",
@@ -55,193 +76,336 @@ const LOCALES = {
       bookCall: "Review pilot requirements",
     },
     landing: {
-      title: "EU AI Act Compliance Documentation Builder | Evidence Pack Generator",
+      title: "EU AI Act Evidence Pack Builder | High-Risk AI Compliance for August 2026",
       description:
-        "For high-risk or externally reviewed AI systems, build a self-hosted technical evidence dossier for EU AI Act preparation, review handoff, and authority-facing workflows.",
+        "Build the provider-side EU AI Act documentation path for high-risk AI systems, with law-grounded drafts, statutory sections, and supporting records for the relevant AI system and its version.",
       keywords:
-        "EU AI Act compliance, EU AI Act documentation, high risk AI Europe, EU AI Act August 2026, conformity assessment preparation, AI evidence pack",
-      heroTitle:
-        "When EU AI Act review gets real, screenshots and dashboards stop being enough.",
+        "EU AI Act evidence pack, EU AI Act compliance tool, high risk AI August 2026, AI Act documentation builder, insurance AI compliance, hiring AI compliance, healthcare AI compliance, finance AI compliance",
+      heroTitle: "2 August 2026 is coming. Can your AI system hand evidence to a reviewer?",
       heroText:
-        "Use the site to structure the dossier. Use Agent QA Toolkit to add the self-hosted Evidence Pack, review record, archive controls, and authority-ready handoff that make the package credible.",
+        "Build the provider-side EU AI Act documentation path for high-risk AI systems, with law-grounded drafts, statutory sections, and supporting records for the relevant AI system and its version.",
+      heroSubline:
+        "This default path is for providers of high-risk AI systems. Importer, distributor, deployer, and authorised-representative obligations differ. If Article 25 makes your organization the provider, use this path.",
       primaryCta: "Start building your package",
       secondaryCta: "See live proof",
       audienceTitle: "Choose your entry path",
       audienceLead:
-        "Start with the job you are actually trying to complete: consultant delivery, governance review, or technical evaluation.",
+        "Start with the job you are actually trying to complete: understand the EU workflow, inspect the technical overview, or start the package.",
       audienceCards: [
         {
-          title: "For consultants",
+          title: "Understand the EU workflow",
           text:
-            "You already own legal interpretation or client delivery. Use the toolkit as the technical evidence layer behind your dossier work.",
-          result: "First click: workflow fit, dossier outputs, and the handoff story.",
-          cta: "Open consultant path",
+            "Use this route when you need to understand the provider-side documentation flow, what your team has to write, what can be attached as supporting records, and what stays human-owned.",
+          result: "Best first click for governance, legal, consultants, and mixed review teams.",
+          cta: "Open workflow path",
           href: "how-it-works",
         },
         {
-          title: "For governance teams",
+          title: "Inspect the technology",
           text:
-            "You need a review-ready technical package for internal approval, monitoring, and EU AI Act preparation.",
-          result: "First click: builder plus live EU dossier demo.",
-          cta: "Open governance path",
-          href: "builder",
+            "See the architecture: how evidence is generated, verified, and packaged into reviewer-ready EU dossiers before your team spends time in the repo.",
+          result: "Best first click for CTOs, engineering leads, security, and technical diligence.",
+          cta: "Open technical overview",
+          href: "technical",
         },
         {
-          title: "For technical teams",
+          title: "Start the package",
           text:
-            "You need to decide whether the core evidence engine is concrete enough to install, review internally, and extend with sector-specific cases or scanners.",
-          result: "First click: what to inspect, where the boundary is, and how sector layers fit above the core.",
-          cta: "Open technical team path",
-          href: "about",
+            "Use this route when you already want to draft the provider-side statutory sections for a high-risk AI system and complete the minimum legal package article by article.",
+          result: "Best first click for operators and implementation owners who need a practical starting point.",
+          cta: "Open package path",
+          href: "builder",
         },
       ],
       solutionTitle: "How EU AI Act Evidence Builder works",
       steps: [
-        "Screen whether the system needs only basic journaling or a scrutiny-grade technical package.",
-        "Use the builder and templates to structure the dossier sections that need narrative and evidence references.",
-        "Run the technical workflow in your own environment and attach a portable Evidence Pack where the package needs proof.",
+        "Confirm which provider-side statutory sections apply and which supporting records your team already has.",
+        "Use the builder and templates to structure the statutory sections that need written draft text.",
+        "Attach the supporting records already required for your system and export one organized provider-side package.",
       ],
       strongestFitTitle: "Strongest fit",
       strongestFitBody:
-        "Best when evidence must survive external or cross-team review: consultant delivery, high-risk pre-evaluation, regulated procurement, incident handoff, or authority-facing requests. Legal classification and final sign-off stay outside the product.",
+        "Best when a team needs to assemble the provider-side minimum package without inventing the structure from scratch. Legal classification, final sign-off, and role-specific legal judgment stay outside the product.",
       deliverablesTitle: "What you actually get",
       deliverablesLead:
         "The product should be legible in outputs, not only in process language.",
       deliverablesCards: [
         {
-          title: "Portable Evidence Pack",
-          text: "Offline report, compare-report JSON, manifest, and retention controls that survive handoff outside engineering tooling.",
+          title: "Law-grounded written draft",
+          text: "A first provider-side written draft that follows Annex IV and the linked statutory sections your team has to complete.",
         },
         {
-          title: "Dossier-facing exports",
-          text: "Annex IV structure plus Article 9, 13, 17, 72, and 73 scaffolds linked to runtime evidence.",
+          title: "Statutory section structure",
+          text: "Annex IV plus the linked provider-side sections for Articles 9, 10, 12, 13, 14, 15, 16, 17, 43, 47, 48, 49, 72, and Annex V.",
         },
         {
-          title: "Structured review record",
-          text: "Named decision, handoff note, completion checks, and recurring corrective-action continuity.",
+          title: "Supporting records list",
+          text: "One place to attach the records your system already requires, such as logs, testing summaries, monitoring notes, declarations, and conformity records.",
         },
         {
-          title: "Authority-ready package",
-          text: "When needed, a scoped authority-response bundle with disclosure and archive decisions.",
+          title: "Exportable provider package",
+          text: "A print-ready and JSON draft that your team can review, complete, and save as part of the provider-side package.",
         },
       ],
-      fitMatrixTitle: "Where this becomes worth the effort",
+      fitMatrixTitle: "What teams usually need under review",
       fitMatrixLead:
-        "Not every AI team needs a scrutiny-grade evidence layer. The value appears when basic logs stop being enough.",
-      fitMatrixHeaders: ["Situation", "Why basic logs are weak", "What this adds"],
+        "For the provider-side minimum path, teams still need more than raw logs or static notes because the law requires one structured package across multiple sections.",
+      fitMatrixHeaders: ["What teams need", "Basic logs", "SaaS dashboard / eval tool", "Checklist / PDF tool", "This product"],
       fitMatrixRows: [
-        ["Cross-team internal review", "Evidence lives in dashboards or tribal knowledge.", "Portable pack, review record, and deterministic gate."],
-        ["Consultant or vendor handoff", "Client delivery turns into screenshots and static narrative.", "Dossier-facing exports linked to verified runtime evidence."],
-        ["Incident, counsel, or authority request", "Raw traces are too sensitive or too hard to share directly.", "Scoped authority package, archive controls, and disclosure record."],
+        [
+          "Technical documentation structure",
+          "No",
+          "Partial",
+          "Partial",
+          "Yes",
+        ],
+        [
+          "Record-keeping and logs",
+          "Partial",
+          "Partial",
+          "Yes",
+          "Yes",
+        ],
+        [
+          "Instructions and deployer information",
+          "No",
+          "Partial",
+          "Partial",
+          "Yes",
+        ],
+        [
+          "Human oversight material",
+          "Yes",
+          "Partial",
+          "Partial",
+          "Yes",
+        ],
+        [
+          "Risk-management draft",
+          "No",
+          "Partial",
+          "Partial",
+          "Yes",
+        ],
+        [
+          "Conformity and declaration sections",
+          "No",
+          "No",
+          "Partial",
+          "Yes",
+        ],
+        [
+          "Post-market monitoring section",
+          "No",
+          "Partial",
+          "Partial",
+          "Yes",
+        ],
+        [
+          "One organized provider-side package",
+          "No",
+          "Partial",
+          "Partial",
+          "Yes",
+        ],
       ],
       proofTitle: "See the proof before you read more",
       proofBody:
         "Open the builder, inspect the live dossier, or jump into the technical operating model. The site should route you to a real artifact, not a generic checklist.",
+      faq: [
+        [
+          "When does the EU AI Act start for high-risk AI?",
+          "As of 28 March 2026, the main application date for most Annex III high-risk AI systems is 2 August 2026. Certain Article 6(1) routes tied to Annex I safety-component products apply from 2 August 2027. Teams that may fall into high-risk scope should be using 2026 as the date to get evidence, documentation, and review workflows in shape.",
+        ],
+        [
+          "Which industries usually fall into Annex III high-risk AI systems?",
+          "The broad search buckets are insurance, finance, hiring, healthcare, education, biometrics, law enforcement, border control, and justice. The legal scope is narrower than those labels: common Annex III examples include hiring and worker management, educational access and assessment, credit scoring, life and health insurance risk assessment, emergency triage, biometrics, and other listed high-impact uses. This site stays broad in the headline and more precise here in the answer.",
+        ],
+        [
+          "Which EU AI Act articles require more than logs and traces?",
+          "For high-risk systems, logs help with only one part of the package. Article 11 and Annex IV require technical documentation; Article 12 requires record-keeping; Article 13 requires information for deployers; Article 14 requires human oversight; Article 17 requires a documented quality management system; Article 72 requires a post-market monitoring plan; and Article 47 together with Annex V requires an EU declaration of conformity. The product exists because those obligations need to survive review together.",
+        ],
+        [
+          "Why are basic logs not enough for high-risk AI review?",
+          "Because high-risk review needs more than runtime traceability. Article 12 record-keeping matters, but teams may still need technical documentation, deployer information, human-oversight material, monitoring outputs, and a conformity-facing package that another reviewer can actually read and verify. Logs are necessary, but they are not the whole deliverable.",
+        ],
+        [
+          "Is this default path for importers, distributors, deployers, or authorised representatives?",
+          "No. The default path on this site is the provider-side path for high-risk AI systems. Those other roles have different obligations. If Article 25 makes your organization the provider, use this provider path. If a provider is established outside the Union, Article 22 adds the authorised-representative duty on top of the provider path.",
+        ],
+        [
+          "Why isn't a SaaS dashboard or eval platform enough for EU AI Act evidence?",
+          "Because most SaaS observability and eval surfaces are built for internal inspection, not for controlled reviewer handoff. They can be useful inputs, but they usually do not solve the offline dossier, review record, disclosure boundary, or machine-verifiable bundle another reviewer can inspect outside the original stack.",
+        ],
+        [
+          "Why does the provider-side package need more than a checklist or PDF?",
+          "Because the provider-side path still has to cover technical documentation, record-keeping, deployer information, human oversight, monitoring, and conformity-facing sections together. A checklist or static PDF can help with one slice of that work, but not with the whole package structure.",
+        ],
+        [
+          "What does this product add beyond logs, SaaS dashboards, and PDF tools?",
+          "It adds the provider-side package structure that simpler tools usually leave missing: law-grounded draft sections, linked article templates, a single place for required supporting records, and an exportable draft your team can complete and review.",
+        ],
+        [
+          "Will runtime data, prompts, or evidence leave our environment?",
+          "No. The core evidence workflow is designed to run inside your own environment, so runtime evidence, packaging, verification, and reviewer outputs can stay within your controlled boundary.",
+        ],
+        [
+          "Does this replace legal review or final sign-off?",
+          "No. The product structures the written provider-side package and the supporting records around it. Legal classification, residual-risk judgment, and final approval remain human-owned.",
+        ],
+        [
+          "In which formats can the package be delivered?",
+          "The builder produces a browser-generated written draft, a JSON export, and a print-ready version that your team can save as PDF. Supporting records stay attached to the same provider-side package.",
+        ],
+      ],
     },
     how: {
-      title: "How EU AI Act Evidence Builder works",
+      title: "How to prepare EU AI Act documents and evidence for review",
       description:
-        "See the pipeline from AI system profile to machine-verifiable evidence pack and Annex IV-ready documentation references.",
-      headline: "From AI system profile to evidence-backed documentation",
+        "Understand what your team needs to prepare first, what the workflow organizes automatically, what still needs human review, and what a reviewer receives at the end.",
+      keywords:
+        "how to prepare EU AI Act documents, EU AI Act documentation workflow, high risk AI review process, AI compliance workflow, what documents are needed for EU AI Act",
+      headline: "How to prepare EU AI Act documents and evidence for review",
       intro:
-        "This page is the workflow view for consultants and governance owners. It shows how the dossier path turns into a review-ready technical package.",
-      summaryTitle: "Operational block at a glance",
-      summaryLead: "Read this first if you want the shortest honest view of what goes in, what the product automates, what stays human-owned, and what comes out.",
+        "Use this page when you need to understand the documentation process before starting: what your team prepares first, what the workflow organizes automatically, what still needs human review, and what a reviewer receives at the end.",
+      summaryTitle: "What needs to be prepared for EU AI Act review",
+      summaryLead:
+        "This is the shortest view of what your team provides first, what the workflow organizes automatically, what still needs human review, and what a reviewer should receive at the end.",
       summaryColumns: [
         {
-          title: "Input",
+          title: "Your team provides",
           points: [
             "System scope, intended use, owners, and deployment context",
-            "Narrative dossier sections that need evidence references",
-            "Quality expectations that determine evidence depth",
+            "Dossier sections that need explanations, constraints, and references",
+            "Review expectations that determine how much support is needed",
           ],
         },
         {
-          title: "Automated",
+          title: "Organized automatically",
           points: [
-            "Intake structuring and validation",
-            "Evidence bundle generation and dossier-facing exports",
-            "Review scaffolding and authority-response packaging",
+            "Dossier structure and validation",
+            "Supporting materials linked back to the same package",
+            "A print-ready and JSON draft for the provider-side package",
           ],
         },
         {
-          title: "Human-owned",
+          title: "Still with people",
           points: [
+            "Legal interpretation and scope confirmation",
             "Business harms and residual-risk judgment",
-            "Approval vs block policy judgment",
-            "Legal classification, final narrative, and sign-off",
+            "Final wording, approval, and sign-off",
           ],
         },
         {
-          title: "Output",
+          title: "Your team can hand off",
           points: [
-            "Portable Evidence Pack",
-            "Structured review-ready package",
-            "Authority-ready handoff when needed",
+            "A readable package organized for review",
+            "Linked supporting materials and attached records",
+            "A provider-side draft that legal or governance teams can review",
           ],
         },
       ],
-      inputsTitle: "What goes in",
-      inputsLead: "This workflow starts with operator-owned inputs, not with generated artifacts.",
+      inputsTitle: "What your team needs before starting",
+      inputsLead: "The process starts with information your team already knows. The workflow cannot invent system scope, owners, or intended use on its own.",
       inputCards: [
         ["System scope", "System boundary, intended use, owners, and deployment context."],
-        ["Narrative sections", "The dossier sections that need assumptions, constraints, and evidence references."],
-        ["Quality expectations", "The release or governance expectations that determine what evidence depth is required."],
+        ["Dossier sections", "The sections that need explanations, assumptions, constraints, and references."],
+        ["Review expectations", "The release or governance expectations that determine how much technical support is required."],
       ],
-      workflowTitle: "What the automation does",
-      workflowLead: "Once the scope is frozen, the workflow should automate evidence generation and package assembly as far as possible.",
+      workflowTitle: "How the documentation process works",
+      workflowLead:
+        "The goal is simple: collect the information your team already knows for the provider-side path, attach supporting materials from real runs, and end with one organized set of documents for review.",
       workflowSteps: [
-        "Freeze system scope, owners, and intended use before the package starts expanding.",
-        "Use the builder and templates to draft narrative sections and identify where technical references are required.",
-        "Run Agent QA Toolkit to generate the portable evidence bundle, dossier-facing exports, and structured review artifacts.",
-        "Hand one package to governance, consultants, counsel, or authority-facing review without relying on dashboards.",
+        "Describe the system, its intended use, and who owns it.",
+        "Add the explanations, limits, and references the package needs.",
+        "Attach supporting materials from real runs and turn everything into one organized provider-side package.",
       ],
-      outputsTitle: "What the workflow produces",
-      outputsLead: "This should end in concrete outputs, not only in process language.",
+      outputsTitle: "What your team can hand off at the end",
+      outputsLead: "The result should be easy to review, not only technically correct.",
       outputCards: [
-        ["Dossier structure", "A drafted package with the sections that need narrative, assumptions, and evidence references."],
-        ["Technical evidence bundle", "Portable report, compare-report JSON, manifest, retention controls, and dossier-facing exports."],
-        ["Review-ready handoff", "Structured review record and, when needed, scoped authority-response packaging."],
+        ["Dossier structure", "A package organized by the sections that need explanations, assumptions, constraints, and references."],
+        ["Supporting materials", "Attached records such as logs, monitoring notes, declarations, testing summaries, and linked technical materials where they already exist."],
+        ["Review handoff", "A provider-side draft that legal, governance, procurement, or other internal reviewers can examine and complete."],
       ],
-      boundaryTitle: "Where the workflow still stops",
-      boundaryLead: "The workflow prepares the technical package. It does not remove governance and legal ownership.",
+      boundaryTitle: "What still needs human review and approval",
+      boundaryLead:
+        "The workflow organizes the package. It does not remove legal, governance, or approval responsibility.",
       boundaryPoints: [
-        "Legal classification and final sign-off stay outside the product.",
+        "Legal classification and final sign-off stay with named people.",
         "Business harms and residual-risk judgment still belong to the operator.",
-        "Deployer-facing narrative and release trade-offs still need named human owners.",
+        "Deployer-facing wording and release trade-offs still need human owners.",
       ],
-      screenshotTitle: "What the output looks like",
-      screenshotBody: "The result should be a review-ready package another person can inspect without opening your internal systems.",
-      proofTitle: "Next useful clicks",
-      proofBody: "From here, the real choices are: start the builder, inspect the live dossier, or open the technical operating model.",
+      screenshotTitle: "What the reviewer sees at the end",
+      screenshotBody:
+        "The result should be readable to another person without opening your internal systems or engineering tools.",
+      proofTitle: "Choose your next step",
+      proofBody:
+        "Start the package if you are ready to draft documents, open the legal templates if you want to inspect the statutory sections first, or open Technical Overview if your team needs the implementation side.",
+      faq: [
+        [
+          "What documents need to be prepared for EU AI Act review?",
+          "Most teams need a readable dossier, supporting technical materials from real runs, and the sections that still require human explanation, approval, or sign-off. The exact mix depends on system scope, intended use, and the review path you are preparing for.",
+        ],
+        [
+          "Is this workflow page for deployers, importers, distributors, or authorised representatives?",
+          "No. This workflow page follows the provider-side documentation path for high-risk AI systems. Other roles have different obligations. If Article 25 makes your organization the provider, use this path. If the provider is established outside the Union, add the Article 22 authorised-representative record to the same provider package.",
+        ],
+        [
+          "What does my team need before starting the EU AI Act documentation workflow?",
+          "Your team needs to define the system scope, intended use, owners, deployment context, and the dossier sections that need explanations, constraints, or references. The workflow cannot invent those inputs on its own.",
+        ],
+        [
+          "How does the EU AI Act documentation workflow work step by step?",
+          "First confirm scope and review context. Then draft the sections that need human explanation. After that, attach technical materials from real runs, check structure and completeness, and hand one organized package to the next reviewer.",
+        ],
+        [
+          "What is generated automatically and what still needs human review?",
+          "The workflow can organize dossier structure, attach supporting materials, and prepare a print-ready and JSON draft. Legal interpretation, residual-risk judgment, deployer-facing wording, and final approval still stay with named people.",
+        ],
+        [
+          "What does the reviewer receive at the end?",
+          "The reviewing team should receive a readable provider-side draft, linked supporting materials, and one organized package that can be completed and approved by the right human owners.",
+        ],
+        [
+          "Can one workflow produce both documents and technical supporting materials?",
+          "Yes. The workflow is meant to keep readable review documents and the supporting technical materials in the same package so they do not drift apart.",
+        ],
+        [
+          "Do runtime data and evidence stay in our environment?",
+          "Yes. The core workflow is designed so runtime evidence, verification, and reviewer outputs can stay inside your controlled environment.",
+        ],
+        [
+          "Does this replace legal review or final approval?",
+          "No. The workflow organizes the package and its technical support, but legal interpretation and final approval remain human responsibilities.",
+        ],
+      ],
     },
     pricing: {
-      title: "EU AI Act pricing: OSS, Launch Pack, Team, Studio, and enterprise support",
+      title: "EU AI Act pricing for high-risk AI systems",
       description:
-        "Free OSS self-serve, a one-time Launch Pack, Team and Studio subscriptions, and custom enterprise support for EU AI Act technical evidence.",
-      headline: "Start free. Pay once to reach first value, then subscribe when the workflow becomes part of operations.",
+        "Free self-serve access, paid help for the first real package, and enterprise support for broader EU AI Act work.",
+      headline: "EU AI Act pricing for high-risk AI systems",
       lead:
-        "The OSS core is free. The one-time Launch Pack gets one agent to a real first evidence outcome. Team and Studio are ongoing product tiers for teams already running the workflow in-house.",
+        "Choose the path that matches your stage: free self-serve, paid help for the first real package, or enterprise support for broader rollout.",
       subscriptionsLabel: "Commercial paths",
-      entryTitle: "Start with OSS",
+      entryTitle: "Free self-serve",
       entryLead:
-        "Use the free path when you want to inspect the product, run quickstart on your own agent, and decide whether the workflow deserves a place in your stack.",
-      launchEyebrow: "One-time onboarding",
-      launchTitle: "Need help reaching first value on your own agent?",
+        "Use the open-source repo, Builder, templates, and EU starter when your team wants to evaluate the workflow on its own.",
+      launchEyebrow: "Paid help",
+      launchTitle: "Paid help for the first real package",
       launchLead:
-        "Launch Pack is the one-time bridge between trying the repo and getting a real first pack on your own infrastructure.",
-      tiersEyebrow: "Subscriptions",
-      tiersTitle: "Ongoing product tiers",
+        "Choose this when one system needs a real package and your team wants hands-on help reaching it faster.",
+      tiersEyebrow: "Enterprise",
+      tiersTitle: "Enterprise support for broader rollout",
       tiersLead:
-        "Team, Studio, and Enterprise start only after the workflow is already part of real operations.",
-      fitTitle: "Choose the commercial path that matches your stage",
+        "Choose enterprise support when the work spans multiple systems, multiple teams, or formal procurement and review.",
+      fitTitle: "Which path fits your team?",
       fitLead:
-        "Do not buy support just to browse. Use the one-time pack to reach first value, then move to a subscription only when the workflow is part of day-to-day operations.",
+        "Stay self-serve while you are evaluating. Pay only when the work moves from trial to delivery.",
       fitCards: [
-        ["Stay self-serve", "Use the repo, quickstart, docs, and demos when you are still evaluating fit or can operate the workflow yourself."],
-        ["Use Launch Pack", "Buy this when one agent needs a real first pack and your team does not want to spend weeks finding the path alone."],
-        ["Use Team or Studio", "Subscribe only after the workflow is already useful and the team wants to run it continuously across 3 or 10 agents."],
-        ["Use Enterprise", "Bring us in when review is external, multi-system, conformity-driven, or when support has to survive procurement and scrutiny."],
+        ["Free self-serve", "Best when your team can run the workflow on its own and wants to evaluate fit first."],
+        ["Paid help", "Best when one system needs a first real package and your team wants help reaching it."],
+        ["Enterprise support", "Best when support spans multiple systems, multiple teams, or formal procurement and review."],
       ],
       faq: [
         {
@@ -250,19 +414,15 @@ const LOCALES = {
         },
         {
           q: "What should I start with?",
-          a: "Start with OSS if you are still evaluating fit or can run the workflow yourself. Use Launch Pack when one agent needs to reach a real first evidence outcome quickly. Use Team or Studio after the workflow is already useful in-house. Use Enterprise when the package has to survive multi-team or external review.",
+          a: "Start free with Builder and the EU starter if you are still evaluating fit or can run the workflow yourself. Use paid help when one system needs a first real package. Use enterprise support when the work is broader or more formal.",
         },
         {
-          q: "What exactly does Launch Pack buy?",
-          a: "Launch Pack is a one-time onboarding offer for one agent. It gets your team to a real first evidence pack on your own infrastructure and a clear next-step handoff. It does not replace full case design, governance review, or legal sign-off.",
+          q: "What exactly does paid help buy?",
+          a: "Paid help helps your team reach the first real package on its own system faster. It does not replace legal review, governance review, or final sign-off.",
         },
         {
-          q: "Why is Launch Pack one-time while Team and Studio are monthly?",
-          a: "Launch Pack is for activation to first value. Team and Studio are for teams that already completed onboarding and now want continuous product use, updates, exports, and recurring support for 3 or 10 agents.",
-        },
-        {
-          q: "Do Team and Studio include unlimited custom work?",
-          a: "No. Team and Studio are product tiers with support, not unlimited consulting. Multi-system implementation, external-review support, or custom dossier work moves into Enterprise scope.",
+          q: "When should I move beyond self-serve?",
+          a: "Move beyond self-serve when one real system needs a real package and your team does not want to piece the path together alone.",
         },
         {
           q: "Does this replace legal counsel?",
@@ -271,17 +431,21 @@ const LOCALES = {
       ],
     },
     builder: {
-      title: "EU AI Act documentation builder",
+      title: "EU AI Act legal draft builder | EU AI Evidence Builder",
       description:
-        "Step-by-step builder for AI system profile, risk classification, Articles 9, 12, 14, and print-ready documentation export.",
-      headline: "Build your EU AI Act documentation package",
+        "Start a first EU AI Act draft section by section for the organization responsible for a high-risk AI system in the EU, including Annex IV technical documentation, risk, logging, oversight, conformity, marking, registration, and declaration sections.",
+      headline: "Build your first EU AI Act draft",
       intro:
-        "This wizard helps you structure the package. Where technical proof is required, it points you to the live evidence workflow.",
+        "For companies developing or materially modifying high-risk AI systems for the EU market.",
+      hideTopAside: true,
+      scopeEyebrow: "",
+      scopeTitle: "",
+      scopePoints: [],
     },
     templates: {
       title: "EU AI Act documentation templates",
       description:
-        "Free EU AI Act templates for Articles 9, 12, 13, 14, 15, 17, 72, 73, and Annex IV technical documentation.",
+        "Free EU AI Act templates for Articles 9, 10, 12, 13, 14, 15, 16, 17, 22, 43, 47, 48, 49, 72, 73, Annex IV technical documentation, and Annex V declaration content.",
       headline: "Documentation templates for high-intent EU AI Act work",
       intro:
         "Use this index to scan technical coverage and open the exact page for artifact mapping, boundaries, and template detail.",
@@ -294,50 +458,28 @@ const LOCALES = {
     docs: {
       title: "Source docs and proof hub",
       description:
-        "Quickstart, operator runbooks, proof surfaces, and source-of-truth documentation behind the EU AI Evidence Builder.",
+        "EU starter guide, operator runbooks, proof surfaces, and source-of-truth documentation behind the EU AI Evidence Builder.",
       headline: "Source docs and proof hub",
-    },
-    about: {
-      title: "For technical teams evaluating fit | EU AI Evidence Builder",
-      description:
-        "User-facing page for platform, security, and compliance engineering teams evaluating whether the core product is real enough to install and whether sector-specific work can sit above it cleanly.",
-      headline: "For technical teams evaluating fit",
-      intro:
-        "Use this page when the question is not pricing or regulation, but whether the core evidence engine is technically serious enough to deserve installation time.",
-      inspectTitle: "What to check first",
-      inspectLead:
-        "A technical reviewer should be able to inspect concrete outputs, explicit gates, the split between core and sector-specific work, and an honest automation boundary before doing any deeper integration work.",
-      inspectCards: [
-        ["Real outputs", "The product ends in a portable report, machine contract, manifest, retention controls, review record, and optional authority package."],
-        ["Hard gates", "Packaging, verify, review, and authority packaging all have explicit checks. This is not a dashboard-only story."],
-        ["Sector-ready core", "The core qualifies tool-using agents. Sector case libraries, scanners, and vertical exports can sit above it without turning the base product into a generic compliance suite."],
-        ["Source-visible path", "Commands, schemas, and artifacts are visible in the repository and line up with the live proof surface."],
-        ["Honest boundary", "The system automates evidence operations, not legal classification, business judgment, or final sign-off."],
+      faq: [
+        [
+          "Which document should I open first?",
+          "Open the live reviewer dossier first if you want to see the EU-facing output. Open the EU starter guide first if you want to test the lightweight EU path on your own agent.",
+        ],
+        [
+          "Do I need to read raw JSON first?",
+          "No. The reviewer dossier is the intended first reading surface. The JSON artifacts stay available as the deeper technical layer.",
+        ],
+        [
+          "Are the docs aligned across English, German, and French?",
+          "Yes. The site publishes the same core pages and proof paths across all three languages, while keeping exact artifact filenames unchanged.",
+        ],
       ],
-      quickstartTitle: "Fastest honest first run",
-      quickstartLead:
-        "If your adapter is already running, use quickstart to build a real starter evidence pack on your own infrastructure before doing any deeper setup work.",
-      quickstartCommand: "npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud",
-      quickstartPoints: [
-        "Runs the starter smoke path on your own adapter and packages a portable report.",
-        "Shows whether the toolkit can really execute, package, and verify evidence in your environment.",
-        "Stays honest: starter evidence pack only, not full qualification or compliance readiness.",
-      ],
-      quickstartButton: "Open quickstart guide",
     },
     contact: {
       title: "Contact the team",
       description:
         "Apply for a pilot, review the proof surface, or open the open-source repository for the EU AI Evidence Builder.",
       headline: "Choose the fastest path to a serious pilot",
-    },
-    holding: {
-      title: "Extended material holding page",
-      description:
-        "Sections trimmed from the main landing page and kept for later audit instead of being silently deleted.",
-      headline: "Extended material held out of the main funnel",
-      intro:
-        "This page collects sections removed from the homepage so they can be reviewed later and either deleted, rewritten, or moved into a better surface.",
     },
     legalTitles: {
       privacy: "Privacy policy",
@@ -358,7 +500,7 @@ const LOCALES = {
     htmlLang: "de",
     nav: {
       how: "So funktioniert es",
-      technical: "Technologie",
+      technical: "Technischer Ueberblick",
       templates: "Vorlagen",
       pricing: "Preise",
       docs: "Dokumentation",
@@ -393,49 +535,50 @@ const LOCALES = {
       bookCall: "Pilot prüfen",
     },
     landing: {
-      title: "EU KI-Verordnung Dokumentation erstellen | Kostenlose Vorlagen",
+      title: "EU KI-Verordnung Nachweispaket | Hochrisiko-KI-Compliance fuer August 2026",
       description:
-        "Fuer Hochrisiko- oder extern gepruefte KI-Systeme: bei Ihnen gehostete technische Nachweise fuer EU-AI-Act-Vorbereitung, Pruefuebergabe und behoerdenfaehige Pakete.",
+        "Bauen Sie den provider-seitigen Dokumentationspfad der EU-KI-Verordnung fuer Hochrisiko-KI-Systeme mit rechtsnahen Entwuerfen, Pflichtabschnitten und unterstuetzenden Unterlagen fuer das konkrete KI-System und seine Version.",
       keywords:
-        "KI-Verordnung Compliance, EU KI-Verordnung Dokumentation, KI-Verordnung August 2026, KI Konformitätsbewertung Vorlage, Hochrisiko KI System Nachweis",
-      heroTitle:
-        "Sobald die Pruefung nach der EU-KI-Verordnung ernst wird, reichen Screenshots und Dashboards nicht mehr.",
+        "KI-Verordnung August 2026, Hochrisiko KI Nachweis, KI Konformitaetsbewertung, KI-Verordnung Dokumentation, Versicherung KI Compliance, Recruiting KI Compliance, Gesundheitswesen KI, Finanz KI, DSGVO KI",
+      heroTitle: "Der 2. August 2026 kommt. Kann Ihr KI-System Nachweise an Reviewende uebergeben?",
       heroText:
-        "Der Dokumentations-Assistent strukturiert das Dossier. Agent QA Toolkit liefert das bei Ihnen gehostete Nachweispaket, das Pruefprotokoll, Archivkontrollen und die behoerdentaugliche Uebergabe.",
+        "Bauen Sie den provider-seitigen Dokumentationspfad der EU-KI-Verordnung fuer Hochrisiko-KI-Systeme mit rechtsnahen Entwuerfen, Pflichtabschnitten und unterstuetzenden Unterlagen fuer das konkrete KI-System und seine Version.",
+      heroSubline:
+        "Dieser Standardpfad gilt fuer Anbieter von Hochrisiko-KI-Systemen. Pflichten von Importeuren, Haendlern, Deployern und Bevollmaechtigten unterscheiden sich. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad.",
       primaryCta: "Dokumentation starten",
       secondaryCta: "Live-Nachweise ansehen",
       audienceTitle: "Wählen Sie Ihren Einstieg",
       audienceLead:
-        "Starten Sie mit der eigentlichen Aufgabe: Beratung, Governance-Pruefung oder technische Bewertung.",
+        "Starten Sie mit der eigentlichen Aufgabe: den EU-Workflow verstehen, den technischen Ueberblick pruefen oder direkt mit dem Paket beginnen.",
       audienceCards: [
         {
-          title: "Für Berater",
+          title: "Den EU-Workflow verstehen",
           text:
-            "Sie verantworten rechtliche Einordnung oder Kundendokumentation. Nutzen Sie den Toolkit-Stack als technische Nachweis-Schicht.",
-          result: "Erster Klick: Workflow-Passung, Dossier-Ergebnisse und Logik der Uebergabe.",
-          cta: "Beratungs-Workflow",
+            "Nutzen Sie diesen Weg, wenn Sie den Dossier-Workflow, die Uebergabe-Logik, die menschlich gefuehrten Teile und die Rolle reviewer-tauglicher Nachweise verstehen muessen.",
+          result: "Bester erster Klick fuer Governance, Recht, Beratung und gemischte Review-Teams.",
+          cta: "Workflow-Pfad oeffnen",
           href: "how-it-works",
         },
         {
-          title: "Für Governance-Teams",
+          title: "Die Technologie pruefen",
           text:
-            "Sie brauchen ein technisch belastbares Paket fuer interne Freigaben und EU-AI-Act-Vorbereitung.",
-          result: "Erster Klick: Dokumentations-Assistent plus Live-Demo des Dossiers.",
-          cta: "Governance-Pfad",
-          href: "builder",
+            "Sehen Sie die Architektur: wie Nachweise erzeugt, verifiziert und in reviewer-taugliche EU-Dossiers verpackt werden, bevor Ihr Team Zeit im Repository investiert.",
+          result: "Bester erster Klick fuer CTOs, Engineering-Leads, Security und technische Due Diligence.",
+          cta: "Technischen Ueberblick oeffnen",
+          href: "technical",
         },
         {
-          title: "Für technische Teams",
+          title: "Mit dem Paket starten",
           text:
-            "Sie muessen entscheiden, ob die Kern-Engine technisch ernst genug fuer Installation, interne Pruefung und sektorielle Cases oder Scanner ist.",
-          result: "Erster Klick: was man pruefen kann, wo die Grenze liegt und wie sektorielle Schichten ueber dem Kern liegen.",
-          cta: "Pfad fuer technische Teams",
-          href: "about",
+            "Nutzen Sie diesen Weg, wenn Sie die provider-seitigen Pflichtabschnitte fuer ein Hochrisiko-KI-System jetzt entwerfen und das gesetzliche Mindestpaket Artikel fuer Artikel vervollstaendigen wollen.",
+          result: "Bester erster Klick fuer Operatoren und Umsetzungsteams mit einem praktischen Startpunkt.",
+          cta: "Paket-Pfad oeffnen",
+          href: "builder",
         },
       ],
       solutionTitle: "So funktioniert der Dokumentations-Assistent",
       steps: [
-        "Pruefen, ob nur Basis-Journalisierung oder ein technisch belastbares Paket noetig ist.",
+        "Pruefen, ob nur Journalisierung im Sinn von Artikel 12 oder ein technisch belastbares Paket fuer Hochrisiko-Pruefung noetig ist.",
         "Mit Dokumentations-Assistent und Vorlagen die Dossier-Abschnitte mit Narrativ und Nachweis-Referenzen strukturieren.",
         "Den technischen Workflow in der eigenen Umgebung ausfuehren und das portable Nachweispaket dort anhaengen, wo das Paket Belege braucht.",
       ],
@@ -448,11 +591,11 @@ const LOCALES = {
       deliverablesCards: [
         {
           title: "Portables Nachweispaket",
-          text: "Offline-Report, Compare-Report-JSON, Manifest und Archivkontrollen, die ausserhalb der Engineering-Tools uebergeben werden koennen.",
+          text: "Offline-Report, Compare-Report-JSON, signiertes Manifest bei Bedarf, Reviewer-PDF/HTML/Markdown und Archivkontrollen, die ausserhalb der Engineering-Tools uebergeben werden koennen.",
         },
         {
           title: "Dossier-nahe Exporte",
-          text: "Anhang-IV-Struktur plus Gerueste fuer Artikel 9, 13, 17, 72 und 73 mit Bezug zu Ausfuehrungsnachweisen.",
+          text: "Anhang-IV-Struktur plus reviewer-orientierte Ausgaben und Gerueste fuer Artikel 9, 13, 17, 72 und 73 mit Bezug zu Ausfuehrungsnachweisen.",
         },
         {
           title: "Strukturiertes Pruefprotokoll",
@@ -463,123 +606,265 @@ const LOCALES = {
           text: "Wenn noetig: ein abgegrenztes Behoerdenpaket mit Offenlegungs- und Archiventscheidungen.",
         },
       ],
-      fitMatrixTitle: "Wann sich dieser Aufwand lohnt",
+      fitMatrixTitle: "Was Teams unter Pruefung normalerweise brauchen",
       fitMatrixLead:
-        "Nicht jedes KI-Team braucht eine belastbare Nachweis-Schicht. Der Mehrwert beginnt dort, wo einfache Logs nicht mehr reichen.",
-      fitMatrixHeaders: ["Situation", "Warum einfache Logs schwach sind", "Was der Stack ergaenzt"],
+        "Wenn Nachweise Beschaffung, Rechtspruefung, Kundenreview oder Behoerdenanfragen ueberstehen muessen, brauchen Teams meistens mehr als Observability oder statische Dokumente.",
+      fitMatrixHeaders: ["Was Teams brauchen", "Basis-Logs", "SaaS-Dashboard / Eval-Tool", "Checklist / PDF-Tool", "Dieses Produkt"],
       fitMatrixRows: [
-        ["Teamuebergreifende interne Pruefungen", "Nachweise leben in Dashboards oder im Kopf einzelner Personen.", "Portables Paket, Pruefprotokoll und deterministischer Verifikationsschritt."],
-        ["Uebergabe an Beratung oder Anbieter", "Kundendokumentation endet in Screenshots und statischem Narrativ.", "Dossier-Ergebnisse mit verifizierten Ausfuehrungsnachweisen."],
-        ["Vorfall, Rechtsberatung oder Behoerdenanfrage", "Rohe Traces sind zu sensibel oder zu schwer direkt zu teilen.", "Abgegrenztes Behoerdenpaket, Archivkontrollen und Offenlegungsprotokoll."],
+        [
+          "Lesbares Reviewer-Dossier",
+          "Nein",
+          "Teilweise",
+          "Ja",
+          "Ja",
+        ],
+        [
+          "Nachweise bleiben an echte Runtime-Runs gebunden",
+          "Teilweise",
+          "Teilweise",
+          "Nein",
+          "Ja",
+        ],
+        [
+          "Maschinenverifizierbare Nachweiskette",
+          "Nein",
+          "Teilweise",
+          "Nein",
+          "Ja",
+        ],
+        [
+          "Selbst gehostete Nachweisgrenze",
+          "Ja",
+          "Nein",
+          "Teilweise",
+          "Ja",
+        ],
+        [
+          "Kontrollierte Uebergabe ausserhalb von Engineering",
+          "Nein",
+          "Teilweise",
+          "Nein",
+          "Ja",
+        ],
+        [
+          "Reviewer-PDF / HTML / Markdown",
+          "Nein",
+          "Teilweise",
+          "Teilweise",
+          "Ja",
+        ],
+        [
+          "Pruefprotokoll und Abschlusschecks",
+          "Nein",
+          "Teilweise",
+          "Nein",
+          "Ja",
+        ],
+        [
+          "Behoerdentaugliches Paket bei Bedarf",
+          "Nein",
+          "Nein",
+          "Nein",
+          "Ja",
+        ],
       ],
       proofTitle: "Nachweise sehen, bevor Sie mehr lesen",
       proofBody:
         "Dokumentations-Assistent, Live-Dossier und technisches Betriebsmodell fuehren direkt zu echten Artefakten statt zu generischen Checklisten.",
+      faq: [
+        [
+          "Wann beginnt die EU-KI-Verordnung fuer Hochrisiko-KI?",
+          "Stand 28. Maerz 2026 ist der zentrale Anwendungszeitpunkt fuer die meisten Hochrisiko-KI-Systeme aus Anhang III der 2. August 2026. Bestimmte Pfade nach Artikel 6 Absatz 1 in Verbindung mit Anhang-I-Sicherheitskomponenten greifen ab dem 2. August 2027. Teams mit moeglichem Hochrisiko-Scope sollten 2026 als Betriebsdatum fuer Nachweise, Dokumentation und Review-Workflows behandeln.",
+        ],
+        [
+          "Welche Branchen fallen typischerweise unter Hochrisiko-KI nach Anhang III?",
+          "Die breiten Suchbegriffe sind Versicherung, Finanzen, Recruiting, Gesundheitswesen, Bildung, Biometrie, Strafverfolgung, Grenzkontrolle und Justiz. Der rechtliche Scope ist enger als diese Schlagworte: typische Beispiele aus Anhang III sind Recruiting und Arbeitnehmermanagement, Bildungszugang und Bewertung, Kreditpruefung, Risiko- oder Preisbewertung in Lebens- und Krankenversicherung, Notfall-Triage, Biometrie und andere aufgelistete Hochwirkungsfaelle. Die Seite bleibt im Einstieg bewusst breiter und wird hier in der Antwort praeziser.",
+        ],
+        [
+          "Welche EU-AI-Act-Artikel verlangen mehr als Logs und Traces?",
+          "Bei Hochrisiko-Systemen helfen Logs nur fuer einen Teil des Pakets. Artikel 11 und Anhang IV verlangen technische Dokumentation; Artikel 12 verlangt Journalisierung; Artikel 13 verlangt Informationen fuer Deployers; Artikel 14 verlangt menschliche Aufsicht; Artikel 17 verlangt ein dokumentiertes Qualitaetsmanagementsystem; Artikel 72 verlangt einen Post-Market-Monitoring-Plan; und Artikel 47 zusammen mit Anhang V verlangt eine EU-Konformitaetserklaerung. Genau deshalb gibt es hier ein prueffertiges Paket: weil diese Pflichten gemeinsam einer Pruefung standhalten muessen.",
+        ],
+        [
+          "Warum reichen Basis-Logs nicht fuer die Pruefung von Hochrisiko-KI aus?",
+          "Weil Hochrisiko-Review mehr als Runtime-Rueckverfolgbarkeit braucht. Artikel-12-Journalisierung ist wichtig, aber Teams koennen trotzdem technische Dokumentation, Deployers-Informationen, Materialien fuer menschliche Aufsicht, Monitoring-Ausgaben und ein konformitaetsfaehiges Paket brauchen, das eine andere Person wirklich lesen und verifizieren kann. Logs sind noetig, aber nicht das ganze Deliverable.",
+        ],
+        [
+          "Gilt dieser Standardpfad fuer Importeure, Haendler, Deployers oder Bevollmaechtigte?",
+          "Nein. Der Standardpfad auf dieser Website ist der provider-seitige Pfad fuer Hochrisiko-KI-Systeme. Diese anderen Rollen haben eigene Pflichten. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Provider-Pfad. Wenn der Anbieter ausserhalb der Union niedergelassen ist, kommt Artikel 22 als Pflicht zum Bevollmaechtigten auf denselben Provider-Pfad hinzu.",
+        ],
+        [
+          "Warum reicht ein SaaS-Dashboard oder Eval-Tool fuer EU-AI-Act-Nachweise nicht aus?",
+          "Weil die meisten SaaS-Observability- und Eval-Oberflaechen fuer interne Inspektion gebaut sind, nicht fuer kontrollierte reviewer-taugliche Uebergabe. Sie koennen nuetzliche Inputs sein, loesen aber meist weder Offline-Dossier, Pruefprotokoll, Offenlegungsgrenzen noch ein maschinenverifizierbares Bundle fuer andere Reviewende ausserhalb des Ursprungs-Stacks.",
+        ],
+        [
+          "Warum braucht ein reviewer-taugliches Paket mehr als eine Checklist oder ein PDF?",
+          "Weil ein Checklist- oder statisches PDF-Tool ein System beschreiben kann, ohne mit den Runtime-Nachweisen verbunden zu bleiben, die die Aussagen tragen. Hochrisiko-Review wird genau dann schmerzhaft, wenn Dokumentebene und Nachweis-Ebene auseinanderlaufen. Der Punkt hier ist, beide verbunden zu halten.",
+        ],
+        [
+          "Was fuegt dieses Produkt ueber Logs, SaaS-Dashboards und PDF-Tools hinaus hinzu?",
+          "Es fuegt genau die Schicht hinzu, die einfachere Tools meist offenlassen: ein lesbares Reviewer-Dossier, eine maschinenverifizierbare Nachweiskette, selbst gehostete Reviewer-Ausgaben, einen kontrollierten Uebergabepfad ausserhalb von Engineering und ein Paket, das an echte Runtime-Runs gebunden bleibt statt in Screenshots oder Copy-Paste zu zerfallen.",
+        ],
+        [
+          "Verlassen Laufzeitdaten, Prompts oder Nachweise unsere Umgebung?",
+          "Nein. Der Kern-Workflow ist so gebaut, dass Laufzeit-Nachweise, Paketierung, Verifikation und Reviewer-Ausgaben innerhalb Ihrer kontrollierten Umgebung bleiben koennen.",
+        ],
+        [
+          "Ersetzt das rechtliche Pruefung oder die finale Freigabe?",
+          "Nein. Das Produkt automatisiert Nachweisbetrieb, reviewer-taugliche Paketierung und dossier-nahe Exporte. Rechtsklassifizierung, Rest-Risiko-Urteil und finale Freigabe bleiben menschlich gefuehrt.",
+        ],
+        [
+          "In welchen Formaten kann das Paket an Reviewende uebergeben werden?",
+          "Die reviewer-orientierte Schicht steht als PDF, HTML und Markdown bereit, darunter liegen maschinenverifizierbare JSON-Artefakte und dossier-nahe Exporte. So koennen nichttechnische Reviewende mit dem lesbaren Dossier beginnen, waehrend technische Reviewende die zugrunde liegende Nachweiskette weiter pruefen koennen.",
+        ],
+      ],
     },
     how: {
-      title: "So funktioniert der EU AI Evidence Builder",
+      title: "Wie man EU-KI-Verordnung Dokumente und Nachweise fuer die Pruefung vorbereitet",
       description:
-        "Vom Systemprofil zur technischen Dokumentation mit maschinenlesbaren Nachweisen.",
-      headline: "Von Systemprofilen zu belastbaren Nachweisen",
+        "Verstehen Sie, was Ihr Team zuerst vorbereiten muss, was der Workflow automatisch organisiert, was menschliche Pruefung bleibt und was Reviewende am Ende erhalten.",
+      keywords:
+        "EU KI-Verordnung Dokumentation vorbereiten, KI Hochrisiko Dokumentationsprozess, EU KI-Verordnung Workflow, welche Dokumente fuer KI-Verordnung noetig sind, KI Compliance Prozess",
+      headline: "Wie man EU-KI-Verordnung Dokumente und Nachweise fuer die Pruefung vorbereitet",
       intro:
-        "Diese Seite ist die Workflow-Sicht fuer Beratung und Governance. Sie zeigt, wie aus dem Dossier-Pfad ein technisch pruefbares Paket wird.",
-      summaryTitle: "Betriebsmodell auf einen Blick",
-      summaryLead: "Zuerst hier lesen, wenn Sie die kuerzeste ehrliche Sicht auf Eingaben, Automatisierung, menschlich gefuehrten Teil und Ergebnis wollen.",
+        "Nutzen Sie diese Seite, wenn Sie den Dokumentationsprozess vor dem Start verstehen muessen: was Ihr Team zuerst vorbereitet, was der Workflow automatisch organisiert, was menschliche Pruefung bleibt und was Reviewende am Ende erhalten.",
+      summaryTitle: "Was fuer die Pruefung nach der EU-KI-Verordnung vorbereitet werden muss",
+      summaryLead:
+        "Das ist die kuerzeste Sicht darauf, was Ihr Team zuerst liefert, was der Workflow automatisch organisiert, was menschliche Pruefung bleibt und was eine reviewende Person am Ende erhalten sollte.",
       summaryColumns: [
         {
-          title: "Eingaben",
+          title: "Ihr Team liefert",
           points: [
             "Systemrahmen, Verwendungszweck, verantwortliche Personen und Einsatzkontext",
-            "Systemrahmen, Verwendungszweck, verantwortliche Personen und Einsatzkontext",
-            "Narrative Dossier-Abschnitte mit Nachweis-Referenzen",
-            "Qualitaetserwartungen, die die Evidenztiefe bestimmen",
+            "Dossier-Abschnitte, die Erklaerungen, Grenzen und Referenzen brauchen",
+            "Review-Erwartungen, die bestimmen, wie viel technische Unterstuetzung noetig ist",
           ],
         },
         {
-          title: "Automatisiert",
+          title: "Automatisch organisiert",
           points: [
-            "Intake-Strukturierung und Validierung",
-            "Erzeugung des Nachweispakets und dossierrahe Exporte",
-            "Vorbereitung der Pruefung und Paketierung fuer Behoerdenantworten",
+            "Dossier-Struktur und Validierung",
+            "Technische Materialien mit Bezug auf dasselbe Paket",
+            "Review-Uebergabe und Behoerdenpaket bei Bedarf",
           ],
         },
         {
-          title: "Menschlich gefuehrt",
+          title: "Bleibt bei Menschen",
           points: [
-            "Geschaeftsschaeden und Urteile zum Rest-Risiko",
-            "Approval-vs-Block-Urteile",
-            "Rechtliche Klassifizierung, finales Narrativ und Freigabe",
+            "Rechtliche Einordnung und Scope-Bestaetigung",
+            "Geschaeftsschaeden und Rest-Risiko-Urteil",
+            "Finale Formulierung, Freigabe und Sign-off",
           ],
         },
         {
-          title: "Ergebnis",
+          title: "Reviewende erhalten",
           points: [
-            "Portables Nachweispaket",
-            "Strukturiertes prueffertiges Paket",
-            "Behoerdentaugliche Uebergabe bei Bedarf",
+            "Ein lesbares Dossier fuer die Pruefung",
+            "Verknuepfte technische Materialien und Reviewer-PDF/HTML/Markdown",
+            "Ein Uebergabepaket, wenn Kunden-, Rechts- oder Behoerdenpruefung noetig ist",
           ],
         },
       ],
-      inputsTitle: "Was hineingeht",
-      inputsLead: "Der Workflow startet mit vom Betreiber gelieferten Eingaben, nicht mit generierten Artefakten.",
+      inputsTitle: "Was Ihr Team vor dem Start braucht",
+      inputsLead:
+        "Der Prozess beginnt mit Informationen, die Ihr Team bereits kennt. Der Workflow kann Systemgrenze, verantwortliche Personen und Verwendungszweck nicht selbst erfinden.",
       inputCards: [
         ["Systemrahmen", "Systemgrenze, Verwendungszweck, verantwortliche Personen und Einsatzkontext."],
-        ["Narrative Abschnitte", "Dossier-Teile mit Annahmen, Grenzen und Nachweis-Referenzen."],
-        ["Qualitaetserwartungen", "Release- oder Governance-Erwartungen, die die noetige Evidenztiefe bestimmen."],
+        ["Dossier-Abschnitte", "Die Abschnitte, die Erklaerungen, Annahmen, Grenzen und Referenzen brauchen."],
+        ["Review-Erwartungen", "Release- oder Governance-Erwartungen, die bestimmen, wie viel technische Unterstuetzung noetig ist."],
       ],
-      workflowTitle: "Was die Automatisierung erledigt",
-      workflowLead: "Sobald der Systemrahmen feststeht, sollte der Workflow Nachweis-Erzeugung und Paketaufbau so weit wie moeglich automatisieren.",
+      workflowTitle: "Wie der Dokumentationsprozess funktioniert",
+      workflowLead:
+        "Das Ziel ist einfach: Informationen sammeln, die Ihr Team fuer den provider-seitigen Pfad bereits kennt, technische Materialien aus realen Runs anhaengen und am Ende einen geordneten Satz von Unterlagen fuer die Pruefung erhalten.",
       workflowSteps: [
-        "Systemgrenze, verantwortliche Personen und Verwendungszweck festhalten, bevor das Paket ausufert.",
-        "Dokumentations-Assistent und Vorlagen nutzen, um Narrative zu entwerfen und Stellen mit technischen Referenzen zu markieren.",
-        "Agent QA Toolkit ausfuehren, um ein portables Nachweispaket, dossierrahe Exporte und strukturierte Pruefartefakte zu erzeugen.",
-        "Ein Paket an Governance, Beratung, Rechtsberatung oder behoerdliche Pruefungen uebergeben, ohne sich auf Dashboards zu stuetzen.",
+        "Beschreiben Sie das System, seinen Verwendungszweck und die verantwortlichen Personen.",
+        "Fuegen Sie die Erklaerungen, Grenzen und Referenzen hinzu, die fuer die Pruefung gebraucht werden.",
+        "Haengen Sie technische Materialien aus realen Runs an und machen Sie daraus ein geordnetes Paket fuer die Pruefung.",
       ],
-      outputsTitle: "Was der Workflow erzeugt",
-      outputsLead: "Am Ende muessen konkrete Ergebnisse stehen, nicht nur Prozesssprache.",
+      outputsTitle: "Was Reviewende am Ende erhalten",
+      outputsLead: "Das Ergebnis sollte leicht pruefbar sein und nicht nur technisch korrekt.",
       outputCards: [
-        ["Dossier-Struktur", "Ein vorbereiteter Paketentwurf mit Narrativ, Annahmen und Nachweis-Referenzen."],
-        ["Technisches Nachweispaket", "Portabler Report, Compare-Report-JSON, Manifest, Archivkontrollen und dossierrahe Exporte."],
-        ["Prueffertige Uebergabe", "Strukturiertes Pruefprotokoll und bei Bedarf ein abgegrenztes Paket fuer Behoerdenantworten."],
+        ["Dossier-Struktur", "Ein Paket, das nach den Abschnitten organisiert ist, die Erklaerungen, Annahmen, Grenzen und Referenzen brauchen."],
+        ["Technische Materialien", "Portabler Report, verknuepfte technische Materialien, Reviewer-PDF/HTML/Markdown und maschinenlesbare Nachweise darunter."],
+        ["Review-Uebergabe", "Strukturiertes Pruefprotokoll und bei Bedarf ein abgegrenztes Paket fuer Kunden-, Rechts-, Beschaffungs- oder Behoerdenpruefung."],
       ],
-      boundaryTitle: "Wo der Workflow weiterhin stoppt",
-      boundaryLead: "Der Workflow bereitet das technische Paket vor. Governance- und Rechtsverantwortung verschwinden dadurch nicht.",
+      boundaryTitle: "Was weiterhin menschliche Pruefung und Freigabe braucht",
+      boundaryLead:
+        "Der Workflow organisiert das Paket. Er nimmt aber keine rechtliche, Governance- oder Freigabeverantwortung ab.",
       boundaryPoints: [
-        "Rechtliche Klassifizierung und finale Freigabe bleiben ausserhalb des Produkts.",
+        "Rechtliche Klassifizierung und finale Freigabe bleiben bei benannten Personen.",
         "Urteile zu Geschaeftsschaeden und Rest-Risiko bleiben beim Operator.",
-        "Einsatz-Narrativ und Abwaegungen zur Inbetriebnahme brauchen weiterhin benannte verantwortliche Personen.",
+        "Deployer-orientierte Formulierungen und Release-Abwaegungen brauchen weiterhin menschliche Owner.",
       ],
-      screenshotTitle: "Wie das Ergebnis aussieht",
-      screenshotBody: "Das Ergebnis sollte ein prueffertiges Paket sein, das eine andere Person ohne interne Systeme pruefen kann.",
-      proofTitle: "Naechste sinnvolle Klicks",
-      proofBody: "Von hier aus sind die echten Entscheidungen: Dokumentations-Assistent starten, Live-Dossier ansehen oder das technische Betriebsmodell oeffnen.",
+      screenshotTitle: "Was Reviewende am Ende sehen",
+      screenshotBody:
+        "Das Ergebnis sollte fuer eine andere Person lesbar sein, ohne interne Systeme oder Engineering-Tools oeffnen zu muessen.",
+      proofTitle: "Waehlen Sie den naechsten Schritt",
+      proofBody:
+        "Starten Sie das Paket, wenn Sie mit dem Entwurf beginnen wollen, oeffnen Sie das Live-Beispiel fuer Reviewende, wenn Sie zuerst das Ergebnis sehen wollen, oder oeffnen Sie den technischen Ueberblick fuer die Implementierungsseite.",
+      faq: [
+        [
+          "Welche Dokumente muessen fuer eine Pruefung nach der EU-KI-Verordnung vorbereitet werden?",
+          "Die meisten Teams brauchen ein lesbares Dossier, technische Materialien aus realen Runs und die Abschnitte, die weiterhin menschliche Erklaerung, Freigabe oder Sign-off verlangen. Die genaue Mischung haengt von Systemgrenze, Verwendungszweck und dem geplanten Review-Pfad ab.",
+        ],
+        [
+          "Gilt diese Workflow-Seite fuer Deployers, Importeure, Haendler oder Bevollmaechtigte?",
+          "Nein. Diese Workflow-Seite folgt dem provider-seitigen Dokumentationspfad fuer Hochrisiko-KI-Systeme. Andere Rollen haben eigene Pflichten. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad. Wenn der Anbieter ausserhalb der Union niedergelassen ist, fuegen Sie denselben Provider-Unterlagen den Artikel-22-Eintrag fuer den Bevollmaechtigten hinzu.",
+        ],
+        [
+          "Was braucht mein Team vor dem Start des Dokumentations-Workflows?",
+          "Ihr Team muss Systemgrenze, Verwendungszweck, verantwortliche Personen, Einsatzkontext und die Dossier-Abschnitte festlegen, die Erklaerungen, Grenzen oder Referenzen brauchen. Diese Eingaben kann der Workflow nicht selbst erfinden.",
+        ],
+        [
+          "Wie funktioniert der Dokumentations-Workflow nach der EU-KI-Verordnung Schritt fuer Schritt?",
+          "Zuerst bestaetigen Sie Scope und Review-Kontext. Dann entwerfen Sie die Abschnitte, die menschliche Erklaerung brauchen. Danach werden technische Materialien aus realen Runs an dasselbe Paket angehaengt, Struktur und Vollstaendigkeit geprueft und ein geordnetes Paket an die naechste reviewende Person uebergeben.",
+        ],
+        [
+          "Was wird automatisch erzeugt und was bleibt menschliche Pruefung?",
+          "Der Workflow kann die Dossier-Struktur ordnen, technische Materialien anhaengen und reviewer-orientierte Ausgaben vorbereiten. Rechtliche Einordnung, Rest-Risiko-Urteil, deployer-orientierte Formulierungen und finale Freigabe bleiben bei benannten Personen.",
+        ],
+        [
+          "Was erhalten Reviewende am Ende?",
+          "Reviewende sollten ein lesbares Dossier, verknuepfte technische Materialien, Reviewer-PDF- oder HTML-Ausgaben und bei Bedarf ein abgegrenztes Uebergabepaket fuer Kunden-, Rechts-, Beschaffungs- oder Behoerdenpruefung erhalten.",
+        ],
+        [
+          "Kann ein einzelner Workflow sowohl Dokumente als auch technische Materialien erzeugen?",
+          "Ja. Der Workflow soll lesbare Review-Dokumente und die technischen Materialien im selben Paket zusammenhalten, damit sie nicht auseinanderlaufen.",
+        ],
+        [
+          "Bleiben Laufzeitdaten und Nachweise in unserer Umgebung?",
+          "Ja. Der Kern-Workflow ist so gebaut, dass Laufzeit-Nachweise, Verifikation und Reviewer-Ausgaben innerhalb Ihrer kontrollierten Umgebung bleiben koennen.",
+        ],
+        [
+          "Ersetzt das rechtliche Pruefung oder die finale Freigabe?",
+          "Nein. Der Workflow organisiert das Paket und seine technische Unterstuetzung, aber rechtliche Einordnung und finale Freigabe bleiben menschliche Verantwortung.",
+        ],
+      ],
     },
     pricing: {
       title: "Preise fuer EU AI Act Nachweise",
       description:
-        "Kostenloser OSS-Selbstbetrieb, einmaliges Startpaket, Team- und Studio-Abos sowie massgeschneiderte Enterprise-Begleitung fuer EU-AI-Act-Nachweise.",
-      headline: "Kostenlos starten. Einmal zahlen, um zum ersten echten Ergebnis zu kommen. Abonnieren, wenn der Workflow operativ wird.",
+        "Kostenloser OSS-Selbstbetrieb, optionale bezahlte Hilfe fuer das erste echte Paket und Enterprise-Begleitung fuer groessere EU-AI-Act-Arbeit.",
+      headline: "Kostenlos starten. Nur dann bezahlen, wenn Ihr Team Hilfe fuer das erste echte Paket braucht.",
       lead:
-        "Der OSS-Kern ist kostenlos. Das einmalige Startpaket bringt einen Agenten zum ersten echten Nachweis-Ergebnis. Team und Studio sind laufende Produktstufen fuer Teams, die den Workflow bereits intern nutzen.",
+        "Der OSS-Kern ist kostenlos. Bezahlte Hilfe ist fuer Teams gedacht, die das erste echte Paket auf ihrem eigenen System schneller erreichen wollen. Enterprise passt fuer breiteren Rollout oder formale Pruefung.",
       subscriptionsLabel: "Kommerzielle Wege",
       entryTitle: "Mit OSS starten",
       entryLead:
         "Nutzen Sie den kostenlosen Weg, wenn Sie das Produkt pruefen, den Schnellstart auf Ihrem eigenen Agenten ausfuehren und erst dann entscheiden wollen, ob der Workflow in Ihren Stack gehoert.",
-      launchEyebrow: "Einmaliges Onboarding",
-      launchTitle: "Brauchen Sie Hilfe bis zum ersten echten Ergebnis auf Ihrem eigenen Agenten?",
+      launchEyebrow: "Bezahlte Hilfe",
+      launchTitle: "Brauchen Sie Hilfe fuer das erste Paket auf Ihrem eigenen System?",
       launchLead:
-        "Das Startpaket ist die einmalige Bruecke zwischen Repo ausprobieren und dem ersten echten Paket auf Ihrer eigenen Infrastruktur.",
-      tiersEyebrow: "Abos",
-      tiersTitle: "Laufende Produktstufen",
+        "Nutzen Sie den bezahlten Weg, wenn Ihr Team Hilfe beim Anschluss des eigenen Systems, bei der ersten Einrichtung und beim ersten echten Paket braucht.",
+      tiersEyebrow: "Enterprise",
+      tiersTitle: "Brauchen Sie breitere Begleitung?",
       tiersLead:
-        "Team, Studio und Enterprise beginnen erst dann, wenn der Workflow bereits Teil des echten Betriebs ist.",
+        "Enterprise passt, wenn die Arbeit mehrere Systeme, mehrere Teams oder formale Pruefung und Beschaffung umfasst.",
       fitTitle: "Waehlen Sie den Weg passend zu Ihrem Reifegrad",
       fitLead:
-        "Support sollte nicht gekauft werden, nur um sich umzusehen. Das einmalige Pack bringt Sie zum ersten Wert. Ein Abo lohnt sich erst, wenn der Workflow Teil des laufenden Betriebs wird.",
+        "Der erste Schritt soll einfach bleiben. Bleiben Sie im Selbstbetrieb, solange es reicht. Zahlen Sie nur dann, wenn Ihr Team Hilfe fuer den Weg vom Test zum echten Paket braucht.",
       fitCards: [
         ["Beim Selbstbetrieb bleiben", "Repo, Schnellstart, Dokumentation und Demos reichen aus, solange Sie den Workflow selbst pruefen oder betreiben koennen."],
-        ["Startpaket nutzen", "Das ist der richtige Weg, wenn ein Agent schnell zu einem echten ersten Paket kommen soll, ohne dass Ihr Team den Pfad allein suchen muss."],
-        ["Team oder Studio nutzen", "Ein Abo lohnt sich erst, wenn der Workflow fuer 3 oder 10 Agenten laufend intern genutzt wird."],
+        ["Bezahlte Hilfe nutzen", "Das ist der richtige Weg, wenn ein System schnell zu einem echten ersten Paket kommen soll, ohne dass Ihr Team den Pfad allein suchen muss."],
         ["Enterprise nutzen", "Hier passt es, wenn Pruefungen extern, systemuebergreifend, konformitaetsnah oder wiederkehrend unter hoher Kontrolle laufen muessen."],
       ],
       faq: [
@@ -589,19 +874,15 @@ const LOCALES = {
         },
         {
           q: "Womit sollte ich anfangen?",
-          a: "OSS passt fuer die erste Eignungspruefung oder fuer Teams, die den Workflow selbst betreiben koennen. Das Startpaket passt, wenn ein Agent schnell zu einem echten ersten Nachweis-Ergebnis kommen soll. Team oder Studio passen erst, wenn der Workflow intern bereits nuetzlich ist. Enterprise ist fuer teamuebergreifende oder externe Pruefungen gedacht.",
+          a: "OSS passt fuer die erste Eignungspruefung oder fuer Teams, die den Workflow selbst betreiben koennen. Bezahlte Hilfe passt, wenn ein System schnell zu einem echten ersten Paket kommen soll. Enterprise ist fuer teamuebergreifende oder externe Pruefungen gedacht.",
         },
         {
-          q: "Was kaufe ich mit dem Startpaket genau?",
-          a: "Das Startpaket ist ein einmaliges Onboarding-Angebot fuer einen Agenten. Es bringt Ihr Team zu einem echten ersten Nachweispaket auf Ihrer eigenen Infrastruktur und zu einem klaren naechsten Schritt. Vollstaendiges Case-Design, Governance-Pruefung und rechtliche Freigabe ersetzt es nicht.",
+          q: "Was kaufe ich mit bezahlter Hilfe genau?",
+          a: "Bezahlte Hilfe bringt Ihr Team schneller durch das erste echte Paket auf dem eigenen System. Vollstaendiges Case-Design, Governance-Pruefung und rechtliche Freigabe ersetzt sie nicht.",
         },
         {
-          q: "Warum ist das Startpaket einmalig, waehrend Team und Studio monatlich laufen?",
-          a: "Das Startpaket ist fuer Aktivierung bis zum ersten Wert. Team und Studio sind fuer Teams gedacht, die Onboarding schon hinter sich haben und Produktnutzung, Updates, Exporte und wiederkehrenden Support fuer 3 oder 10 Agenten brauchen.",
-        },
-        {
-          q: "Enthalten Team und Studio unbegrenzte Sonderleistungen?",
-          a: "Nein. Team und Studio sind Produktstufen mit Support, aber keine unbegrenzte Beratung. Systemuebergreifende Implementierung, externe Pruefungen oder kundenspezifische Dossier-Arbeit laufen ueber Enterprise.",
+          q: "Wann sollte ich ueber den Selbstbetrieb hinausgehen?",
+          a: "Dann, wenn Ihr Team das erste echte Paket auf dem eigenen System braucht und den Pfad nicht allein zusammensetzen will.",
         },
         {
           q: "Ersetzt das rechtliche Beratung?",
@@ -612,15 +893,22 @@ const LOCALES = {
     builder: {
       title: "Dokumentations-Assistent zur EU-KI-Verordnung",
       description:
-        "Mehrsprachiger Assistent fuer Risiko-Vorpruefung, Dokumentationsvorlagen und technische Nachweise.",
-      headline: "Bauen Sie Ihr Dokumentationspaket auf",
+        "Schritt-fuer-Schritt-Assistent fuer den provider-seitigen Mindestpfad nach der EU-KI-Verordnung bei Hochrisiko-KI-Systemen.",
+      headline: "Erstellen Sie den provider-seitigen Entwurf Ihres EU-AI-Act-Pakets",
       intro:
-        "Texteingaben bleiben frei. Fuer Nachweise verlinkt der Assistent direkt in den Nachweis-Workflow.",
+        "Nutzen Sie diese Seite, um zuerst den schriftlichen provider-seitigen Mindestentwurf fuer ein Hochrisiko-KI-System zu erstellen. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, ist dies der richtige Pfad.",
+      scopeEyebrow: "Nur Provider-Pfad",
+      scopeTitle: "Diese Seite erstellt nur den schriftlichen provider-seitigen Entwurf",
+      scopePoints: [
+        "Der Standardpfad gilt fuer Anbieter von Hochrisiko-KI-Systemen.",
+        "Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad.",
+        "Wenn der Anbieter ausserhalb der Union niedergelassen ist, fuegen Sie den Artikel-22-Eintrag fuer den Bevollmaechtigten hinzu, sofern erforderlich.",
+      ],
     },
     templates: {
       title: "EU-KI-Verordnung Vorlagen",
       description:
-        "Vorlagen fuer EU-AI-Act-Artikel mit direktem Zugang zu maschinenlesbaren Nachweisen.",
+        "Vorlagen fuer provider-seitige Artikel der EU-KI-Verordnung, einschliesslich Artikel 22, wenn der Anbieter ausserhalb der Union niedergelassen ist.",
       headline: "Vorlagen mit klarem Bezug zu echten Nachweisen",
       intro:
         "Diese Vorlagen zeigen, wie der Dokumentations-Assistent und das Toolkit konkrete EU-AI-Act-Abschnitte mit strukturierten Nachweisen verknuepfen.",
@@ -635,48 +923,26 @@ const LOCALES = {
       description:
         "Schnellstart, Operator-Leitfaeden, Nachweis-Oberflaechen und massgebliche Produktdokumentation hinter dem EU AI Evidence Builder.",
       headline: "Referenzdokumente und Nachweis-Hub",
-    },
-    about: {
-      title: "Fuer technische Teams, die die Passung pruefen",
-      description:
-        "Seite fuer Plattform-, Security- und Compliance-Engineering-Teams, die pruefen wollen, ob das Kernprodukt technisch ernst genug fuer eine Installation ist und ob sektorielle Arbeit sauber darueber liegen kann.",
-      headline: "Fuer technische Teams, die die Passung pruefen",
-      intro:
-        "Diese Seite ist fuer den Moment gedacht, in dem nicht Preise oder Regulierung, sondern die technische Ernsthaftigkeit der Kern-Engine im Vordergrund steht.",
-      inspectTitle: "Was man zuerst pruefen sollte",
-      inspectLead:
-        "Eine technische Prueferin oder ein technischer Pruefer sollte konkrete Ergebnisse, explizite Verifikationsschritte, die Trennung zwischen Kern und sektorieller Arbeit sowie eine ehrliche Automationsgrenze sehen koennen, bevor tiefere Integrationsarbeit beginnt.",
-      inspectCards: [
-        ["Reale Ergebnisse", "Das Produkt endet in portablem Report, maschinenlesbarem Vertrag, Manifest, Archivkontrollen, Pruefprotokoll und optionalem Behoerdenpaket."],
-        ["Klare Verifikationsschritte", "Paketierung, Verifikation, Pruefung und Behoerdenpaket haben explizite Kontrollen. Das ist keine reine Dashboard-Geschichte."],
-        ["Sektorfester Kern", "Der Kern qualifiziert tool-nutzende Agenten. Sektorielle Case-Bibliotheken, Scanner und vertikale Exporte koennen darueber liegen, ohne dass das Basisprodukt zu einer generischen Compliance-Suite wird."],
-        ["Im Quelltext sichtbar", "Befehle, Schemata und Artefakte sind im Repository sichtbar und passen zur Live-Nachweis-Oberflaeche."],
-        ["Ehrliche Grenze", "Das System automatisiert Nachweisablaeufe, nicht Rechtsklassifizierung, Geschaefts-Urteile oder finale Freigabe."],
+      faq: [
+        [
+          "Welches Dokument sollte ich zuerst oeffnen?",
+          "Oeffnen Sie zuerst das Live-Reviewer-Dossier, wenn Sie die EU-Ausgabe sehen wollen. Oeffnen Sie zuerst den Schnellstart, wenn Sie den Workflow am eigenen Agenten pruefen wollen.",
+        ],
+        [
+          "Muss ich zuerst rohes JSON lesen?",
+          "Nein. Das Reviewer-Dossier ist die vorgesehene erste Leseflaeche. Die JSON-Artefakte bleiben als tiefere technische Ebene verlinkt.",
+        ],
+        [
+          "Sind die Inhalte in Englisch, Deutsch und Franzoesisch abgestimmt?",
+          "Ja. Die Site veroeffentlicht dieselben Kernseiten und Nachweispfade in allen drei Sprachen, waehrend exakte Artefaktnamen unveraendert bleiben.",
+        ],
       ],
-      quickstartTitle: "Schnellster ehrlicher erster Lauf",
-      quickstartLead:
-        "Wenn Ihr Adapter bereits laeuft, nutzt der Schnellstart den kuerzesten Weg zu einem echten Starter-Nachweispaket in Ihrer eigenen Umgebung.",
-      quickstartCommand: "npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud",
-      quickstartPoints: [
-        "Fuehrt den Starter-Smoke-Pfad auf Ihrem eigenen Adapter aus und paketiert einen portablen Report.",
-        "Zeigt, ob das Toolkit in Ihrer Umgebung wirklich Nachweise erzeugen, paketieren und verifizieren kann.",
-        "Bleibt ehrlich: nur Starter-Nachweispaket, keine volle Qualifikation und keine Compliance-Aussage.",
-      ],
-      quickstartButton: "Schnellstart-Guide oeffnen",
     },
     contact: {
       title: "Kontakt",
       description:
         "Pilot anfragen, Live-Demo prüfen oder direkt in das Open-Source-Repository einsteigen.",
       headline: "Pilot oder technische Prüfung starten",
-    },
-    holding: {
-      title: "Holding-Seite fuer erweitertes Material",
-      description:
-        "Von der Startseite entfernte Abschnitte, die fuer ein spaeteres Audit gesammelt werden, statt still geloescht zu werden.",
-      headline: "Erweitertes Material ausserhalb des Haupt-Funnels",
-      intro:
-        "Diese Seite sammelt Abschnitte, die von der Homepage entfernt wurden, damit sie spaeter geprueft, geloescht, umgeschrieben oder auf bessere Oberflaechen verteilt werden koennen.",
     },
     legalTitles: {
       privacy: "Datenschutz",
@@ -697,7 +963,7 @@ const LOCALES = {
     htmlLang: "fr",
     nav: {
       how: "Fonctionnement",
-      technical: "Technologie",
+      technical: "Vue technique",
       templates: "Modeles",
       pricing: "Tarifs",
       docs: "Documentation",
@@ -732,49 +998,50 @@ const LOCALES = {
       bookCall: "Verifier le pilote",
     },
     landing: {
-      title: "Documentation AI Act Europe | Modeles gratuits et preuves techniques",
+      title: "Dossier de preuve EU AI Act | Conformite IA a haut risque pour aout 2026",
       description:
-        "Pour les systemes IA a haut risque ou exposes a une revue externe: dossier de preuve technique heberge chez vous pour la preparation EU AI Act, la transmission et les workflows tournes vers l'autorite.",
+        "Construisez le parcours de documentation cote fournisseur du EU AI Act pour les systemes d'IA a haut risque, avec des brouillons ancrés dans le droit, des sections obligatoires et des pieces d'appui pour le systeme d'IA concerne et sa version.",
       keywords:
-        "reglement europeen IA conformite, IA acte europeen documentation, evaluation de conformite IA Europe, IA haut risque aout 2026",
-      heroTitle:
-        "Quand la revue EU AI Act devient concrete, les captures d'ecran et les tableaux de bord ne suffisent plus.",
+        "EU AI Act aout 2026, IA haut risque preuve, outil conformite IA, documentation EU AI Act, assurance IA conformite, recrutement IA conformite, sante IA, finance IA, RGPD IA",
+      heroTitle: "Le 2 aout 2026 approche. Votre systeme IA peut-il remettre une preuve a un evaluateur ?",
       heroText:
-        "L'assistant de documentation structure le dossier. Agent QA Toolkit ajoute le dossier de preuve heberge chez vous, la trace de revue, les controles d'archivage et la transmission exploitable pour une autorite qui rendent l'ensemble credible.",
+        "Construisez le parcours de documentation cote fournisseur du EU AI Act pour les systemes d'IA a haut risque, avec des brouillons ancrés dans le droit, des sections obligatoires et des pieces d'appui pour le systeme d'IA concerne et sa version.",
+      heroSubline:
+        "Le parcours par defaut ici concerne les fournisseurs de systemes d'IA a haut risque. Les obligations des importateurs, distributeurs, deployeurs et representants autorises sont differentes. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours.",
       primaryCta: "Commencer le dossier",
       secondaryCta: "Voir la preuve live",
       audienceTitle: "Choisissez votre point d'entree",
       audienceLead:
-        "Commencez par le vrai travail a accomplir: mission de conseil, revue de gouvernance ou evaluation technique.",
+        "Commencez par le vrai travail a accomplir: comprendre le workflow EU, inspecter la vue technique, ou commencer le dossier.",
       audienceCards: [
         {
-          title: "Pour les consultants",
+          title: "Comprendre le workflow EU",
           text:
-            "Vous gerez deja l'interpretation legale ou la livraison client. Le toolkit sert de couche de preuve technique derriere votre dossier.",
-          result: "Premier clic: adequation du workflow, resultats du dossier et logique de transmission.",
-          cta: "Parcours consultants",
+            "Utilisez ce parcours si vous devez comprendre le flux dossier, la logique de transmission, ce qui reste humain, et ou viennent se rattacher les preuves lisibles par un evaluateur.",
+          result: "Meilleur premier clic pour gouvernance, juridique, conseil et equipes de revue mixtes.",
+          cta: "Ouvrir le parcours workflow",
           href: "how-it-works",
         },
         {
-          title: "Pour les equipes gouvernance",
+          title: "Inspecter la technologie",
           text:
-            "Vous avez besoin d'un dossier technique pret pour la revue interne, le suivi et la preparation EU AI Act.",
-          result: "Premier clic: assistant de documentation plus demonstration live du dossier.",
-          cta: "Parcours gouvernance",
-          href: "builder",
+            "Voyez l'architecture : comment la preuve est generee, verifiee et transformee en dossier EU lisible par un evaluateur avant que votre equipe ne passe du temps dans le repo.",
+          result: "Meilleur premier clic pour CTO, engineering leads, securite et due diligence technique.",
+          cta: "Ouvrir la vue technique",
+          href: "technical",
         },
         {
-          title: "Pour les equipes techniques",
+          title: "Commencer le dossier",
           text:
-            "Vous devez juger si le moteur central est assez serieux pour meriter installation, revue interne et ajouts sectoriels via des cas ou scanners.",
-          result: "Premier clic: quoi inspecter, ou se trouve la frontiere et comment les couches sectorielles se posent au-dessus du noyau.",
-          cta: "Parcours equipes techniques",
-          href: "about",
+            "Utilisez ce parcours si vous voulez deja rediger les sections obligatoires cote fournisseur pour un systeme d'IA a haut risque et completer le package legal minimum article par article.",
+          result: "Meilleur premier clic pour les operateurs et responsables de mise en oeuvre qui ont besoin d'un point de depart pratique.",
+          cta: "Ouvrir le parcours dossier",
+          href: "builder",
         },
       ],
       solutionTitle: "Comment fonctionne l'assistant de documentation",
       steps: [
-        "Verifier si le systeme a besoin d'un simple journal d'evenements ou d'un dossier technique capable de tenir sous examen pousse.",
+        "Verifier si le systeme a seulement besoin d'une journalisation de type article 12 ou d'un dossier technique capable de tenir sous examen a haut risque.",
         "Structurer avec l'assistant de documentation les sections du dossier qui demandent un texte explicatif et des references de preuve.",
         "Executer le workflow technique dans votre environnement et rattacher un dossier de preuve portable la ou le dossier a besoin de preuve.",
       ],
@@ -787,11 +1054,11 @@ const LOCALES = {
       deliverablesCards: [
         {
           title: "Dossier de preuve portable",
-          text: "Rapport hors ligne, compare-report JSON, manifest et controles de retention qui restent exploitables lors d'une transmission hors des outils d'ingenierie.",
+          text: "Rapport hors ligne, compare-report JSON, manifeste signe si necessaire, reviewer PDF/HTML/Markdown et controles de retention qui restent exploitables lors d'une transmission hors des outils d'ingenierie.",
         },
         {
           title: "Exports orientes dossier",
-          text: "Structure Annexe IV plus brouillons pour les articles 9, 13, 17, 72 et 73 relies aux preuves d'execution.",
+          text: "Structure Annexe IV plus sorties orientees relecteur et brouillons pour les articles 9, 13, 17, 72 et 73 relies aux preuves d'execution.",
         },
         {
           title: "Trace de revue structuree",
@@ -802,122 +1069,265 @@ const LOCALES = {
           text: "Quand necessaire, un dossier cible pour reponse a une autorite avec decisions de divulgation et d'archivage.",
         },
       ],
-      fitMatrixTitle: "Quand cet effort devient utile",
+      fitMatrixTitle: "Ce dont les equipes ont generalement besoin sous revue",
       fitMatrixLead:
-        "Toutes les equipes IA n'ont pas besoin d'une couche de preuve scrutiny-grade. La valeur apparait quand de simples logs ne suffisent plus.",
-      fitMatrixHeaders: ["Situation", "Pourquoi les logs simples sont faibles", "Ce que la couche de preuve ajoute"],
+        "Quand la preuve doit survivre aux achats, au juridique, a la revue client ou a une autorite, les equipes ont generalement besoin de plus que d'observabilite ou de documents statiques.",
+      fitMatrixHeaders: ["Ce dont les equipes ont besoin", "Logs de base", "Dashboard SaaS / outil d'evaluation", "Checklist / outil PDF", "Ce produit"],
       fitMatrixRows: [
-        ["Revue interne multi-equipe", "La preuve vit dans des tableaux de bord ou dans la memoire des personnes.", "Dossier portable, trace de revue et verrou de verification deterministe."],
-        ["Transmission au conseil ou a un fournisseur", "La livraison client se transforme en captures d'ecran et en narratif statique.", "Exports orientes dossier relies a des preuves d'execution verifiees."],
-        ["Incident, conseil juridique ou demande d'autorite", "Les traces brutes sont trop sensibles ou trop difficiles a partager directement.", "Dossier cible pour l'autorite, controles d'archivage et trace de divulgation."],
+        [
+          "Dossier reviewer lisible",
+          "Non",
+          "Partiel",
+          "Oui",
+          "Oui",
+        ],
+        [
+          "Preuve liee a de vrais runs d'execution",
+          "Partiel",
+          "Partiel",
+          "Non",
+          "Oui",
+        ],
+        [
+          "Chaine de preuve machine-verifiable",
+          "Non",
+          "Partiel",
+          "Non",
+          "Oui",
+        ],
+        [
+          "Perimetre de preuve heberge chez vous",
+          "Oui",
+          "Non",
+          "Partiel",
+          "Oui",
+        ],
+        [
+          "Transmission controlee hors de l'ingenierie",
+          "Non",
+          "Partiel",
+          "Non",
+          "Oui",
+        ],
+        [
+          "Reviewer PDF / HTML / Markdown",
+          "Non",
+          "Partiel",
+          "Partiel",
+          "Oui",
+        ],
+        [
+          "Trace de revue et checks de completion",
+          "Non",
+          "Partiel",
+          "Non",
+          "Oui",
+        ],
+        [
+          "Package pret pour une autorite si necessaire",
+          "Non",
+          "Non",
+          "Non",
+          "Oui",
+        ],
       ],
       proofTitle: "Voir la preuve avant de lire plus",
       proofBody:
         "Ouvrez l'assistant de documentation, le dossier live ou le modele operationnel technique. Le site doit mener vers un vrai artefact, pas une checklist generique.",
+      faq: [
+        [
+          "Quand le EU AI Act commence-t-il pour l'IA a haut risque ?",
+          "Au 28 mars 2026, la date principale d'application pour la plupart des systemes IA a haut risque relevant de l'Annexe III est le 2 aout 2026. Certaines voies relevant de l'article 6(1) et de produits-composants de securite de l'Annexe I s'appliquent a partir du 2 aout 2027. Les equipes qui peuvent tomber dans le scope haut risque devraient traiter 2026 comme la date operationnelle pour la preuve, la documentation et la revue.",
+        ],
+        [
+          "Quels secteurs tombent le plus souvent dans les systemes IA a haut risque de l'Annexe III ?",
+          "Les grandes familles de recherche sont l'assurance, la finance, le recrutement, la sante, l'education, la biometrie, l'application de la loi, le controle aux frontieres et la justice. Le scope juridique est plus etroit que ces mots-cles : les exemples frequents de l'Annexe III couvrent le recrutement et la gestion des travailleurs, l'acces et l'evaluation dans l'education, l'evaluation de la solvabilite, l'evaluation du risque ou du prix en assurance vie ou sante, le triage d'urgence, la biometrie et d'autres usages a fort impact listes par le texte. Le site reste volontairement plus large en entree et plus precis dans cette reponse.",
+        ],
+        [
+          "Quels articles du EU AI Act exigent plus que des logs et des traces ?",
+          "Pour les systemes a haut risque, les logs ne couvrent qu'une partie du dossier. L'article 11 et l'Annexe IV exigent une documentation technique ; l'article 12 exige la journalisation ; l'article 13 exige des informations pour les deployeurs ; l'article 14 exige la supervision humaine ; l'article 17 exige un systeme de gestion de la qualite documente ; l'article 72 exige un plan de suivi post-marche ; et l'article 47 avec l'Annexe V exige une declaration UE de conformite. Le produit existe parce que ces obligations doivent tenir ensemble sous revue.",
+        ],
+        [
+          "Pourquoi les logs de base ne suffisent-ils pas pour la revue d'une IA a haut risque ?",
+          "Parce que la revue haut risque demande plus que la tracabilite d'execution. La journalisation de l'article 12 compte, mais les equipes peuvent quand meme avoir besoin de documentation technique, d'informations pour les deployeurs, de materiel de supervision humaine, de sorties de monitoring et d'un package oriente conformite qu'un autre evaluateur peut reellement lire et verifier. Les logs sont necessaires, mais ils ne constituent pas tout le livrable.",
+        ],
+        [
+          "Ce parcours par defaut vaut-il pour les importateurs, distributeurs, deployeurs ou representants autorises ?",
+          "Non. Le parcours par defaut sur ce site est le parcours cote fournisseur pour les systemes d'IA a haut risque. Ces autres roles ont leurs propres obligations. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours. Si le fournisseur est etabli hors de l'Union, l'article 22 ajoute la charge du representant autorise au meme parcours fournisseur.",
+        ],
+        [
+          "Pourquoi un dashboard SaaS ou une plateforme d'evaluation ne suffit-il pas pour la preuve EU AI Act ?",
+          "Parce que la plupart des surfaces SaaS d'observabilite ou d'evaluation sont concues pour l'inspection interne, pas pour une transmission reviewer controlee. Elles peuvent etre des entrees utiles, mais elles ne resolvent en general ni le dossier hors ligne, ni la trace de revue, ni la frontiere de divulgation, ni le bundle machine-verifiable qu'un autre evaluateur peut verifier hors de la pile d'origine.",
+        ],
+        [
+          "Pourquoi un package reviewer-ready demande-t-il plus qu'une checklist ou un PDF ?",
+          "Parce qu'une checklist ou un PDF statique peut decrire un systeme sans rester lie a la preuve d'execution qui soutient les affirmations. La revue haut risque devient douloureuse quand la couche documentaire et la couche de preuve se detachent. Le but ici est de les garder reliees.",
+        ],
+        [
+          "Qu'est-ce que ce produit ajoute par rapport aux logs, aux dashboards SaaS et aux outils PDF ?",
+          "Il ajoute la couche que les outils plus simples laissent souvent manquer : un dossier reviewer lisible, une chaine de preuve machine-verifiable, des sorties reviewer hebergees chez vous, un chemin de transmission controle hors de l'ingenierie, et un package qui reste relie a de vrais runs d'execution au lieu de glisser vers des captures d'ecran ou du copier-coller.",
+        ],
+        [
+          "Est-ce que les donnees d'execution, les prompts ou les preuves quittent notre environnement ?",
+          "Non. Le workflow de preuve principal est concu pour fonctionner dans votre propre environnement, de sorte que les preuves d'execution, la mise en forme, la verification et les sorties reviewer peuvent rester dans votre perimetre controle.",
+        ],
+        [
+          "Est-ce que cela remplace la revue legale ou la validation finale ?",
+          "Non. Le produit automatise les operations de preuve, la mise en forme lisible par un evaluateur et les exports orientes dossier. La classification legale, le jugement sur le risque residuel et la validation finale restent humains.",
+        ],
+        [
+          "Dans quels formats le package peut-il etre remis aux evaluateurs ?",
+          "La couche orientee evaluateur est disponible en PDF, HTML et Markdown, avec dessous des artefacts JSON machine-verifiables et des exports orientes dossier. Les relecteurs non techniques peuvent donc commencer par le dossier lisible, tandis que les relecteurs techniques peuvent verifier la chaine de preuve sous-jacente.",
+        ],
+      ],
     },
     how: {
-      title: "Comment fonctionne l'assistant de preuve EU AI Act",
+      title: "Comment preparer les documents et preuves EU AI Act pour la revue",
       description:
-        "Du profil systeme aux preuves techniques reliees a la documentation.",
-      headline: "Un pipeline de documentation et de preuve",
+        "Comprenez ce que votre equipe doit preparer d'abord, ce que le workflow organise automatiquement, ce qui reste humain et ce qu'un evaluateur recoit a la fin.",
+      keywords:
+        "preparer documentation EU AI Act, workflow documentation IA haut risque, quels documents pour EU AI Act, processus conformite IA, preparation revue IA",
+      headline: "Comment preparer les documents et preuves EU AI Act pour la revue",
       intro:
-        "Cette page est la vue workflow pour les consultants et la gouvernance. Elle montre comment le parcours dossier devient un dossier technique pret pour la revue.",
-      summaryTitle: "Bloc operationnel en un coup d'oeil",
-      summaryLead: "A lire d'abord si vous voulez la vue la plus courte et la plus honnete des entrees, de l'automatisation, de la part humaine et du resultat.",
+        "Utilisez cette page si vous devez comprendre le processus de documentation avant de commencer : ce que votre equipe prepare d'abord, ce que le workflow organise automatiquement, ce qui reste humain et ce qu'un evaluateur recoit a la fin.",
+      summaryTitle: "Ce qui doit etre prepare pour la revue EU AI Act",
+      summaryLead:
+        "Voici la vue la plus courte de ce que votre equipe fournit d'abord, de ce que le workflow organise automatiquement, de ce qui reste humain et de ce qu'un evaluateur devrait recevoir a la fin.",
       summaryColumns: [
         {
-          title: "Entrees",
+          title: "Votre equipe fournit",
           points: [
             "Perimetre du systeme, finalite prevue, responsables et contexte de deploiement",
-            "Sections narratives du dossier avec references de preuve",
-            "Attentes de qualite qui definissent la profondeur de preuve",
+            "Sections du dossier qui demandent explications, limites et references",
+            "Attentes de revue qui determinent le niveau de support technique necessaire",
           ],
         },
         {
-          title: "Automatise",
+          title: "Organise automatiquement",
           points: [
-            "Structuration et validation de l'intake",
-            "Generation du dossier de preuve et exports orientes dossier",
-            "Preparation de la revue et mise en forme pour reponse a une autorite",
+            "Structure du dossier et validation",
+            "Materiaux techniques relies au meme package",
+            "Transmission pour la revue et package autorite si necessaire",
           ],
         },
         {
-          title: "Humain",
+          title: "Reste humain",
           points: [
+            "Interpretation legale et confirmation du scope",
             "Jugement sur les dommages metier et le risque residuel",
-            "Jugement d'approbation ou de blocage",
-            "Classification legale, narratif final et validation",
+            "Formulation finale, approbation et validation",
           ],
         },
         {
-          title: "Resultat",
+          title: "L'evaluateur recoit",
           points: [
-            "Dossier de preuve portable",
-            "Dossier structure pret pour la revue",
-            "Transmission exploitable par une autorite si necessaire",
+            "Un dossier lisible organise pour la revue",
+            "Des materiaux techniques relies et reviewer PDF/HTML/Markdown",
+            "Un package de transmission si une revue client, juridique ou autorite est necessaire",
           ],
         },
       ],
-      inputsTitle: "Ce qui entre",
-      inputsLead: "Le workflow commence par des informations detenues par l'operateur, pas par des artefacts generes.",
+      inputsTitle: "Ce dont votre equipe a besoin avant de commencer",
+      inputsLead:
+        "Le processus commence par des informations que votre equipe connait deja. Le workflow ne peut pas inventer seul le perimetre du systeme, les responsables ou la finalite prevue.",
       inputCards: [
         ["Perimetre du systeme", "Perimetre systeme, finalite prevue, responsables et contexte de deploiement."],
-        ["Sections narratives", "Parties du dossier qui demandent hypotheses, contraintes et references de preuve."],
-        ["Attentes de qualite", "Attentes de mise en production ou de gouvernance qui definissent la profondeur de preuve necessaire."],
+        ["Sections du dossier", "Les sections qui demandent explications, hypotheses, limites et references."],
+        ["Attentes de revue", "Les attentes de mise en production ou de gouvernance qui definissent le niveau de support technique necessaire."],
       ],
-      workflowTitle: "Ce que l'automatisation fait",
-      workflowLead: "Une fois le perimetre fige, le workflow doit automatiser autant que possible la generation de preuve et l'assemblage du dossier.",
+      workflowTitle: "Comment fonctionne le processus de documentation",
+      workflowLead:
+        "Le but est simple : rassembler les informations que votre equipe connait deja pour le parcours cote fournisseur, rattacher les materiaux issus de vrais runs et finir avec un ensemble de documents organise pour la revue.",
       workflowSteps: [
-        "Figer le perimetre du systeme, les responsables et la finalite prevue avant que le dossier ne s'elargisse.",
-        "Utiliser l'assistant de documentation et les modeles pour rediger les sections narratives et reperer les references techniques requises.",
-        "Executer Agent QA Toolkit pour produire le dossier de preuve portable, les exports orientes dossier et les artefacts de revue structures.",
-        "Remettre un seul dossier a la gouvernance, aux consultants, au juridique ou aux workflows tournes vers l'autorite sans dependre de tableaux de bord.",
+        "Decrivez le systeme, sa finalite prevue et les personnes responsables.",
+        "Ajoutez les explications, limites et references dont la revue a besoin.",
+        "Rattachez les materiaux issus de vrais runs et transformez le tout en un package organise pour la revue.",
       ],
-      outputsTitle: "Ce que le workflow produit",
-      outputsLead: "Le resultat doit etre un ensemble de resultats concrets, pas seulement du langage de process.",
+      outputsTitle: "Ce que l'evaluateur recoit a la fin",
+      outputsLead: "Le resultat doit etre facile a relire, pas seulement techniquement correct.",
       outputCards: [
-        ["Structure de dossier", "Un dossier brouillon avec sections narratives, hypotheses et references de preuve."],
-        ["Dossier de preuve technique", "Rapport portable, compare-report JSON, manifest, controles de retention et exports orientes dossier."],
-        ["Transmission prete pour la revue", "Trace de revue structuree et, si besoin, mise en forme ciblee pour une reponse a une autorite."],
+        ["Structure du dossier", "Un package organise selon les sections qui demandent explications, hypotheses, limites et references."],
+        ["Materiaux techniques", "Rapport portable, materiaux techniques relies, reviewer PDF/HTML/Markdown et preuves lisibles par machine en dessous."],
+        ["Transmission pour la revue", "Trace de revue structuree et, si besoin, package cible pour revue client, juridique, achats ou autorite."],
       ],
-      boundaryTitle: "Ou le workflow s'arrete encore",
-      boundaryLead: "Le workflow prepare le dossier technique. Il ne retire pas la responsabilite gouvernance et legale.",
+      boundaryTitle: "Ce qui demande encore une revue et une validation humaines",
+      boundaryLead:
+        "Le workflow organise le package. Il ne retire pas la responsabilite legale, gouvernance ou d'approbation.",
       boundaryPoints: [
-        "La classification legale et la validation finale restent hors du produit.",
+        "La classification legale et la validation finale restent entre des mains nommees.",
         "Les jugements sur les dommages metier et le risque residuel restent chez l'operateur.",
-        "Le narratif destine au deploiement et les arbitrages de mise en production demandent encore des responsables humains nommes.",
+        "Les formulations destinees aux deployeurs et les arbitrages de mise en production demandent encore des responsables humains.",
       ],
-      screenshotTitle: "A quoi ressemble la sortie",
-      screenshotBody: "Le resultat doit etre un dossier pret pour la revue qu'une autre personne peut inspecter sans ouvrir vos systemes internes.",
-      proofTitle: "Prochains clics utiles",
-      proofBody: "A partir d'ici, les vrais choix sont: ouvrir l'assistant de documentation, inspecter le dossier live, ou passer au modele technique.",
+      screenshotTitle: "Ce que l'evaluateur voit a la fin",
+      screenshotBody:
+        "Le resultat doit etre lisible par une autre personne sans ouvrir vos systemes internes ni vos outils d'ingenierie.",
+      proofTitle: "Choisissez l'etape suivante",
+      proofBody:
+        "Commencez le package si vous etes pret a rediger les documents, ouvrez l'exemple live pour voir d'abord le resultat, ou ouvrez la vue technique si votre equipe a besoin de la partie implementation.",
+      faq: [
+        [
+          "Quels documents faut-il preparer pour une revue EU AI Act ?",
+          "La plupart des equipes ont besoin d'un dossier lisible, de materiaux techniques issus de vrais runs et des sections qui demandent encore explication humaine, approbation ou validation. Le contenu exact depend du perimetre du systeme, de la finalite prevue et du parcours de revue vise.",
+        ],
+        [
+          "Cette page de workflow vaut-elle pour les deployeurs, importateurs, distributeurs ou representants autorises ?",
+          "Non. Cette page suit le parcours de documentation cote fournisseur pour les systemes d'IA a haut risque. Les autres roles ont des obligations differentes. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours. Si le fournisseur est etabli hors de l'Union, ajoutez au meme package fournisseur l'enregistrement Article 22 du representant autorise.",
+        ],
+        [
+          "De quoi mon equipe a-t-elle besoin avant de commencer le workflow de documentation ?",
+          "Votre equipe doit definir le perimetre du systeme, la finalite prevue, les responsables, le contexte de deploiement et les sections du dossier qui demandent explications, limites ou references. Le workflow ne peut pas inventer ces entrees seul.",
+        ],
+        [
+          "Comment le workflow de documentation EU AI Act fonctionne-t-il etape par etape ?",
+          "D'abord vous confirmez le scope et le contexte de revue. Ensuite vous redigez les sections qui demandent une explication humaine. Puis les materiaux techniques issus de vrais runs sont rattaches au meme package, la structure et la completude sont verifiees, et un package unique est remis au relecteur suivant.",
+        ],
+        [
+          "Qu'est-ce qui est genere automatiquement et qu'est-ce qui reste humain ?",
+          "Le workflow peut organiser la structure du dossier, rattacher les materiaux techniques et preparer les sorties orientees evaluateur. L'interpretation legale, le jugement sur le risque residuel, les formulations pour deployeurs et la validation finale restent entre des mains nommees.",
+        ],
+        [
+          "Que recoit l'evaluateur a la fin ?",
+          "L'evaluateur devrait recevoir un dossier lisible, des materiaux techniques relies, des sorties reviewer en PDF ou HTML et, si besoin, un package cible pour une revue client, juridique, achats ou autorite.",
+        ],
+        [
+          "Un meme workflow peut-il produire a la fois les documents et les materiaux techniques ?",
+          "Oui. Le workflow est concu pour garder les documents lisibles pour la revue et les materiaux techniques dans le meme package afin qu'ils ne divergent pas.",
+        ],
+        [
+          "Les donnees d'execution et les preuves restent-elles dans notre environnement ?",
+          "Oui. Le workflow principal est concu pour que les preuves d'execution, la verification et les sorties reviewer puissent rester dans votre environnement controle.",
+        ],
+        [
+          "Est-ce que cela remplace la revue legale ou la validation finale ?",
+          "Non. Le workflow organise le package et son support technique, mais l'interpretation legale et la validation finale restent des responsabilites humaines.",
+        ],
+      ],
     },
     pricing: {
       title: "Tarifs pour les preuves EU AI Act",
       description:
-        "Acces OSS gratuit, pack de lancement ponctuel, abonnements Team et Studio, et accompagnement enterprise sur mesure pour les preuves EU AI Act.",
-      headline: "Commencez gratuitement. Payez une fois pour atteindre la premiere vraie valeur, puis abonnez-vous quand le workflow devient operationnel.",
+        "Acces OSS gratuit, aide payante optionnelle pour le premier vrai paquet, et accompagnement enterprise pour un travail EU AI Act plus large.",
+      headline: "Commencez gratuitement. Payez seulement quand votre equipe a besoin d'aide pour le premier vrai paquet.",
       lead:
-        "Le coeur OSS est gratuit. Le pack de lancement ponctuel amene un agent vers un premier vrai resultat de preuve. Team et Studio sont des offres produit recurrentes pour les equipes qui exploitent deja le workflow en interne.",
+        "Le coeur OSS est gratuit. L'aide payante sert aux equipes qui veulent atteindre plus vite le premier vrai paquet sur leur propre systeme. Enterprise convient a un deploiement plus large ou a une revue formelle.",
       subscriptionsLabel: "Parcours commerciaux",
       entryTitle: "Commencer avec OSS",
       entryLead:
         "Utilisez la voie gratuite si vous voulez inspecter le produit, lancer le demarrage rapide sur votre propre agent, puis decider si le workflow merite une place dans votre environnement.",
-      launchEyebrow: "Onboarding ponctuel",
-      launchTitle: "Besoin d'aide pour atteindre la premiere vraie valeur sur votre propre agent ?",
+      launchEyebrow: "Aide payante",
+      launchTitle: "Besoin d'aide pour obtenir le premier paquet sur votre propre systeme ?",
       launchLead:
-        "Le pack de lancement est le pont ponctuel entre tester le depot et obtenir un premier vrai dossier de preuve sur votre propre infrastructure.",
-      tiersEyebrow: "Abonnements",
-      tiersTitle: "Tiers produit recurrents",
+        "Utilisez la voie payante quand votre equipe veut de l'aide pour connecter son propre systeme, revoir la premiere configuration et obtenir plus vite le premier vrai paquet.",
+      tiersEyebrow: "Enterprise",
+      tiersTitle: "Besoin d'un accompagnement plus large ?",
       tiersLead:
-        "Team, Studio et Enterprise ne commencent qu'une fois que le workflow fait deja partie des operations reelles.",
+        "Enterprise convient quand le travail couvre plusieurs systemes, plusieurs equipes, ou une revue formelle et des achats.",
       fitTitle: "Choisissez le parcours qui correspond a votre stade",
       fitLead:
-        "N'achetez pas du support juste pour regarder. Le pack ponctuel sert a atteindre la premiere valeur. L'abonnement commence quand le workflow fait deja partie de l'exploitation courante.",
+        "Gardez la premiere etape simple. Restez en autonomie tant que cela suffit. Payez seulement quand votre equipe a besoin d'aide pour passer du test au vrai paquet.",
       fitCards: [
         ["Rester en autonomie", "Le depot, le demarrage rapide, la documentation et les demonstrations suffisent tant que vous evaluez l'adequation ou pouvez operer le workflow seuls."],
-        ["Prendre le pack de lancement", "C'est le bon choix quand un agent doit atteindre vite un vrai premier dossier de preuve sans que votre equipe perde des semaines a trouver le chemin seule."],
-        ["Prendre Team ou Studio", "Abonnez-vous seulement quand le workflow est deja utile en continu pour 3 ou 10 agents."],
+        ["Prendre l'aide payante", "C'est le bon choix quand un systeme doit atteindre vite un vrai premier paquet sans que votre equipe perde des semaines a trouver le chemin seule."],
         ["Prendre Enterprise", "C'est le bon niveau quand la revue devient externe, multi-systeme, orientee conformite, ou recurrente sous examen serre."],
       ],
       faq: [
@@ -927,19 +1337,15 @@ const LOCALES = {
         },
         {
           q: "Par quoi dois-je commencer ?",
-          a: "Commencez par OSS si vous evaluez encore l'adequation ou si votre equipe peut operer le workflow seule. Prenez le pack de lancement quand un agent doit atteindre vite un vrai premier resultat de preuve. Prenez Team ou Studio seulement apres que le workflow soit deja utile en interne. Prenez Enterprise quand le dossier doit survivre a une revue multi-equipe ou externe.",
+          a: "Commencez par OSS si vous evaluez encore l'adequation ou si votre equipe peut operer le workflow seule. Prenez l'aide payante quand un systeme doit atteindre vite un vrai premier paquet. Prenez Enterprise quand le dossier doit survivre a une revue multi-equipe ou externe.",
         },
         {
-          q: "Que paie exactement le pack de lancement ?",
-          a: "Le pack de lancement est une offre ponctuelle d'onboarding pour un agent. Il amene votre equipe a un premier vrai dossier de preuve sur votre propre infrastructure et a une transmission claire pour la suite. Il ne remplace ni la vraie conception des cas, ni la revue de gouvernance, ni la validation juridique finale.",
+          q: "Que paie exactement l'aide payante ?",
+          a: "L'aide payante fait gagner du temps a votre equipe pour obtenir le premier vrai paquet sur son propre systeme. Elle ne remplace ni la vraie conception des cas, ni la revue de gouvernance, ni la validation juridique finale.",
         },
         {
-          q: "Pourquoi le pack de lancement est-il ponctuel alors que Team et Studio sont mensuels ?",
-          a: "Le pack de lancement sert a l'activation vers la premiere valeur. Team et Studio servent aux equipes qui ont deja passe l'onboarding et ont besoin d'usage produit, de mises a jour, d'exports et d'un support recurrent pour 3 ou 10 agents.",
-        },
-        {
-          q: "Team et Studio incluent-ils du travail custom illimite ?",
-          a: "Non. Team et Studio sont des offres produit avec support, pas du conseil illimite. L'implementation multi-systeme, la revue externe ou le travail de dossier sur mesure passent en perimetre Enterprise.",
+          q: "Quand faut-il aller au-dela de l'autonomie ?",
+          a: "Quand votre equipe a besoin du premier vrai paquet sur son propre systeme et ne veut pas reconstruire seule tout le chemin.",
         },
         {
           q: "Cela remplace-t-il un conseil juridique ?",
@@ -950,15 +1356,22 @@ const LOCALES = {
     builder: {
       title: "Assistant EU AI Act",
       description:
-        "Assistant pas a pas pour le profil systeme, le tri de risque et le dossier documentaire.",
-      headline: "Construisez votre dossier documentaire",
+        "Assistant pas a pas pour le parcours legal minimum cote fournisseur du EU AI Act pour les systemes d'IA a haut risque.",
+      headline: "Redigez le brouillon cote fournisseur de votre package EU AI Act",
       intro:
-        "L'assistant de documentation est gratuit pour la structure. Les preuves techniques se branchent la ou elles sont necessaires.",
+        "Utilisez cette page pour rediger d'abord le brouillon ecrit cote fournisseur pour un systeme d'IA a haut risque. Si l'article 25 fait de votre organisation le fournisseur, c'est le bon parcours.",
+      scopeEyebrow: "Parcours fournisseur uniquement",
+      scopeTitle: "Cette page construit seulement le brouillon ecrit cote fournisseur",
+      scopePoints: [
+        "Le parcours par defaut concerne les fournisseurs de systemes d'IA a haut risque.",
+        "Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours.",
+        "Si le fournisseur est etabli hors de l'Union, ajoutez l'enregistrement Article 22 du representant autorise quand il est requis.",
+      ],
     },
     templates: {
       title: "Modeles de documentation AI Act",
       description:
-        "Modeles pour les articles de l'EU AI Act avec liens vers les preuves techniques live.",
+        "Modeles pour les articles cote fournisseur du EU AI Act, y compris l'article 22 lorsque le fournisseur est etabli hors de l'Union.",
       headline: "Modeles utiles pour les equipes qui doivent agir vite",
       intro:
         "Ces modeles montrent comment l'assistant de documentation et le toolkit relient des sections concretes de l'EU AI Act a des preuves structurees.",
@@ -973,48 +1386,26 @@ const LOCALES = {
       description:
         "Demarrage rapide, guides operateur, surfaces de preuve et documentation de reference derriere l'assistant EU AI Evidence.",
       headline: "Documentation source et hub de preuve",
-    },
-    about: {
-      title: "Pour les equipes techniques qui evaluent l'adequation",
-      description:
-        "Page pour les equipes plateforme, securite et ingenierie de conformite qui veulent juger si le produit central est assez reel pour etre installe et si du travail sectoriel peut se poser proprement au-dessus.",
-      headline: "Pour les equipes techniques qui evaluent l'adequation",
-      intro:
-        "Utilisez cette page quand la vraie question n'est ni le prix ni la regulation, mais la solidite technique du moteur de preuve central.",
-      inspectTitle: "Ce qu'il faut verifier d'abord",
-      inspectLead:
-        "Un evaluateur technique doit pouvoir voir des resultats concrets, des verrous explicites, la separation entre noyau et travail sectoriel, et une frontiere d'automatisation honnete avant une integration plus profonde.",
-      inspectCards: [
-        ["Resultats reels", "Le produit se termine par un rapport portable, un contrat lisible par machine, un manifest, des controles de retention, une trace de revue et un dossier pour autorite en option."],
-        ["Verrous explicites", "Le packaging, la verification, la revue et la preparation pour autorite ont tous des controles explicites. Ce n'est pas une simple histoire de tableau de bord."],
-        ["Noyau pret pour les verticales", "Le noyau qualifie des agents qui utilisent des outils. Des bibliotheques de cas, scanners et exports verticaux sectoriels peuvent se poser au-dessus sans transformer le produit de base en suite de conformite generique."],
-        ["Visible dans le code source", "Les commandes, schemas et artefacts sont visibles dans le depot et correspondent a la surface de preuve live."],
-        ["Frontiere honnete", "Le systeme automatise les operations de preuve, pas la classification legale, le jugement metier ou la validation finale."],
+      faq: [
+        [
+          "Quel document ouvrir en premier ?",
+          "Ouvrez d'abord le dossier reviewer live si vous voulez voir la sortie UE. Ouvrez d'abord le guide de demarrage rapide si vous voulez tester le workflow sur votre propre agent.",
+        ],
+        [
+          "Faut-il lire du JSON brut d'abord ?",
+          "Non. Le dossier reviewer est la premiere surface de lecture prevue. Les artefacts JSON restent disponibles comme couche technique plus profonde.",
+        ],
+        [
+          "Les contenus sont-ils alignes entre anglais, allemand et francais ?",
+          "Oui. Le site publie les memes pages et chemins de preuve de base dans les trois langues, tout en conservant les noms exacts des artefacts.",
+        ],
       ],
-      quickstartTitle: "Chemin le plus rapide vers un premier run honnete",
-      quickstartLead:
-        "Si votre adapter tourne deja, utilisez le demarrage rapide pour produire un vrai premier dossier de preuve dans votre propre environnement avant toute integration plus lourde.",
-      quickstartCommand: "npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud",
-      quickstartPoints: [
-        "Execute le chemin smoke de demarrage sur votre propre adapter et produit un rapport portable.",
-        "Montre si le toolkit peut vraiment executer, packager et verifier la preuve dans votre environnement.",
-        "Reste honnete: premier dossier de preuve seulement, pas qualification complete ni niveau de conformite etabli.",
-      ],
-      quickstartButton: "Ouvrir le guide de demarrage rapide",
     },
     contact: {
       title: "Contact",
       description:
         "Demandez un pilote, ouvrez les demos live ou consultez le depot open source.",
       headline: "Choisissez le chemin le plus court vers un pilote serieux",
-    },
-    holding: {
-      title: "Page de stockage du materiel etendu",
-      description:
-        "Sections retirees de la page d'accueil et conservees pour un audit ulterieur au lieu d'etre supprimees silencieusement.",
-      headline: "Materiel etendu retire du funnel principal",
-      intro:
-        "Cette page regroupe les sections retirees de la page d'accueil pour qu'elles soient revues plus tard et soit supprimees, soit reecrites, soit deplacees vers une meilleure surface.",
     },
     legalTitles: {
       privacy: "Confidentialite",
@@ -1075,8 +1466,8 @@ const TECHNICAL_SHARED = {
     "I know whether I need only technical evidence or also EU dossier outputs.",
   ],
   readinessBands: [
-    ["0-2", "Needs scoping help before self-serve or Launch Pack will be efficient."],
-    ["3-4", "Good Launch Pack candidate: the core workflow exists but needs structuring."],
+    ["0-2", "Needs scoping help before self-serve or paid help will be efficient."],
+    ["3-4", "Good paid-help candidate: the core workflow exists but needs structuring."],
     ["5-6", "Good self-serve or Enterprise-support candidate: the team is operationally ready."],
   ],
   maturityRows: [
@@ -1096,8 +1487,8 @@ const TECHNICAL_SHARED = {
   ],
   supportRows: [
     ["OSS self-serve", "Teams that can scope, integrate, and operate the workflow alone.", "No setup help, no supported-agent scope, no done-for-you onboarding."],
-    ["Launch Pack", "One supported agent that needs first-time setup and a first serious package.", "Not unlimited case authoring, not full legal drafting, not multi-agent implementation."],
-    ["Monthly support", "Supported agents that already cleared onboarding and now need recurring help.", "Not full done-for-you setup for every new agent unless separately scoped."],
+    ["Paid help", "One supported system that needs first-time setup and a first serious package.", "Not unlimited case authoring, not full legal drafting, not multi-agent implementation."],
+    ["Enterprise support", "Broader scopes that need recurring or multi-system help.", "Not sold as unlimited done-for-you setup for every new system."],
   ],
   failureCards: [
     ["Weak cases", "Critical cases use empty or weak `expected` blocks, so the bundle looks green while proving very little."],
@@ -1188,8 +1579,8 @@ const TECHNICAL_SHARED_I18N = {
       "Ich weiss, ob ich nur technische Nachweise oder auch EU-Dossier-Ergebnisse brauche.",
     ],
     readinessBands: [
-      ["0-2", "Braucht Scoping-Hilfe, bevor Selbstbetrieb oder Startpaket effizient sind."],
-      ["3-4", "Guter Kandidat fuer das Startpaket: Der Kern-Workflow existiert, braucht aber Struktur."],
+      ["0-2", "Braucht Scoping-Hilfe, bevor Selbstbetrieb oder bezahlte Hilfe effizient sind."],
+      ["3-4", "Guter Kandidat fuer bezahlte Hilfe: Der Kern-Workflow existiert, braucht aber Struktur."],
       ["5-6", "Guter Kandidat fuer Selbstbetrieb oder Enterprise-Support: Das Team ist operativ bereit."],
     ],
     maturityRows: [
@@ -1209,8 +1600,8 @@ const TECHNICAL_SHARED_I18N = {
     ],
     supportRows: [
       ["OSS im Selbstbetrieb", "Teams, die den Workflow allein eingrenzen, integrieren und betreiben koennen.", "Keine Setup-Hilfe, kein abgegrenzter Umfang fuer unterstuetzte Agenten, kein Onboarding als Komplettservice."],
-      ["Startpaket", "Ein unterstuetzter Agent, der das erste Setup und ein erstes ernstes Paket braucht.", "Keine unbegrenzte Fallausarbeitung, kein vollstaendiges rechtliches Verfassen, keine Multi-Agent-Implementierung."],
-      ["Monatlicher Support", "Unterstuetzte Agenten, die das Onboarding bereits abgeschlossen haben und nun wiederkehrende Hilfe brauchen.", "Kein vollstaendiges Komplettsetup fuer jeden neuen Agenten, sofern nicht separat abgegrenzt."],
+      ["Bezahlte Hilfe", "Ein unterstuetztes System, das das erste Setup und ein erstes ernstes Paket braucht.", "Keine unbegrenzte Fallausarbeitung, kein vollstaendiges rechtliches Verfassen, keine Multi-System-Implementierung."],
+      ["Enterprise-Support", "Breitere Umfaenge mit wiederkehrender oder systemuebergreifender Hilfe.", "Nicht als unbegrenztes Komplettsetup fuer jedes neue System verkauft."],
     ],
     failureCards: [
       ["Schwache Cases", "Kritische Cases nutzen leere oder schwache `expected`-Bloecke, sodass das Paket grün aussieht, aber wenig beweist."],
@@ -1287,8 +1678,8 @@ const TECHNICAL_SHARED_I18N = {
       "Je sais si j'ai besoin seulement de preuves techniques ou aussi de sorties de dossier UE.",
     ],
     readinessBands: [
-      ["0-2", "Necessite une aide de cadrage avant qu'un mode autonome ou un pack de lancement soit efficace."],
-      ["3-4", "Bon candidat pour le pack de lancement: le workflow coeur existe mais doit etre structure."],
+      ["0-2", "Necessite une aide de cadrage avant qu'un mode autonome ou une aide payante soit efficace."],
+      ["3-4", "Bon candidat pour l'aide payante: le workflow coeur existe mais doit etre structure."],
       ["5-6", "Bon candidat pour le mode autonome ou le support enterprise: l'equipe est prete sur le plan operationnel."],
     ],
     maturityRows: [
@@ -1357,13 +1748,23 @@ function getTechnicalShared(locale) {
 
 const TECHNICAL_PAGE = {
   en: {
-    title: "Technology and evidence architecture | EU AI Evidence Builder",
+    title: "Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder",
     description:
-      "Architecture, verification model, artifact contracts, and trust boundary behind the EU AI Evidence Builder.",
-    eyebrow: "Technology",
-    headline: "How the evidence engine works",
+      "Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time.",
+    eyebrow: "Technical Overview",
+    headline: "Technical Overview: from agent runs to reviewer-ready EU evidence",
     intro:
-      "Inspect the architecture, verification model, artifact contracts, trust boundary, and sector-layering model behind the evidence dossier.",
+      "For CTOs and engineering leads deciding whether this is worth technical time now: what already exists, how to test fit on your own agent, what the engine actually does, where human approval still begins, and the fact that the default EU path here targets the provider side of a high-risk AI system.",
+    inspectTitle: "What to check first",
+    inspectLead:
+      "Before installation, a CTO should be able to see concrete outputs, explicit gates, the split between machine evidence and human-owned completion, and the minimum your team must already have for an honest first run.",
+    inspectCards: [
+      ["Role scope", "The default EU path on this site is the provider-side path for high-risk AI systems. Other roles differ. If Article 25 makes your organization the provider, this is the correct path."],
+      ["Real outputs", "The product ends in a portable report, machine contract, manifest, retention controls, review record, and optional authority package."],
+      ["Reviewer-ready EU outputs", "The EU path includes reviewer PDF, reviewer HTML, reviewer Markdown, and Annex-shaped dossier outputs linked back to the same evidence bundle."],
+      ["Hard gates and source-visible path", "Packaging, verify, review, and authority packaging all have explicit checks, and the commands, schemas, and artifacts are visible in the repository and reflected in the live proof surface."],
+      ["What your team must already have", "A reachable adapter, a clear release boundary, starter cases, and named owners for thresholds and sign-off are enough to test fit honestly before deeper integration."],
+    ],
     credibilityEyebrow: "Core primitives",
     credibilityTitle: "Core technical primitives",
     credibilityLead:
@@ -1392,14 +1793,14 @@ const TECHNICAL_PAGE = {
     ],
     summaryTitle: "What this technology actually does",
     summaryLead:
-      "The product turns comparable runs into a verified evidence dossier, adds review and handoff structure, supports sector-specific layers above the same core, and keeps legal and policy ownership outside the automation layer.",
+      "The product turns comparable runs into reviewer-ready EU evidence, keeps the machine-verifiable core intact, and layers review, handoff, and dossier structure on top without pretending to automate legal sign-off.",
     summaryColumns: [
       {
         title: "Evidence generation",
         points: [
           "Comparable baseline and new runs become a portable evidence bundle",
-          "The bundle includes a report, machine contract, manifest, and retention controls",
-          "EU dossier-facing exports attach to the same verified runtime evidence",
+          "The bundle includes a report, machine contract, manifest, retention controls, and reviewer-facing EU outputs",
+          "EU dossier sections attach to the same verified runtime evidence instead of diverging into a document-only workflow",
         ],
       },
       {
@@ -1413,9 +1814,9 @@ const TECHNICAL_PAGE = {
       {
         title: "Review and handoff",
         points: [
-          "The package can move across engineering, governance, counsel, and authority-facing review",
-          "Review records, handoff notes, and authority bundles are part of the product surface",
-          "The goal is a package another reviewer can inspect without internal dashboards or unsigned file swaps",
+          "The package can move across engineering, governance, counsel, procurement, and authority-facing review",
+          "Reviewer PDF, reviewer HTML, review records, handoff notes, and authority bundles are part of the product surface",
+          "The goal is a package another reviewer can inspect without internal dashboards, screenshots, or unsigned file swaps",
         ],
       },
       {
@@ -1427,56 +1828,62 @@ const TECHNICAL_PAGE = {
         ],
       },
     ],
-    compactWorkflowTitle: "How the technology works",
+    compactWorkflowTitle: "What your team provides and what the engine does next",
     compactWorkflowLead:
-      "At a high level, the stack connects runtime evidence, strict verification, signed-manifest authenticity when needed, review records, and handoff packaging into one self-hosted workflow. Sector-specific case libraries, scanners, and vertical outputs can extend the same core when the object under review is still a tool-using agent.",
+      "The middle of the decision should stay practical. Your team brings a reachable adapter, a real change boundary, starter cases, and named owners. From there the engine handles comparable runs, verified packaging, and reviewer-ready EU outputs on top of the same bundle.",
     compactWorkflowSteps: [
-      "The agent is exercised through checked adapters and comparable baseline/new runs.",
-      "The evaluator packages a portable evidence bundle and verifies integrity and structure.",
-      "EU dossier exports, review records, and retention controls attach to the same verified bundle.",
-      "When needed, the workflow can produce a scoped authority-facing package from the verified report.",
+      "Your team exposes a reachable adapter and the baseline/new boundary that is actually worth reviewing.",
+      "Your team supplies starter cases, intended-use context, and named owners for thresholds and sign-off.",
+      "The engine runs comparable executions, packages the bundle, and verifies integrity and structure.",
+      "The engine generates reviewer-ready EU outputs from that same verified bundle; legal judgment and final approval still stay with your team.",
     ],
     commandsTitle: "Command surface",
-    commandsLead: "These commands correspond to the real packaging, signing, verify, review, and authority steps in the live product.",
+    commandsLead:
+      "If the fit is real, these are the real commands behind packaging, signing, verification, review, and authority handoff.",
     artifactsSummaryTitle: "What must exist if the workflow is healthy",
     artifactsSummaryLead: "Judge the product by durable artifacts and explicit gates, not by screenshots or narrative alone.",
     screenshotTitle: "What the verified bundle looks like",
     screenshotBody: "This is the kind of package the technical path should produce before anyone asks governance or counsel to review it.",
-    extendedTitle: "Need deeper technical detail?",
+    extendedTitle: "If the fit is real, open the repo",
     extendedBody:
-      "Deep dives, readiness scoring, re-run triggers, support scope, and the longer technical notes are available on the holding page.",
+      "Once outputs, gates, and the first-run path look real, the repository is the right next step for adapters, schemas, commands, and implementation detail.",
     extendedButton: "Open extended notes",
-    opsButton: "Open operational model",
+    opsButton: "Open self-hosted guide",
     proofButton: "Open live evidence",
     docsButton: "Open OSS docs",
-    quickstartTitle: "Fastest way to test this on your own agent",
+    repoButton: "Open GitHub repo",
+    quickstartJumpButton: "See self-serve EU starter",
+    reviewerButton: "Open reviewer dossier demo",
+    demoAgentButton: "Open demo agent report",
+    allDocsButton: "Open all demo documents",
+    quickstartTitle: "First self-serve EU starter",
     quickstartLead:
-      "If the adapter is already running, quickstart gives you a portable starter pack without pretending that it already understands your real qualification scope.",
-    quickstartCommand: "npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud",
+      "Use the EU starter guide when you want a lightweight first EU-shaped package on your own agent before deciding whether you need paid help.",
+    quickstartCommand: "",
     quickstartColumns: [
       {
-        title: "What it proves",
+        title: "What it shows",
         points: [
-          "The toolkit can reach your adapter and execute the starter smoke path.",
-          "A portable report can be packaged and verified on your infrastructure.",
-          "The bridge from demo to your own agent is real, not a sales-only promise.",
+          "The toolkit can reach your adapter and produce a lightweight EU-shaped starter package.",
+          "You can see how the EU minimum path starts on your own infrastructure, not only on the demo.",
+          "Your team gets an honest first signal before deciding whether paid help is worth it.",
         ],
       },
       {
-        title: "What it does not prove",
+        title: "What it does not do",
         points: [
-          "It does not establish meaningful production case coverage.",
-          "It does not replace real identity metadata or a reviewed intake contract.",
-          "It does not count as full qualification or compliance readiness.",
+          "It does not replace the real provider-side package for review.",
+          "It does not replace reviewed cases, comparable runs, or final legal completion.",
+          "It does not replace hands-on help when your team wants the real package on its own agent.",
         ],
       },
     ],
-    quickstartButton: "Open quickstart guide",
+    quickstartButton: "Open EU starter guide",
     planningTitle: "Time to first evidence",
     planningNote: "Planning estimates, not delivery guarantees.",
     estimates: [
       ["Self-serve first setup", "3-4 weeks"],
-      ["Launch Pack first verified package", "5 business days"],
+      ["Paid help to first verified package", "5 business days"],
       ["Recurring release after onboarding", "1-2 days"],
       ["Monthly support scope", "Supported agents only"],
     ],
@@ -1484,7 +1891,7 @@ const TECHNICAL_PAGE = {
     intakeTitle: "Structured intake layer",
     intakeLead: "Automate the upstream contract before case authoring and adapter work starts.",
     intakeHumanTitle: "What still stays human-owned",
-    boundaryTitle: "Automation boundary",
+    boundaryTitle: "What still stays human-owned",
     boundaryBody:
       "The strongest part of the product is the path from prepared inputs to a verified evidence bundle. Scope judgment, policy thresholds, adapter-depth decisions, and final sign-off still stay with named humans.",
     artifactsTitle: "Artifacts and ready gates",
@@ -1493,26 +1900,54 @@ const TECHNICAL_PAGE = {
     reviewLead: "Stage 7 is still human-owned, but it is no longer an unstructured email or ticket comment.",
     reviewChecksTitle: "What the handoff gate enforces",
     readinessTitle: "Readiness self-assessment",
-    readinessLead: "Use this before choosing self-serve, Launch Pack, or enterprise support.",
+    readinessLead: "Use this before choosing self-serve, paid help, or enterprise support.",
     readinessScoreTitle: "How to read the score",
     maturityTitle: "Evidence maturity model",
     maturityLead: "This is the fastest way to explain where a team is now and what level the next engagement should target.",
     triggersTitle: "When evidence should be re-run",
     supportTitle: "What each engagement layer actually covers",
     failureTitle: "Common failure modes",
-    landingTitle: "Need the technology page?",
+    landingTitle: "Need the technical overview?",
     landingBody:
       "Open the architecture, verification model, artifact contracts, and trust boundary behind the evidence engine.",
-    landingButton: "Open technology page",
+    landingButton: "Open technical overview",
+    faq: [
+      [
+        "What should a technical team verify before integrating?",
+        "Check the reviewer dossier, the explicit verify and review gates, the split between machine-generated evidence and operator-owned completion, and the product boundary.",
+      ],
+      [
+        "Can we test this on our own agent before deeper setup?",
+        "Yes. The EU starter guide is the shortest honest path from the public draft flow to a lightweight EU starter package on your own running adapter.",
+      ],
+      [
+        "Do we need to read filenames and raw JSON first?",
+        "No. Start with the reviewer dossier and the product-facing fit checks on this page. The filenames, commands, and deeper technical docs are there once you decide the product deserves installation time.",
+      ],
+      [
+        "Does the toolkit automate legal approval?",
+        "No. It automates evidence operations and packaging. Legal classification, residual-risk judgment, and final sign-off remain human-owned.",
+      ],
+    ],
   },
   de: {
-    title: "Technologie und Nachweisarchitektur | EU AI Evidence Builder",
+    title: "Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen | EU AI Evidence Builder",
     description:
-      "Architektur, Verifikationsmodell, Artefakt-Vertraege und Vertrauensgrenze des EU AI Evidence Builder ansehen.",
-    eyebrow: "Technologie",
-    headline: "Wie die Nachweis-Engine funktioniert",
+      "Architektur, Verifikation und Vertrauensmodell fuer CTOs und Engineering-Leads, die entscheiden muessen, ob der EU-Nachweis-Workflow technische Zeit wert ist.",
+    eyebrow: "Technischer Ueberblick",
+    headline: "Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen",
     intro:
-      "Hier geht es um Architektur, Verifikationsmodell, Artefakt-Vertraege, Vertrauensgrenze und das Modell sektoraler Schichten hinter dem Nachweispaket.",
+      "Fuer CTOs und Engineering-Leads, die entscheiden muessen, ob das Thema jetzt technische Zeit wert ist: was bereits real existiert, wie Sie den Fit am eigenen Agenten pruefen, was die Engine tatsaechlich leistet, wo menschliche Freigabe beginnt und dass der EU-Standardpfad hier die Provider-Seite eines Hochrisiko-KI-Systems adressiert.",
+    inspectTitle: "Was man zuerst pruefen sollte",
+    inspectLead:
+      "Vor jeder Installation sollte ein CTO konkrete Ausgaben, explizite Kontrollpunkte, die Trennung zwischen Maschinen-Nachweisen und menschlicher Vervollstaendigung sowie die minimalen Voraussetzungen fuer einen ehrlichen ersten Lauf sehen koennen.",
+    inspectCards: [
+      ["Rollen-Scope", "Der Standardpfad fuer EU-Inhalte auf dieser Website ist der provider-seitige Pfad fuer Hochrisiko-KI-Systeme. Andere Rollen unterscheiden sich. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, ist dies der richtige Pfad."],
+      ["Reale Ausgaben", "Das Produkt endet in portablem Report, Maschinenvertrag, Manifest, Aufbewahrungskontrollen, Review Record und optionalem Behoerdenpaket."],
+      ["Reviewer-taugliche EU-Ausgaben", "Der EU-Pfad umfasst Reviewer-PDF, Reviewer-HTML, Reviewer-Markdown und Anhangs-orientierte Dossier-Ausgaben, die auf dasselbe Nachweispaket zurueckzeigen."],
+      ["Harte Kontrollpunkte und im Quellcode sichtbarer Pfad", "Packaging, Verify, Review und Authority Packaging haben explizite Checks, und die dazugehoerigen Befehle, Schemas und Artefakte sind im Repository sichtbar und in der Live-Proof-Oberflaeche wiederzufinden."],
+      ["Was Ihr Team bereits haben muss", "Ein erreichbarer Adapter, eine klare Release-Grenze, erste Cases und benannte Owner fuer Schwellen und Freigabe reichen aus, um den Fit vor tieferer Integration ehrlich zu pruefen."],
+    ],
     credibilityEyebrow: "Kernprimitive",
     credibilityTitle: "Kernprimitive der Technologie",
     credibilityLead:
@@ -1541,14 +1976,14 @@ const TECHNICAL_PAGE = {
     ],
     summaryTitle: "Was diese Technologie tatsaechlich leistet",
     summaryLead:
-      "Das Produkt macht aus vergleichbaren Runs ein verifiziertes Nachweispaket, fuegt Pruef- und Uebergabe-Struktur hinzu, erlaubt sektorielle Schichten ueber demselben Kern und laesst rechtliche sowie Policy-Verantwortung ausserhalb der Automatisierung.",
+      "Das Produkt macht aus vergleichbaren Runs reviewer-taugliche EU-Nachweise, fuegt Pruef- und Uebergabe-Struktur hinzu, erlaubt sektorielle Schichten ueber demselben Kern und laesst rechtliche sowie Policy-Verantwortung ausserhalb der Automatisierung.",
     summaryColumns: [
       {
         title: "Nachweiserzeugung",
         points: [
           "Vergleichbare Baseline- und New-Runs werden zu einem portablen Nachweispaket",
-          "Das Paket enthaelt Report, Maschinenvertrag, Manifest und Aufbewahrungskontrollen",
-          "EU-Dossier-nahe Exporte haengen an denselben verifizierten Runtime-Nachweisen",
+          "Das Paket enthaelt Report, Maschinenvertrag, Manifest, Reviewer-PDF/HTML/Markdown und Aufbewahrungskontrollen",
+          "EU-Dossier-nahe Ausgaben haengen an denselben verifizierten Runtime-Nachweisen",
         ],
       },
       {
@@ -1563,7 +1998,7 @@ const TECHNICAL_PAGE = {
         title: "Pruefung und Uebergabe",
         points: [
           "Das Paket kann zwischen Engineering, Governance, Rechtsberatung und behoerdlicher Pruefung uebergeben werden",
-          "Pruefprotokolle, Uebergabe-Notizen und Behoerdenpakete sind Teil der Produktoberflaeche",
+          "Pruefprotokolle, Uebergabe-Notizen, Reviewer-Ausgaben und Behoerdenpakete sind Teil der Produktoberflaeche",
           "Ziel ist ein Paket, das ohne interne Dashboards oder unsignierte Dateitausche geprueft werden kann",
         ],
       },
@@ -1576,32 +2011,38 @@ const TECHNICAL_PAGE = {
         ],
       },
     ],
-    compactWorkflowTitle: "Wie die Technologie funktioniert",
+    compactWorkflowTitle: "Was Ihr Team liefert und was die Engine danach uebernimmt",
     compactWorkflowLead:
-      "Auf hoher Ebene verbindet der Stack Laufzeit-Nachweise, strikte Verifikation, Manifest-Authentizitaet bei Bedarf, Pruefprotokolle und Uebergabe-Paketierung zu einem bei Ihnen gehosteten Workflow. Sektorielle Case-Bibliotheken, Scanner und vertikale Exporte koennen denselben Kern erweitern, solange weiter ein tool-nutzender Agent geprueft wird.",
+      "Die Mitte der Entscheidung sollte praktisch bleiben. Ihr Team bringt einen erreichbaren Adapter, eine echte Aenderungsgrenze, erste Cases und benannte Owner mit. Von dort uebernimmt die Engine vergleichbare Runs, verifiziertes Packaging und reviewer-taugliche EU-Ausgaben auf demselben Bundle.",
     compactWorkflowSteps: [
-      "Der Agent wird ueber gepruefte Adapter und vergleichbare Baseline/New-Runs ausgefuehrt.",
-      "Der Evaluator paketiert ein portables Nachweispaket und verifiziert Integritaet und Struktur.",
-      "EU-Dossier-Exporte, Pruefprotokolle und Aufbewahrungskontrollen haengen an demselben verifizierten Paket.",
-      "Bei Bedarf kann daraus ein scoped Authority-Paket erzeugt werden.",
+      "Ihr Team stellt einen erreichbaren Adapter und eine Baseline/New-Grenze bereit, die wirklich pruefenswert ist.",
+      "Ihr Team liefert erste Cases, Intended-Use-Kontext und benannte Owner fuer Schwellen und Freigabe.",
+      "Die Engine fuehrt vergleichbare Runs aus, paketiert das Bundle und verifiziert Integritaet und Struktur.",
+      "Die Engine erzeugt reviewer-taugliche EU-Ausgaben aus demselben verifizierten Bundle; Rechtsurteil und finale Freigabe bleiben beim Team.",
     ],
     commandsTitle: "Befehlsoberflaeche",
-    commandsLead: "Diese Befehle entsprechen echten Schritten fuer Paketierung, Signatur, Verifikation, Pruefung und Behoerdenpfad im Live-Produkt.",
+    commandsLead:
+      "Wenn der Fit real ist, sind das die echten Befehle hinter Packaging, Signatur, Verifikation, Review und Behoerdenpfad.",
     artifactsSummaryTitle: "Was bei gesundem Workflow existieren muss",
     artifactsSummaryLead: "Technische Teams sollten das Produkt an dauerhaften Artefakten und expliziten Verifikationsschritten messen, nicht nur an Screenshots oder Narrativ.",
     screenshotTitle: "Wie das verifizierte Paket aussieht",
     screenshotBody: "So sollte das Paket aussehen, bevor Governance oder Rechtsberatung ueberhaupt in die Pruefung einsteigen.",
-    extendedTitle: "Mehr technische Details noetig?",
+    extendedTitle: "Wenn der Fit real ist, oeffnen Sie das Repository",
     extendedBody:
-      "Vertiefungen, Readiness-Bewertung, Trigger fuer neue Laeufe, Support-Umfang und laengere technische Notizen liegen auf der Holding-Seite.",
+      "Sobald Ausgaben, Kontrollpunkte und der Pfad fuer den ersten Lauf echt wirken, ist das Repository der richtige naechste Schritt fuer Adapter, Schemas, Befehle und Implementierungsdetails.",
     extendedButton: "Erweiterte Notizen oeffnen",
-    opsButton: "Operational Model öffnen",
+    opsButton: "Self-Hosted-Leitfaden öffnen",
     proofButton: "Live-Nachweise oeffnen",
     docsButton: "OSS-Dokumentation oeffnen",
-    quickstartTitle: "Schnellster Weg zum Test am eigenen Agenten",
+    repoButton: "GitHub-Repository oeffnen",
+    quickstartJumpButton: "Ersten Lauf am eigenen Agenten sehen",
+    reviewerButton: "Reviewer-Demo oeffnen",
+    demoAgentButton: "Demo-Agent-Report oeffnen",
+    allDocsButton: "Alle Demo-Dokumente oeffnen",
+    quickstartTitle: "Schnellster ehrlicher erster Lauf",
     quickstartLead:
-      "Wenn der Adapter bereits laeuft, liefert der Schnellstart ein portables Starter-Paket, ohne so zu tun, als kenne es schon Ihren echten Qualifikationsrahmen.",
-    quickstartCommand: "npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud",
+      "Wenn Ihr Adapter bereits laeuft, nutzen Sie den Schnellstart, um vor tieferer Integrationsarbeit ein echtes erstes Nachweispaket auf Ihrer eigenen Infrastruktur zu erzeugen.",
+    quickstartCommand: "",
     quickstartColumns: [
       {
         title: "Was es beweist",
@@ -1620,12 +2061,12 @@ const TECHNICAL_PAGE = {
         ],
       },
     ],
-    quickstartButton: "Leitfaden zum Schnellstart oeffnen",
+    quickstartButton: "EU-Starter-Leitfaden auf GitHub oeffnen",
     planningTitle: "Zeit bis zum ersten Nachweis",
     planningNote: "Planungswerte, keine harten Lieferzusagen.",
     estimates: [
       ["Erstsetup im Selbstbetrieb", "3-4 Wochen"],
-      ["Startpaket bis zum ersten verifizierten Paket", "5 Arbeitstage"],
+      ["Bezahlte Hilfe bis zum ersten verifizierten Paket", "5 Arbeitstage"],
       ["Wiederkehrende Inbetriebnahme nach Onboarding", "1-2 Tage"],
       ["Monatlicher Support", "Nur betreute Agenten"],
     ],
@@ -1633,7 +2074,7 @@ const TECHNICAL_PAGE = {
     intakeTitle: "Strukturierte Intake-Schicht",
     intakeLead: "Den Upstream-Vertrag automatisieren, bevor Cases und Adapter-Arbeit starten.",
     intakeHumanTitle: "Was menschlich gefuehrt bleibt",
-    boundaryTitle: "Automationsgrenze",
+    boundaryTitle: "Was weiterhin menschlich gefuehrt bleibt",
     boundaryBody:
       "Der staerkste Teil des Produkts ist der Weg von vorbereiteten Eingaben zu einem verifizierten Nachweispaket. Urteile ueber Systemgrenze, Leitlinien-Schwellen, Adapter-Tiefe und finale Freigabe bleiben bei benannten Menschen.",
     artifactsTitle: "Artefakte und Freigabe-Kontrollpunkte",
@@ -1642,26 +2083,54 @@ const TECHNICAL_PAGE = {
     reviewLead: "Stage 7 bleibt menschlich gefuehrt, ist aber nicht mehr nur eine unstrukturierte Mail oder Ticket-Notiz.",
     reviewChecksTitle: "Was der Uebergabe-Kontrollpunkt erzwingt",
     readinessTitle: "Readiness-Selbsteinschaetzung",
-    readinessLead: "Nutzen Sie diese Liste vor Selbstbetrieb, Startpaket oder monatlichem Support.",
+    readinessLead: "Nutzen Sie diese Liste vor Selbstbetrieb, bezahlter Hilfe oder Enterprise-Support.",
     readinessScoreTitle: "So lesen Sie den Score",
     maturityTitle: "Nachweis-Reifegradmodell",
     maturityLead: "Damit laesst sich der aktuelle Reifegrad eines Teams sehr schnell einordnen.",
     triggersTitle: "Wann Nachweise neu erzeugt werden sollten",
     supportTitle: "Was die einzelnen Engagement-Layer wirklich abdecken",
     failureTitle: "Haeufige Ausfallmuster",
-    landingTitle: "Brauchen Sie die Technologie-Seite?",
+    landingTitle: "Brauchen Sie den technischen Ueberblick?",
     landingBody:
       "Oeffnen Sie Architektur, Verifikationsmodell, Artefakt-Vertraege und Vertrauensgrenze hinter der Nachweis-Engine.",
-    landingButton: "Technologie-Seite oeffnen",
+    landingButton: "Technischen Ueberblick oeffnen",
+    faq: [
+      [
+        "Was sollte ein technisches Team vor der Integration pruefen?",
+        "Pruefen Sie das Reviewer-Dossier, die expliziten Verify- und Review-Kontrollpunkte, die Trennung zwischen Maschinen-Nachweisen und operator-eigener Vervollstaendigung sowie die Produktgrenze.",
+      ],
+      [
+        "Koennen wir das auf unserem eigenen Agenten pruefen, bevor wir tiefer einsteigen?",
+        "Ja. Der Schnellstart ist der kuerzeste ehrliche Weg von der Live-Demo zu Ihrem laufenden Adapter. Er zeigt, ob das Toolkit in Ihrer Umgebung ein Starter-Nachweispaket ausfuehren, paketieren und verifizieren kann.",
+      ],
+      [
+        "Muss ich mit Dateinamen und rohem JSON anfangen?",
+        "Nein. Starten Sie mit dem Reviewer-Dossier und den produktnahen Fit-Fragen auf dieser Seite. Dateinamen, Befehle und tiefere technische Dokumente sind erst der naechste Schritt, wenn sich die Installation lohnt.",
+      ],
+      [
+        "Automatisiert das Toolkit rechtliche Freigabe?",
+        "Nein. Es automatisiert Nachweisbetrieb und Paketierung. Rechtsklassifizierung, Rest-Risiko-Urteil und finale Freigabe bleiben menschlich gefuehrt.",
+      ],
+    ],
   },
   fr: {
-    title: "Technologie et architecture de preuve | EU AI Evidence Builder",
+    title: "Vue technique : des runs agent aux preuves UE lisibles par un evaluateur | EU AI Evidence Builder",
     description:
-      "Architecture, modele de verification, contrats d'artefacts et frontiere de confiance du EU AI Evidence Builder.",
-    eyebrow: "Technologie",
-    headline: "Comment fonctionne le moteur de preuve",
+      "Architecture, verification et modele de confiance pour les CTO et engineering leads qui doivent decider si le workflow de preuve EU merite du temps technique.",
+    eyebrow: "Vue technique",
+    headline: "Vue technique : des runs agent aux preuves UE lisibles par un evaluateur",
     intro:
-      "Inspectez l'architecture, le modele de verification, les contrats d'artefacts, la frontiere de confiance et la logique de couches sectorielles derriere le dossier de preuve.",
+      "Pour les CTO et engineering leads qui doivent decider si cela merite du temps technique maintenant : ce qui existe deja, comment tester l'adequation sur votre propre agent, ce que l'engine fait reellement, ou commence encore la validation humaine, et le fait que le parcours UE par defaut ici vise la partie fournisseur d'un systeme d'IA a haut risque.",
+    inspectTitle: "Ce qu'il faut verifier d'abord",
+    inspectLead:
+      "Avant toute installation, un CTO doit pouvoir voir des sorties concretes, des verrous explicites, la separation entre preuve machine et completion humaine, ainsi que le minimum que votre equipe doit deja avoir pour un premier run honnete.",
+    inspectCards: [
+      ["Perimetre de role", "Le parcours UE par defaut sur ce site est le parcours cote fournisseur pour les systemes d'IA a haut risque. Les autres roles sont differents. Si l'article 25 fait de votre organisation le fournisseur, c'est le bon parcours."],
+      ["Sorties reelles", "Le produit se termine par un rapport portable, un contrat machine, un manifest, des controles de retention, une trace de revue et un package autorite en option."],
+      ["Sorties UE lisibles par un evaluateur", "Le chemin UE comprend reviewer PDF, reviewer HTML, reviewer Markdown et des sorties dossier alignees sur les annexes, toutes reliees au meme bundle de preuve."],
+      ["Verrous stricts et chemin visible dans le code source", "Packaging, verify, review et authority packaging ont des controles explicites, et les commandes, schemas et artefacts associes sont visibles dans le depot et refletes dans la preuve live."],
+      ["Ce que votre equipe doit deja avoir", "Un adapter joignable, une frontiere de release claire, des cas de depart et des responsables nommes pour les seuils et la validation suffisent pour tester l'adequation honnetement avant une integration plus profonde."],
+    ],
     credibilityEyebrow: "Primitives centrales",
     credibilityTitle: "Primitives techniques centrales",
     credibilityLead:
@@ -1690,14 +2159,14 @@ const TECHNICAL_PAGE = {
     ],
     summaryTitle: "Ce que cette technologie fait reellement",
     summaryLead:
-      "Le produit transforme des runs comparables en dossier de preuve verifie, ajoute une structure de revue et de transmission, permet des couches sectorielles au-dessus du meme noyau, et laisse la responsabilite legale et de politique hors de la couche d'automatisation.",
+      "Le produit transforme des runs comparables en preuves UE lisibles par un evaluateur, ajoute une structure de revue et de transmission, permet des couches sectorielles au-dessus du meme noyau, et laisse la responsabilite legale et de politique hors de la couche d'automatisation.",
     summaryColumns: [
       {
         title: "Generation de preuve",
         points: [
           "Des runs baseline/new comparables deviennent un dossier de preuve portable",
-          "Le dossier inclut rapport, contrat machine, manifest et controles de retention",
-          "Les exports dossier UE s'attachent aux memes preuves d'execution verifiees",
+          "Le dossier inclut rapport, contrat machine, manifest, reviewer PDF/HTML/Markdown et controles de retention",
+          "Les sorties dossier UE s'attachent aux memes preuves d'execution verifiees",
         ],
       },
       {
@@ -1712,7 +2181,7 @@ const TECHNICAL_PAGE = {
         title: "Revue et transmission",
         points: [
           "Le dossier peut circuler entre ingenierie, gouvernance, conseil juridique et revue tournee vers l'autorite",
-          "Les traces de revue, notes de transmission et dossiers pour autorite font partie du produit",
+          "Les traces de revue, notes de transmission, sorties reviewer et dossiers pour autorite font partie du produit",
           "Le but est un dossier qu'un autre evaluateur peut inspecter sans tableaux de bord internes ni echanges de fichiers non signes",
         ],
       },
@@ -1725,32 +2194,38 @@ const TECHNICAL_PAGE = {
         ],
       },
     ],
-    compactWorkflowTitle: "Comment la technologie fonctionne",
+    compactWorkflowTitle: "Ce que votre equipe fournit et ce que l'engine fait ensuite",
     compactWorkflowLead:
-      "A haut niveau, le systeme relie les preuves d'execution, la verification stricte, l'authenticite par manifeste signe quand il le faut, les traces de revue et la mise en forme de transmission dans un workflow heberge chez vous. Des bibliotheques de cas, scanners et sorties verticales sectorielles peuvent etendre ce noyau tant que l'objet evalue reste un agent utilisant des outils.",
+      "Le milieu de la decision doit rester pratique. Votre equipe apporte un adapter joignable, une vraie frontiere de changement, des cas de depart et des responsables nommes. A partir de la, l'engine prend en charge les runs comparables, le packaging verifie et les sorties UE lisibles par un evaluateur sur le meme bundle.",
     compactWorkflowSteps: [
-      "L'agent est exerce via des adapters controles et des runs baseline/new comparables.",
-      "L'evaluator assemble un dossier de preuve portable et verifie son integrite et sa structure.",
-      "Les exports dossier UE, traces de revue et controles de retention s'attachent au meme dossier verifie.",
-      "Si necessaire, un dossier cible pour une autorite peut etre produit a partir du rapport verifie.",
+      "Votre equipe expose un adapter joignable et une frontiere baseline/new qui vaut vraiment la peine d'etre revue.",
+      "Votre equipe fournit des cas de depart, le contexte d'usage prevu et des responsables nommes pour les seuils et la validation.",
+      "L'engine execute des runs comparables, package le bundle et verifie l'integrite et la structure.",
+      "L'engine genere les sorties UE lisibles par un evaluateur a partir du meme bundle verifie; le jugement legal et la validation finale restent a votre equipe.",
     ],
     commandsTitle: "Surface de commande",
-    commandsLead: "Ces commandes correspondent aux vraies etapes de mise en forme, signature, verification, revue et preparation pour une autorite dans le produit live.",
+    commandsLead:
+      "Si l'adequation est reelle, ce sont les vraies commandes derriere le packaging, la signature, la verification, la revue et la preparation pour une autorite.",
     artifactsSummaryTitle: "Ce qui doit exister si le workflow est sain",
     artifactsSummaryLead: "Les equipes techniques doivent juger le produit a ses artefacts durables et a ses verrous explicites, pas seulement a des captures ou a du narratif.",
     screenshotTitle: "A quoi ressemble le dossier verifie",
     screenshotBody: "C'est le type de dossier que le chemin technique doit produire avant qu'une revue de gouvernance ou de conseil juridique commence.",
-    extendedTitle: "Besoin de plus de details techniques ?",
+    extendedTitle: "Si l'adequation est reelle, ouvrez le depot",
     extendedBody:
-      "Les analyses detaillees, la mesure de readiness, les declencheurs de nouveau run, le perimetre du support et les notes techniques plus longues sont disponibles sur la holding page.",
+      "Une fois les sorties, les verrous et le chemin du premier run juges credibles, le depot devient la bonne etape suivante pour les adapters, schemas, commandes et details d'implementation.",
     extendedButton: "Ouvrir les notes detaillees",
-    opsButton: "Ouvrir l'operating model",
+    opsButton: "Ouvrir le guide self-hosted",
     proofButton: "Ouvrir la preuve live",
     docsButton: "Ouvrir les docs OSS",
-    quickstartTitle: "La facon la plus rapide de tester cela sur votre propre agent",
+    repoButton: "Ouvrir le depot GitHub",
+    quickstartJumpButton: "Voir le premier run sur votre propre agent",
+    reviewerButton: "Ouvrir la demo reviewer",
+    demoAgentButton: "Ouvrir le rapport de demo agent",
+    allDocsButton: "Ouvrir tous les documents de demo",
+    quickstartTitle: "Chemin le plus rapide vers un premier run honnete",
     quickstartLead:
-      "Si l'adapter tourne deja, le demarrage rapide produit un premier dossier portable sans pretendre comprendre deja votre vrai perimetre de qualification.",
-    quickstartCommand: "npm run quickstart -- --baseUrl http://localhost:8787 --systemType fraud",
+      "Si votre adapter tourne deja, utilisez le demarrage rapide pour produire un vrai premier dossier de preuve sur votre propre infrastructure avant toute integration plus lourde.",
+    quickstartCommand: "",
     quickstartColumns: [
       {
         title: "Ce que cela prouve",
@@ -1769,7 +2244,7 @@ const TECHNICAL_PAGE = {
         ],
       },
     ],
-    quickstartButton: "Ouvrir le guide de demarrage rapide",
+    quickstartButton: "Ouvrir le guide du starter UE sur GitHub",
     planningTitle: "Temps jusqu'a la premiere preuve",
     planningNote: "Estimations de planification, pas garanties de livraison.",
     estimates: [
@@ -1782,7 +2257,7 @@ const TECHNICAL_PAGE = {
     intakeTitle: "Couche d'intake structuree",
     intakeLead: "Automatiser le contrat amont avant la creation des cas et le travail d'adapter.",
     intakeHumanTitle: "Ce qui reste humain",
-    boundaryTitle: "Frontiere d'automatisation",
+    boundaryTitle: "Ce qui reste humain",
     boundaryBody:
       "La partie la plus forte du produit est le chemin entre des entrees preparees et un dossier de preuve verifie. Le jugement sur le perimetre, les seuils de politique, la profondeur de l'adapter et la validation finale restent humains.",
     artifactsTitle: "Artefacts et verrous de disponibilite",
@@ -1791,17 +2266,35 @@ const TECHNICAL_PAGE = {
     reviewLead: "L'etape 7 reste humaine, mais ce n'est plus un simple email ou commentaire de ticket non structure.",
     reviewChecksTitle: "Ce que le verrou de transmission impose",
     readinessTitle: "Auto-evaluation de readiness",
-    readinessLead: "Utilisez cette liste avant de choisir l'autonomie, le pack de lancement ou le support enterprise.",
+    readinessLead: "Utilisez cette liste avant de choisir l'autonomie, l'aide payante ou le support enterprise.",
     readinessScoreTitle: "Comment lire le score",
     maturityTitle: "Modele de maturite de preuve",
     maturityLead: "C'est la facon la plus rapide de situer le niveau de maturite actuel d'une equipe.",
     triggersTitle: "Quand il faut regenerer la preuve",
     supportTitle: "Ce que couvre vraiment chaque couche d'engagement",
     failureTitle: "Modes de defaillance frequents",
-    landingTitle: "Besoin de la page technologie ?",
+    landingTitle: "Besoin de la vue technique ?",
     landingBody:
       "Ouvrez l'architecture, le modele de verification, les contrats d'artefacts et la frontiere de confiance derriere le moteur de preuve.",
-    landingButton: "Ouvrir la page technologie",
+    landingButton: "Ouvrir la vue technique",
+    faq: [
+      [
+        "Que doit verifier une equipe technique avant integration ?",
+        "Verifier le dossier reviewer, les verrous explicites de verification et de revue, la separation entre preuve machine et completion restee a l'operateur, ainsi que la frontiere du produit.",
+      ],
+      [
+        "Peut-on tester cela sur notre propre agent avant d'aller plus loin ?",
+        "Oui. Le demarrage rapide est le chemin honnete le plus court entre la demo live et votre adapter deja en marche. Il montre si le toolkit peut executer, packager et verifier un premier dossier de preuve dans votre environnement.",
+      ],
+      [
+        "Faut-il commencer par des noms de fichiers et du JSON brut ?",
+        "Non. Commencez par le dossier reviewer et les questions de fit produit sur cette page. Les noms de fichiers, les commandes et la documentation technique plus profonde viennent ensuite, une fois que le produit merite du temps d'installation.",
+      ],
+      [
+        "Le toolkit automatise-t-il la validation juridique ?",
+        "Non. Il automatise les operations de preuve et le packaging. La classification legale, le jugement sur le risque residuel et la validation finale restent humains.",
+      ],
+    ],
   },
 };
 
@@ -2003,34 +2496,44 @@ const TECHNICAL_CASES = {
 const PLANS = [
   {
     key: "starter",
-    name: { en: "FREE OSS", de: "FREE OSS", fr: "FREE OSS" },
+    name: { en: "FREE", de: "KOSTENLOS", fr: "GRATUIT" },
+    heading: {
+      en: "Free self-serve EU AI Act path",
+      de: "Kostenloser EU-KI-Selbstbedienungsweg",
+      fr: "Parcours EU AI Act gratuit en autonomie",
+    },
     price: { en: "Free", de: "Kostenlos", fr: "Gratuit" },
     featured: false,
     items: {
-      en: ["Unlimited self-serve evaluation", "Quickstart + OSS docs", "Builder + templates", "Live demos", "No setup help included"],
+      en: ["Unlimited self-serve evaluation", "EU starter + open-source docs", "Builder + templates", "Live demos", "No setup help included"],
       de: ["Unbegrenzte Selbstbetrieb-Evaluierung", "Schnellstart + OSS-Dokumentation", "Dokumentations-Assistent + Vorlagen", "Live-Demos", "Keine Setup-Hilfe enthalten"],
       fr: ["Evaluation illimitee en autonomie", "Demarrage rapide + documentation OSS", "Assistant de documentation + modeles", "Demos live", "Sans aide au setup"],
     },
     note: {
-      en: "Use the OSS repo on your own. No commercial support scope is attached.",
+      en: "Use the open-source repo on your own. No commercial support is included.",
       de: "Sie nutzen das OSS-Repo selbst. Kein kommerzieller Support-Scope ist enthalten.",
       fr: "Vous utilisez seul le depot OSS. Aucun perimetre de support commercial n'est inclus.",
     },
-    cta: { en: "Open OSS Docs", de: "OSS-Dokumentation oeffnen", fr: "Ouvrir la documentation OSS" },
-    href: "docs",
+    cta: { en: "Open GitHub repo", de: "GitHub-Repo oeffnen", fr: "Ouvrir le depot GitHub" },
+    href: GITHUB_REPO,
   },
   {
     key: "launch-pack",
-    name: { en: "LAUNCH PACK", de: "STARTPAKET", fr: "PACK DE LANCEMENT" },
-    price: { en: "EUR499 one-time", de: "EUR499 einmalig", fr: "EUR499 en une fois" },
+    name: { en: "PAID HELP", de: "BEZAHLTE HILFE", fr: "AIDE PAYANTE" },
+    heading: {
+      en: "Paid help for one real system",
+      de: "Bezahlte Hilfe fuer ein echtes System",
+      fr: "Aide payante pour un systeme reel",
+    },
+    price: { en: "EUR499", de: "EUR499", fr: "EUR499" },
     featured: true,
     items: {
       en: [
         "1 supported agent",
         "Adapter fit check",
-        "Help to reach the first real evidence pack",
+        "Help to reach the first real package",
         "Short results review + next-step handoff",
-        "Built for activation, not for a long consulting engagement",
+        "Focused help for the first package",
       ],
       de: [
         "1 unterstuetzter Agent",
@@ -2048,11 +2551,11 @@ const PLANS = [
       ],
     },
     note: {
-      en: "One-time onboarding to first value on your own agent. This is the bridge between trying the repo and deciding to run the workflow continuously.",
-      de: "Einmaliges Onboarding bis zum ersten echten Wert auf Ihrem eigenen Agenten. Das ist die Bruecke zwischen Repo ausprobieren und kontinuierlichem Einsatz.",
-      fr: "Onboarding ponctuel jusqu'a la premiere vraie valeur sur votre propre agent. C'est le pont entre tester le depot et utiliser le workflow en continu.",
+      en: "Use this when your team needs hands-on help getting to the first real package on its own system.",
+      de: "Nutzen Sie das, wenn Ihr Team praktische Hilfe bis zum ersten echten Paket auf dem eigenen System braucht.",
+      fr: "Utilisez-le quand votre equipe a besoin d'aide concrete pour obtenir le premier vrai paquet sur son propre systeme.",
     },
-    cta: { en: "Book Launch Pack", de: "Startpaket buchen", fr: "Reserver le pack de lancement" },
+    cta: { en: "Contact us", de: "Kontakt aufnehmen", fr: "Nous contacter" },
     href: "contact",
   },
   {
@@ -2138,36 +2641,41 @@ const PLANS = [
   {
     key: "enterprise",
     name: { en: "ENTERPRISE", de: "ENTERPRISE", fr: "ENTERPRISE" },
+    heading: {
+      en: "Enterprise support for broader rollout",
+      de: "Enterprise-Support fuer breiteren Rollout",
+      fr: "Support enterprise pour un deploiement plus large",
+    },
     price: { en: "Custom", de: "Custom", fr: "Custom" },
     featured: false,
     items: {
-      en: ["Multi-system implementation", "Conformity / external review support", "Dedicated export formatting", "Custom scope and SLA", "For teams whose support needs exceed Team or Studio"],
+      en: ["Multi-system support", "Formal review support", "Dedicated export formatting", "Custom scope and SLA", "For broader or formal support needs"],
       de: [
         "Multi-System-Implementierung",
         "Unterstuetzung fuer Konformitaet / externe Pruefungen",
         "Dediziertes Exportformat",
         "Sonderumfang und SLA",
-        "Fuer Teams, deren Supportbedarf ueber Team oder Studio hinausgeht",
+        "Fuer breitere oder formale Support-Anforderungen",
       ],
       fr: [
         "Implementation multi-systeme",
         "Support conformite / revue externe",
         "Formatage d'export dedie",
         "Perimetre sur mesure et SLA",
-        "Pour les equipes dont le besoin de support depasse Team ou Studio",
+        "Pour des besoins de support plus larges ou plus formels",
       ],
     },
     note: {
-      en: "Use Enterprise when support has to survive procurement, external review, conformity pressure, or a broader multi-system rollout.",
+      en: "Use this when support needs to cover multiple systems, multiple teams, or formal procurement and review.",
       de: "Nutzen Sie Enterprise, wenn der Support Beschaffung, externe Pruefungen, Konformitaetsdruck oder einen breiteren Multi-System-Rollout abdecken muss.",
       fr: "Passez a Enterprise quand le support doit tenir face aux achats, a la revue externe, a la pression de conformite ou a un deploiement multi-systeme plus large.",
     },
-    cta: { en: "Scope Enterprise", de: "Enterprise abstimmen", fr: "Definir Enterprise" },
+    cta: { en: "Contact us", de: "Kontakt aufnehmen", fr: "Nous contacter" },
     href: "contact",
   },
 ];
 
-const PRICING_PREVIEW_ORDER = ["starter", "launch-pack", "team", "studio", "enterprise"];
+const PRICING_PREVIEW_ORDER = ["starter", "launch-pack", "enterprise"];
 const SUBSCRIPTION_PLAN_ORDER = ["starter", "launch-pack", "team", "studio", "enterprise"];
 
 function localizePlanValue(value, locale) {
@@ -2185,20 +2693,25 @@ function renderPlanCard(plan, locale, href, { fade = true } = {}) {
   if (fade) classes.push("fade-up");
   const buttonClass = plan.featured ? "button" : "button-ghost";
   const note = plan.note ? localizePlanValue(plan.note, locale) : "";
+  const heading = plan.heading ? localizePlanValue(plan.heading, locale) : "";
+  const hrefValue = typeof plan.href === "string" && /^https?:\/\//.test(plan.href) ? plan.href : href(plan.href);
+  const externalAttrs =
+    typeof plan.href === "string" && /^https?:\/\//.test(plan.href) ? ' target="_blank" rel="noreferrer"' : "";
 
   return `
     <article class="${classes.join(" ")}">
       <div>
         <p class="eyebrow">${escapeHtml(localizePlanValue(plan.name, locale))}</p>
+        ${heading ? `<h3>${escapeHtml(heading)}</h3>` : ""}
         <p class="price">${escapeHtml(localizePlanValue(plan.price, locale))}</p>
         ${note ? `<p class="muted">${escapeHtml(note)}</p>` : ""}
       </div>
       <ul class="pricing-list">
         ${localizePlanValue(plan.items, locale)
-          .map((item) => `<li>${escapeHtml(item)}</li>`)
-          .join("")}
+      .map((item) => `<li>${escapeHtml(item)}</li>`)
+      .join("")}
       </ul>
-      <a class="${buttonClass}" href="${href(plan.href)}" data-track-event="pricing_cta">${escapeHtml(
+      <a class="${buttonClass}" href="${hrefValue}"${externalAttrs} data-track-event="pricing_cta">${escapeHtml(
         localizePlanValue(plan.cta, locale)
       )}</a>
     </article>
@@ -2249,7 +2762,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "Who supplies what",
         title: "What Article 9 expects, what the toolkit can add, and what your team still owns",
         note:
-          "Without connecting your agent, the toolkit can only draft the register from the EU package you already generated. After adapter integration, it can also add entries from real runs, review outputs, and monitoring history.",
+          "Without connecting your agent, the toolkit can only draft the register from the EU package you already generated. After adapter integration, it can also add entries from real runs, linked article outputs, and monitoring history.",
         headers: [
           "Article 9 expects",
           "Toolkit with bundle only",
@@ -2260,7 +2773,7 @@ const TEMPLATE_CONTENT = {
           [
             "A maintained risk register",
             "Creates a draft risk-register file and basic placeholders from the EU bundle.",
-            "Adds evidence-linked entries from runs, review outputs, and monitoring history.",
+            "Adds evidence-linked entries from runs, linked article outputs, and monitoring history.",
             "Add domain risks the toolkit cannot observe and decide which ones belong in the final register.",
           ],
           [
@@ -2272,7 +2785,7 @@ const TEMPLATE_CONTENT = {
           [
             "Controls and follow-up",
             "Can point to unresolved gaps already present in the package.",
-            "Can link a risk entry to review outcomes, scanner constats, and post-release follow-up.",
+            "Can link a risk entry to monitoring signals, scanner constats, and follow-up actions.",
             "Write the control, the control owner, the review date, and the next action.",
           ],
           [
@@ -2365,7 +2878,7 @@ const TEMPLATE_CONTENT = {
         ["Risk inventory", "List concrete harms, failure modes, and affected users.", "Per-case risk level, gate recommendation, scanner results."],
         ["Mitigation controls", "Explain which controls reduce the highest risks.", "Security constats, human-approval path, blocked actions."],
         ["Validation cadence", "Show how often the risk process is tested.", "Recurring evidence packs and monitoring exports."],
-        ["Residual risk review", "Capture what remains unresolved and who signs off.", "Release review and oversight summary."],
+        ["Residual risk review", "Capture what remains unresolved and who signs off.", "Human oversight summary and monitoring outputs."],
       ],
       de: [
         ["Risikoinventar", "Konkrete Risiken und betroffene Gruppen erfassen.", "Fallbasierte Risikostufen und Kontrollpunkt-Empfehlungen."],
@@ -2403,7 +2916,7 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "Likelihood and severity rationale",
-            "Before sign-off on the Article 9 section or before a release decision that relies on it.",
+            "Before the Article 9 section is approved or relied on in provider governance.",
             "Short text or your internal scale explaining why the risk is low, medium, or high and how likely it is.",
           ],
           [
@@ -2413,7 +2926,7 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "Residual-risk acceptance and sign-off",
-            "At revue de mise en production or governance sign-off, after the open risks and controls have been reviewed.",
+            "At provider or governance review, after the open risks and controls have been reviewed.",
             "Accepted, blocked, or escalate, plus the approver name and any required next step.",
           ],
         ],
@@ -2492,7 +3005,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "How this fits into the full package",
         title: "Article 9 is one section inside the full EU dossier",
         lead:
-          "There is one full EU dossier. The Article 9 draft is one file inside that package, alongside the review and monitoring outputs it depends on. The JSON layout shown here is the toolkit's structured format for those requirements, not an EU-mandated form.",
+          "There is one full EU dossier. The Article 9 draft is one file inside that package, alongside the oversight and monitoring outputs it depends on. The JSON layout shown here is the toolkit's structured format for those requirements, not an EU-mandated form.",
         headers: ["File in the package", "Why it matters for Article 9", "Open file"],
         rows: [
           [
@@ -2506,13 +3019,13 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
           ],
           [
-            "Release review - release-review.json",
-            "Used when an open risk affects release status or follow-up.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Human oversight summary - human-oversight-summary.json",
+            "Used when an open risk depends on human review, blocking, or escalation controls.",
+            "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
             "Post-market monitoring - post-market-monitoring.json",
-            "Used when Article 9 is updated after release because drift or recurring failures appear.",
+            "Used when Article 9 is updated because drift or recurring failures appear during monitoring.",
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
         ],
@@ -2629,6 +3142,654 @@ const TEMPLATE_CONTENT = {
       ],
     },
   },
+  "article-10": {
+    title: {
+      en: "EU AI Act Article 10 - Data and Data Governance Template",
+    },
+    description: {
+      en: "Template for Article 10 data governance, data provenance, relevance and bias checks, and data-preparation operations.",
+    },
+    intro: {
+      en:
+        "Article 10 is where teams explain how training, validation, and testing data are governed for the relevant AI system. The reviewer needs a clear written account of where data comes from, how relevance and possible bias are examined, and how data preparation is controlled.",
+    },
+    coverage: {
+      en: "Evidence-backed scaffold",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Article 10 expects, what the toolkit can add, and what your team still owns",
+        note:
+          "This page is a drafting scaffold for the Article 10 section. It helps structure the writing, but your team still has to supply the system-specific data-governance details required by law.",
+        headers: [
+          "Article 10 expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "Data governance and management practices",
+            "A law-shaped section for training, validation, and testing data governance.",
+            "Describe the actual governance and management practices used for the relevant AI system.",
+            "A written Article 10 section in the package.",
+          ],
+          [
+            "Data origin and collection process",
+            "Prompts for data origin and collection inputs.",
+            "State where the data comes from and how it is collected for this system.",
+            "A short source-and-collection note.",
+          ],
+          [
+            "Checks for relevance, representativeness, bias, and errors",
+            "A draft structure for these required checks.",
+            "Record the checks actually performed and the main findings.",
+            "A review note or summary table for the data set.",
+          ],
+          [
+            "Data preparation operations",
+            "A place to describe the processing operations used before model work or testing.",
+            "List the actual cleaning, labeling, filtering, transformation, or augmentation steps used.",
+            "A concise data-preparation summary.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Article 10",
+        lead:
+          "Article 10 remains system-specific. The template can structure the section, but it cannot infer your data source, sampling logic, quality checks, or bias review from the package alone.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "Data source description",
+            "The section must describe the origin of the data used for the relevant AI system.",
+            "A short paragraph naming the source, scope, and collection channel.",
+          ],
+          [
+            "Representativeness and relevance review",
+            "The section must explain why the data is relevant and sufficiently representative for the intended purpose.",
+            "A short written assessment or review table.",
+          ],
+          [
+            "Bias and data-quality checks",
+            "The section must record what checks were done for possible bias and errors.",
+            "A checklist or narrative summary of the checks and findings.",
+          ],
+          [
+            "Data preparation summary",
+            "The section must describe the main preparation operations used before training, validation, or testing.",
+            "A short sequence of named preparation steps.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
+  "article-16": {
+    title: {
+      en: "EU AI Act Article 16 - Provider Obligations Template",
+    },
+    description: {
+      en: "Template for provider-side Article 16 duties, including documentation keeping, logs, corrective action, and authority cooperation.",
+    },
+    intro: {
+      en:
+        "Article 16 is where the provider's operational duties are gathered together. The point is not only to have technical documentation, but to show that the provider can keep required materials available, keep logs, take corrective action, and cooperate with authorities when needed.",
+    },
+    coverage: {
+      en: "Evidence-backed scaffold",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Article 16 expects, what the template can add, and what your team still owns",
+        note:
+          "This page structures the provider-side written record for Article 16. It does not replace the actual organizational duties or approvals that the law places on the provider.",
+        headers: [
+          "Article 16 expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "Documentation keeping under Articles 16 and 18",
+            "A section shell for technical documentation, QMS records, and retained conformity records.",
+            "Describe how these materials are kept available for 10 years after the system is placed on the market or put into service.",
+            "A documentation-keeping note.",
+          ],
+          [
+            "Automatically generated logs under Articles 16 and 19",
+            "Prompts for log retention and retrieval.",
+            "Record which automatically generated logs are under provider control and how they are kept for at least six months or longer if another law requires it.",
+            "A log-retention note.",
+          ],
+          [
+            "Corrective actions and duty of information under Article 20",
+            "Prompts for corrective-action handling and notification duties.",
+            "Record how the provider brings the system into conformity, when withdrawal, disabling, or recall is used, and who is informed without undue delay.",
+            "A corrective-action procedure summary.",
+          ],
+          [
+            "Cooperation with competent authorities under Article 21",
+            "A place to state how requests, documentation, and log access are handled.",
+            "Describe the actual cooperation path used by the provider, including how information is supplied in an easily understood language and how access to logs is granted where they are under provider control.",
+            "A short authority-cooperation note.",
+          ],
+          [
+            "Registration, declaration, marking, and related provider duties",
+            "Cross-links to conformity and declaration sections.",
+            "Record which provider-side duties are completed elsewhere in the package and who approves them.",
+            "A cross-reference note inside the package.",
+          ],
+          [
+            "CE marking under Article 48",
+            "A place to record how the marking is applied or made digitally accessible.",
+            "Record where the CE marking appears, whether it is digital, and whether notified-body identification must accompany it.",
+            "A CE-marking note.",
+          ],
+          [
+            "Registration under Article 49",
+            "A place to record the registration route where it applies.",
+            "Record whether registration applies, which register is used, and the retained reference for the relevant AI system.",
+            "A registration note.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Article 16",
+        lead:
+          "The template can structure the provider-obligations section, but it cannot supply your retention process, corrective-action workflow, or authority response path.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "Documentation keeping process",
+            "Articles 16 and 18 require the provider to keep documentation and related records available.",
+            "A short note naming the repository, versioning control, and 10-year retention path.",
+          ],
+          [
+            "Log-retention and retrieval process",
+            "Articles 16 and 19 require automatically generated logs to be kept where they are under provider control.",
+            "A short note naming the logs kept, retention period, and retrieval path.",
+          ],
+          [
+            "Corrective-action and notification workflow",
+            "Article 20 requires corrective action and duty-to-inform when non-conformity or risk appears.",
+            "A step-by-step internal escalation and notification note.",
+          ],
+          [
+            "Authority cooperation contact path",
+            "Article 21 requires cooperation with competent authorities and access to logs where applicable.",
+            "A named contact and escalation path, plus the documentation and log-access route.",
+          ],
+          [
+            "Cross-reference to conformity and declaration work",
+            "Article 16 sits alongside the conformity and declaration duties.",
+            "A short note linking to the related sections in the package.",
+          ],
+          [
+            "CE-marking record",
+            "Article 48 requires the provider to affix CE marking in the required form.",
+            "A short note naming where the CE marking appears and how it is accessed.",
+          ],
+          [
+            "Registration record",
+            "Article 49 requires registration where that article applies.",
+            "A short note naming the register, reference, and responsible owner.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
+  "article-43": {
+    title: {
+      en: "EU AI Act Article 43 - Conformity Assessment Template",
+    },
+    description: {
+      en: "Template for documenting the conformity assessment procedure applied to a high-risk AI system under Article 43.",
+    },
+    intro: {
+      en:
+        "Article 43 is where the package has to state how conformity assessment is handled before the system is placed on the market or put into service. The requirement is procedural and system-specific: the record has to match the route actually used for the relevant AI system.",
+    },
+    coverage: {
+      en: "Evidence-backed scaffold",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Article 43 expects, what the template can add, and what your team still owns",
+        note:
+          "This template helps capture the conformity-assessment route in writing. It does not decide which route applies to your system and it does not perform the assessment for you.",
+        headers: [
+          "Article 43 expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "A stated conformity-assessment route",
+            "A dedicated section for the procedure used for the relevant AI system.",
+            "State which conformity-assessment route applies and why.",
+            "A conformity-assessment section in the package.",
+          ],
+          [
+            "Evidence of readiness before market placement or service",
+            "A place to cross-reference the documentation and supporting materials used in the assessment.",
+            "List the actual documents, tests, and approvals used for the system.",
+            "A referenced conformity file list.",
+          ],
+          [
+            "Any notified-body involvement where applicable",
+            "Prompts for the part of the route that involves external review.",
+            "Record whether a notified body is involved and capture the relevant reference details when applicable.",
+            "A notified-body note, if applicable.",
+          ],
+          [
+            "System-specific status and date",
+            "A structured section for current assessment status.",
+            "Record the real status, date, and owner for the assessment work.",
+            "A dated status record.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Article 43",
+        lead:
+          "Conformity assessment is not generated from runtime artifacts alone. The template can structure the section, but your team still has to state the route actually used and the status of the work.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "Assessment route used",
+            "The package must reflect the actual conformity-assessment procedure applied.",
+            "A short route statement naming the procedure used.",
+          ],
+          [
+            "Current assessment status",
+            "The package should show where the system stands in the procedure.",
+            "A dated status note with owner.",
+          ],
+          [
+            "Notified-body details where applicable",
+            "Some routes require external review details.",
+            "A short external-review reference note.",
+          ],
+          [
+            "Cross-reference to supporting documents",
+            "The assessment section needs links to the underlying materials.",
+            "A short list of the linked documents used in the assessment.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
+  "article-47": {
+    title: {
+      en: "EU AI Act Article 47 - EU Declaration of Conformity Template",
+    },
+    description: {
+      en: "Template for the EU declaration of conformity requirement under Article 47 for high-risk AI systems.",
+    },
+    intro: {
+      en:
+        "Article 47 requires the provider to draw up an EU declaration of conformity for each high-risk AI system. The declaration is not just a statement that compliance work exists somewhere else; it is a formal document tied to the relevant AI system and its conformity route.",
+    },
+    coverage: {
+      en: "Evidence-backed scaffold",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Article 47 expects, what the template can add, and what your team still owns",
+        note:
+          "The template gives you a declaration section and a structure for the required references. It does not create a valid declaration by itself and it does not replace provider approval or signature.",
+        headers: [
+          "Article 47 expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "A declaration for each relevant high-risk AI system",
+            "A dedicated declaration section in the package.",
+            "State the declaration for the specific system and version.",
+            "A declaration draft tied to the system.",
+          ],
+          [
+            "References to the conformity route and supporting materials",
+            "A structured place for the references that belong with the declaration.",
+            "Record the real references, standards, and conformity route used.",
+            "A referenced declaration record.",
+          ],
+          [
+            "A formal provider statement",
+            "A clear place for the declaration wording.",
+            "Add the final provider statement and approval text used in practice.",
+            "A final declaration text for review.",
+          ],
+          [
+            "Provider sign-off",
+            "A place to capture that sign-off still remains human-owned.",
+            "Record the approver, date, and signing function used by the provider.",
+            "A signature-ready declaration section.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Article 47",
+        lead:
+          "The template can structure the declaration section, but your team still has to provide the final declaration text, references, approver, and signature details.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "Final declaration statement",
+            "Article 47 requires the provider to draw up the declaration.",
+            "A short declaration statement ready for internal review.",
+          ],
+          [
+            "References to the conformity route",
+            "The declaration has to align with the actual conformity path used for the system.",
+            "A short list of standards, specifications, and related references.",
+          ],
+          [
+            "Named approver and signatory",
+            "The declaration remains a provider-owned act.",
+            "A sign-off record with role and date.",
+          ],
+          [
+            "Version-specific identification",
+            "The declaration has to identify the relevant AI system clearly.",
+            "A short system-identification block inside the declaration.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
+  "article-48": {
+    title: {
+      en: "EU AI Act Article 48 - CE Marking Template",
+    },
+    description: {
+      en: "Template for recording how CE marking is applied or made digitally accessible for a high-risk AI system under Article 48.",
+    },
+    intro: {
+      en:
+        "Article 48 requires CE marking for the relevant high-risk AI system. This template is a place to record how the marking is applied in practice, whether it is digitally accessible, and whether notified-body identification must appear with it where that route applies.",
+    },
+    coverage: {
+      en: "Provider-side scaffold",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Article 48 expects, what the template can add, and what your team still owns",
+        note:
+          "The template structures the CE-marking record. It does not decide whether notified-body identification is required and it does not replace provider approval of the final marking arrangement.",
+        headers: [
+          "Article 48 expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "CE marking for the relevant high-risk AI system",
+            "A section that records the marking arrangement for the system.",
+            "State where the CE marking appears for the system in practice.",
+            "A CE-marking record.",
+          ],
+          [
+            "Digital CE marking where the system is provided digitally",
+            "A place to record how the digital marking is accessed.",
+            "Describe the interface path, machine-readable code, or other electronic means used.",
+            "A digital-access note.",
+          ],
+          [
+            "Notified-body identification where applicable",
+            "A field for the identification number when that route applies.",
+            "Record whether notified-body identification accompanies the marking and where it appears.",
+            "A notified-body marking note.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Article 48",
+        lead:
+          "The template can structure the CE-marking section, but your team still has to provide the actual placement, access path, and notified-body identification details where applicable.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "CE-marking placement",
+            "Article 48 requires the CE marking to appear in the required form for the relevant system.",
+            "A short note naming where the marking appears in the interface, packaging, or documentation.",
+          ],
+          [
+            "Digital access path",
+            "Digital systems must make the marking easily accessible.",
+            "A short note naming the interface path, machine-readable code, or other electronic access route.",
+          ],
+          [
+            "Notified-body identifier where applicable",
+            "Some conformity routes require the notified-body identification number to appear with the marking.",
+            "A short note naming the identifier and where it is shown.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
+  "article-49": {
+    title: {
+      en: "EU AI Act Article 49 - Registration Template",
+    },
+    description: {
+      en: "Template for recording the registration obligations that apply to a high-risk AI system under Article 49.",
+    },
+    intro: {
+      en:
+        "Article 49 requires registration where that article applies. The useful job of the template is to record whether registration applies to the relevant AI system, which register is used, and what reference is retained in the provider package.",
+    },
+    coverage: {
+      en: "Provider-side scaffold",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Article 49 expects, what the template can add, and what your team still owns",
+        note:
+          "The template structures the registration record. It does not decide whether registration applies to your system and it does not perform registration for you.",
+        headers: [
+          "Article 49 expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "A registration record where Article 49 applies",
+            "A section that records whether registration applies to the relevant AI system.",
+            "State whether the system must be registered before it is placed on the market or put into service.",
+            "A registration-applicability note.",
+          ],
+          [
+            "The actual registration route and reference",
+            "A place to record the register used and the resulting reference.",
+            "Record the EU database or other applicable registration route and the retained identifier.",
+            "A registration-reference note.",
+          ],
+          [
+            "Responsible owner for keeping the registration current",
+            "A field for ownership and update responsibility.",
+            "Name the owner who keeps the registration record current.",
+            "A named registration owner.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Article 49",
+        lead:
+          "The template can structure the registration section, but your team still has to provide the applicability decision, the register reference, and the responsible owner.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "Registration applicability decision",
+            "Article 49 has to be applied to the relevant system where the registration duty exists.",
+            "A short note stating whether registration applies and why.",
+          ],
+          [
+            "Register and reference",
+            "Where registration applies, the provider needs the retained registration record.",
+            "A short note naming the register and the recorded reference.",
+          ],
+          [
+            "Registration owner",
+            "The registration record has to stay current and attributable.",
+            "A named owner and update responsibility note.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
+  "annex-v": {
+    title: {
+      en: "EU AI Act Annex V - Declaration Content Template",
+    },
+    description: {
+      en: "Template for the information that has to appear in the EU declaration of conformity under Annex V.",
+    },
+    intro: {
+      en:
+        "Annex V sets out the content that belongs in the EU declaration of conformity. The useful job of the template is not to over-interpret the Annex, but to make sure the provider has a clear place to record the required identification, references, date, place, and signatory details.",
+    },
+    coverage: {
+      en: "Evidence-backed scaffold",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Annex V expects, what the template can add, and what your team still owns",
+        note:
+          "Annex V is content-specific. The template gives you the structure, but your team still has to fill in the actual provider, system, standards, and signatory information.",
+        headers: [
+          "Annex V expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "Provider identification",
+            "A section for provider name and address details.",
+            "Fill in the provider identity exactly as it should appear in the declaration.",
+            "A declaration identity block.",
+          ],
+          [
+            "Identification of the AI system",
+            "A section for system name, version, and identifying references.",
+            "Record the actual system identification used in the declaration.",
+            "A system-identification block.",
+          ],
+          [
+            "References to standards, common specifications, or notified body details where applicable",
+            "A section for the references that Annex V expects in the declaration.",
+            "List the standards, specifications, or notified-body references that actually apply.",
+            "A references block inside the declaration.",
+          ],
+          [
+            "Place and date of issue and signatory details",
+            "A section for final declaration issuance details.",
+            "Fill in the place, date, signatory name, and function.",
+            "A signature block ready for final approval.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Annex V",
+        lead:
+          "Annex V is declaration content. The template can lay out the fields, but your team still has to supply the actual identity, references, and signatory data used in the declaration.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "Provider name and address",
+            "Annex V requires provider identification inside the declaration.",
+            "A short identity block.",
+          ],
+          [
+            "System identification",
+            "Annex V requires clear identification of the relevant AI system.",
+            "A name, version, and reference line.",
+          ],
+          [
+            "Applicable references",
+            "Annex V requires the relevant standards, specifications, or notified-body references where applicable.",
+            "A short list of references.",
+          ],
+          [
+            "Issuance and signatory details",
+            "Annex V requires place/date and signatory information.",
+            "A dated signature block.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
   "article-12": {
     title: {
       en: "EU AI Act Article 12 - Logging and Traceability Template",
@@ -2642,15 +3803,19 @@ const TEMPLATE_CONTENT = {
     },
     intro: {
       en:
-        "Article 12 is where a reviewer checks whether a run can be reconstructed outside your internal dashboards. The hard part is not having logs in principle. The hard part is having a record trail that another reviewer can actually inspect, follow, and retain.",
+        "Article 12 is where the documentation has to show that a run can be reconstructed outside your internal dashboards. The hard part is not having logs in principle. The hard part is having a record trail that another team can actually inspect, follow, and retain. For high-risk systems, that trail still has to fit into a broader Annex IV documentation package.",
       de:
-        "In Artikel 12 prueft eine pruefende Person, ob sich ein Run ausserhalb Ihrer internen Dashboards rekonstruieren laesst. Die Schwierigkeit besteht nicht darin, Logs im Prinzip zu haben. Die Schwierigkeit besteht darin, eine nachvollziehbare Spur zu haben, die eine andere pruefende Person wirklich prüfen, verfolgen und aufbewahren kann.",
+        "In Artikel 12 prueft eine pruefende Person, ob sich ein Run ausserhalb Ihrer internen Dashboards rekonstruieren laesst. Die Schwierigkeit besteht nicht darin, Logs im Prinzip zu haben. Die Schwierigkeit besteht darin, eine nachvollziehbare Spur zu haben, die eine andere pruefende Person wirklich prüfen, verfolgen und aufbewahren kann. Fuer eine Hochrisiko-Pruefung muss diese Spur trotzdem in ein groesseres Annex-orientiertes Paket passen.",
       fr:
-        "L'article 12 est l'endroit ou un evaluateur verifie si un run peut etre reconstruit en dehors de vos tableaux de bord internes. La difficulte n'est pas d'avoir des logs en principe. La difficulte est d'avoir une piste d'enregistrements qu'un autre evaluateur peut vraiment inspecter, suivre et conserver.",
+        "L'article 12 est l'endroit ou un evaluateur verifie si un run peut etre reconstruit en dehors de vos tableaux de bord internes. La difficulte n'est pas d'avoir des logs en principe. La difficulte est d'avoir une piste d'enregistrements qu'un autre evaluateur peut vraiment inspecter, suivre et conserver. Pour une revue a haut risque, cette piste doit tout de meme s'integrer dans un dossier plus large structure selon l'Annexe.",
     },
     requirement: {
       en:
-        "For agent systems, this means more than generic application logs. The section should show what is recorded, how files link back to a concrete run, what artifacts survive handoff, and what retention controls still depend on operator policy.",
+        "For agent systems, this means more than generic application logs. The section should show what is recorded, how files link back to a concrete run, what artifacts survive handoff, and what retention controls still depend on operator policy. Article 12 is necessary, but it does not replace Annex IV documentation, deployer information, oversight, or monitoring.",
+      de:
+        "Fuer Agentensysteme bedeutet das mehr als allgemeine Applikationslogs. Der Abschnitt sollte zeigen, was aufgezeichnet wird, wie Dateien auf einen konkreten Run zurueckverweisen, welche Artefakte die Uebergabe ueberstehen und welche Aufbewahrungskontrollen weiterhin von der Operator-Richtlinie abhaengen. Artikel 12 ist notwendig, ersetzt aber weder die Dokumentation nach Anhang IV noch Deployer-Informationen, Aufsicht oder Monitoring.",
+      fr:
+        "Pour les systemes d'agents, cela signifie plus que des logs applicatifs generiques. La section doit montrer ce qui est enregistre, comment les fichiers renvoient a un run concret, quels artefacts survivent a la transmission et quels controles de retention dependent encore de la politique de l'operateur. L'article 12 est necessaire, mais il ne remplace ni la documentation Annexe IV, ni l'information du deployeur, ni l'oversight, ni le monitoring.",
     },
     contractMatrix: {
       en: {
@@ -2678,9 +3843,9 @@ const TEMPLATE_CONTENT = {
             "Explain any external trace systems, storage layers, or identifiers that live outside the toolkit.",
           ],
           [
-            "A reviewer path after something goes wrong",
-            "Lets a reviewer inspect the generated report, compare file, and retained artifacts already in the package.",
-            "Lets a reviewer open the underlying run records and tool-level artifacts tied to the same cases.",
+            "A record path after something goes wrong",
+            "Lets another team inspect the generated report, compare file, and retained artifacts already in the package.",
+            "Lets another team open the underlying run records and tool-level artifacts tied to the same cases.",
             "Define who may access those records, under what workflow, and how incident or audit access is granted.",
           ],
           [
@@ -2773,7 +3938,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "Manual fields",
         title: "What your team still defines around Article 12",
         lead:
-          "The toolkit can preserve and package records, but it does not choose your retention posture or disclosure rules. Those decisions still belong in your logging policy and governance workflow.",
+          "The toolkit can preserve and package records, but it does not choose your retention posture or disclosure rules. Those decisions still belong in your logging policy and governance workflow. Article 12 therefore becomes one reviewed layer inside the larger high-risk package, not the whole package by itself.",
         headers: ["What you define", "When you define it", "Practical format to use"],
         rows: [
           [
@@ -2807,7 +3972,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "Manuelle Felder",
         title: "Was Ihr Team rund um Artikel 12 noch festlegt",
         lead:
-          "Das Toolkit kann Datensaetze erhalten und in ein Paket uebernehmen, entscheidet aber nicht ueber Ihre Aufbewahrungsregeln oder Offenlegungsvorgaben. Diese Entscheidungen gehoeren weiterhin in Ihre Journalisierungsrichtlinie und Ihren Governance-Ablauf.",
+          "Das Toolkit kann Datensaetze erhalten und in ein Paket uebernehmen, entscheidet aber nicht ueber Ihre Aufbewahrungsregeln oder Offenlegungsvorgaben. Diese Entscheidungen gehoeren weiterhin in Ihre Journalisierungsrichtlinie und Ihren Governance-Ablauf. Artikel 12 wird damit zu einer geprueften Schicht im groesseren Hochrisiko-Paket und nicht zum ganzen Paket fuer sich.",
         headers: ["Was Sie festlegen", "Wann Sie es festlegen", "Praktisches Format"],
         rows: [
           [
@@ -2841,7 +4006,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "Champs manuels",
         title: "Ce que votre equipe definit encore autour de l'article 12",
         lead:
-          "Le toolkit peut conserver et assembler ces enregistrements dans le dossier, mais il ne choisit ni votre posture de retention ni vos regles de divulgation. Ces decisions restent dans votre politique de journalisation et votre workflow de gouvernance.",
+          "Le toolkit peut conserver et assembler ces enregistrements dans le dossier, mais il ne choisit ni votre posture de retention ni vos regles de divulgation. Ces decisions restent dans votre politique de journalisation et votre workflow de gouvernance. L'article 12 devient donc une couche relue a l'interieur du paquet a haut risque plus large, pas le paquet complet a lui seul.",
         headers: ["Ce que vous definissez", "Quand vous le definissez", "Format pratique a utiliser"],
         rows: [
           [
@@ -2981,7 +4146,7 @@ const TEMPLATE_CONTENT = {
     },
     intro: {
       en:
-        "Article 13 is where a reviewer checks whether your instructions match the real technical boundary of the system. A deployment guide alone is not enough. The instructions have to name what the system is for, what conditions it relies on, and when a human must step in.",
+        "Article 13 is where your documentation has to show that the instructions match the real technical boundary of the system. A deployment guide alone is not enough. The instructions have to name what the system is for, what conditions it relies on, and when a human must step in.",
       de:
         "In Artikel 13 prueft eine pruefende Person, ob Ihre Anweisungen zur realen technischen Grenze des Systems passen. Ein Einsatzleitfaden allein reicht nicht. Die Anweisungen muessen benennen, wofuer das System gedacht ist, auf welche Bedingungen es sich stuetzt und wann ein Mensch eingreifen muss.",
       fr:
@@ -2996,7 +4161,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "Who supplies what",
         title: "What Article 13 expects, what the toolkit can add, and what your team still owns",
         note:
-          "Without connecting your agent, the toolkit can only draft the instructions file from the generated package. After adapter integration, it can also attach links from the instructions to real runs, review outputs, and oversight records.",
+          "Without connecting your agent, the toolkit can only draft the instructions file from the generated package. After adapter integration, it can also attach links from the instructions to real runs, linked article outputs, and oversight records.",
         headers: [
           "Article 13 expects",
           "Toolkit with generated package only",
@@ -3007,25 +4172,25 @@ const TEMPLATE_CONTENT = {
           [
             "An intended purpose and system boundary",
             "Creates a draft instructions file with a technical scope, current system identity, and open operator-input fields.",
-            "Adds links from that draft to real runs, review outputs, and runtime evidence for the connected system.",
+            "Adds links from that draft to real runs, linked article outputs, and runtime evidence for the connected system.",
             "Write the final intended purpose, excluded uses, and the deployment boundary in business terms.",
           ],
           [
             "Conditions for safe use",
             "Can point to current quality status, known limitations, and residual gaps already visible in the package.",
-            "Can link those limits back to live execution quality, release-review output, and logging outputs from real runs.",
+            "Can link those limits back to live execution quality, monitoring outputs, and logging outputs from real runs.",
             "Define prerequisites, local operating conditions, and any deployment-specific assumptions the operator must satisfy.",
           ],
           [
             "Human review instructions",
-            "Can reference approval-required cases and release-review outputs already in the package.",
+            "Can reference approval-required cases and current oversight outputs already in the package.",
             "Can link instructions back to the oversight summary, blocked cases, and escalation evidence from real runs.",
             "Write the actual operator guidance: when to review, when to stop, and who must be involved.",
           ],
           [
             "Re-check after change",
             "Can note that the instructions are tied to the current package and its unresolved gaps.",
-            "Can show the new evidence and review outputs created after model, prompt, tool, or deployment changes.",
+            "Can show the new evidence and linked article outputs created after model, prompt, tool, or deployment changes.",
             "Decide when the instructions must be reissued and who approves the updated version.",
           ],
         ],
@@ -3132,7 +4297,7 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "Deployer-facing wording",
-            "Before external delivery, customer review, or internal governance sign-off.",
+            "Before the instructions are shared with deployers, customers, or operations teams.",
             "The exact language your organization wants to show to deployers, customers, or operations teams.",
           ],
           [
@@ -3230,9 +4395,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
-            "Release review - release-review.json",
-            "Supports any operator guidance tied to release status or required follow-up.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Compare report - compare-report.json",
+            "Supports any operator guidance tied to current quality status, highlighted cases, or system limitations.",
+            "demo/eu-ai-act/compare-report.json",
           ],
           [
             "Annex IV dossier - eu-ai-act-annex-iv.json",
@@ -3320,7 +4485,7 @@ const TEMPLATE_CONTENT = {
     },
     intro: {
       en:
-        "Article 14 is where a reviewer checks whether humans can actually supervise, intervene, and stop the system when needed. For agent workflows, that means the review path has to be concrete: what escalates, what blocks, who reviews it, and where that outcome is recorded.",
+        "Article 14 is where the documentation has to show that humans can actually supervise, intervene, and stop the system when needed. For agent workflows, that means the oversight path has to be concrete: what escalates, what blocks, who reviews it, and where that outcome is recorded.",
       de:
         "In Artikel 14 prueft eine pruefende Person, ob Menschen das System tatsaechlich beaufsichtigen, eingreifen und bei Bedarf stoppen koennen. Fuer Agent-Workflows bedeutet das, dass der Pruefpfad konkret sein muss: was eskaliert, was blockiert, wer prueft und wo dieses Ergebnis festgehalten wird.",
       fr:
@@ -3361,9 +4526,9 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "A record of what the reviewer saw and decided",
-            "Can show release-review status and the current oversight summary already in the package.",
+            "Can show approval-required cases, blocked cases, and the current oversight summary already in the package.",
             "Can preserve a case-linked review queue and approval or block trail tied to the connected agent.",
-            "Decide what reviewer notes, approvals, or sign-offs must be captured in your governance process.",
+            "Decide what notes, approvals, or sign-offs must be captured in your governance process.",
           ],
           [
             "Human authority to stop or override the system",
@@ -3460,7 +4625,7 @@ const TEMPLATE_CONTENT = {
         rows: [
           [
             "Review roles",
-            "Before the oversight process is used for a real release or governance review.",
+            "Before the oversight process is used in real operation or governance review.",
             "A short role list naming who reviews, who can block, and who can approve exceptional cases.",
           ],
           [
@@ -3480,7 +4645,7 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "Final accountability assignment",
-            "At governance sign-off or release sign-off.",
+            "At governance approval or when the oversight process is formally assigned.",
             "A named owner or approving role for the final oversight process.",
           ],
         ],
@@ -3557,7 +4722,7 @@ const TEMPLATE_CONTENT = {
     dossierContext: {
       en: {
         eyebrow: "How this fits into the full package",
-        title: "Article 14 is evidenced through oversight and review outputs",
+        title: "Article 14 is documented through oversight and operating outputs",
         lead:
           "The files below are the main evidence surfaces for Article 14. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.",
         headers: ["File in the package", "Why it matters for Article 14", "Open file"],
@@ -3568,9 +4733,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
-            "Release review - release-review.json",
-            "Shows the release decision and required human actions tied to oversight outcomes.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Article 9 risk register - article-9-risk-register.json",
+            "Shows where blocked cases, escalation triggers, and human-review controls affect the wider risk picture.",
+            "demo/eu-ai-act/compliance/article-9-risk-register.json",
           ],
           [
             "Compare report - compare-report.json",
@@ -3663,7 +4828,7 @@ const TEMPLATE_CONTENT = {
     },
     intro: {
       en:
-        "Article 15 is where performance claims stop being slogans and start needing evidence. A reviewer wants to see quality signals, robustness and security constats, version-to-version comparison, and a clear point where the system is not ready for release.",
+        "Article 15 is where performance claims stop being slogans and start needing evidence. The documentation has to show quality signals, robustness and security constats, version-to-version comparison, and a clear point where the system no longer meets the provider's accepted threshold.",
       de:
         "In Artikel 15 hoeren Leistungsversprechen auf, Schlagwoerter zu sein, und brauchen echte Nachweise. Eine pruefende Person will Qualitaetssignale, Robustheits- und Sicherheitsbefunde, Vergleiche zwischen Versionen und einen klaren Punkt sehen, an dem das System nicht fuer die Inbetriebnahme freigegeben werden sollte.",
       fr:
@@ -3671,7 +4836,7 @@ const TEMPLATE_CONTENT = {
     },
     requirement: {
       en:
-        "A useful Article 15 section should show the quality signals that matter, the failures that still exist, the comparison across changes, and the threshold for releasing or blocking the current version.",
+        "A useful Article 15 section should show the quality signals that matter, the failures that still exist, the comparison across changes, and the threshold for accepting, escalating, or blocking the current version in provider governance.",
       de:
         "Ein nuetzlicher Abschnitt zu Artikel 15 sollte die relevanten Qualitaetssignale, die noch bestehenden Fehler, den Vergleich ueber Aenderungen hinweg und die Schwelle fuer Freigabe oder Blockierung der aktuellen Version zeigen.",
       fr:
@@ -3700,7 +4865,7 @@ const TEMPLATE_CONTENT = {
             "Robustness and security constats",
             "Shows current security constats and risk levels already present in the package.",
             "Can keep those constats linked to the actual runs, tool behavior, and case outputs that triggered them.",
-            "Explain which robustness or security constats are acceptable, and which require remediation before release.",
+            "Explain which robustness or security constats are acceptable, and which require remediation before the system is relied on.",
           ],
           [
             "Version-to-version comparison",
@@ -3709,10 +4874,10 @@ const TEMPLATE_CONTENT = {
             "Decide whether the chosen cases are sufficient to justify the claim you want to make.",
           ],
           [
-            "A release threshold",
-            "Shows current release recommendation and execution-quality status already in the package.",
-            "Can keep the threshold evidence tied to recurring runs and release history as the system changes.",
-            "Set the final threshold for release, escalation, or block and approve that decision.",
+            "A documented performance threshold",
+            "Shows current execution-quality status and case outcomes already in the package.",
+            "Can keep the threshold evidence tied to recurring runs and monitoring history as the system changes.",
+            "Set the final threshold for acceptance, escalation, or block and approve that decision.",
           ],
         ],
       },
@@ -3803,7 +4968,7 @@ const TEMPLATE_CONTENT = {
         rows: [
           [
             "Task-specific success threshold",
-            "Before you rely on the package to justify release or conformance claims.",
+            "Before you rely on the package to support performance or conformity claims.",
             "A short threshold statement or table naming the metric, target, and minimum acceptable result.",
           ],
           [
@@ -3900,7 +5065,7 @@ const TEMPLATE_CONTENT = {
     dossierContext: {
       en: {
         eyebrow: "How this fits into the full package",
-        title: "Article 15 is evidenced through comparison, integrity, and release outputs",
+        title: "Article 15 is documented through comparison, integrity, and performance outputs",
         lead:
           "The files below are the main evidence surfaces for Article 15. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.",
         headers: ["File in the package", "Why it matters for Article 15", "Open file"],
@@ -3921,9 +5086,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/artifacts/manifest.json",
           ],
           [
-            "Release review - release-review.json",
-            "Shows how the current quality state affects release status and follow-up.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Article 9 risk register - article-9-risk-register.json",
+            "Shows how serious performance or security issues can reopen or update risk entries.",
+            "demo/eu-ai-act/compliance/article-9-risk-register.json",
           ],
         ],
       },
@@ -4006,7 +5171,7 @@ const TEMPLATE_CONTENT = {
     },
     intro: {
       en:
-        "Article 17 is where teams have to show that their process is not ad hoc. A reviewer wants to see how changes are controlled, how testing is repeated, how monitoring feeds back into the process, and where written procedures still sit outside the product.",
+        "Article 17 is where teams have to show that their process is not ad hoc. The documentation has to show how changes are controlled, how testing is repeated, how monitoring feeds back into the process, and where written procedures still sit outside the product.",
       de:
         "In Artikel 17 muessen Teams zeigen, dass ihr Prozess nicht ad hoc ist. Eine pruefende Person will sehen, wie Aenderungen kontrolliert werden, wie Tests wiederholt werden, wie die Beobachtung nach dem Inverkehrbringen in den Prozess zurueckfliesst und wo schriftliche Verfahren weiterhin ausserhalb des Produkts liegen.",
       fr:
@@ -4025,7 +5190,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "Who supplies what",
         title: "What Article 17 expects, what the toolkit can add, and what your team still owns",
         note:
-          "Without connecting your agent, the toolkit can only draft the QMS-lite file from the generated package. After adapter integration and recurring use, it can keep that scaffold tied to real release, monitoring, and follow-up outputs.",
+          "Without connecting your agent, the toolkit can only draft the QMS-lite file from the generated package. After adapter integration and recurring use, it can keep that scaffold tied to real change, monitoring, and follow-up outputs.",
         headers: [
           "Article 17 expects",
           "Toolkit with generated package only",
@@ -4036,14 +5201,14 @@ const TEMPLATE_CONTENT = {
           [
             "A controlled change path",
             "Creates a QMS-lite draft with the current system identity, process areas, and management-review triggers.",
-            "Keeps that draft linked to real version changes, revues de mise en production, and sorties de comparaison for the connected system.",
+            "Keeps that draft linked to real version changes, monitoring updates, and compare-report outputs for the connected system.",
             "Write the formal change procedure, approval path, and accountability rules your organization uses.",
           ],
           [
-            "Repeatable testing before release",
-            "Can point to the rapport de comparaison, revue de mise en production, and gate outputs already present in the package.",
-            "Can keep those testing and gate outputs current as the connected agent is rerun over time.",
-            "Define which suites, thresholds, and review steps are mandatory before release.",
+            "Repeatable testing and review steps",
+            "Can point to the compare report and current statutory outputs already present in the package.",
+            "Can keep those testing and statutory outputs current as the connected agent is rerun over time.",
+            "Define which suites, thresholds, and review steps are mandatory before relying on the system or placing it on the market or putting it into service.",
           ],
           [
             "Monitoring feedback into the process",
@@ -4147,7 +5312,7 @@ const TEMPLATE_CONTENT = {
           [
             "Written procedure set",
             "Before you treat the Article 17 package as part of a real QMS review.",
-            "A short list of linked procedures covering change control, revue de mise en production, issue follow-up, and monitoring escalation.",
+            "A short list of linked procedures covering change control, system updates, issue follow-up, and monitoring escalation.",
           ],
           [
             "Document control and approval path",
@@ -4156,7 +5321,7 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "Training and competency expectations",
-            "Before reviewer, operator, or engineering roles are treated as part of the QMS.",
+            "Before operator or engineering roles are treated as part of the QMS.",
             "A role-based note describing who must be trained and what evidence of competency you keep.",
           ],
           [
@@ -4167,7 +5332,7 @@ const TEMPLATE_CONTENT = {
           [
             "Named accountable roles",
             "At governance sign-off or QMS review.",
-            "A simple role map naming who owns release control, monitoring follow-up, and final approval.",
+            "A simple role map naming who owns change control, monitoring follow-up, and final approval.",
           ],
         ],
       },
@@ -4254,13 +5419,13 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/article-17-qms-lite.json",
           ],
           [
-            "Release review - release-review.json",
-            "Shows the release controls and human actions that feed the QMS scaffold.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Article 16 provider obligations - article-16-provider-obligations.json",
+            "Shows the provider-owned obligations and documentation controls that feed the QMS scaffold.",
+            "demo/eu-ai-act/compliance/article-16-provider-obligations.json",
           ],
           [
             "Post-market monitoring - post-market-monitoring.json",
-            "Shows how post-release monitoring can feed back into the process.",
+            "Shows how monitoring can feed back into the process.",
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
           [
@@ -4336,6 +5501,208 @@ const TEMPLATE_CONTENT = {
     hideTopActions: true,
     hideBottomActions: true,
   },
+  "article-22": {
+    title: {
+      en: "EU AI Act Article 22 - Authorised Representative Template",
+      de: "EU KI-Verordnung Artikel 22 - Vorlage fuer den Bevollmaechtigten",
+      fr: "EU AI Act Article 22 - Modele pour le representant autorise",
+    },
+    description: {
+      en: "Template for the authorised-representative record that applies when the provider of a high-risk AI system is established outside the Union.",
+      de: "Vorlage fuer den Eintrag zum Bevollmaechtigten, wenn der Anbieter eines Hochrisiko-KI-Systems ausserhalb der Union niedergelassen ist.",
+      fr: "Modele pour l'enregistrement du representant autorise quand le fournisseur d'un systeme d'IA a haut risque est etabli hors de l'Union.",
+    },
+    intro: {
+      en:
+        "Article 22 matters only where the provider is established outside the Union. In that case the provider must appoint an authorised representative in the Union by written mandate. This page is not a separate role workflow. It is a conditional provider-side record that sits next to the rest of the provider package.",
+      de:
+        "Artikel 22 ist nur relevant, wenn der Anbieter ausserhalb der Union niedergelassen ist. Dann muss der Anbieter per schriftlichem Mandat einen Bevollmaechtigten in der Union benennen. Diese Seite ist kein eigener Rollen-Workflow. Sie ist ein bedingter provider-seitiger Eintrag, der neben dem restlichen Provider-Paket steht.",
+      fr:
+        "L'article 22 ne compte que lorsque le fournisseur est etabli hors de l'Union. Dans ce cas, le fournisseur doit designer un representant autorise dans l'Union par mandat ecrit. Cette page n'est pas un workflow de role separe. C'est un enregistrement conditionnel cote fournisseur qui reste a cote du reste du package fournisseur.",
+    },
+    coverage: {
+      en: "Provider-side scaffold",
+      de: "Provider-seitiges Geruest",
+      fr: "Structure cote fournisseur",
+    },
+    contractMatrix: {
+      en: {
+        eyebrow: "Who supplies what",
+        title: "What Article 22 expects, what the template can add, and what your team still owns",
+        note:
+          "Use this page only when the provider is established outside the Union. The template structures the record of the authorised representative and the written mandate. It does not replace the actual mandate or the representative's own legal duties.",
+        headers: [
+          "Article 22 expects",
+          "What the template can add",
+          "What your team still has to write",
+          "Practical output to keep",
+        ],
+        rows: [
+          [
+            "An authorised representative established in the Union",
+            "A section that records the named representative and mandate reference.",
+            "Name the representative and record the exact mandate used.",
+            "An authorised-representative record.",
+          ],
+          [
+            "A written mandate from the provider",
+            "A place to record the mandate reference and scope.",
+            "Record the signed mandate reference, date, and scope used in practice.",
+            "A mandate reference note.",
+          ],
+          [
+            "A clear boundary between provider duties and representative duties",
+            "A field for the provider-side explanation of how Article 22 is handled.",
+            "Record which materials the representative keeps available and how authority cooperation is routed.",
+            "A provider-side Article 22 note.",
+          ],
+        ],
+      },
+      de: {
+        eyebrow: "Wer liefert was",
+        title: "Was Artikel 22 verlangt, was die Vorlage strukturieren kann und was Ihr Team weiterhin liefern muss",
+        note:
+          "Nutzen Sie diese Seite nur, wenn der Anbieter ausserhalb der Union niedergelassen ist. Die Vorlage strukturiert den Eintrag zum Bevollmaechtigten und zum schriftlichen Mandat. Sie ersetzt weder das eigentliche Mandat noch die eigenen rechtlichen Pflichten des Bevollmaechtigten.",
+        headers: [
+          "Was Artikel 22 verlangt",
+          "Was die Vorlage ergaenzen kann",
+          "Was Ihr Team weiterhin schreiben muss",
+          "Welches praktische Ergebnis bleiben sollte",
+        ],
+        rows: [
+          [
+            "Einen in der Union niedergelassenen Bevollmaechtigten",
+            "Einen Abschnitt, der den benannten Bevollmaechtigten und die Mandatsreferenz festhaelt.",
+            "Benennen Sie den Bevollmaechtigten und halten Sie die exakt verwendete Mandatsreferenz fest.",
+            "Einen Eintrag zum Bevollmaechtigten.",
+          ],
+          [
+            "Ein schriftliches Mandat des Anbieters",
+            "Einen Platz fuer die Referenz und den Geltungsbereich des Mandats.",
+            "Dokumentieren Sie die unterzeichnete Mandatsreferenz, das Datum und den praktischen Geltungsbereich.",
+            "Einen Hinweis zur Mandatsreferenz.",
+          ],
+          [
+            "Eine klare Grenze zwischen Anbieterpflichten und Pflichten des Bevollmaechtigten",
+            "Ein Feld fuer die provider-seitige Erklaerung, wie Artikel 22 umgesetzt wird.",
+            "Dokumentieren Sie, welche Unterlagen der Bevollmaechtigte verfuegbar haelt und wie die Zusammenarbeit mit Behoerden geleitet wird.",
+            "Einen provider-seitigen Hinweis zu Artikel 22.",
+          ],
+        ],
+      },
+      fr: {
+        eyebrow: "Qui fournit quoi",
+        title: "Ce que l'article 22 exige, ce que le modele peut structurer, et ce que votre equipe doit encore fournir",
+        note:
+          "Utilisez cette page seulement lorsque le fournisseur est etabli hors de l'Union. Le modele structure l'enregistrement du representant autorise et du mandat ecrit. Il ne remplace ni le mandat reel ni les obligations juridiques propres du representant.",
+        headers: [
+          "Ce que l'article 22 exige",
+          "Ce que le modele peut ajouter",
+          "Ce que votre equipe doit encore rediger",
+          "Sortie pratique a conserver",
+        ],
+        rows: [
+          [
+            "Un representant autorise etabli dans l'Union",
+            "Une section qui enregistre le representant nomme et la reference du mandat.",
+            "Nommez le representant et enregistrez la reference exacte du mandat utilise.",
+            "Un enregistrement du representant autorise.",
+          ],
+          [
+            "Un mandat ecrit du fournisseur",
+            "Un espace pour enregistrer la reference et le perimetre du mandat.",
+            "Enregistrez la reference du mandat signe, la date et le perimetre applique en pratique.",
+            "Une note de reference du mandat.",
+          ],
+          [
+            "Une frontiere claire entre les obligations du fournisseur et celles du representant",
+            "Un champ pour l'explication cote fournisseur de la mise en oeuvre de l'article 22.",
+            "Enregistrez quels documents le representant doit garder disponibles et comment la cooperation avec l'autorite est routee.",
+            "Une note cote fournisseur sur l'article 22.",
+          ],
+        ],
+      },
+    },
+    operatorDetail: {
+      en: {
+        eyebrow: "Manual fields",
+        title: "What your team still adds to Article 22",
+        lead:
+          "This page is only needed when the provider is established outside the Union. The template can structure the record, but your team still has to provide the representative identity, written mandate, and the actual coordination path.",
+        headers: ["What you add", "Why it is required", "Practical format to use"],
+        rows: [
+          [
+            "Authorised representative identity",
+            "Article 22 requires a representative established in the Union.",
+            "A short note naming the representative and contact details.",
+          ],
+          [
+            "Written mandate reference",
+            "Article 22 requires the representative to act under a written mandate from the provider.",
+            "A mandate reference with date and version.",
+          ],
+          [
+            "Provider-to-representative coordination path",
+            "The representative has to be able to keep documentation and cooperate with authorities under the mandate.",
+            "A short note naming the documentation handoff and authority-contact path.",
+          ],
+        ],
+      },
+      de: {
+        eyebrow: "Manuelle Felder",
+        title: "Was Ihr Team fuer Artikel 22 weiterhin hinzufuegt",
+        lead:
+          "Diese Seite wird nur benoetigt, wenn der Anbieter ausserhalb der Union niedergelassen ist. Die Vorlage kann den Eintrag strukturieren, aber Ihr Team muss weiterhin die Identitaet des Bevollmaechtigten, das schriftliche Mandat und den tatsaechlichen Koordinationspfad liefern.",
+        headers: ["Was Sie hinzufuegen", "Warum es verlangt ist", "Welches praktische Format passt"],
+        rows: [
+          [
+            "Identitaet des Bevollmaechtigten",
+            "Artikel 22 verlangt einen in der Union niedergelassenen Bevollmaechtigten.",
+            "Eine kurze Notiz mit Name des Bevollmaechtigten und Kontaktdaten.",
+          ],
+          [
+            "Referenz des schriftlichen Mandats",
+            "Artikel 22 verlangt, dass der Bevollmaechtigte auf Grundlage eines schriftlichen Mandats des Anbieters handelt.",
+            "Eine Mandatsreferenz mit Datum und Version.",
+          ],
+          [
+            "Koordinationspfad zwischen Anbieter und Bevollmaechtigtem",
+            "Der Bevollmaechtigte muss unter dem Mandat Unterlagen verfuegbar halten und mit Behoerden zusammenarbeiten koennen.",
+            "Eine kurze Notiz, die Dokumentenuebergabe und Behoerdenkontakt beschreibt.",
+          ],
+        ],
+      },
+      fr: {
+        eyebrow: "Champs manuels",
+        title: "Ce que votre equipe ajoute encore pour l'article 22",
+        lead:
+          "Cette page n'est necessaire que lorsque le fournisseur est etabli hors de l'Union. Le modele peut structurer l'enregistrement, mais votre equipe doit encore fournir l'identite du representant, le mandat ecrit et le chemin reel de coordination.",
+        headers: ["Ce que vous ajoutez", "Pourquoi c'est requis", "Format pratique a utiliser"],
+        rows: [
+          [
+            "Identite du representant autorise",
+            "L'article 22 exige un representant etabli dans l'Union.",
+            "Une courte note donnant le nom du representant et ses coordonnees.",
+          ],
+          [
+            "Reference du mandat ecrit",
+            "L'article 22 exige que le representant agisse sur la base d'un mandat ecrit du fournisseur.",
+            "Une reference de mandat avec date et version.",
+          ],
+          [
+            "Chemin de coordination fournisseur-representant",
+            "Le representant doit pouvoir conserver la documentation et cooperer avec les autorites selon le mandat.",
+            "Une courte note qui nomme le chemin de transmission documentaire et le point de contact avec l'autorite.",
+          ],
+        ],
+      },
+    },
+    hideSectionGuide: true,
+    hideFaq: true,
+    hideExamples: true,
+    hideTopActions: true,
+    hideBottomActions: true,
+  },
   "article-72": {
     title: {
       en: "EU AI Act Article 72 - Post-Market Monitoring Template",
@@ -4349,7 +5716,7 @@ const TEMPLATE_CONTENT = {
     },
     intro: {
       en:
-        "Article 72 is where teams move from one-time packaging into continuous monitoring. A reviewer wants to see what signals are watched after release, how often they are reviewed, what triggers escalation, and how monitoring links back to the original evidence dossier.",
+        "Article 72 is where teams move from one-time packaging into continuous monitoring. The documentation has to show what signals are watched during operation, how often they are reviewed, what triggers escalation, and how monitoring links back to the original dossier.",
       de:
         "In Artikel 72 wechseln Teams von einmaliger Paketierung zu kontinuierlicher Beobachtung nach dem Inverkehrbringen. Eine pruefende Person will sehen, welche Signale nach der Inbetriebnahme beobachtet werden, wie oft sie geprueft werden, was eine Eskalation ausloest und wie diese Beobachtung zum urspruenglichen Nachweispaket zurueckverweist.",
       fr:
@@ -4357,7 +5724,7 @@ const TEMPLATE_CONTENT = {
     },
     requirement: {
       en:
-        "For agent systems, post-market monitoring is usually where dashboards stop being enough. Reviewers need a documented cadence, named triggers, and a path from drift or blocking constats back into review and corrective action.",
+        "For agent systems, post-market monitoring is usually where dashboards stop being enough. Teams need a documented cadence, named triggers, and a path from drift or blocking constats back into review and corrective action.",
       de:
         "Bei Agent-Systemen ist die Beobachtung nach dem Inverkehrbringen meist der Punkt, an dem Dashboards nicht mehr ausreichen. Pruefende Personen brauchen eine dokumentierte Kadenz, benannte Trigger und einen Pfad von Drift oder blockierenden Befunden zurueck in Pruefung und Korrekturmassnahmen.",
       fr:
@@ -4368,7 +5735,7 @@ const TEMPLATE_CONTENT = {
         eyebrow: "Who supplies what",
         title: "What Article 72 expects, what the toolkit can add, and what your team still owns",
         note:
-          "Without connecting your agent and collecting recurring history, the toolkit can only draft the monitoring plan from the current package. After adapter integration and recurring runs, it can add monitoring history, drift signals, and linked review outputs.",
+          "Without connecting your agent and collecting recurring history, the toolkit can only draft the monitoring plan from the current package. After adapter integration and recurring runs, it can add monitoring history, drift signals, and linked follow-up outputs.",
         headers: [
           "Article 72 expects",
           "Toolkit with generated package only",
@@ -4385,17 +5752,17 @@ const TEMPLATE_CONTENT = {
           [
             "Named triggers for new review or escalation",
             "Can point to current execution-quality issues or open risks already visible in the package.",
-            "Can add drift signals, recurring failures, blocking constats, and linked review outcomes from recurring runs.",
+            "Can add drift signals, recurring failures, blocking constats, and linked follow-up outputs from recurring runs.",
             "Decide which triggers require escalation, which require only review, and which require incident preparation.",
           ],
           [
             "A continuity loop back into governance",
-            "Can show how the current package already links revue de mise en production and unresolved gaps.",
-            "Can link monitoring outputs back to revue de mise en production, Article 9 risk updates, and corrective-action follow-up.",
+            "Can show how the current package already links open risks and unresolved gaps.",
+            "Can link monitoring outputs back to Article 9 risk updates and corrective-action follow-up.",
             "Define the response workflow, owner, and timeline once a monitoring trigger fires.",
           ],
           [
-            "Post-release interpretation and response",
+            "Monitoring interpretation and response",
             "Can expose the signals and the structured outputs generated from them.",
             "Still does not decide the commercial, legal, or organizational meaning of those signals after integration.",
             "Interpret the signal, choose the action, and approve any resulting operational or regulatory response.",
@@ -4489,7 +5856,7 @@ const TEMPLATE_CONTENT = {
         rows: [
           [
             "Monitoring cadence",
-            "Before the plan is used in production or governance review.",
+            "Before the plan is used in operation or governance review.",
             "A short schedule naming how often the signals are reviewed and by whom.",
           ],
           [
@@ -4586,7 +5953,7 @@ const TEMPLATE_CONTENT = {
     dossierContext: {
       en: {
         eyebrow: "How this fits into the full package",
-        title: "Article 72 is built from monitoring, review, and risk-update files",
+        title: "Article 72 is built from monitoring, follow-up, and risk-update files",
         lead:
           "The files below are the main evidence surfaces for Article 72. Their layout is the toolkit's structured format for these requirements, not an EU-mandated form.",
         headers: ["File in the package", "Why it matters for Article 72", "Open file"],
@@ -4598,17 +5965,17 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "Post-market monitoring - post-market-monitoring.json",
-            "Current monitoring history and drift evidence used after release.",
+            "Current monitoring history and drift evidence used during operation.",
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
           [
-            "Release review - release-review.json",
-            "Shows how monitoring constats link back to release status and follow-up.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Compare report - compare-report.json",
+            "Shows the current execution-quality signals and recurring case outcomes that monitoring can refer back to.",
+            "demo/eu-ai-act/compare-report.json",
           ],
           [
             "Article 9 risk register - article-9-risk-register.json",
-            "Shows how post-release constats can reopen or update risk entries.",
+            "Shows how monitoring constats can reopen or update risk entries.",
             "demo/eu-ai-act/compliance/article-9-risk-register.json",
           ],
         ],
@@ -5071,12 +6438,12 @@ const TEMPLATE_CONTENT = {
           [
             "Intended purpose and operating constraints",
             "Can expose operator inputs still required for intended purpose and constraints.",
-            "Can keep those fields linked to the latest Article 13, oversight, and review outputs from the connected system.",
+            "Can keep those fields linked to the latest Article 13, oversight, and other statutory outputs from the connected system.",
             "Write the final intended purpose, target users, excluded uses, and deployment assumptions.",
           ],
           [
             "Linked evidence across risk, logging, oversight, and quality",
-            "Can already link the dossier to generated Article 9, 12, 13, 14, 15, 17, 72, and 73 outputs in the package.",
+            "Can already link the dossier to generated Article 9, 10, 12, 13, 14, 15, 16, 17, 43, 47, 72, and Annex V outputs in the package.",
             "Keeps those links current as the connected agent is rerun and monitored over time.",
             "Decide whether the linked evidence is sufficient for the claim you want to make in the dossier.",
           ],
@@ -5185,7 +6552,7 @@ const TEMPLATE_CONTENT = {
           ],
           [
             "Operator organization and roles",
-            "When the dossier needs to show who owns oversight, release, and monitoring.",
+            "When the dossier needs to show who owns oversight, documentation updates, and monitoring.",
             "A short role map naming accountable teams and approval points.",
           ],
           [
@@ -5283,9 +6650,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
           ],
           [
-            "Evidence index - evidence-index.json",
-            "Shows the clause-by-clause evidence selectors and residual gaps behind the dossier.",
-            "demo/eu-ai-act/compliance/evidence-index.json",
+            "Article 10 data governance - article-10-data-governance.json",
+            "One of the linked article outputs the dossier depends on for data governance and data-quality controls.",
+            "demo/eu-ai-act/compliance/article-10-data-governance.json",
           ],
           [
             "Article 9 risk register - article-9-risk-register.json",
@@ -5616,6 +6983,10 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+function jsonForScript(value) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
 function renderInlineCode(value) {
   return String(value)
     .split(/`([^`]+)`/g)
@@ -5680,6 +7051,8 @@ function createPage(locale, key, segment, options) {
     description: options.description,
     keywords: options.keywords || "",
     schema: options.schema || [],
+    noindex: options.noindex === true,
+    excludeFromSitemap: options.excludeFromSitemap === true,
     body: options.body,
   };
 }
@@ -5691,6 +7064,124 @@ function pagePath(locale, segment) {
 function canonicalUrl(origin, locale, segment) {
   const suffix = [locale, ...toSegments(segment)].join("/");
   return `${origin}/${suffix}/`;
+}
+
+function absoluteAssetUrl(origin, assetPath) {
+  return `${origin}/${assetPath.replace(/^\/+/, "")}`;
+}
+
+function ogLocale(locale) {
+  return locale === "de" ? "de_DE" : locale === "fr" ? "fr_FR" : "en_US";
+}
+
+function pageLabel(page, locale) {
+  const localeCopy = LOCALES[locale];
+  const keyMap = {
+    landing: locale === "de" ? "Start" : locale === "fr" ? "Accueil" : "Home",
+    "how-it-works": localeCopy.nav.how,
+    technical: localeCopy.nav.technical,
+    templates: localeCopy.nav.templates,
+    pricing: localeCopy.nav.pricing,
+    docs: localeCopy.nav.docs,
+    builder: localeCopy.nav.start,
+    contact: localeCopy.footer.contact,
+    blog: localeCopy.blog.headline,
+    privacy: localeCopy.footer.privacy,
+    terms: localeCopy.footer.terms,
+    disclaimer: localeCopy.footer.disclaimer,
+    cookies: localeCopy.footer.cookies,
+  };
+  return keyMap[page.key] || page.title;
+}
+
+function websiteSchema(origin, locale) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "EU AI Evidence Builder",
+    url: `${origin}/${locale}/`,
+    inLanguage: locale,
+  };
+}
+
+function organizationSchema(origin) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "EU AI Evidence Builder",
+    url: `${origin}/en/`,
+    sameAs: [GITHUB_REPO],
+  };
+}
+
+function pageSchema(page, origin) {
+  const type =
+    page.key === "docs" || page.key === "templates" || page.key === "blog"
+      ? "CollectionPage"
+      : page.key === "builder"
+        ? "WebApplication"
+        : page.segment.startsWith("blog/")
+          ? "Article"
+          : "WebPage";
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": type,
+    name: formatPageTitle(page.title),
+    description: page.description,
+    inLanguage: page.locale,
+    url: canonicalUrl(origin, page.locale, page.segment),
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: `${origin}/${page.locale}/`,
+    },
+  };
+  if (type === "Article") {
+    schema.author = { "@type": "Organization", name: SITE_NAME };
+    schema.publisher = { "@type": "Organization", name: SITE_NAME };
+    schema.mainEntityOfPage = canonicalUrl(origin, page.locale, page.segment);
+    schema.articleSection = "EU AI Act";
+  }
+  return schema;
+}
+
+function breadcrumbSchema(page, allPages, origin) {
+  const crumbs = [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: page.locale === "de" ? "Start" : page.locale === "fr" ? "Accueil" : "Home",
+      item: `${origin}/${page.locale}/`,
+    },
+  ];
+
+  if (!page.segment) {
+    return {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: crumbs,
+    };
+  }
+
+  const segmentParts = toSegments(page.segment);
+  let acc = [];
+  for (const part of segmentParts) {
+    acc = [...acc, part];
+    const segment = acc.join("/");
+    const match = allPages.find((candidate) => candidate.locale === page.locale && candidate.segment === segment);
+    crumbs.push({
+      "@type": "ListItem",
+      position: crumbs.length + 1,
+      name: match ? pageLabel(match, page.locale) : part,
+      item: canonicalUrl(origin, page.locale, segment),
+    });
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs,
+  };
 }
 
 function renderHeader(page, localeCopy, href, localeOptions, pageAlternates) {
@@ -5717,10 +7208,9 @@ function renderHeader(page, localeCopy, href, localeOptions, pageAlternates) {
           <a href="${href("technical")}">${escapeHtml(localeCopy.nav.technical)}</a>
           <a href="${href("templates")}">${escapeHtml(localeCopy.nav.templates)}</a>
           <a href="${href("pricing")}">${escapeHtml(localeCopy.nav.pricing)}</a>
-          <a href="${href("docs")}">${escapeHtml(localeCopy.nav.docs)}</a>
           <a class="button" href="${href("builder")}" data-track-event="header_start_free">${escapeHtml(
-            localeCopy.nav.start
-          )}</a>
+    localeCopy.nav.start
+  )}</a>
           <label class="sr-only" for="locale-switcher">${escapeHtml(localeCopy.common.languageLabel)}</label>
           <select id="locale-switcher" class="locale-switch" data-locale-switcher>
             ${options}
@@ -5777,6 +7267,28 @@ function renderFaq(items) {
     .join("");
 }
 
+function renderPageFaqSection(locale, items) {
+  if (!Array.isArray(items) || items.length === 0) return "";
+  const eyebrow = locale === "de" ? "FAQ" : locale === "fr" ? "FAQ" : "FAQ";
+  const title =
+    locale === "de"
+      ? "Haeufige Fragen"
+      : locale === "fr"
+        ? "Questions frequentes"
+        : "Frequently asked questions";
+  return `
+    <section class="section section-tight">
+      <div class="container">
+        <p class="eyebrow">${escapeHtml(eyebrow)}</p>
+        <h2 class="section-title">${escapeHtml(title)}</h2>
+        <div class="split-grid">
+          ${renderFaq(items)}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function renderTemplateDownloadLink(downloadHref, label) {
   return `<a class="button" href="${downloadHref}" download>${escapeHtml(label)}</a>`;
 }
@@ -5789,6 +7301,7 @@ function pickLocalizedValue(value, locale) {
 
 function renderPageHtml(page, allPages, proof, origin) {
   const localeCopy = LOCALES[page.locale];
+  const fullTitle = formatPageTitle(page.title);
   const currentParts = pagePath(page.locale, page.segment);
   const pageAlternates = allPages.filter((candidate) => candidate.key === page.key);
   const href = (key, locale = page.locale) => {
@@ -5800,16 +7313,46 @@ function renderPageHtml(page, allPages, proof, origin) {
     }
     return relativeHref(currentParts, pagePath(target.locale, target.segment));
   };
-  const assetHref = (assetPath) => relativeFileHref(currentParts, toSegments(assetPath));
+  const assetHref = (assetPath) => {
+    if (typeof assetPath === "string" && assetPath.startsWith("demo/")) {
+      const localizedDemoPath = `demo/${page.locale}/${assetPath.slice("demo/".length)}`;
+      return relativeFileHref(currentParts, toSegments(localizedDemoPath));
+    }
+    return relativeFileHref(currentParts, toSegments(assetPath));
+  };
+  const versionedAssetHref = (assetPath) => {
+    const hrefValue = assetHref(assetPath);
+    if (typeof assetPath !== "string" || !assetPath.startsWith("site-assets/")) {
+      return hrefValue;
+    }
+    const fsPath = path.join(SITE_OUTPUT_ROOT, ...toSegments(assetPath));
+    if (!existsSync(fsPath)) {
+      return hrefValue;
+    }
+    if (!ASSET_VERSION_CACHE.has(fsPath)) {
+      const digest = createHash("sha1").update(readFileSync(fsPath)).digest("hex").slice(0, 10);
+      ASSET_VERSION_CACHE.set(fsPath, digest);
+    }
+    return `${hrefValue}?v=${ASSET_VERSION_CACHE.get(fsPath)}`;
+  };
   const alternates = pageAlternates
     .map((alt) => {
       const hrefLang = alt.locale === "en" ? "en" : alt.locale;
       return `<link rel="alternate" hreflang="${hrefLang}" href="${canonicalUrl(origin, alt.locale, alt.segment)}" />`;
     })
     .join("\n");
-  const schemaBlocks = (page.schema || [])
+  const schemaBlocks = [pageSchema(page, origin), breadcrumbSchema(page, allPages, origin), ...(page.schema || [])]
     .map((schema) => `<script type="application/ld+json">${JSON.stringify(schema)}</script>`)
     .join("\n");
+  const ogAltLocales = pageAlternates
+    .filter((alt) => alt.locale !== page.locale)
+    .map((alt) => `<meta property="og:locale:alternate" content="${ogLocale(alt.locale)}" />`)
+    .join("\n");
+  const robotsMeta = page.noindex
+    ? "noindex, nofollow"
+    : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+  const socialImage = absoluteAssetUrl(origin, proof.screenshotPaths.secondary);
+  const ogType = page.segment.startsWith("blog/") ? "article" : page.key === "landing" ? "website" : "website";
   const plausibleScript = PLAUSIBLE_DOMAIN
     ? `<script defer data-domain="${escapeHtml(PLAUSIBLE_DOMAIN)}" src="https://plausible.io/js/script.file-downloads.outbound-links.js"></script>`
     : "";
@@ -5819,13 +7362,27 @@ function renderPageHtml(page, allPages, proof, origin) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(page.title)}</title>
+  <title>${escapeHtml(fullTitle)}</title>
   <meta name="description" content="${escapeHtml(page.description)}" />
+  <meta name="robots" content="${robotsMeta}" />
   ${page.keywords ? `<meta name="keywords" content="${escapeHtml(page.keywords)}" />` : ""}
   <link rel="canonical" href="${canonicalUrl(origin, page.locale, page.segment)}" />
   ${alternates}
   <link rel="alternate" hreflang="x-default" href="${origin}/en/" />
-  <link rel="stylesheet" href="${assetHref("site-assets/site.css")}" />
+  <meta property="og:type" content="${ogType}" />
+  <meta property="og:title" content="${escapeHtml(fullTitle)}" />
+  <meta property="og:description" content="${escapeHtml(page.description)}" />
+  <meta property="og:url" content="${canonicalUrl(origin, page.locale, page.segment)}" />
+  <meta property="og:site_name" content="EU AI Evidence Builder" />
+  <meta property="og:locale" content="${ogLocale(page.locale)}" />
+  ${ogAltLocales}
+  <meta property="og:image" content="${socialImage}" />
+  <meta property="og:image:alt" content="EU AI Evidence Builder proof surface" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${escapeHtml(fullTitle)}" />
+  <meta name="twitter:description" content="${escapeHtml(page.description)}" />
+  <meta name="twitter:image" content="${socialImage}" />
+  <link rel="stylesheet" href="${versionedAssetHref("site-assets/site.css")}" />
   ${plausibleScript}
   ${schemaBlocks}
 </head>
@@ -5839,8 +7396,8 @@ function renderPageHtml(page, allPages, proof, origin) {
     ${renderFooter(page, localeCopy, href)}
   </div>
   ${renderCookieBanner(localeCopy)}
-  <script src="${assetHref("site-assets/site.js")}" defer></script>
-  ${page.key === "builder" ? `<script src="${assetHref("site-assets/builder.js")}" defer></script>` : ""}
+  <script src="${versionedAssetHref("site-assets/site.js")}" defer></script>
+  ${page.key === "builder" ? `<script src="${versionedAssetHref("site-assets/builder.js")}" defer></script>` : ""}
 </body>
 </html>`;
 }
@@ -5858,36 +7415,36 @@ function renderLanding(locale, ctx) {
   const monitoringStatus =
     locale === "de"
       ? { history_current: "aktuell", history_stale: "veraltet", unknown: "unbekannt" }[proofSurface?.summary?.monitoring_status] ??
-        proofSurface?.summary?.monitoring_status ??
-        "aktuell"
+      proofSurface?.summary?.monitoring_status ??
+      "aktuell"
       : locale === "fr"
         ? { history_current: "a jour", history_stale: "obsolete", unknown: "inconnu" }[proofSurface?.summary?.monitoring_status] ??
-          proofSurface?.summary?.monitoring_status ??
-          "a jour"
+        proofSurface?.summary?.monitoring_status ??
+        "a jour"
         : proofSurface?.summary?.monitoring_status ?? "history_current";
   const ui = {
     en: {
       metrics: ["Runs in window", "Approvals", "Blocks", "Monitoring"],
       entryEyebrow: "Entry paths",
-      fitEyebrow: "Strongest fit",
+      fitEyebrow: "Comparison",
       heroAlt: "Real evidence report screenshot",
     },
     de: {
       metrics: ["Laeufe im Fenster", "Freigaben", "Blockierungen", "Beobachtung"],
       entryEyebrow: "Einstiegspfade",
-      fitEyebrow: "Staerkster Fit",
+      fitEyebrow: "Vergleich",
       heroAlt: "Screenshot eines echten Nachweisberichts",
     },
     fr: {
       metrics: ["Runs dans la fenetre", "Approbations", "Blocages", "Surveillance"],
       entryEyebrow: "Parcours d'entree",
-      fitEyebrow: "Meilleur fit",
+      fitEyebrow: "Comparaison",
       heroAlt: "Capture d'un vrai rapport de preuve",
     },
     en: {
       metrics: ["Runs in window", "Approvals", "Blocks", "Monitoring"],
       entryEyebrow: "Entry paths",
-      fitEyebrow: "Strongest fit",
+      fitEyebrow: "Comparison",
       heroAlt: "Real evidence report screenshot",
     },
   }[locale];
@@ -5898,15 +7455,16 @@ function renderLanding(locale, ctx) {
           <p class="eyebrow">EU AI Evidence Builder</p>
           <h1>${escapeHtml(copy.heroTitle)}</h1>
           <p class="lead">${escapeHtml(copy.heroText)}</p>
+          ${copy.heroSubline ? `<p class="muted">${escapeHtml(copy.heroSubline)}</p>` : ""}
           <div class="button-row">
             <a class="button" href="${ctx.href("builder")}" data-track-event="landing_start_free">${escapeHtml(copy.primaryCta)}</a>
-            <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer" data-track-event="landing_proof">${escapeHtml(copy.secondaryCta)}</a>
+            <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer" data-track-event="landing_proof">${escapeHtml(copy.secondaryCta)}</a>
           </div>
           <div class="trust-line">
             ${LOCALES[locale].common.trustLine
-              .split("·")
-              .map((item) => `<span class="trust-pill">${escapeHtml(item.trim())}</span>`)
-              .join("")}
+      .split("·")
+      .map((item) => `<span class="trust-pill">${escapeHtml(item.trim())}</span>`)
+      .join("")}
           </div>
         </div>
         <aside class="hero-card fade-up">
@@ -5923,9 +7481,9 @@ function renderLanding(locale, ctx) {
           </div>
           <div class="button-row">
             <a class="button-soft" href="${ctx.assetHref("demo/")}" data-track-event="landing_demo_hub">${escapeHtml(common.liveDemos)}</a>
-            <a class="button-soft" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-              common.viewProof
-            )}</a>
+            <a class="button-soft" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(
+        common.viewProof
+      )}</a>
           </div>
         </aside>
       </div>
@@ -5937,8 +7495,8 @@ function renderLanding(locale, ctx) {
         <p class="lead">${escapeHtml(copy.audienceLead)}</p>
         <div class="docs-grid">
           ${copy.audienceCards
-            .map(
-              (card) => `
+      .map(
+        (card) => `
             <article class="card fade-up">
               <h3>${escapeHtml(card.title)}</h3>
               <p class="muted">${escapeHtml(card.text)}</p>
@@ -5947,8 +7505,8 @@ function renderLanding(locale, ctx) {
                 <a class="button-soft" href="${ctx.href(card.href)}">${escapeHtml(card.cta)}</a>
               </div>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -5963,11 +7521,11 @@ function renderLanding(locale, ctx) {
           </thead>
           <tbody>
             ${(copy.fitMatrixRows || [])
-              .map(
-                (row) => `
+      .map(
+        (row) => `
               <tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
-              )
-              .join("")}
+      )
+      .join("")}
           </tbody>
         </table>
         <p class="muted">${escapeHtml(copy.strongestFitTitle)}: ${escapeHtml(copy.strongestFitBody)}</p>
@@ -5975,6 +7533,7 @@ function renderLanding(locale, ctx) {
     </section>
     ${renderLandingDeliverables(locale)}
     ${renderLandingProofCta(locale, ctx)}
+    ${renderPageFaqSection(locale, copy.faq)}
   `;
 }
 
@@ -5987,19 +7546,19 @@ function renderPricingPreview(locale, ctx) {
         <p class="eyebrow">Pricing preview</p>
         <div class="pricing-grid">
           ${previewPlans
-            .map((plan) =>
-              renderPlanCard(
-                {
-                  ...plan,
-                  cta: { en: common.viewPricing, de: common.viewPricing, fr: common.viewPricing },
-                  href: "pricing",
-                },
-                locale,
-                ctx.href,
-                { fade: false }
-              )
-            )
-            .join("")}
+      .map((plan) =>
+        renderPlanCard(
+          {
+            ...plan,
+            cta: { en: common.viewPricing, de: common.viewPricing, fr: common.viewPricing },
+            href: "pricing",
+          },
+          locale,
+          ctx.href,
+          { fade: false }
+        )
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -6017,14 +7576,14 @@ function renderLandingDeliverables(locale) {
         <p class="lead">${escapeHtml(copy.deliverablesLead)}</p>
         <div class="docs-grid">
           ${copy.deliverablesCards
-            .map(
-              (card) => `
+      .map(
+        (card) => `
             <article class="card fade-up">
               <h3>${escapeHtml(card.title)}</h3>
               <p class="muted">${escapeHtml(card.text)}</p>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -6043,9 +7602,9 @@ function renderLandingProofCta(locale, ctx) {
         <p class="muted">${escapeHtml(copy.proofBody)}</p>
         <div class="button-row">
           <a class="button" href="${ctx.href("builder")}" data-track-event="landing_builder_cta">${escapeHtml(copy.primaryCta)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-            LOCALES[locale].common.viewProof
-          )}</a>
+          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(
+    LOCALES[locale].common.viewProof
+  )}</a>
           <a class="button-soft" href="${ctx.href("technical")}" data-track-event="landing_technical_cta">${escapeHtml(technicalCopy.landingButton)}</a>
         </div>
       </div>
@@ -6064,185 +7623,19 @@ function renderTechnicalCallout(locale, ctx) {
         <div class="button-row">
           <a class="button" href="${ctx.href("technical")}" data-track-event="landing_technical">${escapeHtml(copy.landingButton)}</a>
           <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.proofButton)}</a>
-          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/evidence-operations-model.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
+          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
         </div>
       </div>
     </section>
-  `;
-}
-
-function renderHolding(locale, ctx) {
-  const meta = LOCALES[locale].holding || LOCALES.en.holding;
-  const landing = LOCALES[locale].landing;
-  const technical = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
-  const how = LOCALES[locale].how;
-  const ui = {
-    en: {
-      eyebrow: "Holding page",
-      statusEyebrow: "Status",
-      statusTitle: "Not part of the main landing flow",
-      statusBody:
-        "These sections were removed from the homepage intentionally. Keep them here until they are either deleted, rewritten, or moved into a stronger page.",
-      levelsEyebrow: "From L0 to L5",
-      levelsTitle: "Move from ad-hoc testing to review-ready evidence",
-      l0: "Screenshots, one-off checks, and no portable handoff.",
-      l5: "Verified Evidence Pack, structured review record, archive-ready package, and EU dossier outputs when needed.",
-      levelsBody: "Use this as a qualification shortcut, not as a promise of automatic legal completion.",
-      liveEyebrow: "Live surface",
-      liveTitle: "Use the demo hub as the proof layer of the site",
-      liveHub: "Open demo hub",
-      liveJson: "Open JSON index",
-      liveBody:
-        "This block was removed from the public workflow page because it read like a demo deck instead of a workflow explanation.",
-    },
-    de: {
-      eyebrow: "Holding-Seite",
-      statusEyebrow: "Status",
-      statusTitle: "Kein Teil des Haupt-Funnels",
-      statusBody:
-        "Diese Abschnitte wurden bewusst von der Homepage entfernt. Sie bleiben hier, bis sie geloescht, umgeschrieben oder auf eine staerkere Seite verschoben werden.",
-      levelsEyebrow: "Von L0 bis L5",
-      levelsTitle: "Von Ad-hoc-Tests zu prueffertigen Nachweisen",
-      l0: "Screenshots, einmalige Checks und keine portable Uebergabe.",
-      l5: "Verifiziertes Nachweispaket, strukturiertes Pruefprotokoll, archivfaehiges Paket und bei Bedarf EU-Dossier-Ausgaben.",
-      levelsBody: "Nutzen Sie dies als Qualifikations-Abkuerzung, nicht als Versprechen automatischer rechtlicher Vollstaendigkeit.",
-      liveEyebrow: "Live-Oberflaeche",
-      liveTitle: "Demo-Hub als Nachweis-Ebene der Seite nutzen",
-      liveHub: "Demo-Hub oeffnen",
-      liveJson: "JSON-Index oeffnen",
-      liveBody:
-        "Dieser Block wurde von der oeffentlichen Workflow-Seite entfernt, weil er eher wie eine Demo-Flaeche als wie eine Workflow-Erklaerung wirkte.",
-    },
-    fr: {
-      eyebrow: "Page d'archivage",
-      statusEyebrow: "Statut",
-      statusTitle: "Pas dans le flux principal du site",
-      statusBody:
-        "Ces sections ont ete retirees volontairement de la page d'accueil. Elles restent ici jusqu'a suppression, reecriture ou transfert vers une page plus solide.",
-      levelsEyebrow: "De L0 a L5",
-      levelsTitle: "Passer de tests ad hoc a une preuve prete pour la revue",
-      l0: "Captures d'ecran, controles ponctuels et aucune transmission portable.",
-      l5: "Dossier de preuve verifie, trace de revue structuree, dossier pret pour l'archive et sorties de dossier UE quand necessaire.",
-      levelsBody: "Utilisez cela comme raccourci de qualification, pas comme promesse d'achevement juridique automatique.",
-      liveEyebrow: "Surface live",
-      liveTitle: "Utiliser le hub de demonstration comme couche de preuve du site",
-      liveHub: "Ouvrir le hub de demonstration",
-      liveJson: "Ouvrir l'index JSON",
-      liveBody:
-        "Ce bloc a ete retire de la page workflow publique parce qu'il ressemblait davantage a une vitrine de demonstration qu'a une explication du workflow.",
-    },
-  }[locale];
-  return `
-    <section class="section">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.eyebrow)}</p>
-          <h1>${escapeHtml(meta.headline)}</h1>
-          <p class="lead">${escapeHtml(meta.intro)}</p>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.statusEyebrow)}</p>
-          <h3>${escapeHtml(ui.statusTitle)}</h3>
-          <p class="muted">${escapeHtml(ui.statusBody)}</p>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(landing.solutionTitle)}</p>
-          <h2 class="section-title">${escapeHtml(landing.solutionTitle)}</h2>
-          <div class="timeline">
-            ${landing.steps
-              .map(
-                (step, index) => `
-              <article class="timeline-card">
-                <span class="timeline-step">${index + 1}</span>
-                <p>${escapeHtml(step)}</p>
-              </article>`
-              )
-              .join("")}
-          </div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.levelsEyebrow)}</p>
-          <h3>${escapeHtml(ui.levelsTitle)}</h3>
-          <div class="timeline section-tight">
-            <article class="timeline-card">
-              <span class="timeline-step">L0</span>
-              <p class="muted">${escapeHtml(ui.l0)}</p>
-            </article>
-            <article class="timeline-card">
-              <span class="timeline-step">L5</span>
-              <p class="muted">${escapeHtml(ui.l5)}</p>
-            </article>
-          </div>
-          <p class="muted">${escapeHtml(ui.levelsBody)}</p>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container evidence-card fade-up">
-        <p class="eyebrow">${escapeHtml(technical.eyebrow)}</p>
-        <h3>${escapeHtml(technical.landingTitle)}</h3>
-        <p class="muted">${escapeHtml(technical.landingBody)}</p>
-        <div class="button-row">
-          <a class="button" href="${ctx.href("technical")}">${escapeHtml(technical.landingButton)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-            technical.proofButton
-          )}</a>
-          <a class="button-soft" href="${ctx.href("how-it-works")}">${escapeHtml(LOCALES[locale].nav.how)}</a>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container split-grid">
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.liveEyebrow)}</p>
-          <h3>${escapeHtml(ui.liveTitle)}</h3>
-          <div class="button-row">
-            <a class="button" href="${ctx.assetHref("demo/")}" data-track-event="holding_demo_hub">${escapeHtml(ui.liveHub)}</a>
-            <a class="button-soft" href="${ctx.href("technical")}" data-track-event="holding_technical">${escapeHtml(technical.landingButton)}</a>
-            <a class="button-ghost" href="${ctx.assetHref("demo/product-surfaces.json")}" target="_blank" rel="noreferrer">${escapeHtml(ui.liveJson)}</a>
-          </div>
-          <div class="code-snippet"><code>{
-"artifact": "compare-report.json",
-"dossier": "eu-ai-act-report.html",
-"instructions": "article-13-instructions.json",
-"risk_register": "article-9-risk-register.json",
-"qms_lite": "article-17-qms-lite.json",
-"monitoring_plan": "article-72-monitoring-plan.json",
-"incident_pack": "article-73-serious-incident-pack.json"
-}</code></div>
-          <p class="muted">${escapeHtml(ui.liveBody)}</p>
-        </div>
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(how.workflowTitle)}</p>
-          <h2 class="section-title">${escapeHtml(how.workflowTitle)}</h2>
-          <div class="timeline">
-            ${how.workflowSteps
-              .map(
-                (step, index) => `
-              <article class="timeline-card">
-                <span class="timeline-step">${index + 1}</span>
-                <p>${escapeHtml(step)}</p>
-              </article>`
-              )
-              .join("")}
-          </div>
-        </div>
-      </div>
-    </section>
-    ${renderTechnicalHolding(locale, ctx)}
   `;
 }
 
 function renderHowItWorks(locale, ctx) {
   const copy = LOCALES[locale].how;
   const ui = {
-    en: { pipeline: "Pipeline", inputs: "Inputs", automated: "Automated path", human: "Human-owned", outputs: "Outputs" },
-    de: { pipeline: "Ablauf", inputs: "Eingaben", automated: "Automatisierter Pfad", human: "Menschlich verantwortet", outputs: "Ergebnisse" },
-    fr: { pipeline: "Parcours", inputs: "Entrees", automated: "Parcours automatise", human: "Reste humain", outputs: "Sorties" },
+    en: { pipeline: "Process", inputs: "Before you start", automated: "Step by step", outputs: "At the end" },
+    de: { pipeline: "Prozess", inputs: "Vor dem Start", automated: "Schritt fuer Schritt", outputs: "Am Ende" },
+    fr: { pipeline: "Processus", inputs: "Avant de commencer", automated: "Etape par etape", outputs: "A la fin" },
   }[locale];
   return `
     <section class="section">
@@ -6257,12 +7650,12 @@ function renderHowItWorks(locale, ctx) {
           <h3>${escapeHtml(copy.screenshotTitle)}</h3>
           <div class="proof-frame">
             <img src="${ctx.assetHref(ctx.proof.screenshotPaths.secondary)}" alt="${escapeHtml(
-              locale === "de"
-                ? "Screenshot eines prueffertigen Nachweispakets"
-                : locale === "fr"
-                  ? "Capture d'un dossier de preuve pret pour la revue"
-                  : "Review-ready evidence dossier screenshot"
-            )}" />
+    locale === "de"
+      ? "Screenshot eines prueffertigen Nachweispakets"
+      : locale === "fr"
+        ? "Capture d'un dossier de preuve pret pour la revue"
+        : "Review-ready evidence dossier screenshot"
+  )}" />
           </div>
           <p class="muted">${escapeHtml(copy.screenshotBody)}</p>
         </div>
@@ -6274,16 +7667,16 @@ function renderHowItWorks(locale, ctx) {
         <p class="lead">${escapeHtml(copy.summaryLead)}</p>
         <div class="docs-grid">
           ${copy.summaryColumns
-            .map(
-              (column) => `
+      .map(
+        (column) => `
             <article class="card fade-up">
               <h3>${escapeHtml(column.title)}</h3>
               <ul class="pricing-list">
                 ${column.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
               </ul>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -6294,39 +7687,31 @@ function renderHowItWorks(locale, ctx) {
         <p class="lead">${escapeHtml(copy.inputsLead)}</p>
         <div class="docs-grid">
           ${copy.inputCards
-            .map(
-              ([title, text]) => `
+      .map(
+        ([title, text]) => `
             <article class="card fade-up">
               <h3>${escapeHtml(title)}</h3>
               <p class="muted">${escapeHtml(text)}</p>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
     <section class="section">
-      <div class="container split-grid">
+      <div class="container">
         <div class="card fade-up">
           <p class="eyebrow">${escapeHtml(ui.automated)}</p>
           <h2 class="section-title">${escapeHtml(copy.workflowTitle)}</h2>
           <p class="lead">${escapeHtml(copy.workflowLead)}</p>
           <div class="timeline">
             ${copy.workflowSteps
-              .map(
-                (step, index) => `
+      .map(
+        (step, index) => `
               <article class="timeline-card"><span class="timeline-step">${index + 1}</span><p>${escapeHtml(step)}</p></article>`
-              )
-              .join("")}
+      )
+      .join("")}
           </div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.human)}</p>
-          <h3>${escapeHtml(copy.boundaryTitle)}</h3>
-          <p class="muted">${escapeHtml(copy.boundaryLead)}</p>
-          <ul class="pricing-list">
-            ${copy.boundaryPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
-          </ul>
         </div>
       </div>
     </section>
@@ -6337,14 +7722,14 @@ function renderHowItWorks(locale, ctx) {
         <p class="lead">${escapeHtml(copy.outputsLead)}</p>
         <div class="docs-grid">
           ${copy.outputCards
-            .map(
-              ([title, text]) => `
+      .map(
+        ([title, text]) => `
             <article class="card fade-up">
               <h3>${escapeHtml(title)}</h3>
               <p class="muted">${escapeHtml(text)}</p>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -6355,46 +7740,57 @@ function renderHowItWorks(locale, ctx) {
         <p class="muted">${escapeHtml(copy.proofBody)}</p>
         <div class="button-row">
           <a class="button" href="${ctx.href("builder")}" data-track-event="how_builder">${escapeHtml(LOCALES[locale].landing.primaryCta)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-            LOCALES[locale].common.viewProof
-          )}</a>
+          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(
+        LOCALES[locale].common.viewProof
+      )}</a>
           <a class="button-soft" href="${ctx.href("technical")}" data-track-event="how_technical">${escapeHtml(TECHNICAL_PAGE[locale]?.landingButton || TECHNICAL_PAGE.en.landingButton)}</a>
         </div>
       </div>
     </section>
+    ${renderPageFaqSection(locale, copy.faq)}
   `;
 }
 
 function renderTechnical(locale, ctx) {
   const copy = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
   const shared = getTechnicalShared(locale);
+  const repoHref = GITHUB_REPO;
   const ui = {
     en: {
+      verifyEyebrow: "Before installation",
       workflowEyebrow: "Workflow",
-      boundaryEyebrow: "Boundary",
-      quickstartEyebrow: "Quickstart",
-      commandsEyebrow: "Commands",
-      artifactsEyebrow: "Artifacts",
-      artifactsHeaders: ["Stage", "Artifact", "Ready signal"],
-      extendedEyebrow: "Extended notes",
+      boundaryEyebrow: "Human-owned",
+      quickstartEyebrow: "Self-serve EU starter",
+      commandsEyebrow: "Deeper technical inspection",
+      extendedEyebrow: "Next step",
+      proofEyebrow: "Live proof",
+      proofTitle: "What should already exist before installation time",
+      proofBody:
+        "A serious product should expose a reviewer-first dossier, explicit gates, and, for authority-facing paths, an authenticity story rather than hash-only integrity before your team spends time integrating it.",
     },
     de: {
+      verifyEyebrow: "Vor der Installation",
       workflowEyebrow: "Ablauf",
-      boundaryEyebrow: "Grenze",
-      quickstartEyebrow: "Schnellstart",
-      commandsEyebrow: "Kommandos",
-      artifactsEyebrow: "Artefakte",
-      artifactsHeaders: ["Stufe", "Artefakt", "Ready-Signal"],
-      extendedEyebrow: "Erweiterte Notizen",
+      boundaryEyebrow: "Menschlich gefuehrt",
+      quickstartEyebrow: "Am eigenen Agenten pruefen",
+      commandsEyebrow: "Tiefere technische Pruefung",
+      extendedEyebrow: "Naechster Schritt",
+      proofEyebrow: "Live-Nachweise",
+      proofTitle: "Was schon vor Integrationsaufwand sichtbar sein sollte",
+      proofBody:
+        "Ein ernstzunehmendes Produkt sollte ein reviewer-orientiertes Dossier, explizite Verifikationsschritte und fuer Behoerdenpfade eine Authentizitaetsgeschichte statt nur Hash-Integritaet zeigen, bevor Ihr Team Integrationszeit investiert.",
     },
     fr: {
+      verifyEyebrow: "Avant installation",
       workflowEyebrow: "Parcours",
-      boundaryEyebrow: "Frontiere",
-      quickstartEyebrow: "Demarrage rapide",
-      commandsEyebrow: "Commandes",
-      artifactsEyebrow: "Artefacts",
-      artifactsHeaders: ["Etape", "Artefact", "Signal de preparation"],
-      extendedEyebrow: "Notes etendues",
+      boundaryEyebrow: "Reste humain",
+      quickstartEyebrow: "Tester sur votre propre agent",
+      commandsEyebrow: "Inspection technique plus profonde",
+      extendedEyebrow: "Etape suivante",
+      proofEyebrow: "Preuve live",
+      proofTitle: "Ce qui doit deja exister avant de depenser du temps d'integration",
+      proofBody:
+        "Un produit serieux doit montrer un dossier oriente reviewer, des etapes de verification explicites et, pour les chemins tournes vers l'autorite, une histoire d'authenticite plutot qu'une simple integrite par hash avant que votre equipe n'investisse du temps d'integration.",
     },
   }[locale];
   return `
@@ -6405,42 +7801,69 @@ function renderTechnical(locale, ctx) {
           <h1>${escapeHtml(copy.headline)}</h1>
           <p class="lead">${escapeHtml(copy.intro)}</p>
           <div class="button-row section-tight">
-            <a class="button" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.proofButton)}</a>
-            <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/evidence-operations-model.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
-            <a class="button-soft" href="${ctx.href("docs")}">${escapeHtml(copy.docsButton)}</a>
+            <a class="button" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.reviewerButton)}</a>
+            <a class="button-ghost" href="${ctx.assetHref("demo/agent-evidence/report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
+            <a class="button-ghost" href="${ctx.assetHref("demo/")}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
+            <a class="button-soft" href="#first-run">${escapeHtml(copy.quickstartJumpButton)}</a>
           </div>
         </div>
         <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(copy.screenshotTitle)}</p>
-          <h3>${escapeHtml(copy.screenshotTitle)}</h3>
+          <p class="eyebrow">${escapeHtml(ui.proofEyebrow)}</p>
+          <h3>${escapeHtml(ui.proofTitle)}</h3>
           <div class="proof-frame">
             <img src="${ctx.assetHref(ctx.proof.screenshotPaths.secondary)}" alt="${escapeHtml(
-              locale === "de"
-                ? "Screenshot eines verifizierten technischen Nachweispakets"
-                : locale === "fr"
-                  ? "Capture d'un dossier de preuve technique verifie"
-                  : "Verified technical evidence bundle screenshot"
-            )}" />
+    locale === "de"
+      ? "Screenshot eines verifizierten technischen Nachweispakets"
+      : locale === "fr"
+        ? "Capture d'un dossier de preuve technique verifie"
+        : "Verified technical evidence bundle screenshot"
+  )}" />
           </div>
-          <p class="muted">${escapeHtml(copy.screenshotBody)}</p>
+          <p class="muted">${escapeHtml(ui.proofBody)}</p>
         </div>
       </div>
     </section>
     <section class="section section-tight">
       <div class="container">
-        <p class="eyebrow">${escapeHtml(copy.credibilityEyebrow)}</p>
-        <h2 class="section-title">${escapeHtml(copy.credibilityTitle)}</h2>
-        <p class="lead">${escapeHtml(copy.credibilityLead)}</p>
+        <p class="eyebrow">${escapeHtml(ui.verifyEyebrow)}</p>
+        <h2 class="section-title">${escapeHtml(copy.inspectTitle)}</h2>
+        <p class="lead">${escapeHtml(copy.inspectLead)}</p>
         <div class="docs-grid">
-          ${copy.credibilityCards
-            .map(
-              (card) => `
+          ${copy.inspectCards
+      .map(
+        ([title, text]) => `
             <article class="card fade-up">
-              <h3>${escapeHtml(card.title)}</h3>
-              <p class="muted">${escapeHtml(card.text)}</p>
+              <h3>${escapeHtml(title)}</h3>
+              <p class="muted">${escapeHtml(text)}</p>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight" id="first-run">
+      <div class="container evidence-card fade-up">
+        <p class="eyebrow">${escapeHtml(ui.quickstartEyebrow)}</p>
+        <h3>${escapeHtml(copy.quickstartTitle)}</h3>
+        <p class="muted">${escapeHtml(copy.quickstartLead)}</p>
+        ${copy.quickstartCommand ? `<div class="code-snippet"><code>${escapeHtml(copy.quickstartCommand)}</code></div>` : ""}
+        <div class="docs-grid section-tight">
+          ${copy.quickstartColumns
+      .map(
+        (column) => `
+            <article class="card fade-up">
+              <h3>${escapeHtml(column.title)}</h3>
+              <ul class="pricing-list">
+                ${column.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+              </ul>
+            </article>`
+      )
+      .join("")}
+        </div>
+        <div class="button-row">
+          <a class="button" href="${ctx.href("starter")}">${escapeHtml(copy.quickstartButton || copy.repoButton)}</a>
+          <a class="button-ghost" href="${ctx.assetHref("demo/agent-evidence/report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
+          <a class="button-soft" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.reviewerButton)}</a>
         </div>
       </div>
     </section>
@@ -6450,16 +7873,16 @@ function renderTechnical(locale, ctx) {
         <p class="lead">${escapeHtml(copy.summaryLead)}</p>
         <div class="docs-grid">
           ${copy.summaryColumns
-            .map(
-              (column) => `
+      .map(
+        (column) => `
             <article class="card fade-up">
               <h3>${escapeHtml(column.title)}</h3>
               <ul class="pricing-list">
                 ${column.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
               </ul>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -6471,14 +7894,14 @@ function renderTechnical(locale, ctx) {
           <p class="lead">${escapeHtml(copy.compactWorkflowLead)}</p>
           <div class="timeline section-tight">
             ${copy.compactWorkflowSteps
-              .map(
-                (step, index) => `
+      .map(
+        (step, index) => `
               <article class="timeline-card">
                 <span class="timeline-step">${index + 1}</span>
                 <p>${escapeHtml(step)}</p>
               </article>`
-              )
-              .join("")}
+      )
+      .join("")}
           </div>
         </div>
         <div class="proof-card fade-up">
@@ -6493,58 +7916,13 @@ function renderTechnical(locale, ctx) {
     </section>
     <section class="section section-tight">
       <div class="container evidence-card fade-up">
-        <p class="eyebrow">${escapeHtml(ui.quickstartEyebrow)}</p>
-        <h3>${escapeHtml(copy.quickstartTitle)}</h3>
-        <p class="muted">${escapeHtml(copy.quickstartLead)}</p>
-        <div class="code-snippet"><code>${escapeHtml(copy.quickstartCommand)}</code></div>
-        <div class="docs-grid section-tight">
-          ${copy.quickstartColumns
-            .map(
-              (column) => `
-            <article class="card fade-up">
-              <h3>${escapeHtml(column.title)}</h3>
-              <ul class="pricing-list">
-                ${column.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
-              </ul>
-            </article>`
-            )
-            .join("")}
-        </div>
+        <p class="eyebrow">${escapeHtml(ui.commandsEyebrow)}</p>
+        <h3>${escapeHtml(copy.commandsTitle)}</h3>
+        <p class="muted">${escapeHtml(copy.commandsLead)}</p>
+        <div class="code-snippet"><code>${escapeHtml(TECHNICAL_SHARED.packageCommands.join("\n"))}</code></div>
         <div class="button-row">
-          <a class="button" href="${GITHUB_REPO}/blob/main/docs/quickstart-your-agent.md" target="_blank" rel="noreferrer">${escapeHtml(copy.quickstartButton)}</a>
-          <a class="button-soft" href="${ctx.href("docs")}">${escapeHtml(copy.docsButton)}</a>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.commandsEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.commandsTitle)}</h2>
-          <p class="muted">${escapeHtml(copy.commandsLead)}</p>
-          <div class="code-snippet"><code>${escapeHtml(TECHNICAL_SHARED.packageCommands.join("\n"))}</code></div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.artifactsEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.artifactsSummaryTitle)}</h2>
-          <p class="muted">${escapeHtml(copy.artifactsSummaryLead)}</p>
-          <table class="section-table section-tight">
-            <thead>
-              <tr><th>${escapeHtml(ui.artifactsHeaders[0])}</th><th>${escapeHtml(ui.artifactsHeaders[1])}</th><th>${escapeHtml(ui.artifactsHeaders[2])}</th></tr>
-            </thead>
-            <tbody>
-              ${shared.compactArtifactRows
-                .map(
-                  (row) => `
-                <tr>
-                  <td>${escapeHtml(row[0])}</td>
-                  <td>${renderInlineCode(row[1])}</td>
-                  <td>${escapeHtml(row[2])}</td>
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
+          <a class="button" href="${repoHref}" target="_blank" rel="noreferrer" data-track-event="technical_repo">${escapeHtml(copy.repoButton)}</a>
+          <a class="button-ghost" href="${ctx.assetHref("demo/agent-evidence/report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
         </div>
       </div>
     </section>
@@ -6554,309 +7932,9 @@ function renderTechnical(locale, ctx) {
         <h3>${escapeHtml(copy.extendedTitle)}</h3>
         <p class="muted">${escapeHtml(copy.extendedBody)}</p>
         <div class="button-row">
-          <a class="button" href="${ctx.href("holding")}" data-track-event="technical_holding">${escapeHtml(copy.extendedButton || copy.extendedTitle)}</a>
-          <a class="button-ghost" href="${ctx.href("builder")}" data-track-event="technical_builder">${escapeHtml(LOCALES[locale].landing.primaryCta)}</a>
-          <a class="button-soft" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.proofButton)}</a>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-function renderTechnicalHolding(locale, ctx) {
-  const copy = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
-  const shared = getTechnicalShared(locale);
-  const ui = {
-    en: {
-      extendedEyebrow: "Extended technical notes",
-      workflowEyebrow: "Ablauf",
-      intakeEyebrow: "Eingangsschicht",
-      humanEyebrow: "Human-owned",
-      humanHeaders: ["Area", "Why it stays manual"],
-      artifactsEyebrow: "Artifacts",
-      artifactHeaders: ["Stage", "Artifact", "Created by", "Ready gate"],
-      reviewEyebrow: "Pruefung",
-      gateEyebrow: "Gate",
-      readinessEyebrow: "Readiness",
-      maturityEyebrow: "Maturity",
-      maturityHeaders: ["Level", "Name", "Characteristics"],
-      triggerEyebrow: "Re-run triggers",
-      triggerHeaders: ["Trigger", "Expected action"],
-      supportEyebrow: "Support scope",
-      supportHeaders: ["Layer", "Good fit", "Not included"],
-      failureEyebrow: "Failure modes",
-    },
-    de: {
-      extendedEyebrow: "Erweiterte technische Notizen",
-      workflowEyebrow: "Ablauf",
-      intakeEyebrow: "Eingangsschicht",
-      humanEyebrow: "Menschlich verantwortet",
-      humanHeaders: ["Bereich", "Warum es manuell bleibt"],
-      artifactsEyebrow: "Artefakte",
-      artifactHeaders: ["Stufe", "Artefakt", "Erstellt von", "Freigabeschritt"],
-      reviewEyebrow: "Pruefung",
-      gateEyebrow: "Freigabe",
-      readinessEyebrow: "Vorbereitung",
-      maturityEyebrow: "Reifegrad",
-      maturityHeaders: ["Stufe", "Name", "Merkmale"],
-      triggerEyebrow: "Trigger fuer neue Laeufe",
-      triggerHeaders: ["Trigger", "Erwartete Aktion"],
-      supportEyebrow: "Supportumfang",
-      supportHeaders: ["Ebene", "Geeigneter Fit", "Nicht enthalten"],
-      failureEyebrow: "Ausfallmuster",
-    },
-    fr: {
-      extendedEyebrow: "Notes techniques etendues",
-      workflowEyebrow: "Parcours",
-      intakeEyebrow: "Couche d'entree",
-      humanEyebrow: "Reste humain",
-      humanHeaders: ["Zone", "Pourquoi cela reste manuel"],
-      artifactsEyebrow: "Artefacts",
-      artifactHeaders: ["Etape", "Artefact", "Cree par", "Etape de disponibilite"],
-      reviewEyebrow: "Revue",
-      gateEyebrow: "Controle de revue",
-      readinessEyebrow: "Preparation",
-      maturityEyebrow: "Maturite",
-      maturityHeaders: ["Niveau", "Nom", "Caracteristiques"],
-      triggerEyebrow: "Declencheurs de nouveau run",
-      triggerHeaders: ["Declencheur", "Action attendue"],
-      supportEyebrow: "Perimetre du support",
-      supportHeaders: ["Niveau", "Bon fit", "Non inclus"],
-      failureEyebrow: "Modes de defaillance",
-    },
-  }[locale];
-  return `
-    <section class="section">
-      <div class="container evidence-card fade-up">
-        <p class="eyebrow">${escapeHtml(ui.extendedEyebrow)}</p>
-        <h2>${escapeHtml(copy.extendedTitle)}</h2>
-        <p class="muted">${escapeHtml(copy.extendedBody)}</p>
-        <div class="button-row">
-          <a class="button" href="${ctx.href("technical")}">${escapeHtml(copy.landingButton)}</a>
-          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/evidence-operations-model.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(copy.planningTitle)}</p>
-          <h2 class="section-title">${escapeHtml(copy.planningTitle)}</h2>
-          <div class="metric-grid">
-            ${copy.estimates
-              .map(
-                ([label, value]) => `
-              <div class="metric">
-                <span>${escapeHtml(label)}</span>
-                <strong>${escapeHtml(value)}</strong>
-              </div>`
-              )
-              .join("")}
-          </div>
-          <p class="muted">${escapeHtml(copy.planningNote)}</p>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.workflowEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.workflowTitle)}</h2>
-          <div class="timeline section-tight">
-            ${shared.workflowSteps
-              .map(
-                ([title, text], index) => `
-              <article class="timeline-card">
-                <span class="timeline-step">${index + 1}</span>
-                <h3>${escapeHtml(title)}</h3>
-                <p class="muted">${escapeHtml(text)}</p>
-              </article>`
-              )
-              .join("")}
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.intakeEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.intakeTitle)}</h2>
-          <p class="muted">${escapeHtml(copy.intakeLead)}</p>
-          <div class="code-snippet"><code>${escapeHtml(TECHNICAL_SHARED.intakeCommands.join("\n"))}</code></div>
-          <ul class="check-list section-tight">
-            ${shared.intakeArtifacts.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-          </ul>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.humanEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.intakeHumanTitle)}</h2>
-          <table class="section-table">
-            <thead>
-              <tr><th>${escapeHtml(ui.humanHeaders[0])}</th><th>${escapeHtml(ui.humanHeaders[1])}</th></tr>
-            </thead>
-            <tbody>
-              ${shared.humanOwnedRows
-                .map(
-                  (row) => `
-                <tr>
-                  <td>${escapeHtml(row[0])}</td>
-                  <td>${escapeHtml(row[1])}</td>
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-    ${renderTechnicalCasesSection(locale)}
-    <section class="section section-tight">
-      <div class="container table-card fade-up">
-        <p class="eyebrow">${escapeHtml(ui.artifactsEyebrow)}</p>
-        <h2 class="section-title">${escapeHtml(copy.artifactsTitle)}</h2>
-        <p class="muted">${escapeHtml(copy.artifactsLead)}</p>
-        <table class="section-table">
-          <thead>
-            <tr><th>${escapeHtml(ui.artifactHeaders[0])}</th><th>${escapeHtml(ui.artifactHeaders[1])}</th><th>${escapeHtml(ui.artifactHeaders[2])}</th><th>${escapeHtml(ui.artifactHeaders[3])}</th></tr>
-          </thead>
-          <tbody>
-            ${shared.artifactRows
-              .map(
-                (row) => `
-                <tr>
-                  <td>${escapeHtml(row[0])}</td>
-                  <td>${renderInlineCode(row[1])}</td>
-                  <td>${escapeHtml(row[2])}</td>
-                  <td>${escapeHtml(row[3])}</td>
-                </tr>`
-              )
-              .join("")}
-          </tbody>
-        </table>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.reviewEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.reviewTitle)}</h2>
-          <p class="muted">${escapeHtml(copy.reviewLead)}</p>
-          <div class="code-snippet"><code>${escapeHtml(TECHNICAL_SHARED.reviewCommands.join("\n"))}</code></div>
-          <ul class="check-list section-tight">
-            ${shared.reviewArtifacts.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-          </ul>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.gateEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.reviewChecksTitle)}</h2>
-          <ul class="check-list section-tight">
-            ${shared.reviewChecks.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-          </ul>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.readinessEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.readinessTitle)}</h2>
-          <p class="muted">${escapeHtml(copy.readinessLead)}</p>
-          <ul class="check-list section-tight">
-            ${shared.readinessChecklist.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-          </ul>
-          <p class="eyebrow section-tight">${escapeHtml(copy.readinessScoreTitle)}</p>
-          <div class="timeline">
-            ${shared.readinessBands
-              .map(
-                ([score, text]) => `
-              <article class="timeline-card">
-                <span class="timeline-step">${escapeHtml(score)}</span>
-                <p class="muted">${escapeHtml(text)}</p>
-              </article>`
-              )
-              .join("")}
-          </div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.maturityEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.maturityTitle)}</h2>
-          <p class="muted">${escapeHtml(copy.maturityLead)}</p>
-          <table class="section-table">
-            <thead>
-              <tr><th>${escapeHtml(ui.maturityHeaders[0])}</th><th>${escapeHtml(ui.maturityHeaders[1])}</th><th>${escapeHtml(ui.maturityHeaders[2])}</th></tr>
-            </thead>
-            <tbody>
-              ${shared.maturityRows
-                .map(
-                  (row) => `
-                <tr>
-                  <td>${escapeHtml(row[0])}</td>
-                  <td>${escapeHtml(row[1])}</td>
-                  <td>${escapeHtml(row[2])}</td>
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.triggerEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.triggersTitle)}</h2>
-          <table class="section-table">
-            <thead>
-              <tr><th>${escapeHtml(ui.triggerHeaders[0])}</th><th>${escapeHtml(ui.triggerHeaders[1])}</th></tr>
-            </thead>
-            <tbody>
-              ${shared.triggerRows
-                .map(
-                  (row) => `
-                <tr>
-                  <td>${escapeHtml(row[0])}</td>
-                  <td>${escapeHtml(row[1])}</td>
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.supportEyebrow)}</p>
-          <h2 class="section-title">${escapeHtml(copy.supportTitle)}</h2>
-          <table class="section-table">
-            <thead>
-              <tr><th>${escapeHtml(ui.supportHeaders[0])}</th><th>${escapeHtml(ui.supportHeaders[1])}</th><th>${escapeHtml(ui.supportHeaders[2])}</th></tr>
-            </thead>
-            <tbody>
-              ${shared.supportRows
-                .map(
-                  (row) => `
-                <tr>
-                  <td>${escapeHtml(row[0])}</td>
-                  <td>${escapeHtml(row[1])}</td>
-                  <td>${escapeHtml(row[2])}</td>
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container">
-        <p class="eyebrow">${escapeHtml(ui.failureEyebrow)}</p>
-        <h2 class="section-title">${escapeHtml(copy.failureTitle)}</h2>
-        <div class="docs-grid section-tight">
-          ${shared.failureCards
-            .map(
-              ([title, text]) => `
-            <article class="card fade-up">
-              <h3>${escapeHtml(title)}</h3>
-              <p class="muted">${escapeHtml(text)}</p>
-            </article>`
-            )
-            .join("")}
+          <a class="button" href="${repoHref}" target="_blank" rel="noreferrer" data-track-event="technical_repo">${escapeHtml(copy.repoButton)}</a>
+          <a class="button-ghost" href="#first-run">${escapeHtml(copy.quickstartJumpButton)}</a>
+          <a class="button-soft" href="${ctx.assetHref("demo/")}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
         </div>
       </div>
     </section>
@@ -6934,15 +8012,15 @@ function renderTechnicalCasesSection(locale) {
             </thead>
             <tbody>
               ${copy.metricsRows
-                .map(
-                  (row) => `
+      .map(
+        (row) => `
                 <tr>
                   <td>${escapeHtml(row[0])}</td>
                   <td>${escapeHtml(row[1])}</td>
                   <td>${escapeHtml(row[2])}</td>
                 </tr>`
-                )
-                .join("")}
+      )
+      .join("")}
             </tbody>
           </table>
         </div>
@@ -6992,13 +8070,13 @@ function renderTemplatesIndex(locale, ctx, availableTemplateKeys) {
         <p class="lead">${escapeHtml(copy.intro)}</p>
         ${copy.note ? `<p class="muted">${escapeHtml(copy.note)}</p>` : ""}
         ${groups
-          .map((group) => `
+      .map((group) => `
             <p class="eyebrow section-tight">${escapeHtml(group.title || "")}</p>
             <div class="template-grid section-tight">
               ${group.keys
-                .map((key) => {
-              const data = TEMPLATE_CONTENT[key];
-              return `
+          .map((key) => {
+            const data = TEMPLATE_CONTENT[key];
+            return `
                 <article class="template-card fade-up">
                   <p class="eyebrow">${escapeHtml(key)}</p>
                   <h3>${escapeHtml(data.title[locale] || data.title.en)}</h3>
@@ -7007,11 +8085,11 @@ function renderTemplatesIndex(locale, ctx, availableTemplateKeys) {
                   </div>
                 </article>
               `;
-                })
-                .join("")}
+          })
+          .join("")}
             </div>
           `)
-          .join("")}
+      .join("")}
       </div>
     </section>
   `;
@@ -7046,7 +8124,7 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
   const hideBottomActions = data.hideBottomActions === true;
   const contributionTitle = pickLocalizedValue(data.contributionTitle, locale) || "What this covers technically";
   const boundaryTitle = pickLocalizedValue(data.boundaryTitle, locale) || "What remains human-owned";
-  const launchPackLabel = locale === "de" ? "Startpaket buchen" : locale === "fr" ? "Reserver le pack de lancement" : "Book Launch Pack";
+  const launchPackLabel = locale === "de" ? "Kontakt aufnehmen" : locale === "fr" ? "Nous contacter" : "Talk to us";
   const templateLabel = locale === "de" ? "Vorlage" : locale === "fr" ? "Modele" : "Template";
   const openFileLabel = locale === "de" ? "Datei oeffnen" : locale === "fr" ? "Ouvrir le fichier" : "Open file";
   return `
@@ -7058,10 +8136,9 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           <p class="lead">${escapeHtml(intro)}</p>
           ${hideCoverageLine ? "" : coverage ? `<p class="muted"><strong>${escapeHtml(copy.coverageLabel || fallbackCopy.coverageLabel || "Technical contribution")}:</strong> ${escapeHtml(coverage)}</p>` : ""}
         </div>
-        ${
-          artifactPanel || hideTopActions
-            ? ""
-            : `
+        ${artifactPanel || hideTopActions
+      ? ""
+      : `
         <aside class="proof-card fade-up">
           <p class="eyebrow">Download</p>
           <h3>Free template package</h3>
@@ -7072,12 +8149,11 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           </div>
         </aside>
         `
-        }
+    }
       </div>
     </section>
-    ${
-      contractMatrix
-        ? `
+    ${contractMatrix
+      ? `
     <section class="section section-tight">
       <div class="container table-card fade-up">
         <p class="eyebrow">${escapeHtml(contractMatrix.eyebrow || "Working split")}</p>
@@ -7089,72 +8165,67 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           </thead>
           <tbody>
             ${(contractMatrix.rows || [])
-              .map(
-                (row) => `
+        .map(
+          (row) => `
               <tr>
                 ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}
               </tr>`
-              )
-              .join("")}
+        )
+        .join("")}
           </tbody>
         </table>
       </div>
     </section>
     `
-        : ""
+      : ""
     }
-    ${
-      contractMatrix
-        ? ""
-        : `
+    ${contractMatrix
+      ? ""
+      : `
     <section class="section section-tight">
       <div class="container split-grid">
         <div class="card fade-up">
           <p class="eyebrow">${escapeHtml(requirementTitle)}</p>
           <p>${escapeHtml(requirement)}</p>
-          ${
-            requirementItems.length > 0
-              ? `<ul class="check-list section-tight">${requirementItems
-                  .map(([heading, body]) => `<li><strong>${escapeHtml(heading)}:</strong> ${escapeHtml(body)}</li>`)
-                  .join("")}</ul>`
-              : ""
-          }
+          ${requirementItems.length > 0
+        ? `<ul class="check-list section-tight">${requirementItems
+          .map(([heading, body]) => `<li><strong>${escapeHtml(heading)}:</strong> ${escapeHtml(body)}</li>`)
+          .join("")}</ul>`
+        : ""
+      }
         </div>
-        ${
-          artifactPanel
-            ? `
+        ${artifactPanel
+        ? `
         <div class="proof-card fade-up">
           <p class="eyebrow">${escapeHtml(artifactPanel.eyebrow || "What the toolkit actually produces")}</p>
           <h3>${escapeHtml(artifactPanel.title || "")}</h3>
           ${artifactPanel.lead ? `<p class="muted">${escapeHtml(artifactPanel.lead)}</p>` : ""}
-          ${
-            Array.isArray(artifactPanel.items) && artifactPanel.items.length > 0
-              ? `<ul class="check-list section-tight">${artifactPanel.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-              : ""
-          }
+          ${Array.isArray(artifactPanel.items) && artifactPanel.items.length > 0
+          ? `<ul class="check-list section-tight">${artifactPanel.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+          : ""
+        }
         </div>
         `
-            : `
+        : `
         <div class="proof-card fade-up">
           <p class="eyebrow">Proof-first</p>
           <img src="${ctx.assetHref(ctx.proof.screenshotPaths.primary)}" alt="${escapeHtml(
-            locale === "de"
-              ? "Screenshot eines echten Berichts"
-              : locale === "fr"
-                ? "Capture d'un rapport reel"
-                : "Real report screenshot"
-          )}" />
+          locale === "de"
+            ? "Screenshot eines echten Berichts"
+            : locale === "fr"
+              ? "Capture d'un rapport reel"
+              : "Real report screenshot"
+        )}" />
         </div>
         `
-        }
+      }
       </div>
     </section>
     `
     }
-    ${
-      contractMatrix
-        ? ""
-        : `
+    ${contractMatrix
+      ? ""
+      : `
     <section class="section section-tight">
       <div class="container split-grid">
         <div class="card fade-up">
@@ -7173,9 +8244,8 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
     </section>
     `
     }
-    ${
-      mapping && !contractMatrix
-        ? `
+    ${mapping && !contractMatrix
+      ? `
     <section class="section section-tight">
       <div class="container table-card fade-up">
         <p class="eyebrow">${escapeHtml(mapping.label || "Evidence mapping")}</p>
@@ -7186,23 +8256,22 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           </thead>
           <tbody>
             ${(mapping.rows || [])
-              .map(
-                (row) => `
+        .map(
+          (row) => `
               <tr>
                 ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}
               </tr>`
-              )
-              .join("")}
+        )
+        .join("")}
           </tbody>
         </table>
       </div>
     </section>
     `
-        : ""
+      : ""
     }
-    ${
-      operatorDetail
-        ? `
+    ${operatorDetail
+      ? `
     <section class="section section-tight">
       <div class="container table-card fade-up">
         <p class="eyebrow">${escapeHtml(operatorDetail.eyebrow || "Manual fields")}</p>
@@ -7214,23 +8283,22 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           </thead>
           <tbody>
             ${(operatorDetail.rows || [])
-              .map(
-                (row) => `
+        .map(
+          (row) => `
               <tr>
                 ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}
               </tr>`
-              )
-              .join("")}
+        )
+        .join("")}
           </tbody>
         </table>
       </div>
     </section>
     `
-        : ""
+      : ""
     }
-    ${
-      dossierContext
-        ? `
+    ${dossierContext
+      ? `
     <section class="section section-tight">
       <div class="container table-card fade-up">
         <p class="eyebrow">${escapeHtml(dossierContext.eyebrow || "Where this sits in the full dossier")}</p>
@@ -7242,27 +8310,26 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           </thead>
           <tbody>
             ${(dossierContext.rows || [])
-              .map((row) => {
-                const [fileLabel, description, href] = row;
-                return `
+        .map((row) => {
+          const [fileLabel, description, href] = row;
+          return `
               <tr>
                 <td>${escapeHtml(fileLabel)}</td>
                 <td>${escapeHtml(description)}</td>
                 <td>${href ? `<a class="button-ghost" href="${ctx.assetHref(href)}" target="_blank" rel="noreferrer">${openFileLabel}</a>` : ""}</td>
               </tr>`;
-              })
-              .join("")}
+        })
+        .join("")}
           </tbody>
         </table>
       </div>
     </section>
     `
-        : ""
+      : ""
     }
-    ${
-      hideSectionGuide
-        ? ""
-        : `
+    ${hideSectionGuide
+      ? ""
+      : `
     <section class="section section-tight">
       <div class="container table-card fade-up">
         <p class="eyebrow">Section guide</p>
@@ -7272,69 +8339,65 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           </thead>
           <tbody>
             ${rows
-              .map(
-                (row) => `
+        .map(
+          (row) => `
               <tr>
                 <td>${escapeHtml(row[0])}</td>
                 <td>${escapeHtml(row[1])}</td>
                 <td>${escapeHtml(row[2])}</td>
               </tr>`
-              )
-              .join("")}
+        )
+        .join("")}
           </tbody>
         </table>
       </div>
     </section>
     `
     }
-    ${
-      examples && !hideExamples
-        ? `
+    ${examples && !hideExamples
+      ? `
     <section class="section section-tight">
       <div class="container">
         <p class="eyebrow">Examples</p>
         <h3>${escapeHtml(examples.title || "Where this page becomes useful in practice")}</h3>
         <div class="three-col section-tight">
           ${(examples.items || [])
-            .map(
-              ([heading, body]) => `
+        .map(
+          ([heading, body]) => `
             <article class="card fade-up">
               <h3>${escapeHtml(heading)}</h3>
               <p>${escapeHtml(body)}</p>
             </article>`
-            )
-            .join("")}
+        )
+        .join("")}
         </div>
       </div>
     </section>
     `
-        : ""
+      : ""
     }
-    ${
-      hideBottomActions
-        ? ""
-        : `
+    ${hideBottomActions
+      ? ""
+      : `
     <section class="section section-tight">
       <div class="container evidence-card fade-up">
         <p class="eyebrow">${escapeHtml(resourcePanel?.eyebrow || "Generate machine-verifiable evidence")}</p>
         <h3>${escapeHtml(resourcePanel?.title || "Attach real proof to this section")}</h3>
         <p>${escapeHtml(resourcePanel?.lead || "Use the live proof surface to show exactly what technical evidence looks like when it is attached to a documentation package.")}</p>
         <div class="button-row">
-          ${
-            resourcePanel
-              ? renderTemplateDownloadLink(downloadHref, resourcePanel.downloadLabel || "Download free template")
-              : `<a class="button" href="${ctx.href("pricing")}" data-track-event="template_get_evidence">${escapeHtml(launchPackLabel)}</a>`
-          }
+          ${resourcePanel
+        ? renderTemplateDownloadLink(downloadHref, resourcePanel.downloadLabel || "Download free template")
+        : `<a class="button" href="${ctx.href("pricing")}" data-track-event="template_get_evidence">${escapeHtml(launchPackLabel)}</a>`
+      }
           <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(resourcePanel?.liveLabel || "Open live dossier")}</a>
         </div>
       </div>
     </section>
     `
     }
-    ${
-      hideFaq || faq.length === 0
-        ? ""
-        : `
+    ${hideFaq || faq.length === 0
+      ? ""
+      : `
     <section class="section section-tight">
       <div class="container">
         <p class="eyebrow">FAQ</p>
@@ -7356,8 +8419,8 @@ function renderPricing(locale, ctx) {
     fr: { eyebrow: "Tarifs", fitEyebrow: "Quel parcours convient", faqEyebrow: "FAQ" },
   }[locale];
   const starterPlan = getPlan("starter");
-  const launchPlan = getPlan("launch-pack");
-  const subscriptionPlans = ["team", "studio", "enterprise"].map((key) => getPlan(key)).filter(Boolean);
+  const helpPlan = getPlan("launch-pack");
+  const enterprisePlan = getPlan("enterprise");
   return `
     <section class="section">
       <div class="container split-grid">
@@ -7377,9 +8440,9 @@ function renderPricing(locale, ctx) {
       <div class="container">
         <div class="proof-card fade-up">
           <p class="eyebrow">${escapeHtml(copy.launchEyebrow)}</p>
-          <h3>${escapeHtml(copy.launchTitle)}</h3>
+          <h2>${escapeHtml(copy.launchTitle)}</h2>
           <p class="muted">${escapeHtml(copy.launchLead)}</p>
-          ${launchPlan ? renderPlanCard(launchPlan, locale, ctx.href, { fade: false }) : ""}
+          ${helpPlan ? renderPlanCard(helpPlan, locale, ctx.href, { fade: false }) : ""}
         </div>
       </div>
     </section>
@@ -7388,23 +8451,21 @@ function renderPricing(locale, ctx) {
         <p class="eyebrow">${escapeHtml(copy.tiersEyebrow)}</p>
         <h2>${escapeHtml(copy.tiersTitle)}</h2>
         <p class="muted">${escapeHtml(copy.tiersLead)}</p>
-        <div class="pricing-grid section-tight">
-          ${subscriptionPlans.map((plan) => renderPlanCard(plan, locale, ctx.href)).join("")}
-        </div>
+        ${enterprisePlan ? `<div class="pricing-grid section-tight">${renderPlanCard(enterprisePlan, locale, ctx.href)}</div>` : ""}
         <div class="proof-card section-tight fade-up">
           <p class="eyebrow">${escapeHtml(ui.fitEyebrow)}</p>
-          <h3>${escapeHtml(copy.fitTitle)}</h3>
+          <h2>${escapeHtml(copy.fitTitle)}</h2>
           <p class="muted">${escapeHtml(copy.fitLead)}</p>
           <div class="docs-grid section-tight">
             ${copy.fitCards
-              .map(
-                ([title, text]) => `
+      .map(
+        ([title, text]) => `
               <article class="card fade-up">
                 <h3>${escapeHtml(title)}</h3>
                 <p class="muted">${escapeHtml(text)}</p>
               </article>`
-              )
-              .join("")}
+      )
+      .join("")}
           </div>
         </div>
       </div>
@@ -7433,80 +8494,481 @@ function renderBuilder(locale, ctx) {
     en: {
       stepLabel: "Step",
       ofLabel: "of",
-      nextLabel: "Next step",
-      finishLabel: "Done",
-      summaryEyebrow: "Summary",
-      summaryTitle: "Preliminary risk pre-evaluation",
-      evidenceEyebrow: "Evidence preview",
-      evidenceTitle: "What Agent QA Toolkit can attach",
-      selectPlaceholder: "Select an option",
-      disclaimer: "This is a preliminary pre-evaluation. It does not replace legal review by qualified counsel.",
-      classifications: { high: "HIGH RISK", limited: "LIMITED RISK", minimal: "MINIMAL RISK" },
-      rationale: {
-        high: "Your answers suggest a system that affects people in a regulated context or under Annex III-style categories.",
-        limited: "Your answers suggest a system with transparency obligations but a lower direct impact profile.",
-        minimal: "Your answers suggest a lower-risk profile, but documentation and review can still be valuable.",
-        autonomous: "Autonomous decision impact plus EU deployment usually deserves a high-risk review path.",
+      nextLabel: "Next",
+      jumpToExportLabel: "Draft",
+      nextLabels: {
+        step1: "Next",
+        step2: "Next",
+        step3: "Next",
+        step4: "Next",
+        step5: "Next",
+        step6: "Next",
       },
+      finishLabel: "Done",
+      summaryEyebrow: "Your draft",
+      summaryTitle: "Progress on this EU AI Act package",
+      summaryHelp:
+        "A field counts as started once you add any draft text. You can export this draft before every field is complete.",
+      packageProgressLabel: "Whole package",
+      currentSectionLabel: "Current section",
+      sectionStatusTitle: "Section status",
+      sectionStates: {
+        empty: "Not started",
+        partial: "In progress",
+        full: "Draft added for every field",
+      },
+      evidenceEyebrow: "Need the legal text?",
+      evidenceTitle: "Template pages for this section",
+      evidenceHelp:
+        "Open these template pages only if you want to read the legal wording and see the structure for the section you are writing now.",
+      disclaimer:
+        "This builder collects a first written draft against specific EU AI Act requirements. It does not replace final legal interpretation, conformity assessment, or approval.",
       stepTitles: {
-        step1: "Tell us about your AI system",
-        step2: "Your preliminary risk classification",
-        step3: "Article 9 - Risk management",
-        step4: "Articles 12 and 14 - Logging and oversight",
-        step5: "Download your package",
+        step1: "EU AI Act Annex IV technical documentation",
+        step2: "EU AI Act Article 9 risk management system",
+        step3: "EU AI Act Article 10 data and data governance",
+        step4: "EU AI Act Articles 12 and 14",
+        step5: "EU AI Act Articles 13, 15, 17 and 72",
+        step6: "EU AI Act Articles 16, 22, 43, 47, 48, 49 and Annex V",
+        step7: "Export your first draft",
+      },
+      stepLeads: {
+        step1:
+          "Write short factual descriptions. Use 1-3 short sentences per field and describe the real system in plain language.",
+        step2:
+          "Write 2-5 short bullets per field. Name the risk, when it appears, and the measure your team already uses to reduce it.",
+        step3:
+          "Write short factual notes about the data used for training, validation, and testing, including origin, relevance checks, bias checks, and preparation steps.",
+        step4:
+          "Write short operational notes about what is logged, how people can read those logs, and how human oversight works in practice.",
+        step5:
+          "Write short paragraphs about deployer information, performance limits, quality-management process, and post-market monitoring.",
+        step6:
+          "Write short factual records about provider obligations, conformity path, declaration, CE marking, registration, and Article 22 only if it applies to your organization.",
       },
       packageSections: {
-        profile: "System profile",
-        risk: "Risk classification",
-        article9: "Article 9 draft",
-        oversight: "Articles 12 and 14 draft",
-        evidence: "Evidence references",
+        profile: "EU AI Act Annex IV technical documentation",
+        risk: "EU AI Act Article 9 risk management system",
+        article9: "EU AI Act Article 10 data and data governance",
+        oversight: "EU AI Act Articles 12, 13, 14, 15, 17 and 72",
+        evidence: "Supporting documents to attach where required",
       },
-      packageTitle: "EU AI Act Documentation Package",
+      packageTitle: "First EU AI Act law-grounded draft",
       packageDisclaimer:
-        "This package is a documentation draft generated in the browser. Save it as PDF from the browser print dialog, then attach live technical evidence where required.",
-      requiredArticles: "Required articles",
+        "This export is a browser-generated snapshot of your written EU AI Act draft. Return to the builder to revise any field and export again. Attach any supporting records already required for your system separately.",
       evidencePlaceholder:
-        "Technical evidence is strongest for Articles 9, 12, 14, 15, and Annex IV references. Use the live proof surface for that part of the package.",
+        "Attach the supporting materials already required for your system, such as logs, technical documentation excerpts, testing summaries, conformity-assessment records, declaration details, and monitoring records.",
       openProof: "Open live proof",
-      openDocs: "Open docs",
-      downloadJson: "Download JSON",
-      openPrintable: "Open print-ready package",
-      exportHint: "Save the printable dossier as PDF from your browser if you need a handoff document now.",
-      placeholderText: "Add your team narrative here.",
-      placeholders: {
-        risks: "Describe the main harms, failure modes, and affected users.",
-        mitigations: "Describe current controls, approvals, and technical guardrails.",
-        logging: "Explain what is recorded, how events are linked, and how retention works.",
-        oversight: "Explain who reviews escalations and what actions humans can stop or approve.",
-      },
-      ctaRiskEyebrow: "Evidence required",
-      ctaRiskTitle: "This section requires machine-verifiable evidence",
-      ctaRiskBody:
-        "Article 9 is stronger when the package can point to recent risk testing, gate recommendations, and scanner results.",
-      ctaRiskPoints: ["Risk scores per test case", "Gate recommendations", "Security scan results", "Portable evidence bundle"],
-      ctaOversightEyebrow: "Logging and oversight",
-      ctaOversightTitle: "Logging and approval paths should point to real artifacts",
-      ctaOversightBody:
-        "Use a live evidence pack for trace anchors, structured events, and approval-ready review exports.",
+      openDocs: "Open EU package runbook",
+      downloadJson: "Download draft JSON",
+      openPrintable: "Open draft preview",
+      exportHint:
+        "Use Draft in the navigation if you want to open the preview. Use the button below if you want to save the draft JSON.",
+      exportNextHint:
+        "Next opens the starter check on your own agent.",
+      placeholderText: "Write a short factual draft here.",
+      sourceLabel: "Law source",
+      filledLabel: "started",
+      openTemplateLabel: "Open template",
+      noTextYet: "No draft text added yet.",
+      legalSteps: [
+        {
+          id: "annex-iv",
+          title: "EU AI Act Annex IV technical documentation",
+          lead: "Write the first draft for the Annex IV fields that identify the system, describe its interfaces and instructions for use, and explain its expected output and testing.",
+          fields: [
+            {
+              key: "intended_purpose",
+              label: "Intended purpose",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(a)",
+              groupTitle: "1. Identify the system",
+              groupLead: "Start with the basic facts that explain what the system is for and who provides it.",
+              help: "State what the system is used for, who uses it, and what task it supports.",
+              placeholder:
+                "Example: The system helps claims analysts prioritize incoming motor-insurance claims for manual review.",
+            },
+            {
+              key: "provider_name_version",
+              label: "Provider name and system version",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(a)",
+              help: "State the AI provider name and the current system or agent version covered by this draft.",
+              placeholder: "Example: Acme AI Ltd. - Claims Prioritization Agent v2.3.1",
+            },
+            {
+              key: "system_interactions",
+              label: "Interaction with other hardware or software",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(b)",
+              groupTitle: "2. Describe interfaces and delivery",
+              groupLead: "Explain what the system connects to and how it is delivered or put into use.",
+              help: "List the main systems, tools, APIs, databases, or hardware this system depends on or exchanges data with.",
+              placeholder:
+                "Example: The system receives claim data from the internal case platform and returns a priority score through an internal API.",
+            },
+            {
+              key: "system_elements_and_development_process",
+              label: "General description of the system elements and development process",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(c)",
+              help: "Describe the main parts of the system and how the current version was built, tested, and released.",
+              placeholder:
+                "Example: The system includes a ranking model, scoring service, analyst dashboard, and release process with staging tests before production deployment.",
+            },
+            {
+              key: "market_forms",
+              label: "Forms in which the system is placed on the market or put into service",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(d)",
+              help: "State how the system is made available or put into use, for example as SaaS, API, internal tool, or embedded feature.",
+              placeholder:
+                "Example: The system is provided as a hosted internal web application with an API used by the claims platform.",
+            },
+            {
+              key: "hardware_requirements",
+              label: "Hardware on which the system is intended to run",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(e)",
+              help: "State the hardware or infrastructure the system is expected to run on.",
+              placeholder:
+                "Example: The service runs in AWS on managed containers and standard x86 cloud instances with encrypted storage.",
+            },
+            {
+              key: "user_interface_description",
+              label: "Basic description of the user interface for deployers",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(g)",
+              groupTitle: "3. Explain use and outputs",
+              groupLead: "Describe what users see, what they are told to do, and what output the system produces.",
+              help: "Describe the interface a deployer or operator sees when using the system.",
+              placeholder:
+                "Example: Analysts use a dashboard that shows the claim number, priority score, explanation notes, and action buttons.",
+            },
+            {
+              key: "instructions_for_use",
+              label: "Instructions for use",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(1)(h)",
+              help: "Summarize the instructions, limits, and expected use conditions given to the people who use the system.",
+              placeholder:
+                "Example: Analysts must review the score together with the claim file, must not auto-approve based on the score, and must escalate uncertain cases.",
+            },
+            {
+              key: "expected_output_quality",
+              label: "Expected output and output quality",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(2)(b)",
+              help: "State what output the system produces and what level or quality of that output you expect.",
+              placeholder:
+                "Example: The system returns a priority score from 1 to 100 and a short explanation. The expected output is stable, readable, and suitable for analyst triage.",
+            },
+            {
+              key: "monitoring_and_control_mechanisms",
+              label: "Monitoring and control mechanisms",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(2)(f)",
+              groupTitle: "4. Describe monitoring and testing",
+              groupLead: "Finish the section with the controls that watch the system and the checks that validate it.",
+              help: "Describe how the system is monitored, what alerts or controls exist, and how issues can be paused or escalated.",
+              placeholder:
+                "Example: The team monitors scoring drift, failed runs, and unusual output patterns; alerts go to the operations queue and the service can be paused by on-call staff.",
+            },
+            {
+              key: "validation_and_testing_procedures",
+              label: "Validation and testing procedures and metrics",
+              sourceKey: "technical-doc",
+              sourceLabel: "Annex IV(2)(g)",
+              help: "Describe the main validation or testing procedures you run and the metrics or acceptance checks you use.",
+              placeholder:
+                "Example: Each release is tested on a holdout data set for ranking quality, false-priority rate, and runtime stability before production approval.",
+            },
+          ],
+        },
+        {
+          id: "article-9",
+          title: "EU AI Act Article 9 risk management system",
+          lead: "Write the first draft for the Article 9 requirements on risk identification, evaluation, and mitigation.",
+          fields: [
+            {
+              key: "risk_identification_analysis",
+              label: "Known and reasonably foreseeable risks to health, safety, or fundamental rights",
+              sourceKey: "article-9",
+              sourceLabel: "Article 9(2)(a)",
+              help: "List the main risks your team already sees if the system fails, is misused, or produces harmful outputs.",
+              placeholder:
+                "Example: Incorrect prioritization could delay urgent claims or create unfair treatment for some claimants.",
+            },
+            {
+              key: "risk_estimation_evaluation",
+              label: "Estimation and evaluation of risks under intended use and reasonably foreseeable misuse",
+              sourceKey: "article-9",
+              sourceLabel: "Article 9(2)(b)",
+              help: "State when these risks appear, how serious they are, and under what normal or misuse conditions they could happen.",
+              placeholder:
+                "Example: The highest risk appears when incomplete claim data produces an unreliable score and analysts rely on it without checking the file.",
+            },
+            {
+              key: "risk_management_measures",
+              label: "Risk management measures designed to address identified risks",
+              sourceKey: "article-9",
+              sourceLabel: "Article 9(2)(d)",
+              help: "List the measures already used to reduce, control, escalate, or stop the identified risks.",
+              placeholder:
+                "Example: Low-confidence cases are flagged for manual review, analysts can override scores, and releases are blocked if validation thresholds fail.",
+            },
+          ],
+        },
+        {
+          id: "article-10",
+          title: "EU AI Act Article 10 data and data governance",
+          lead: "Write the first draft for the data-governance and data-preparation requirements that apply to training, validation, and testing data sets.",
+          fields: [
+            {
+              key: "data_governance_practices",
+              label: "Data governance and management practices for training, validation, and testing data sets",
+              sourceKey: "article-10",
+              sourceLabel: "Article 10(2)",
+              help: "Describe the main rules or process your team uses to manage training, validation, and testing data.",
+              placeholder:
+                "Example: Data sets are versioned, access-controlled, reviewed before use, and tracked by owner, source, and update date.",
+            },
+            {
+              key: "data_collection_and_origin",
+              label: "Data collection processes and the origin of the data",
+              sourceKey: "article-10",
+              sourceLabel: "Article 10(2)(c)",
+              help: "State where the data comes from and how it is collected or received.",
+              placeholder:
+                "Example: Historical claims data comes from the internal claims platform and approved third-party fraud signals come from a contracted provider.",
+            },
+            {
+              key: "data_relevance_bias_and_errors",
+              label: "Examination of relevance, representativeness, possible biases, and data errors",
+              sourceKey: "article-10",
+              sourceLabel: "Article 10(2)(f)",
+              help: "Describe how the team checks whether the data is relevant, representative, and free from obvious bias or errors.",
+              placeholder:
+                "Example: The team reviews missing fields, class imbalance, region skew, and duplicate records before training or evaluation.",
+            },
+            {
+              key: "data_preparation_operations",
+              label: "Data preparation processing operations",
+              sourceKey: "article-10",
+              sourceLabel: "Article 10(3)",
+              help: "State the main preparation steps applied to the data before it is used.",
+              placeholder:
+                "Example: Records are cleaned, deduplicated, normalized, split into train and test sets, and sensitive fields are masked where required.",
+            },
+          ],
+        },
+        {
+          id: "articles-12-and-14",
+          title: "EU AI Act Articles 12 and 14",
+          lead: "Write the first draft for automatic logs, log-handling mechanisms, and the human-oversight measures linked to the system.",
+          fields: [
+            {
+              key: "automatic_recording_of_events",
+              label: "Automatic recording of events over the lifetime of the system",
+              sourceKey: "article-12",
+              sourceLabel: "Article 12(1)",
+              help: "Describe what the system records automatically while it is operating.",
+              placeholder:
+                "Example: Each run records the timestamp, request ID, model version, input reference, output score, and analyst action taken afterwards.",
+            },
+            {
+              key: "log_collection_storage_interpretation",
+              label: "Mechanisms that allow deployers to collect, store, and interpret logs",
+              sourceKey: "article-13",
+              sourceLabel: "Article 13(3)(f)",
+              help: "Describe how deployers can access the logs, store them, and understand what they mean.",
+              placeholder:
+                "Example: Logs are exported to the internal audit store, retained under the operations policy, and explained in the team runbook and dashboard labels.",
+            },
+            {
+              key: "human_oversight_measures",
+              label: "Human oversight measures",
+              sourceKey: "article-14",
+              sourceLabel: "Article 14",
+              help: "Describe the human checks, approvals, or intervention points that sit around the system.",
+              placeholder:
+                "Example: Analysts review the score before action, supervisors review escalations, and operations staff can disable the system during incidents.",
+            },
+            {
+              key: "interpretation_of_outputs",
+              label: "Technical measures that facilitate the interpretation of outputs by deployers",
+              sourceKey: "article-13",
+              sourceLabel: "Article 13(3)(d)",
+              help: "Describe what helps users understand the system output correctly.",
+              placeholder:
+                "Example: The interface shows score bands, explanation notes, confidence indicators, and a warning not to use the score as the only decision factor.",
+            },
+          ],
+        },
+        {
+          id: "articles-13-15-17-72",
+          title: "EU AI Act Articles 13, 15, 17 and 72",
+          lead: "Write the first draft for deployer information, performance limitations, quality management, and post-market monitoring.",
+          fields: [
+            {
+              key: "characteristics_capabilities_limitations",
+              label: "Characteristics, capabilities, and limitations of performance",
+              sourceKey: "article-13",
+              sourceLabel: "Article 13(3)(b)",
+              help: "Describe what the system can do, what it cannot do well, and what users should know before relying on it.",
+              placeholder:
+                "Example: The system helps rank claims for review but does not decide claim approval and performs less reliably when records are incomplete.",
+            },
+            {
+              key: "accuracy_robustness_cybersecurity",
+              label: "Level of accuracy, robustness, and cybersecurity",
+              sourceKey: "article-15",
+              sourceLabel: "Article 13(3)(b)(ii) and Article 15",
+              help: "State the accuracy, robustness, and cybersecurity level the team expects and how it is checked.",
+              placeholder:
+                "Example: The release target is stable ranking quality on validation data, monitored resilience under expected input variation, and standard access and security controls.",
+            },
+            {
+              key: "quality_management_strategy",
+              label: "Strategy for regulatory compliance and procedures for managing modifications",
+              sourceKey: "article-17",
+              sourceLabel: "Article 17(1)(a)",
+              help: "Describe the internal process that keeps the system compliant and controls changes to the system.",
+              placeholder:
+                "Example: The team tracks compliance owners, reviews changes before release, and records approvals when models, prompts, or workflows are modified.",
+            },
+            {
+              key: "post_market_monitoring_plan",
+              label: "Post-market monitoring plan",
+              sourceKey: "article-72",
+              sourceLabel: "Article 72(3)",
+              help: "Describe how the system is monitored after deployment and what signals trigger follow-up action.",
+              placeholder:
+                "Example: The team reviews incidents, drift, complaints, and override rates each month and escalates material issues to compliance and engineering owners.",
+            },
+          ],
+        },
+        {
+          id: "articles-16-43-47-annex-v",
+          title: "EU AI Act Articles 16, 22, 43, 47, 48, 49 and Annex V",
+          lead: "Write the first draft for provider-side obligations on documentation and corrective action, authorised-representative details where Article 22 applies, the conformity assessment procedure, CE marking, registration, and the declaration content required before placing the system on the market or putting it into service.",
+          fields: [
+            {
+              key: "documentation_keeping_records",
+              label: "How technical documentation and related records are kept available for 10 years",
+              sourceKey: "article-16",
+              sourceLabel: "Articles 16 and 18",
+              groupTitle: "1. Provider records and cooperation",
+              groupLead: "Start with the provider-side records that must stay available after the system is placed on the market or put into service.",
+              help: "Describe where the documentation and related records are kept and how they remain available for the required period.",
+              placeholder:
+                "Example: Technical documentation, declarations, and supporting records are stored in the controlled compliance repository with retained release folders.",
+            },
+            {
+              key: "automatic_logs_retention",
+              label: "How automatically generated logs are kept for at least six months where they are under provider control",
+              sourceKey: "article-16",
+              sourceLabel: "Articles 16 and 19",
+              help: "Describe how provider-controlled logs are retained and where that retention is managed.",
+              placeholder:
+                "Example: Provider-controlled audit logs are retained in the internal logging platform for at least six months under the operations retention policy.",
+            },
+            {
+              key: "corrective_actions_and_notifications",
+              label: "Corrective actions, withdrawal or disabling, and duty to inform relevant parties",
+              sourceKey: "article-16",
+              sourceLabel: "Articles 16 and 20",
+              help: "Describe what the team does when the system is non-compliant or presents a serious risk.",
+              placeholder:
+                "Example: The provider can suspend deployment, notify affected customers, and issue corrective updates or disable the affected version.",
+            },
+            {
+              key: "authority_cooperation_and_log_access",
+              label: "How the provider supplies documentation and log access to competent authorities on request",
+              sourceKey: "article-16",
+              sourceLabel: "Articles 16 and 21",
+              help: "Describe how the provider responds to a competent-authority request for documentation, information, or logs.",
+              placeholder:
+                "Example: Regulatory requests are handled through the compliance owner, who retrieves the requested records and coordinates log access with security and engineering.",
+            },
+            {
+              key: "authorised_representative_and_mandate",
+              label: "Authorised representative identity and written mandate where the provider is established outside the Union",
+              sourceKey: "article-22",
+              sourceLabel: "Article 22(1) and 22(3)",
+              groupTitle: "2. Representation, conformity, marking and registration",
+              groupLead: "Complete this part only where it applies to your provider setup and market placement path.",
+              help: "If the provider is outside the Union, identify the authorised representative and the written mandate. If not applicable, say so.",
+              placeholder:
+                "Example: Not applicable. The provider is established in the Union. / Example: EU representative: Example Rep GmbH under written mandate dated 2026-02-15.",
+            },
+            {
+              key: "conformity_assessment_procedure",
+              label: "Conformity assessment procedure applied to the system",
+              sourceKey: "article-43",
+              sourceLabel: "Article 43",
+              help: "State which conformity assessment route is used for this system.",
+              placeholder:
+                "Example: The provider applies the internal control procedure for this high-risk system before placing it on the market.",
+            },
+            {
+              key: "eu_declaration_of_conformity",
+              label: "EU declaration of conformity",
+              sourceKey: "article-47",
+              sourceLabel: "Article 47(1)",
+              help: "State whether the EU declaration exists and how it is maintained for this system.",
+              placeholder:
+                "Example: The provider issues and keeps an EU declaration of conformity for the current system version before release.",
+            },
+            {
+              key: "ce_marking_application",
+              label: "How CE marking is applied or made digitally accessible for the system",
+              sourceKey: "article-48",
+              sourceLabel: "Article 48",
+              help: "Describe how CE marking is applied to the system or made available in digital form.",
+              placeholder:
+                "Example: CE marking is displayed in the product documentation portal and linked from the customer release package.",
+            },
+            {
+              key: "registration_record_and_reference",
+              label: "Registration record and retained reference where Article 49 applies",
+              sourceKey: "article-49",
+              sourceLabel: "Article 49",
+              help: "Describe the registration record or reference kept for the system where registration applies.",
+              placeholder:
+                "Example: The provider stores the registration reference and submission record in the compliance repository for the released version.",
+            },
+            {
+              key: "declaration_identification_and_references",
+              label: "Provider identification, system identification, and references required in the declaration",
+              sourceKey: "annex-v",
+              sourceLabel: "Annex V",
+              groupTitle: "3. Declaration content",
+              groupLead: "Finish with the information that must appear in the declaration itself.",
+              help: "State the provider details, system details, and legal references that appear in the declaration.",
+              placeholder:
+                "Example: The declaration identifies Acme AI Ltd., the Claims Prioritization Agent, the applicable Regulation references, and the system version.",
+            },
+            {
+              key: "declaration_date_place_signature",
+              label: "Place and date of issue, signatory name, and function",
+              sourceKey: "annex-v",
+              sourceLabel: "Annex V",
+              help: "State how the declaration records the place and date of issue and who signs it.",
+              placeholder:
+                "Example: Issued in Dublin on 2026-03-01, signed by Jane Smith, Chief Compliance Officer.",
+            },
+          ],
+        },
+      ],
       metrics: { approvals: "Approvals", blocks: "Blocks", runs: "Runs in window", execution: "Execution" },
-      liveProofEyebrow: "Live proof",
-      openDossierDemo: "Open dossier demo",
+      liveProofEyebrow: "See the result first",
+      openDossierDemo: "Open reviewer dossier demo",
       backLabel: "Back",
       casesLabel: "Cases",
       approvalsLabel: "Approvals",
       blocksLabel: "Blocks",
       portableLabel: "Portable",
-      systemTypes: {
-        hr: "HR recruitment / CV pre-evaluation",
-        credit: "Credit scoring / financial decisions",
-        insurance: "Insurance underwriting / claims processing",
-        fraud: "Fraud detection / AML pre-evaluation",
-        healthcare: "Healthcare decision support",
-        education: "Education assessment",
-        customerService: "Customer service / chatbot",
-        other: "Other",
-      },
     },
     de: {
       stepLabel: "Schritt",
@@ -7514,11 +8976,12 @@ function renderBuilder(locale, ctx) {
       nextLabel: "Naechster Schritt",
       finishLabel: "Fertig",
       summaryEyebrow: "Zusammenfassung",
-      summaryTitle: "Vorlaeufige Risikopruefung",
-      evidenceEyebrow: "Nachweis-Vorschau",
-      evidenceTitle: "Was Agent QA Toolkit anhaengen kann",
+      summaryTitle: "Operator-Entwurf und vorlaeufige Risikopruefung",
+      evidenceEyebrow: "Reviewer-tauglicher Nachweis",
+      evidenceTitle: "Was die Nachweis-Engine spaeter anhaengen kann",
       selectPlaceholder: "Option auswaehlen",
-      disclaimer: "Dies ist eine vorlaeufige Risikopruefung. Sie ersetzt keine rechtliche Pruefung durch qualifizierte Beratung.",
+      disclaimer:
+        "Dies ist ein provider-seitiger Entwurfsablauf fuer den gesetzlichen Mindestpfad. Er ersetzt keine rechtliche Pruefung durch qualifizierte Beratung und ist nicht selbst das finale Konformitaetspaket. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad.",
       classifications: { high: "HOCHRISIKO", limited: "BEGRENZTES RISIKO", minimal: "MINIMALES RISIKO" },
       rationale: {
         high: "Ihre Antworten deuten auf ein System hin, das Personen in einem regulierten Kontext oder in Anhang-III-aehnlichen Kategorien betrifft.",
@@ -7531,7 +8994,7 @@ function renderBuilder(locale, ctx) {
         step2: "Ihre vorlaeufige Risikoklassifizierung",
         step3: "Artikel 9 - Risikomanagement",
         step4: "Artikel 12 und 14 - Journalisierung und Aufsicht",
-        step5: "Paket herunterladen",
+        step5: "Entwurfspaket herunterladen",
       },
       packageSections: {
         profile: "Systemprofil",
@@ -7540,17 +9003,18 @@ function renderBuilder(locale, ctx) {
         oversight: "Artikel-12- und 14-Entwurf",
         evidence: "Nachweis-Referenzen",
       },
-      packageTitle: "EU-AI-Act-Dokumentationspaket",
+      packageTitle: "EU-AI-Act-Dokumentationsentwurf",
       packageDisclaimer:
-        "Dieses Paket ist ein im Browser erzeugter Dokumentationsentwurf. Speichern Sie es bei Bedarf als PDF und verknuepfen Sie anschliessend Live-Nachweise an den benoetigten Stellen.",
+        "Dieses Paket ist ein im Browser erzeugter erster schriftlicher Entwurf fuer den provider-seitigen Pfad gegen die gewaehlten Anforderungen der EU-KI-Verordnung. Speichern Sie es bei Bedarf als PDF und haengen Sie die bereits fuer Ihr System und Ihre Rolle noetigen Unterlagen an. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad.",
       requiredArticles: "Erforderliche Artikel",
       evidencePlaceholder:
-        "Technische Nachweise sind besonders stark fuer Artikel 9, 12, 14, 15 und Anhang-IV-Referenzen. Nutzen Sie dafuer die Live-Nachweis-Oberflaeche.",
+        "Technische Nachweise sind besonders stark fuer Artikel 9, 12, 14, 15 und Anhang-IV-Referenzen. Nutzen Sie dafuer die Live-Nachweis-Oberflaeche, um Reviewer-PDF/HTML/Markdown und maschinenverifizierbare Runtime-Artefakte an diesen Teil des Pakets zu haengen.",
       openProof: "Live-Nachweise oeffnen",
-      openDocs: "Dokumentation oeffnen",
+      openDocs: "EU-Operator-Leitfaden oeffnen",
       downloadJson: "JSON herunterladen",
       openPrintable: "Druckansicht oeffnen",
-      exportHint: "Speichern Sie das druckfertige Paket als PDF aus dem Browser, wenn Sie sofort ein Uebergabe-Dokument brauchen.",
+      exportHint:
+        "Speichern Sie den druckfertigen Entwurf als PDF aus dem Browser, wenn Sie sofort ein Uebergabe-Dokument brauchen, und haengen Sie die reviewer-tauglichen Nachweis-Ausgaben danach separat an.",
       placeholderText: "Fuegen Sie hier das Narrativ Ihres Teams ein.",
       placeholders: {
         risks: "Beschreiben Sie die wichtigsten Schaeden, Ausfallmuster und betroffenen Nutzer.",
@@ -7561,15 +9025,15 @@ function renderBuilder(locale, ctx) {
       ctaRiskEyebrow: "Nachweise erforderlich",
       ctaRiskTitle: "Dieser Abschnitt braucht maschinenverifizierbare Nachweise",
       ctaRiskBody:
-        "Artikel 9 wird staerker, wenn das Paket auf aktuelle Risikotests, Freigabeempfehlungen und Scanner-Ergebnisse verweisen kann.",
-      ctaRiskPoints: ["Risikoscores pro Testfall", "Freigabeempfehlungen", "Ergebnisse von Sicherheitsscans", "Portables Nachweispaket"],
+        "Artikel 9 wird staerker, wenn das Paket auf aktuelle Risikotests, Freigabeempfehlungen, Scanner-Ergebnisse und reviewer-taugliche Nachweis-Ausgaben verweisen kann.",
+      ctaRiskPoints: ["Risikoscores pro Testfall", "Freigabeempfehlungen", "Ergebnisse von Sicherheitsscans", "Reviewer-PDF / HTML / Markdown"],
       ctaOversightEyebrow: "Journalisierung und Aufsicht",
       ctaOversightTitle: "Journalisierungs- und Freigabepfade sollten auf reale Artefakte zeigen",
       ctaOversightBody:
-        "Nutzen Sie ein Live-Nachweispaket fuer Trace-Anker, strukturierte Ereignisse und prueffertige Export-Artefakte.",
+        "Nutzen Sie ein Live-Nachweispaket fuer Trace-Anker, strukturierte Ereignisse, reviewer-taugliche Exporte und prueffertige Review-Artefakte.",
       metrics: { approvals: "Freigaben", blocks: "Blockierungen", runs: "Laeufe im Fenster", execution: "Ausfuehrung" },
-      liveProofEyebrow: "Live-Nachweise",
-      openDossierDemo: "Dossier-Demo oeffnen",
+      liveProofEyebrow: "Reviewer-Nachweis",
+      openDossierDemo: "Reviewer-Demo oeffnen",
       backLabel: "Zurueck",
       casesLabel: "Faelle",
       approvalsLabel: "Freigaben",
@@ -7592,11 +9056,12 @@ function renderBuilder(locale, ctx) {
       nextLabel: "Etape suivante",
       finishLabel: "Termine",
       summaryEyebrow: "Resume",
-      summaryTitle: "Pre-evaluation du risque",
-      evidenceEyebrow: "Apercu des preuves",
-      evidenceTitle: "Ce que Agent QA Toolkit peut joindre",
+      summaryTitle: "Brouillon operateur et tri preliminaire du risque",
+      evidenceEyebrow: "Preuve lisible par un evaluateur",
+      evidenceTitle: "Ce que le moteur de preuve peut joindre ensuite",
       selectPlaceholder: "Selectionner une option",
-      disclaimer: "Il s'agit d'une pre-evaluation preliminaire. Cela ne remplace pas une revue juridique par un conseil qualifie.",
+      disclaimer:
+        "Il s'agit d'un parcours de redaction cote fournisseur pour le minimum legal. Cela ne remplace pas une revue juridique par un conseil qualifie et ce n'est pas encore le package final de conformite. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours.",
       classifications: { high: "HAUT RISQUE", limited: "RISQUE LIMITE", minimal: "RISQUE MINIMAL" },
       rationale: {
         high: "Vos reponses suggerent un systeme qui affecte des personnes dans un contexte reglemente ou dans des categories de type Annexe III.",
@@ -7609,7 +9074,7 @@ function renderBuilder(locale, ctx) {
         step2: "Votre classification preliminaire du risque",
         step3: "Article 9 - Gestion des risques",
         step4: "Articles 12 et 14 - Journalisation et supervision",
-        step5: "Telecharger votre dossier",
+        step5: "Telecharger votre brouillon",
       },
       packageSections: {
         profile: "Profil du systeme",
@@ -7618,17 +9083,18 @@ function renderBuilder(locale, ctx) {
         oversight: "Brouillon Articles 12 et 14",
         evidence: "References de preuve",
       },
-      packageTitle: "Dossier de documentation EU AI Act",
+      packageTitle: "Brouillon de dossier EU AI Act",
       packageDisclaimer:
-        "Ce dossier est un brouillon de documentation genere dans le navigateur. Enregistrez-le en PDF si besoin, puis rattachez les preuves techniques live aux sections concernees.",
+        "Ce dossier est un premier brouillon ecrit genere dans le navigateur pour le parcours cote fournisseur vis-a-vis des exigences EU AI Act selectionnees. Enregistrez-le en PDF si besoin et joignez les documents deja requis pour votre systeme et votre role. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours.",
       requiredArticles: "Articles requis",
       evidencePlaceholder:
-        "Les preuves techniques sont les plus fortes pour les Articles 9, 12, 14, 15 et les references Annexe IV. Utilisez la surface de preuve live pour cette partie du dossier.",
+        "Les preuves techniques sont les plus fortes pour les Articles 9, 12, 14, 15 et les references Annexe IV. Utilisez la surface de preuve live pour joindre le reviewer PDF/HTML/Markdown et les artefacts d'execution verifiables a cette partie du dossier.",
       openProof: "Ouvrir la preuve live",
-      openDocs: "Ouvrir la documentation",
+      openDocs: "Ouvrir le guide operateur UE",
       downloadJson: "Telecharger le JSON",
       openPrintable: "Ouvrir la version imprimable",
-      exportHint: "Enregistrez le dossier imprimable en PDF depuis le navigateur si vous avez besoin d'un document de transmission immediatement.",
+      exportHint:
+        "Enregistrez le brouillon imprimable en PDF depuis le navigateur si vous avez besoin d'un document de transmission immediatement, puis joignez separement les sorties de preuve lisibles par un evaluateur.",
       placeholderText: "Ajoutez ici le texte de votre equipe.",
       placeholders: {
         risks: "Decrivez les principaux dommages, modes de defaillance et utilisateurs affectes.",
@@ -7639,15 +9105,15 @@ function renderBuilder(locale, ctx) {
       ctaRiskEyebrow: "Preuve requise",
       ctaRiskTitle: "Cette section exige des preuves verifiables par machine",
       ctaRiskBody:
-        "L'Article 9 est plus solide quand le dossier peut pointer vers des tests de risque recents, des recommandations de passage et des resultats de scanner.",
-      ctaRiskPoints: ["Scores de risque par cas de test", "Recommandations de passage", "Resultats d'analyse de securite", "Dossier de preuve portable"],
+        "L'Article 9 est plus solide quand le dossier peut pointer vers des tests de risque recents, des recommandations de passage, des resultats de scanner et des sorties de preuve lisibles par un evaluateur.",
+      ctaRiskPoints: ["Scores de risque par cas de test", "Recommandations de passage", "Resultats d'analyse de securite", "Reviewer PDF / HTML / Markdown"],
       ctaOversightEyebrow: "Journalisation et supervision",
       ctaOversightTitle: "Les chemins de journalisation et d'approbation doivent pointer vers de vrais artefacts",
       ctaOversightBody:
-        "Utilisez un dossier de preuve live pour les ancres de trace, les evenements structures et les exports de revue prets pour approbation.",
+        "Utilisez un dossier de preuve live pour les ancres de trace, les evenements structures, les sorties reviewer et les artefacts de revue prets pour approbation.",
       metrics: { approvals: "Approbations", blocks: "Blocages", runs: "Executions dans la fenetre", execution: "Execution" },
-      liveProofEyebrow: "Preuve live",
-      openDossierDemo: "Ouvrir la demo du dossier",
+      liveProofEyebrow: "Preuve reviewer",
+      openDossierDemo: "Ouvrir la demo reviewer",
       backLabel: "Retour",
       casesLabel: "Cas",
       approvalsLabel: "Approbations",
@@ -7665,6 +9131,20 @@ function renderBuilder(locale, ctx) {
       },
     },
   }[locale];
+  const legalSteps =
+    locale === "en" && Array.isArray(builderUi.legalSteps)
+      ? builderUi.legalSteps.map((step) => ({
+        ...step,
+        fields: step.fields.map((field) => ({
+          ...field,
+          sourceHref: ctx.href(`template-${field.sourceKey}`),
+          sourcePageTitle:
+            (TEMPLATE_CONTENT[field.sourceKey] &&
+              (TEMPLATE_CONTENT[field.sourceKey].title[locale] || TEMPLATE_CONTENT[field.sourceKey].title.en)) ||
+            step.title,
+        })),
+      }))
+      : [];
   const builderCopy = {
     locale,
     stepLabel: builderUi.stepLabel,
@@ -7673,83 +9153,117 @@ function renderBuilder(locale, ctx) {
     finishLabel: builderUi.finishLabel,
     summaryEyebrow: builderUi.summaryEyebrow,
     summaryTitle: builderUi.summaryTitle,
+    summaryHelp: builderUi.summaryHelp || "",
+    packageProgressLabel: builderUi.packageProgressLabel || "",
+    currentSectionLabel: builderUi.currentSectionLabel || "",
+    sectionStatusTitle: builderUi.sectionStatusTitle || "",
+    sectionStates: builderUi.sectionStates || {},
     evidenceEyebrow: builderUi.evidenceEyebrow,
     evidenceTitle: builderUi.evidenceTitle,
-    selectPlaceholder: builderUi.selectPlaceholder,
+    evidenceHelp: builderUi.evidenceHelp || "",
+    selectPlaceholder: builderUi.selectPlaceholder || "",
     disclaimer: builderUi.disclaimer,
-    classifications: builderUi.classifications,
-    rationale: builderUi.rationale,
+    classifications: builderUi.classifications || {},
+    rationale: builderUi.rationale || {},
     stepTitles: builderUi.stepTitles,
+    stepLeads: builderUi.stepLeads || {},
+    nextLabels: builderUi.nextLabels || null,
+    buttonHints: builderUi.buttonHints || {},
+    validationErrors: builderUi.validationErrors || {},
     fields: {
-      systemType: locale === "de" ? "Was macht Ihr KI-System?" : locale === "fr" ? "Que fait votre systeme d'IA ?" : "What does your AI system do?",
-      memberStates: locale === "de" ? "Wo wird es eingesetzt?" : locale === "fr" ? "Ou sera-t-il deploye ?" : "Where will it be deployed?",
+      systemType:
+        locale === "de"
+          ? "Was macht Ihr KI-System?"
+          : locale === "fr"
+            ? "Que fait votre systeme d'IA ?"
+            : "",
+      memberStates: locale === "de" ? "Wo wird es eingesetzt?" : locale === "fr" ? "Ou sera-t-il deploye ?" : "",
       usedByEuResidents:
-        locale === "de" ? "Wird es von EU-Buergern genutzt?" : locale === "fr" ? "Utilise par des residents de l'UE ?" : "Used by EU residents?",
+        locale === "de"
+          ? "Wird es von EU-Buergern genutzt?"
+          : locale === "fr"
+            ? "Utilise par des residents de l'UE ?"
+            : "",
       autonomousDecisions:
         locale === "de"
           ? "Trifft es autonome Entscheidungen mit Auswirkungen auf Personen?"
           : locale === "fr"
             ? "Prend-il des decisions autonomes affectant des personnes ?"
-            : "Does it make autonomous decisions affecting people?",
-      risks: locale === "de" ? "Welche Risiken hat Ihr Team identifiziert?" : locale === "fr" ? "Quels risques avez-vous identifies ?" : "What risks has your team identified?",
+            : "",
+      risks: locale === "de" ? "Welche Risiken hat Ihr Team identifiziert?" : locale === "fr" ? "Quels risques avez-vous identifies ?" : "",
       mitigations:
-        locale === "de" ? "Welche Massnahmen sind vorhanden?" : locale === "fr" ? "Quelles mesures de mitigation existent ?" : "What mitigation measures are in place?",
+        locale === "de" ? "Welche Massnahmen sind vorhanden?" : locale === "fr" ? "Quelles mesures de mitigation existent ?" : "",
       logging:
         locale === "de"
           ? "Wie werden Journalisierung und Rueckverfolgbarkeit beschrieben?"
           : locale === "fr"
             ? "Comment decrivez-vous la journalisation et la tracabilite ?"
-            : "How do you describe logging and traceability?",
+            : "",
       oversight:
         locale === "de"
           ? "Wie erfolgt menschliche Aufsicht?"
           : locale === "fr"
             ? "Comment la supervision humaine fonctionne-t-elle ?"
-            : "How does human oversight work?",
+            : "",
     },
     packageSections: builderUi.packageSections,
     packageChecklist: {
       done:
         locale === "de"
-          ? ["Artikel-9-Entwurf", "Artikel-12-Entwurf zur Journalisierung", "Artikel-14-Entwurf zur Aufsicht", "Druckfertiges Paket"]
+          ? ["Operator-Entwurf fuer Artikel 9", "Operator-Entwurf fuer Artikel 12 zur Journalisierung", "Operator-Entwurf fuer Artikel 14 zur Aufsicht", "Druckfertiger Dokumentationsentwurf"]
           : locale === "fr"
             ? [
-                "Brouillon Article 9",
-                "Brouillon Article 12 journalisation",
-                "Brouillon Article 14 supervision",
-                "Dossier pret a imprimer",
-              ]
-            : ["Article 9 template draft", "Article 12 logging draft", "Article 14 oversight draft", "Print-ready package"],
+              "Brouillon operateur Article 9",
+              "Brouillon operateur Article 12 journalisation",
+              "Brouillon operateur Article 14 supervision",
+              "Brouillon documentaire pret a imprimer",
+            ]
+            : [
+              "Annex IV first draft",
+              "Article 9 first draft",
+              "Article 10 first draft",
+              "Articles 12 and 14 first draft",
+              "Articles 13, 15, 17 and 72 first draft",
+              "Articles 16, 22, 43, 47, 48, 49 and Annex V first draft",
+            ],
       todo:
         locale === "de"
-          ? ["Nachweis-Workflow (im Selbstbetrieb via GitHub oder als bezahltes Setup)", "Audit-Export (nach Setup / Enterprise-Support)"]
+          ? ["Erforderliche Unterlagen fuer Ihr System und Ihre Rolle anhaengen", "Finale Pruefung und Freigabe mit Ihrem Team abschliessen"]
           : locale === "fr"
-            ? ["Workflow de preuve (en autonomie via GitHub ou mise en place payante)", "Export pret pour audit (apres mise en place / support enterprise)"]
-            : ["Evidence workflow (self-serve via GitHub or paid setup)", "Audit-ready export (after setup / enterprise support)"],
+            ? ["Joindre les documents requis pour votre systeme et votre role", "Finaliser la revue et la validation avec votre equipe"]
+            : ["Attach any supporting documents required for your system and role", "Complete final review and approval with your team"],
     },
     packageTitle: builderUi.packageTitle,
     packageDisclaimer: builderUi.packageDisclaimer,
-    requiredArticles: builderUi.requiredArticles,
+    requiredArticles: builderUi.requiredArticles || "",
     evidencePlaceholder: builderUi.evidencePlaceholder,
-    getEvidence: locale === "de" ? "Startpaket buchen" : locale === "fr" ? "Reserver le pack de lancement" : "Book Launch Pack",
-    openProof: builderUi.openProof,
+    getEvidence: locale === "de" ? "Kontakt aufnehmen" : locale === "fr" ? "Nous contacter" : "",
+    openProof: locale === "en" ? "" : builderUi.openProof,
     openDocs: builderUi.openDocs,
     downloadJson: builderUi.downloadJson,
     openPrintable: builderUi.openPrintable,
+    jumpToExportLabel: builderUi.jumpToExportLabel || "",
     exportHint: builderUi.exportHint,
+    exportNextHint: builderUi.exportNextHint || "",
     placeholderText: builderUi.placeholderText,
+    sourceLabel: builderUi.sourceLabel || "",
+    filledLabel: builderUi.filledLabel || "",
+    openTemplateLabel: builderUi.openTemplateLabel || "",
+    noTextYet: builderUi.noTextYet || builderUi.placeholderText,
     yes: localeCopy.common.yes,
     no: localeCopy.common.no,
-    systemTypes: [
-      { value: "hr", label: builderUi.systemTypes.hr },
-      { value: "credit", label: builderUi.systemTypes.credit },
-      { value: "insurance", label: builderUi.systemTypes.insurance },
-      { value: "fraud", label: builderUi.systemTypes.fraud },
-      { value: "healthcare", label: builderUi.systemTypes.healthcare },
-      { value: "education", label: builderUi.systemTypes.education },
-      { value: "customer-service", label: builderUi.systemTypes.customerService },
-      { value: "other", label: builderUi.systemTypes.other },
-    ],
+    systemTypes: builderUi.systemTypes
+      ? [
+        { value: "hr", label: builderUi.systemTypes.hr },
+        { value: "credit", label: builderUi.systemTypes.credit },
+        { value: "insurance", label: builderUi.systemTypes.insurance },
+        { value: "fraud", label: builderUi.systemTypes.fraud },
+        { value: "healthcare", label: builderUi.systemTypes.healthcare },
+        { value: "education", label: builderUi.systemTypes.education },
+        { value: "customer-service", label: builderUi.systemTypes.customerService },
+        { value: "other", label: builderUi.systemTypes.other },
+      ]
+      : [],
     memberStates: [
       "AT",
       "BE",
@@ -7779,30 +9293,175 @@ function renderBuilder(locale, ctx) {
       "ES",
       "SE",
     ],
-    placeholders: builderUi.placeholders,
-    ctaRiskEyebrow: builderUi.ctaRiskEyebrow,
-    ctaRiskTitle: builderUi.ctaRiskTitle,
-    ctaRiskBody: builderUi.ctaRiskBody,
-    ctaRiskPoints: builderUi.ctaRiskPoints,
-    ctaOversightEyebrow: builderUi.ctaOversightEyebrow,
-    ctaOversightTitle: builderUi.ctaOversightTitle,
-    ctaOversightBody: builderUi.ctaOversightBody,
+    placeholders: builderUi.placeholders || {},
+    fieldHelp: builderUi.fieldHelp || {},
+    step2InputsTitle: builderUi.step2InputsTitle || null,
+    step2Inputs: builderUi.step2Inputs || [],
+    ctaRiskEyebrow: builderUi.ctaRiskEyebrow || "",
+    ctaRiskTitle: builderUi.ctaRiskTitle || "",
+    ctaRiskBody: builderUi.ctaRiskBody || "",
+    ctaRiskPoints: builderUi.ctaRiskPoints || [],
+    ctaOversightEyebrow: builderUi.ctaOversightEyebrow || "",
+    ctaOversightTitle: builderUi.ctaOversightTitle || "",
+    ctaOversightBody: builderUi.ctaOversightBody || "",
+    legalSteps,
     links: {
-      pricing: ctx.href("pricing"),
-      proof: ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html"),
-      docs: ctx.href("docs"),
+      pricing: locale === "en" ? "" : ctx.href("pricing"),
+      proof: locale === "en" ? "" : ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html"),
+      docs: `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`,
+      nextStage: ctx.href("starter"),
     },
     metrics: builderUi.metrics,
   };
-
-  return `
-    <section class="section">
-      <div class="container split-grid">
-        <div class="fade-up">
-          <p class="eyebrow">${escapeHtml(locale === "de" ? "Dokumentations-Assistent" : locale === "fr" ? "Assistant de documentation" : "Builder")}</p>
-          <h1>${escapeHtml(LOCALES[locale].builder.headline)}</h1>
-          <p class="lead">${escapeHtml(LOCALES[locale].builder.intro)}</p>
+  const countStartedFields = () => 0;
+  const totalLegalFields = builderCopy.legalSteps.reduce((sum, step) => sum + step.fields.length, 0);
+  const sourcePagesForStep = (step) =>
+    Array.from(
+      step.fields.reduce((map, field) => {
+        const entry = map.get(field.sourceHref) || {
+          href: field.sourceHref,
+          title: field.sourcePageTitle || step.title,
+          clauses: [],
+        };
+        if (!entry.clauses.includes(field.sourceLabel)) entry.clauses.push(field.sourceLabel);
+        map.set(field.sourceHref, entry);
+        return map;
+      }, new Map()).values()
+    );
+  const renderLegalFields = (step) =>
+    step.fields
+      .map(
+        (field) => `
+          ${field.groupTitle ? `<div class="field" style="grid-column: 1 / -1;"><h3>${escapeHtml(field.groupTitle)}</h3>${field.groupLead ? `<p class="lang-note">${escapeHtml(field.groupLead)}</p>` : ""}</div>` : ""}
+          <div class="field">
+            <label for="${escapeHtml(field.key)}">${escapeHtml(field.label)}</label>
+            <p class="lang-note">${escapeHtml(builderCopy.sourceLabel)}: <a href="${escapeHtml(field.sourceHref)}">${escapeHtml(field.sourceLabel)}</a></p>
+            ${field.help ? `<p class="lang-note">${escapeHtml(field.help)}</p>` : ""}
+            <textarea class="textarea" id="${escapeHtml(field.key)}" name="${escapeHtml(field.key)}" placeholder="${escapeHtml(field.placeholder || builderCopy.placeholderText)}"></textarea>
+          </div>`
+      )
+      .join("");
+  const sectionStateLabel = (step) => {
+    const started = countStartedFields(step);
+    if (!started) return builderUi.sectionStates?.empty || "Not started";
+    if (started === step.fields.length) return builderUi.sectionStates?.full || "Draft added for every field";
+    return builderUi.sectionStates?.partial || "In progress";
+  };
+  const initialStepBody =
+    locale === "en" && builderCopy.legalSteps.length
+      ? `
+    <div class="builder-panel">
+      ${builderCopy.stepLeads.step1 ? `<p class="lang-note">${escapeHtml(builderCopy.stepLeads.step1)}</p>` : ""}
+      <div class="form-grid">
+        ${renderLegalFields(builderCopy.legalSteps[0])}
+      </div>
+    </div>`
+      : `
+    <div class="builder-panel">
+      ${builderCopy.stepLeads.step1 ? `<p class="lang-note">${escapeHtml(builderCopy.stepLeads.step1)}</p>` : ""}
+      <div class="form-grid">
+        <div class="field">
+          <label for="systemType">${escapeHtml(builderCopy.fields.systemType)}</label>
+          ${builderCopy.fieldHelp.systemType ? `<p class="lang-note">${escapeHtml(builderCopy.fieldHelp.systemType)}</p>` : ""}
+          <select class="select" id="systemType" name="systemType">
+            <option value="">${escapeHtml(builderCopy.selectPlaceholder)}</option>
+            ${builderCopy.systemTypes
+        .map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`)
+        .join("")}
+          </select>
         </div>
+        <fieldset class="field">
+          <legend>${escapeHtml(builderCopy.fields.memberStates)}</legend>
+          ${builderCopy.fieldHelp.memberStates ? `<p class="lang-note">${escapeHtml(builderCopy.fieldHelp.memberStates)}</p>` : ""}
+          <div class="checkbox-list">
+            ${builderCopy.memberStates
+        .map(
+          (value) => `
+              <label class="checkbox-row">
+                <input type="checkbox" name="memberStates" value="${escapeHtml(value)}" />
+                <span>${escapeHtml(value)}</span>
+              </label>`
+        )
+        .join("")}
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <legend>${escapeHtml(builderCopy.fields.usedByEuResidents)}</legend>
+          ${builderCopy.fieldHelp.usedByEuResidents ? `<p class="lang-note">${escapeHtml(builderCopy.fieldHelp.usedByEuResidents)}</p>` : ""}
+          <div class="radio-list">
+            <label class="radio-row"><input type="radio" name="usedByEuResidents" value="yes" /> <span>${escapeHtml(builderCopy.yes)}</span></label>
+            <label class="radio-row"><input type="radio" name="usedByEuResidents" value="no" checked /> <span>${escapeHtml(builderCopy.no)}</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <legend>${escapeHtml(builderCopy.fields.autonomousDecisions)}</legend>
+          ${builderCopy.fieldHelp.autonomousDecisions ? `<p class="lang-note">${escapeHtml(builderCopy.fieldHelp.autonomousDecisions)}</p>` : ""}
+          <div class="radio-list">
+            <label class="radio-row"><input type="radio" name="autonomousDecisions" value="yes" /> <span>${escapeHtml(builderCopy.yes)}</span></label>
+            <label class="radio-row"><input type="radio" name="autonomousDecisions" value="no" checked /> <span>${escapeHtml(builderCopy.no)}</span></label>
+          </div>
+        </fieldset>
+      </div>
+    </div>`;
+  const initialSummaryBody =
+    locale === "en" && builderCopy.legalSteps.length
+      ? `
+    <div class="builder-panel">
+      <p class="eyebrow">${escapeHtml(builderCopy.summaryEyebrow)}</p>
+      <h3>${escapeHtml(builderCopy.summaryTitle)}</h3>
+      <p class="lang-note">${escapeHtml(builderUi.summaryHelp || "")}</p>
+      <div class="metric-grid">
+        <div class="metric"><span>${escapeHtml(builderUi.packageProgressLabel || "Whole package")}</span><strong>0 / ${escapeHtml(String(totalLegalFields))} ${escapeHtml(builderCopy.filledLabel)}</strong></div>
+        <div class="metric"><span>${escapeHtml(builderUi.currentSectionLabel || "Current section")}</span><strong>0 / ${escapeHtml(String(builderCopy.legalSteps[0].fields.length))} ${escapeHtml(builderCopy.filledLabel)}</strong></div>
+      </div>
+      <p class="eyebrow section-tight">${escapeHtml(builderUi.sectionStatusTitle || "Section status")}</p>
+      <ul class="check-list">
+        ${builderCopy.legalSteps
+        .map(
+          (step) =>
+            `<li><strong>${escapeHtml(step.title)}</strong>: ${escapeHtml(sectionStateLabel(step))} (0 / ${escapeHtml(String(step.fields.length))} ${escapeHtml(builderCopy.filledLabel)})</li>`
+        )
+        .join("")}
+      </ul>
+    </div>
+    <div class="evidence-card">
+      <p class="eyebrow">${escapeHtml(builderCopy.evidenceEyebrow)}</p>
+      <h3>${escapeHtml(builderCopy.evidenceTitle)}</h3>
+      <p class="lang-note">${escapeHtml(builderUi.evidenceHelp || "")}</p>
+      <p class="lang-note"><strong>${escapeHtml(builderCopy.legalSteps[0].title)}</strong></p>
+      <ul class="check-list">
+        ${sourcePagesForStep(builderCopy.legalSteps[0])
+        .map(
+          (page) =>
+            `<li><a href="${escapeHtml(page.href)}">${escapeHtml(page.title)}</a><br><span class="lang-note">${escapeHtml(page.clauses.join(", "))}</span></li>`
+        )
+        .join("")}
+      </ul>
+    </div>`
+      : `
+    <div class="builder-panel">
+      <p class="eyebrow">${escapeHtml(builderCopy.summaryEyebrow)}</p>
+      <h3>${escapeHtml(builderCopy.summaryTitle)}</h3>
+      <p class="risk-chip minimal">${escapeHtml(builderCopy.classifications.minimal)}</p>
+      <p class="muted">${escapeHtml(builderCopy.buttonHints.step1 || builderCopy.validationErrors.step1SystemType || "")}</p>
+      <ul class="check-list">
+        <li>${escapeHtml(builderCopy.requiredArticles)}</li>
+      </ul>
+    </div>`;
+  const builderAside =
+    LOCALES[locale].builder.hideTopAside
+      ? ""
+      :
+    Array.isArray(LOCALES[locale].builder.scopePoints) && LOCALES[locale].builder.scopePoints.length
+      ? `
+        <aside class="proof-card fade-up">
+          <p class="eyebrow">${escapeHtml(LOCALES[locale].builder.scopeEyebrow)}</p>
+          <h3>${escapeHtml(LOCALES[locale].builder.scopeTitle)}</h3>
+          <ul class="pricing-list">
+            ${LOCALES[locale].builder.scopePoints.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </aside>`
+      : `
         <aside class="proof-card fade-up">
           <p class="eyebrow">${escapeHtml(builderUi.liveProofEyebrow)}</p>
           <h3>${escapeHtml(proofSurfaceTitle)}</h3>
@@ -7812,8 +9471,18 @@ function renderBuilder(locale, ctx) {
             <div class="metric"><span>${escapeHtml(builderUi.blocksLabel)}</span><strong>${proofSurface?.summary?.blocks ?? 1}</strong></div>
             <div class="metric"><span>${escapeHtml(builderUi.portableLabel)}</span><strong>${proofSurface?.summary?.portable_paths ? "true" : "true"}</strong></div>
           </div>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(builderUi.openDossierDemo)}</a>
-        </aside>
+          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(builderUi.openDossierDemo)}</a>
+        </aside>`;
+
+  return `
+    <section class="section">
+      <div class="container split-grid">
+        <div class="fade-up">
+          <p class="eyebrow">${escapeHtml(locale === "de" ? "Dokumentations-Assistent" : locale === "fr" ? "Assistant de documentation" : "Start here")}</p>
+          <h1>${escapeHtml(LOCALES[locale].builder.headline)}</h1>
+          <p class="lead">${escapeHtml(LOCALES[locale].builder.intro)}</p>
+        </div>
+        ${builderAside}
       </div>
     </section>
     <section class="section section-tight">
@@ -7822,28 +9491,218 @@ function renderBuilder(locale, ctx) {
         <div class="builder-layout">
           <div class="builder-main">
             <div class="builder-panel">
-              <p class="eyebrow" data-builder-step-counter></p>
-              <h2 data-builder-step-title></h2>
+              <p class="eyebrow" data-builder-step-counter>${escapeHtml(`${builderUi.stepLabel} 1 ${builderUi.ofLabel} ${locale === "en" && builderCopy.legalSteps.length ? builderCopy.legalSteps.length + 1 : 5}`)}</p>
+              <h2 data-builder-step-title>${escapeHtml(builderUi.stepTitles.step1)}</h2>
             </div>
-            <div class="builder-main" data-builder-step-body></div>
+            <div class="builder-main" data-builder-step-body>${initialStepBody}</div>
+            <p class="lang-note" data-builder-error hidden></p>
             <div class="builder-nav">
-              <button class="button-soft" type="button" data-builder-prev>${escapeHtml(builderUi.backLabel)}</button>
-              <button class="button" type="button" data-builder-next>${escapeHtml(builderUi.nextLabel)}</button>
+              <button class="button-soft" type="button" data-builder-prev disabled>${escapeHtml(builderUi.backLabel)}</button>
+              <button class="button" type="button" data-builder-next ${locale === "en" && builderCopy.legalSteps.length ? "" : "disabled"}>${escapeHtml((builderUi.nextLabels && builderUi.nextLabels.step1) || builderUi.nextLabel)}</button>
+              <button class="button-ghost" type="button" data-builder-export-jump ${locale === "en" && builderCopy.legalSteps.length ? "" : "hidden disabled"}>${escapeHtml(builderUi.jumpToExportLabel || "Go to export step")}</button>
             </div>
+            <p class="lang-note" data-builder-button-hint>${escapeHtml(builderUi.buttonHints?.step1 || "")}</p>
           </div>
-          <aside class="builder-sidebar" data-builder-summary></aside>
+          <aside class="builder-sidebar" data-builder-summary>${initialSummaryBody}</aside>
         </div>
-        <script id="builder-config" type="application/json">${escapeHtml(
-          JSON.stringify({
-            copy: builderCopy,
-            evidenceSummary: {
-              approvals: proofSurface?.summary?.approvals ?? 1,
-              blocks: proofSurface?.summary?.blocks ?? 1,
-              runsInWindow: proofSurface?.summary?.runs_in_window ?? 2,
-              executionQuality: proofSurface?.summary?.execution_quality_status ?? "healthy",
-            },
-          })
-        )}</script>
+        <script id="builder-config" type="application/json">${jsonForScript({
+        copy: builderCopy,
+        evidenceSummary: {
+          approvals: proofSurface?.summary?.approvals ?? 1,
+          blocks: proofSurface?.summary?.blocks ?? 1,
+          runsInWindow: proofSurface?.summary?.runs_in_window ?? 2,
+          executionQuality: proofSurface?.summary?.execution_quality_status ?? "healthy",
+        },
+      })}</script>
+      </div>
+    </section>
+  `;
+}
+
+const AGENT_CHECK_PAGE = {
+  en: {
+    title: "EU AI Act starter for your own agent | EU AI Evidence Builder",
+    description:
+      "Use the free EU AI Act starter on your own agent to see the first lightweight package before moving to the full workflow.",
+    eyebrow: "Next step",
+    headline: "Try the EU AI Act starter on your own agent",
+    intro:
+      "Use the free starter to see the first lightweight EU AI Act package on your own running adapter. If your team later wants help getting the first real package on its own system, you can contact us.",
+    prepTitle: "Before you start",
+    prepLead:
+      "This page is for teams that want a first honest result on their own agent before deciding whether they need help.",
+    prepPoints: [
+      "Your adapter must already be running.",
+      "You need a reachable base URL for that adapter.",
+      "The exact command and inputs are in the starter guide, not on this page.",
+      "The result is a lightweight first package, not the final provider-side package.",
+    ],
+    formatsTitle: "What the starter gives you",
+    formatsLead:
+      "The free starter is useful when you want a first signal on your own agent without pretending the full package is already done.",
+    formats: [
+      ["A lightweight EU-shaped package", "You see how the minimum path begins on your own agent, not only on the demo."],
+      ["A real first signal", "Your team sees whether the toolkit can reach your adapter and produce a usable starter result."],
+      ["A cleaner buying decision", "You decide whether to stay self-serve or ask for paid help after seeing the path on your own agent."],
+    ],
+    helpTitle: "When to ask for help",
+    helpLead:
+      "Ask for help when your team wants to move beyond the starter and reach the first real package faster.",
+    helpPoints: [
+      "You want the first real package on your own system.",
+      "Adapter setup, cases, or comparable runs are blocking progress.",
+      "Your team does not want to piece the path together alone.",
+    ],
+    buttons: {
+      back: "Back to Builder",
+      quickstart: "Open EU starter guide",
+      technical: "Contact us",
+    },
+  },
+};
+
+function renderAgentCheck(locale, ctx) {
+  const copy = AGENT_CHECK_PAGE[locale] || AGENT_CHECK_PAGE.en;
+  return `
+    <section class="section">
+      <div class="container">
+        <div class="card fade-up">
+          ${copy.eyebrow ? `<p class="eyebrow">${escapeHtml(copy.eyebrow)}</p>` : ""}
+          <h1>${escapeHtml(copy.headline)}</h1>
+          <p class="lead">${escapeHtml(copy.intro)}</p>
+          <div class="button-row section-tight">
+            <a class="button-ghost" href="${ctx.href("builder")}">${escapeHtml(copy.buttons.back)}</a>
+            <a class="button" href="${ctx.href("starter")}">${escapeHtml(copy.buttons.quickstart)}</a>
+            <a class="button-soft" href="${ctx.href("pricing")}">${escapeHtml(copy.buttons.technical)}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container docs-grid">
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.prepTitle)}</h2>
+          <p class="muted">${escapeHtml(copy.prepLead)}</p>
+          <ul class="pricing-list">
+            ${copy.prepPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+          </ul>
+        </article>
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.formatsTitle)}</h2>
+          <p class="muted">${escapeHtml(copy.formatsLead)}</p>
+          <ul class="pricing-list">
+            ${copy.formats
+              .map(([title, text]) => `<li><strong>${escapeHtml(title)}</strong>: ${escapeHtml(text)}</li>`)
+              .join("")}
+          </ul>
+        </article>
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.helpTitle)}</h2>
+          <p class="muted">${escapeHtml(copy.helpLead)}</p>
+          <ul class="pricing-list">
+            ${copy.helpPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+          </ul>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
+const STARTER_PAGE = {
+  en: {
+    title: "EU AI Act starter check for your own agent | EU AI Evidence Builder",
+    description:
+      "Run a first EU AI Act starter check on your own agent before moving to the full provider-side package.",
+    eyebrow: "Self-serve EU starter",
+    headline: "Run a first EU AI Act starter check on your own agent",
+    intro:
+      "This is a first self-serve check, not the full package. It shows whether the toolkit can reach your running adapter and produce a lightweight starter result.",
+    commandTitle: "Starter command",
+    commandLead:
+      "This command does not start your adapter for you. It runs the starter check against your already-running adapter.",
+    command: "npm run compliance:eu-ai-act:starter -- --baseUrl http://localhost:8787 --systemType fraud --profile my-agent",
+    needsTitle: "Before you run it",
+    needs: [
+      "Your adapter is already running and responds to GET /health and POST /run-case.",
+      "Node.js 20 or newer is installed on the machine where you run the command.",
+      "You know the adapter base URL, for example http://localhost:8787.",
+    ],
+    createsTitle: "What you get",
+    createsLead:
+      "After this run you can see whether your agent works with the toolkit before moving to the full package path.",
+    creates: [
+      "A first check that the toolkit can reach and run your agent.",
+      "A lightweight starter report and package.",
+      "A clearer go / no-go signal before the full package.",
+    ],
+    limitsTitle: "What this is not",
+    limits: [
+      "Not the final provider-side package.",
+      "Not the final document set for your system.",
+      "Not a conformity assessment or external review result.",
+    ],
+    nextTitle: "Need the full package?",
+    next: [
+      "If you want the full provider-side package for your system, go to pricing.",
+      "The paid path uses real cases and real runs for the full package.",
+    ],
+    buttons: {
+      pricing: "See pricing",
+    },
+  },
+};
+
+function renderStarterPage(locale, ctx) {
+  const copy = STARTER_PAGE[locale] || STARTER_PAGE.en;
+  return `
+    <section class="section">
+      <div class="container">
+        <div class="card fade-up">
+          ${copy.eyebrow ? `<p class="eyebrow">${escapeHtml(copy.eyebrow)}</p>` : ""}
+          <h1>${escapeHtml(copy.headline)}</h1>
+          <p class="lead">${escapeHtml(copy.intro)}</p>
+          <div class="button-row section-tight">
+            <a class="button" href="${ctx.href("pricing")}">${escapeHtml(copy.buttons.pricing)}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.commandTitle)}</h2>
+          <p class="muted">${escapeHtml(copy.commandLead)}</p>
+          <div class="code-snippet"><code>${escapeHtml(copy.command)}</code></div>
+        </article>
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.needsTitle)}</h2>
+          <ul class="pricing-list">
+            ${copy.needs.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container docs-grid">
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.createsTitle)}</h2>
+          <p class="muted">${escapeHtml(copy.createsLead)}</p>
+          <ul class="pricing-list">
+            ${copy.creates.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.limitsTitle)}</h2>
+          <ul class="pricing-list">
+            ${copy.limits.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.nextTitle)}</h2>
+          <ul class="pricing-list">
+            ${copy.next.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
       </div>
     </section>
   `;
@@ -7861,12 +9720,12 @@ function renderDocs(locale, ctx) {
       scopeTitle: "Docs that explain what this product is and is not",
       scopeLead: "Use these once you have seen the proof path and want the clearer source-of-truth explanation behind it.",
       cards: {
-        quickstart: ["Quickstart guide", "Run your first honest starter evidence pack on your own agent.", `${GITHUB_REPO}/blob/main/docs/quickstart-your-agent.md`, "Open on GitHub"],
+        quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", "__starter__", "Open starter page"],
         runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Open on GitHub"],
         proof: ["Proof hub", "Published live demos and artifact surfaces for both product paths.", "__proof__", "Open proof hub"],
-        technology: ["Technology page", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technology page"],
-        buyer: ["EU buyer guide", "What the product contributes, what remains operator-owned, and where it fits in the workflow.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-buyer-guide.md`, "Open on GitHub"],
-        boundary: ["Automation boundary", "What remains manual by design, what is real tech debt, and what is optional expansion.", `${GITHUB_REPO}/blob/main/docs/automation-boundary-and-tech-debt.md`, "Open on GitHub"],
+        technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
+        buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Open on GitHub"],
+        boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
       },
     },
     de: {
@@ -7878,12 +9737,12 @@ function renderDocs(locale, ctx) {
       scopeTitle: "Dokumente, die erklaeren, was das Produkt ist und was nicht",
       scopeLead: "Diese Quellen helfen, sobald der Nachweis-Pfad klar ist und Sie die saubere Referenzerklaerung dahinter brauchen.",
       cards: {
-        quickstart: ["Schnellstart-Guide", "Das erste ehrliche Starter-Nachweispaket auf dem eigenen Agenten ausfuehren.", `${GITHUB_REPO}/blob/main/docs/quickstart-your-agent.md`, "Auf GitHub oeffnen"],
+        quickstart: ["EU-Starter-Leitfaden", "Ein leichtes erstes EU-Paket auf dem eigenen Agenten ausfuehren.", "__starter__", "Starter-Seite oeffnen"],
         runbook: ["EU-Operator-Leitfaden", "Ende-zu-Ende-Hinweise fuer Run, Paketierung, Verifikation und Uebergabe im EU-Pfad.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Auf GitHub oeffnen"],
         proof: ["Nachweis-Hub", "Veroeffentlichte Live-Demos und Artefakt-Oberflaechen fuer beide Produktpfade.", "__proof__", "Nachweis-Hub oeffnen"],
-        technology: ["Technologie-Seite", "Architektur, Verifikationsmodell, Artefaktvertraege und Vertrauensgrenze.", "__technology__", "Technologie-Seite oeffnen"],
-        buyer: ["EU-Kaeuferleitfaden", "Was das Produkt beitraegt, was beim Operator bleibt und wo es in den Workflow passt.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-buyer-guide.md`, "Auf GitHub oeffnen"],
-        boundary: ["Automationsgrenze", "Was absichtlich manuell bleibt, was echter Tech Debt ist und was nur optionale Expansion ist.", `${GITHUB_REPO}/blob/main/docs/automation-boundary-and-tech-debt.md`, "Auf GitHub oeffnen"],
+        technology: ["Technischer Ueberblick", "Architektur, Verifikationsmodell, Artefaktvertraege und Vertrauensgrenze.", "__technology__", "Technischen Ueberblick oeffnen"],
+        buyer: ["EU Self-Hosted-Leitfaden", "Wie der EU-Pfad auf eigener Infrastruktur laeuft und wie Artefakte unter eigener Kontrolle bleiben.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Auf GitHub oeffnen"],
+        boundary: ["Verifikations-Checkliste", "Was im erzeugten Paket zu pruefen ist und wie Ergebnisse reproduziert werden.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Auf GitHub oeffnen"],
       },
     },
     fr: {
@@ -7895,12 +9754,12 @@ function renderDocs(locale, ctx) {
       scopeTitle: "Les docs qui expliquent ce que le produit est et n'est pas",
       scopeLead: "Utilisez-les apres avoir vu le chemin de preuve, quand vous voulez une explication de reference plus nette.",
       cards: {
-        quickstart: ["Guide de demarrage rapide", "Lancer votre premier dossier de preuve honnete sur votre propre agent.", `${GITHUB_REPO}/blob/main/docs/quickstart-your-agent.md`, "Ouvrir sur GitHub"],
+        quickstart: ["Guide du starter UE", "Lancer un premier paquet UE leger sur votre propre agent.", "__starter__", "Ouvrir la page starter"],
         runbook: ["Guide operateur UE", "Guidage complet pour l'execution, la mise en forme, la verification et la transmission sur le chemin UE.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Ouvrir sur GitHub"],
         proof: ["Hub de preuve", "Demos live publiees et surfaces d'artefacts pour les deux chemins produit.", "__proof__", "Ouvrir le hub de preuve"],
-        technology: ["Page technologie", "Architecture, modele de verification, contrats d'artefacts et frontiere de confiance.", "__technology__", "Ouvrir la page technologie"],
-        buyer: ["Guide acheteur UE", "Ce que le produit couvre, ce qui reste a la charge de l'operateur, et ou il s'insere dans le workflow.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-buyer-guide.md`, "Ouvrir sur GitHub"],
-        boundary: ["Frontiere d'automatisation", "Ce qui reste manuel par design, ce qui est une vraie dette technique, et ce qui n'est qu'une extension optionnelle.", `${GITHUB_REPO}/blob/main/docs/automation-boundary-and-tech-debt.md`, "Ouvrir sur GitHub"],
+        technology: ["Vue technique", "Architecture, modele de verification, contrats d'artefacts et frontiere de confiance.", "__technology__", "Ouvrir la vue technique"],
+        buyer: ["Guide self-hosted UE", "Comment executer le chemin UE sur votre propre infrastructure et garder les artefacts sous votre controle.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Ouvrir sur GitHub"],
+        boundary: ["Checklist de verification", "Ce qu'il faut verifier dans le paquet genere et comment reproduire les resultats.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Ouvrir sur GitHub"],
       },
     },
   }[locale] || {
@@ -7912,17 +9771,18 @@ function renderDocs(locale, ctx) {
     scopeTitle: "Docs that explain what this product is and is not",
     scopeLead: "Use these once you have seen the proof path and want the clearer source-of-truth explanation behind it.",
     cards: {
-      quickstart: ["Quickstart guide", "Run your first honest starter evidence pack on your own agent.", `${GITHUB_REPO}/blob/main/docs/quickstart-your-agent.md`, "Open on GitHub"],
+      quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", "__starter__", "Open starter page"],
       runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Open on GitHub"],
       proof: ["Proof hub", "Published live demos and artifact surfaces for both product paths.", "__proof__", "Open proof hub"],
-      technology: ["Technology page", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technology page"],
-      buyer: ["EU buyer guide", "What the product contributes, what remains operator-owned, and where it fits in the workflow.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-buyer-guide.md`, "Open on GitHub"],
-      boundary: ["Automation boundary", "What remains manual by design, what is real tech debt, and what is optional expansion.", `${GITHUB_REPO}/blob/main/docs/automation-boundary-and-tech-debt.md`, "Open on GitHub"],
+      technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
+      buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Open on GitHub"],
+      boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
     },
   };
   const hrefFor = (value) => {
     if (value === "__proof__") return ctx.assetHref("demo/");
     if (value === "__technology__") return ctx.href("technical");
+    if (value === "__starter__") return ctx.href("starter");
     return value;
   };
   const renderDocCard = ([title, text, href, label]) => `
@@ -7959,140 +9819,44 @@ function renderDocs(locale, ctx) {
   `;
 }
 
-function renderAbout(locale, ctx) {
-  const copy = LOCALES[locale].about;
-  const labels = {
-    en: {
-      eyebrow: "Technical teams",
-      proofEyebrow: "Live proof",
-      proofTitle: "What should already exist before installation time",
-      proofBody:
-        "A serious product should expose real artifacts, explicit gates, and, for authority-facing paths, an authenticity story rather than hash-only integrity before your team spends time integrating it.",
-      firstRunEyebrow: "First run",
-    },
-    de: {
-      eyebrow: "Technische Teams",
-      proofEyebrow: "Live-Nachweise",
-      proofTitle: "Was schon vor Integrationsaufwand sichtbar sein sollte",
-      proofBody:
-        "Ein ernstzunehmendes Produkt sollte echte Artefakte, explizite Verifikationsschritte und fuer Behoerdenpfade eine Authentizitaetsgeschichte statt nur Hash-Integritaet zeigen, bevor Ihr Team Integrationszeit investiert.",
-      firstRunEyebrow: "Erster Lauf",
-    },
-    fr: {
-      eyebrow: "Equipes techniques",
-      proofEyebrow: "Preuve live",
-      proofTitle: "Ce qui doit deja exister avant de depenser du temps d'integration",
-      proofBody:
-        "Un produit serieux doit montrer de vrais artefacts, des etapes de verification explicites et, pour les chemins tournes vers l'autorite, une histoire d'authenticite plutot qu'une simple integrite par hash avant que votre equipe n'investisse du temps d'integration.",
-      firstRunEyebrow: "Premier essai",
-    },
-  };
-  const ui = labels[locale] || labels.en;
-  const technical = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
-  return `
-    <section class="section">
-      <div class="container split-grid">
-        <div class="card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.eyebrow)}</p>
-          <h1>${escapeHtml(copy.headline)}</h1>
-          <p class="lead">${escapeHtml(copy.intro)}</p>
-          <div class="button-row section-tight">
-            <a class="button" href="${ctx.href("technical")}">${escapeHtml(technical.landingButton)}</a>
-            <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-              LOCALES[locale].common.viewProof
-            )}</a>
-            <a class="button-soft" href="${ctx.href("docs")}">${escapeHtml(technical.docsButton)}</a>
-          </div>
-        </div>
-        <div class="proof-card fade-up">
-          <p class="eyebrow">${escapeHtml(ui.proofEyebrow)}</p>
-          <h3>${escapeHtml(ui.proofTitle)}</h3>
-          <div class="proof-frame">
-            <img src="${ctx.assetHref(ctx.proof.screenshotPaths.secondary)}" alt="${escapeHtml(
-              locale === "de"
-                ? "Screenshot eines verifizierten Nachweispakets"
-                : locale === "fr"
-                  ? "Capture d'un dossier de preuve verifie"
-                  : "Verified evidence bundle screenshot"
-            )}" />
-          </div>
-          <p class="muted">${escapeHtml(ui.proofBody)}</p>
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container">
-        <h2 class="section-title">${escapeHtml(copy.inspectTitle)}</h2>
-        <p class="lead">${escapeHtml(copy.inspectLead)}</p>
-        <div class="docs-grid">
-          ${copy.inspectCards
-            .map(
-              ([title, text]) => `
-            <article class="card fade-up">
-              <h3>${escapeHtml(title)}</h3>
-              <p class="muted">${escapeHtml(text)}</p>
-            </article>`
-            )
-            .join("")}
-        </div>
-      </div>
-    </section>
-    <section class="section section-tight">
-      <div class="container evidence-card fade-up">
-        <p class="eyebrow">${escapeHtml(ui.firstRunEyebrow)}</p>
-        <h3>${escapeHtml(copy.quickstartTitle)}</h3>
-        <p class="muted">${escapeHtml(copy.quickstartLead)}</p>
-        <div class="code-snippet"><code>${escapeHtml(copy.quickstartCommand)}</code></div>
-        <ul class="pricing-list section-tight">
-          ${copy.quickstartPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
-        </ul>
-        <div class="button-row">
-          <a class="button" href="${GITHUB_REPO}/blob/main/docs/quickstart-your-agent.md" target="_blank" rel="noreferrer">${escapeHtml(copy.quickstartButton)}</a>
-          <a class="button-soft" href="${ctx.href("technical")}">${escapeHtml(technical.landingButton)}</a>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
 function renderContact(locale, ctx) {
   const copy = LOCALES[locale].contact;
   const cards = {
     en: {
       eyebrow: "Contact",
-      pilotTitle: "Start a pilot",
-      pilotBody: "Use the existing pilot request template in the open-source repository.",
-      pilotCta: "Open pilot request",
+      pilotTitle: "Open GitHub contact path",
+      pilotBody: "Use the public GitHub issue flow if you want to ask a product or implementation question.",
+      pilotCta: "Open GitHub issues",
       proofTitle: "Review the live proof",
       proofBody: "Send buyers directly to the published dossier and evidence pack surface.",
       proofCta: "Open proof hub",
-      docsTitle: "Need the technical docs?",
-      docsBody: "Use the repository docs and product matrix as the source of truth.",
-      docsCta: "Open docs",
+      docsTitle: "Need the builder?",
+      docsBody: "Start the provider-side draft first, then attach the supporting records already required for your system and role.",
+      docsCta: "Open builder",
     },
     de: {
       eyebrow: "Kontakt",
-      pilotTitle: "Pilot starten",
-      pilotBody: "Nutzen Sie die bestehende Pilot-Anfragevorlage im Open-Source-Repository.",
-      pilotCta: "Pilot-Anfrage oeffnen",
+      pilotTitle: "GitHub-Kontaktpfad oeffnen",
+      pilotBody: "Nutzen Sie den oeffentlichen GitHub-Issue-Pfad, wenn Sie eine Produkt- oder Umsetzungsfrage stellen moechten.",
+      pilotCta: "GitHub-Issues oeffnen",
       proofTitle: "Live-Nachweise pruefen",
       proofBody: "Leiten Sie Interessenten direkt zum veroeffentlichten Dossier und zur passenden Nachweisoberflaeche.",
       proofCta: "Nachweis-Hub oeffnen",
-      docsTitle: "Brauchen Sie die technische Dokumentation?",
-      docsBody: "Nutzen Sie die Repository-Dokumente und die Produktmatrix als massgebliche Quelle.",
-      docsCta: "Dokumentation oeffnen",
+      docsTitle: "Brauchen Sie den Builder?",
+      docsBody: "Beginnen Sie mit dem operator-eigenen Entwurf und haengen Sie reviewer-taugliche Nachweise dort an, wo das Paket technische Belege braucht.",
+      docsCta: "Builder oeffnen",
     },
     fr: {
       eyebrow: "Contact",
-      pilotTitle: "Demarrer un pilote",
-      pilotBody: "Utilisez le modele existant de demande de pilote dans le depot open source.",
-      pilotCta: "Ouvrir la demande de pilote",
+      pilotTitle: "Ouvrir le parcours GitHub",
+      pilotBody: "Utilisez le flux public GitHub si vous voulez poser une question produit ou implementation.",
+      pilotCta: "Ouvrir les issues GitHub",
       proofTitle: "Verifier la preuve live",
       proofBody: "Envoyez directement les acheteurs vers le dossier publie et la surface de preuve correspondante.",
       proofCta: "Ouvrir le hub de preuve",
-      docsTitle: "Besoin de la documentation technique ?",
-      docsBody: "Utilisez les docs du depot et la matrice produit comme reference principale.",
-      docsCta: "Ouvrir la documentation",
+      docsTitle: "Besoin du builder ?",
+      docsBody: "Commencez par le brouillon reste a l'operateur, puis rattachez la preuve lisible par un evaluateur la ou le dossier a besoin d'une preuve technique.",
+      docsCta: "Ouvrir le builder",
     },
   }[locale];
   return `
@@ -8104,7 +9868,7 @@ function renderContact(locale, ctx) {
           <article class="card fade-up">
             <h3>${escapeHtml(cards.pilotTitle)}</h3>
             <p class="muted">${escapeHtml(cards.pilotBody)}</p>
-            <a class="button" href="${GITHUB_REPO}/issues/new?template=pilot_request.yml" target="_blank" rel="noreferrer">${escapeHtml(cards.pilotCta)}</a>
+            <a class="button" href="${GITHUB_REPO}/issues/new" target="_blank" rel="noreferrer">${escapeHtml(cards.pilotCta)}</a>
           </article>
           <article class="card fade-up">
             <h3>${escapeHtml(cards.proofTitle)}</h3>
@@ -8114,7 +9878,7 @@ function renderContact(locale, ctx) {
           <article class="card fade-up">
             <h3>${escapeHtml(cards.docsTitle)}</h3>
             <p class="muted">${escapeHtml(cards.docsBody)}</p>
-            <a class="button-ghost" href="${ctx.href("docs")}">${escapeHtml(cards.docsCta)}</a>
+            <a class="button-ghost" href="${ctx.href("builder")}">${escapeHtml(cards.docsCta)}</a>
           </article>
         </div>
       </div>
@@ -8213,9 +9977,9 @@ function renderMovedPage(locale, ctx, destinationKey, label) {
     fr: "Page deplacee",
   };
   const bodyByLocale = {
-    en: "The Technology page now lives at a new URL. Use the button below if you are not redirected automatically.",
-    de: "Die Technologie-Seite liegt jetzt unter einer neuen URL. Nutzen Sie den Button unten, falls keine automatische Weiterleitung erfolgt.",
-    fr: "La page technologie a maintenant une nouvelle URL. Utilisez le bouton ci-dessous si vous n'etes pas redirige automatiquement.",
+    en: `${label} now lives at a new URL. Use the button below if you are not redirected automatically.`,
+    de: `${label} liegt jetzt unter einer neuen URL. Nutzen Sie den Button unten, falls keine automatische Weiterleitung erfolgt.`,
+    fr: `${label} se trouve maintenant a une nouvelle URL. Utilisez le bouton ci-dessous si vous n'etes pas redirige automatiquement.`,
   };
   const destination = ctx.href(destinationKey);
   return `
@@ -8259,15 +10023,15 @@ function renderBlogIndex(locale, ctx) {
         <p class="lead">${escapeHtml(ui.lead)}</p>
         <div class="blog-grid section-tight">
           ${Object.entries(BLOG_CONTENT)
-            .map(
-              ([key, article]) => `
+      .map(
+        ([key, article]) => `
             <article class="blog-card fade-up">
               <h3>${escapeHtml(pickLocalizedValue(article.title, locale) || "")}</h3>
               <p class="muted">${escapeHtml(pickLocalizedValue(article.description, locale) || "")}</p>
               <a class="button-ghost" href="${ctx.href(`blog-${key}`)}">${escapeHtml(ui.readCta)}</a>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -8314,14 +10078,14 @@ function renderBlogPage(locale, ctx, key) {
       <div class="container">
         <div class="timeline">
           ${sections
-            .map(
-              (section) => `
+      .map(
+        (section) => `
             <article class="card fade-up">
               <h2>${escapeHtml(section.heading)}</h2>
               <p class="muted">${escapeHtml(section.body)}</p>
             </article>`
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
       </div>
     </section>
@@ -8363,8 +10127,7 @@ function templateDownloadContent(locale, key) {
 <body>
   <h1>${escapeHtml(title)}</h1>
   <section><p>${escapeHtml(intro)}</p></section>
-  ${
-    contractMatrix
+  ${contractMatrix
       ? `
   <section>
     <h2>${escapeHtml(contractMatrix.title || "Working split")}</h2>
@@ -8373,8 +10136,8 @@ function templateDownloadContent(locale, key) {
       <thead><tr>${(contractMatrix.headers || []).map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead>
       <tbody>
         ${(contractMatrix.rows || [])
-          .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
-          .join("")}
+        .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
+        .join("")}
       </tbody>
     </table>
   </section>
@@ -8386,17 +10149,16 @@ function templateDownloadContent(locale, key) {
       <thead><tr><th>Section</th><th>Meaning</th><th>Evidence</th></tr></thead>
       <tbody>
         ${rows
-          .map(
-            (row) => `<tr><td>${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td><td>${escapeHtml(row[2])}</td></tr>`
-          )
-          .join("")}
+        .map(
+          (row) => `<tr><td>${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td><td>${escapeHtml(row[2])}</td></tr>`
+        )
+        .join("")}
       </tbody>
     </table>
   </section>
   `
-  }
-  ${
-    operatorDetail
+    }
+  ${operatorDetail
       ? `
   <section>
     <h2>${escapeHtml(operatorDetail.title || "Manual fields")}</h2>
@@ -8405,16 +10167,15 @@ function templateDownloadContent(locale, key) {
       <thead><tr>${(operatorDetail.headers || []).map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead>
       <tbody>
         ${(operatorDetail.rows || [])
-          .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
-          .join("")}
+        .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
+        .join("")}
       </tbody>
     </table>
   </section>
   `
       : ""
-  }
-  ${
-    dossierContext
+    }
+  ${dossierContext
       ? `
   <section>
     <h2>${escapeHtml(dossierContext.title || "Related files")}</h2>
@@ -8423,14 +10184,14 @@ function templateDownloadContent(locale, key) {
       <thead><tr>${(dossierContext.headers || []).map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead>
       <tbody>
         ${(dossierContext.rows || [])
-          .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
-          .join("")}
+        .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
+        .join("")}
       </tbody>
     </table>
   </section>
   `
       : ""
-  }
+    }
   <section><p>Use browser print to save this document as PDF.</p></section>
 </body>
 </html>`;
@@ -8460,20 +10221,28 @@ function softwareSchema(locale, origin) {
   };
 }
 
-function faqSchema(locale, key) {
-  const data = TEMPLATE_CONTENT[key];
-  if (data.hideFaq === true) return null;
-  const faq = pickLocalizedValue(data.faq, locale) || [];
-  if (faq.length === 0) return null;
+function formatPageTitle(title) {
+  return title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
+}
+
+function faqPairsSchema(items) {
+  if (!Array.isArray(items) || items.length === 0) return null;
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faq.map(([question, answer]) => ({
+    mainEntity: items.map(([question, answer]) => ({
       "@type": "Question",
       name: question,
       acceptedAnswer: { "@type": "Answer", text: answer },
     })),
   };
+}
+
+function faqSchema(locale, key) {
+  const data = TEMPLATE_CONTENT[key];
+  if (data.hideFaq === true) return null;
+  const faq = pickLocalizedValue(data.faq, locale) || [];
+  return faqPairsSchema(faq);
 }
 
 export function buildSiteDefinition(origin = DEFAULT_ORIGIN, siteOutputRoot = SITE_OUTPUT_ROOT) {
@@ -8491,7 +10260,7 @@ export function buildSiteDefinition(origin = DEFAULT_ORIGIN, siteOutputRoot = SI
         title: meta.landing.title,
         description: meta.landing.description,
         keywords: meta.landing.keywords,
-        schema: [landingSchema],
+        schema: [landingSchema, websiteSchema(origin, locale), organizationSchema(origin), faqPairsSchema(meta.landing.faq)].filter(Boolean),
         body: (ctx) => renderLanding(locale, ctx),
       })
     );
@@ -8499,20 +10268,15 @@ export function buildSiteDefinition(origin = DEFAULT_ORIGIN, siteOutputRoot = SI
       createPage(locale, "how-it-works", "how-it-works", {
         title: meta.how.title,
         description: meta.how.description,
+        schema: [faqPairsSchema(meta.how.faq)].filter(Boolean),
         body: (ctx) => renderHowItWorks(locale, ctx),
-      })
-    );
-    add(
-      createPage(locale, "holding", "holding", {
-        title: meta.holding.title,
-        description: meta.holding.description,
-        body: (ctx) => renderHolding(locale, ctx),
       })
     );
     add(
       createPage(locale, "technical", "technology", {
         title: technicalMeta.title,
         description: technicalMeta.description,
+        schema: [faqPairsSchema(technicalMeta.faq)].filter(Boolean),
         body: (ctx) => renderTechnical(locale, ctx),
       })
     );
@@ -8520,6 +10284,8 @@ export function buildSiteDefinition(origin = DEFAULT_ORIGIN, siteOutputRoot = SI
       createPage(locale, "technical-legacy", "technical", {
         title: `${meta.nav.technical} | EU AI Evidence Builder`,
         description: technicalMeta.description,
+        noindex: true,
+        excludeFromSitemap: true,
         body: (ctx) => renderMovedPage(locale, ctx, "technical", meta.nav.technical),
       })
     );
@@ -8550,6 +10316,22 @@ export function buildSiteDefinition(origin = DEFAULT_ORIGIN, siteOutputRoot = SI
       })
     );
     add(
+      createPage(locale, "agent-check", "agent-check", {
+        title: (AGENT_CHECK_PAGE[locale] || AGENT_CHECK_PAGE.en).title,
+        description: (AGENT_CHECK_PAGE[locale] || AGENT_CHECK_PAGE.en).description,
+        noindex: true,
+        excludeFromSitemap: true,
+        body: (ctx) => renderMovedPage(locale, ctx, "starter", locale === "de" ? "EU-Starter" : locale === "fr" ? "Starter UE" : "EU starter"),
+      })
+    );
+    add(
+      createPage(locale, "starter", "eu-ai-act-starter", {
+        title: (STARTER_PAGE[locale] || STARTER_PAGE.en).title,
+        description: (STARTER_PAGE[locale] || STARTER_PAGE.en).description,
+        body: (ctx) => renderStarterPage(locale, ctx),
+      })
+    );
+    add(
       createPage(locale, "templates", "templates", {
         title: meta.templates.title,
         description: meta.templates.description,
@@ -8558,17 +10340,21 @@ export function buildSiteDefinition(origin = DEFAULT_ORIGIN, siteOutputRoot = SI
       })
     );
     add(
-      createPage(locale, "docs", "docs", {
-        title: meta.docs.title,
-        description: meta.docs.description,
-        body: (ctx) => renderDocs(locale, ctx),
+      createPage(locale, "docs-legacy", "docs", {
+        title: `${meta.builder.title}`,
+        description: meta.builder.description,
+        noindex: true,
+        excludeFromSitemap: true,
+        body: (ctx) => renderMovedPage(locale, ctx, "builder", "Builder"),
       })
     );
     add(
-      createPage(locale, "about", "about", {
-        title: meta.about.title,
-        description: meta.about.description,
-        body: (ctx) => renderAbout(locale, ctx),
+      createPage(locale, "about-legacy", "about", {
+        title: `${technicalMeta.title}`,
+        description: technicalMeta.description,
+        noindex: true,
+        excludeFromSitemap: true,
+        body: (ctx) => renderMovedPage(locale, ctx, "technical", locale === "de" ? "Technischer Ueberblick" : locale === "fr" ? "Vue technique" : "Technical Overview"),
       })
     );
     add(
@@ -8637,6 +10423,7 @@ function renderRootRedirect(origin) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EU AI Evidence Builder</title>
+  <meta name="robots" content="noindex, nofollow" />
   <meta http-equiv="refresh" content="0; url=./en/" />
   <script>
     (function () {
@@ -8655,18 +10442,18 @@ function renderRootRedirect(origin) {
 }
 
 function renderSitemap(origin, pages) {
-  const items = pages
+  const visiblePages = pages.filter((page) => page.excludeFromSitemap !== true);
+  const items = visiblePages
     .map((page) => {
-      const alternates = pages.filter((candidate) => candidate.key === page.key);
+      const alternates = visiblePages.filter((candidate) => candidate.key === page.key);
       const altLinks = alternates
         .map(
           (alt) =>
             `<xhtml:link rel="alternate" hreflang="${alt.locale}" href="${canonicalUrl(origin, alt.locale, alt.segment)}"/>`
         )
         .join("");
-      return `<url><loc>${canonicalUrl(origin, page.locale, page.segment)}</loc>${altLinks}<changefreq>weekly</changefreq><priority>${
-        page.key === "landing" ? "1.0" : "0.8"
-      }</priority></url>`;
+      return `<url><loc>${canonicalUrl(origin, page.locale, page.segment)}</loc>${altLinks}<changefreq>weekly</changefreq><priority>${page.key === "landing" ? "1.0" : "0.8"
+        }</priority></url>`;
     })
     .join("");
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -8674,7 +10461,108 @@ function renderSitemap(origin, pages) {
 }
 
 function renderRobots(origin) {
-  return `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`;
+  return `User-agent: *\nAllow: /\n\n# LLM-friendly summaries\n# ${origin}/llms.txt\n# ${origin}/llms-full.txt\n\nSitemap: ${origin}/sitemap.xml\n`;
+}
+
+function renderLlmsTxt(origin) {
+  return `# EU AI Evidence Builder
+
+> Self-hosted reviewer-ready EU AI Act evidence built from verified runtime data for tool-using AI agents.
+
+## Start here
+- [English homepage](${origin}/en/)
+- [Technical Overview](${origin}/en/technology/)
+- [How it works](${origin}/en/how-it-works/)
+- [Builder](${origin}/en/builder/)
+- [Documentation templates](${origin}/en/templates/)
+
+## Live proof
+- [EU reviewer dossier HTML](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.html)
+- [EU reviewer dossier PDF](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf)
+- [EU proof hub](${origin}/demo/)
+- [Machine-readable proof index](${origin}/demo/product-surfaces.json)
+
+## Product boundary
+- Core evidence engine for tool-using AI agents
+- EU AI Act vertical with reviewer dossier plus expanded technical pack
+- Article 12-style record-keeping is necessary but not sufficient for high-risk review on its own
+- Not legal advice, legal classification, or final sign-off automation
+
+## Languages
+- [English](${origin}/en/)
+- [Deutsch](${origin}/de/)
+- [Français](${origin}/fr/)
+
+## Source docs
+- [README](${GITHUB_REPO}#readme)
+- [EU operator runbook](${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md)
+`;
+}
+
+function renderLlmsFullTxt(origin) {
+  return `# EU AI Evidence Builder
+
+> Deployment-ready site summary for LLM and agentic readers.
+
+## What this product is
+- A self-hosted evidence engine for tool-using AI agents
+- Strongest current vertical: EU AI Act evidence and reviewer-facing dossier outputs
+- Built for teams that need verified runtime evidence to survive review outside engineering tooling
+
+## What it is not
+- Not legal advice
+- Not notified-body review
+- Not a generic compliance suite for every regulated workflow
+- Not only logging, dashboards, or template generation
+
+## Core outputs
+- Portable evidence bundle
+- Machine-readable compare report
+- Integrity manifest and optional signature path
+- Reviewer-first EU outputs: PDF, HTML, Markdown
+- Expanded technical pack with linked JSON artifacts
+- Article-level scaffolds for Articles 9, 12, 13, 14, 15, 17, 72, 73 and Annex IV
+
+## Preferred reading order
+1. [English homepage](${origin}/en/)
+2. [How it works](${origin}/en/how-it-works/)
+3. [Technical Overview](${origin}/en/technology/)
+4. [Builder](${origin}/en/builder/)
+5. [EU reviewer dossier HTML](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.html)
+6. [EU reviewer dossier PDF](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf)
+7. [Proof hub](${origin}/demo/)
+
+## Key English pages
+- [Landing](${origin}/en/)
+- [How it works](${origin}/en/how-it-works/)
+- [Technical Overview](${origin}/en/technology/)
+- [Templates](${origin}/en/templates/)
+- [Builder](${origin}/en/builder/)
+- [Pricing](${origin}/en/pricing/)
+
+## Key German pages
+- [Landing](${origin}/de/)
+- [So funktioniert es](${origin}/de/how-it-works/)
+- [Technischer Ueberblick](${origin}/de/technology/)
+- [Templates](${origin}/de/templates/)
+- [Builder](${origin}/de/builder/)
+
+## Key French pages
+- [Landing](${origin}/fr/)
+- [Fonctionnement](${origin}/fr/how-it-works/)
+- [Vue technique](${origin}/fr/technology/)
+- [Templates](${origin}/fr/templates/)
+- [Builder](${origin}/fr/builder/)
+
+## Important product boundary for EU AI Act readers
+- Article 12 record-keeping matters, but high-risk review still needs Annex-shaped documentation, operator-owned completion, monitoring continuity, and readable reviewer outputs
+- The reviewer dossier and expanded technical pack are generated from the same evidence base
+- The product automates evidence operations and packaging, not legal classification or final approval
+
+## Source docs and guides
+- [README](${GITHUB_REPO}#readme)
+- [EU operator runbook](${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md)
+`;
 }
 
 function outputPathForPage(page, siteOutputRoot = SITE_OUTPUT_ROOT) {
@@ -8696,6 +10584,14 @@ export function getSiteOutputs(origin = DEFAULT_ORIGIN, siteOutputRoot = SITE_OU
   outputs.push({
     absPath: path.join(siteOutputRoot, "robots.txt"),
     content: renderRobots(origin),
+  });
+  outputs.push({
+    absPath: path.join(siteOutputRoot, "llms.txt"),
+    content: renderLlmsTxt(origin),
+  });
+  outputs.push({
+    absPath: path.join(siteOutputRoot, "llms-full.txt"),
+    content: renderLlmsFullTxt(origin),
   });
 
   for (const page of definition.pages) {
@@ -8723,10 +10619,50 @@ const REQUIRED_STATIC_FILES = [
   "site-assets/builder.js",
   "demo/index.html",
   "demo/agent-evidence/report.html",
+  "demo/eu-ai-act/report.html",
+  "demo/eu-ai-act/compare-report.json",
+  "demo/eu-ai-act/artifacts/manifest.json",
+  "demo/eu-ai-act/archive/retention-controls.json",
+  "demo/eu-ai-act/_source_inputs/new/run.json",
   "demo/eu-ai-act/compliance/eu-ai-act-report.html",
+  "demo/eu-ai-act/compliance/eu-ai-act-reviewer.html",
+  "demo/eu-ai-act/compliance/eu-ai-act-reviewer.md",
+  "demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf",
+  "demo/eu-ai-act/compliance/article-9-risk-register.json",
+  "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
+  "demo/eu-ai-act/compliance/release-review.json",
+  "demo/eu-ai-act/compliance/post-market-monitoring.json",
+  "demo/eu-ai-act/compliance/article-13-instructions.json",
+  "demo/eu-ai-act/compliance/human-oversight-summary.json",
+  "demo/eu-ai-act/compliance/article-17-qms-lite.json",
+  "demo/eu-ai-act/compliance/article-72-monitoring-plan.json",
+  "demo/eu-ai-act/compliance/article-73-serious-incident-pack.json",
   "demo/product-surfaces.json",
   "assets/screenshots/01.png",
   "assets/screenshots/05.png",
+  ...SITE_LOCALES.flatMap((locale) => [
+    `demo/${locale}/index.html`,
+    `demo/${locale}/product-surfaces.json`,
+    `demo/${locale}/agent-evidence/report.html`,
+    `demo/${locale}/eu-ai-act/report.html`,
+    `demo/${locale}/eu-ai-act/compare-report.json`,
+    `demo/${locale}/eu-ai-act/artifacts/manifest.json`,
+    `demo/${locale}/eu-ai-act/archive/retention-controls.json`,
+    `demo/${locale}/eu-ai-act/_source_inputs/new/run.json`,
+    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-report.html`,
+    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-reviewer.html`,
+    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-reviewer.md`,
+    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-reviewer.pdf`,
+    `demo/${locale}/eu-ai-act/compliance/article-9-risk-register.json`,
+    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-annex-iv.json`,
+    `demo/${locale}/eu-ai-act/compliance/release-review.json`,
+    `demo/${locale}/eu-ai-act/compliance/post-market-monitoring.json`,
+    `demo/${locale}/eu-ai-act/compliance/article-13-instructions.json`,
+    `demo/${locale}/eu-ai-act/compliance/human-oversight-summary.json`,
+    `demo/${locale}/eu-ai-act/compliance/article-17-qms-lite.json`,
+    `demo/${locale}/eu-ai-act/compliance/article-72-monitoring-plan.json`,
+    `demo/${locale}/eu-ai-act/compliance/article-73-serious-incident-pack.json`,
+  ]),
 ];
 
 export function verifySiteOutputs(origin = DEFAULT_ORIGIN, siteOutputRoot = SITE_OUTPUT_ROOT) {

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "artifact_type": "tool_result_record",
+  "case_id": "c-block",
+  "version": "new",
+  "call_id": "call-1",
+  "tool": "run_shell",
+  "status": "ok",
+  "payload_summary": "command executed",
+  "issues": []
+}

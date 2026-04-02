@@ -29,7 +29,7 @@ export function buildAgentEvidenceFixtureArgs(repoRoot, params) {
 
 export function buildEuAiActFixtureArgs(repoRoot, params) {
   const fixtureRoot = resolveEuAiActFixtureRoot(repoRoot);
-  return [
+  const args = [
     "--cases",
     path.join(fixtureRoot, "cases.json"),
     "--baselineDir",
@@ -45,4 +45,8 @@ export function buildEuAiActFixtureArgs(repoRoot, params) {
     "--trend-db",
     params.trendDb,
   ];
+  if (params.contract) {
+    args.push("--contract", params.contract);
+  }
+  return args;
 }

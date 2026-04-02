@@ -88,11 +88,13 @@ function buildSnapshot(reportDir) {
   const report = readJson(path.join(reportDir, "compare-report.json"));
   const manifest = readJson(path.join(reportDir, "artifacts", "manifest.json"));
   const reportHtml = readFileSync(path.join(reportDir, "report.html"), "utf8");
+  const retentionControls = readJson(path.join(reportDir, "archive", "retention-controls.json"));
 
   return {
     fixture_version: 1,
     compare_report: normalizeValue(report),
     manifest: normalizeManifest(manifest),
+    retention_archive_controls: normalizeValue(retentionControls),
     html_contract: {
       main_report_hrefs: extractHrefs(reportHtml),
     },

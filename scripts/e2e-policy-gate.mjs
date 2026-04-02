@@ -27,6 +27,21 @@ async function writeJson(absPath, value) {
   await writeFile(absPath, JSON.stringify(value, null, 2), "utf-8");
 }
 
+function buildRunMeta(caseIds, version) {
+  return {
+    selected_case_ids: caseIds,
+    provenance: {
+      agent_id: "policy-gate-agent",
+      agent_version: version === "new" ? "policy-gate-v2" : "policy-gate-v1",
+      model: "policy-gate-model",
+      model_version: version === "new" ? "2026-03-21" : "2026-03-01",
+      prompt_version: version === "new" ? "policy-prompt-v2" : "policy-prompt-v1",
+      tools_version: "policy-tools-v1",
+      config_hash: version === "new" ? "cfg-policy-new" : "cfg-policy-baseline",
+    },
+  };
+}
+
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);
 }
@@ -50,8 +65,8 @@ async function main() {
       events: [],
       proposed_actions: [],
     };
-    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
-    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(baselineDir, "run.json"), buildRunMeta(["c1"], "baseline"));
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
     await writeJson(path.join(baselineDir, "c1.json"), okResp);
     await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
 

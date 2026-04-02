@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EU KI-Verordnung Artikel 12 - Vorlage fuer Journalisierung und Rueckverfolgbarkeit</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; max-width: 860px; margin: 40px auto; color: #0f172a; line-height: 1.6; }
+    h1, h2 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -0.03em; }
+    section { border: 1px solid #dbe5f1; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #dbe5f1; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>EU KI-Verordnung Artikel 12 - Vorlage fuer Journalisierung und Rueckverfolgbarkeit</h1>
+  <section><p>In Artikel 12 prueft eine pruefende Person, ob sich ein Run ausserhalb Ihrer internen Dashboards rekonstruieren laesst. Die Schwierigkeit besteht nicht darin, Logs im Prinzip zu haben. Die Schwierigkeit besteht darin, eine nachvollziehbare Spur zu haben, die eine andere pruefende Person wirklich prüfen, verfolgen und aufbewahren kann. Fuer eine Hochrisiko-Pruefung muss diese Spur trotzdem in ein groesseres Annex-orientiertes Paket passen.</p></section>
+  
+  <section>
+    <h2>Was Artikel 12 verlangt, was das Toolkit beitragen kann und was Ihr Team weiter verantwortet</h2>
+    <p>Ohne Verbindung zu Ihrem Agenten kann das Toolkit nur die Trace- und Journalisierungsartefakte zeigen, die bereits im erzeugten Paket vorhanden sind. Nach der Adapter-Integration kann es Laufprotokolle, Tool-Telemetrie, Ergebnis- und Fehlerartefakte sowie Trace-Anker aus echten Runs erfassen.</p>
+    <table>
+      <thead><tr><th>Artikel 12 verlangt</th><th>Toolkit nur mit bereits erzeugtem Paket</th><th>Toolkit nach Adapter-Integration</th><th>Weiter von Ihrem Team definiert und freigegeben</th></tr></thead>
+      <tbody>
+        <tr><td>Eine pruefbare Ereignisspur</td><td>Zeigt Daten aus dem Vergleichsbericht, aufbewahrte Fallartefakte und manifest-gestuetzte Dateiintegritaet, die bereits im Paket vorhanden sind.</td><td>Fuegt Laufprotokolle, Tool-Telemetrie, Ergebnisartefakte, Fehlerartefakte und Trace-Anker aus echten Runs hinzu.</td><td>Legen Sie fest, welche Systeme geloggt werden muessen, was als vollstaendiger Datensatz gilt und welche Luecken durch kompensierende Kontrollen abgedeckt werden muessen.</td></tr><tr><td>Eine Verbindung zwischen Bericht und zugrunde liegendem Run</td><td>Kann Berichtskennungen, Manifest-Eintraege und bereits gemeinsam gebuendelte aufbewahrte Artefakte zeigen.</td><td>Kann vom Bericht auf konkrete Run-Dateien und fallbezogene Artefakte des verbundenen Agenten verweisen.</td><td>Erklaeren Sie externe Trace-Systeme, Speicher-Ebenen oder Kennungen, die ausserhalb des Toolkits liegen.</td></tr><tr><td>Einen Pruefpfad, wenn etwas schiefgeht</td><td>Ermoeglicht einer pruefenden Person, den erzeugten Bericht, die Vergleichsdatei und aufbewahrte Artefakte zu pruefen, die bereits im Paket sind.</td><td>Ermoeglicht einer pruefenden Person, die zugrunde liegenden Laufprotokolle und Tool-Artefakte zu oeffnen, die an dieselben Faelle gebunden sind.</td><td>Definieren Sie, wer auf diese Datensaetze zugreifen darf, in welchem Workflow und wie Zugriff fuer Vorfallanalyse oder Audits freigegeben wird.</td></tr><tr><td>Retention- und Loeschkontrollen</td><td>Zeigt die Ausgabe der Aufbewahrungskontrollen und die bereits im Paket enthaltenen aufbewahrten Dateien.</td><td>Kann reale Run-Artefakte und Telemetrie-Dateien aufnehmen, die Ihre Aufbewahrungsrichtlinie abdecken muss.</td><td>Legen Sie Aufbewahrungsdauer, Loeschregeln, Exportrichtlinie und Regeln fuer rechtliche Offenlegung fest.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Was Ihr Team rund um Artikel 12 noch festlegt</h2>
+    <p>Das Toolkit kann Datensaetze erhalten und in ein Paket uebernehmen, entscheidet aber nicht ueber Ihre Aufbewahrungsregeln oder Offenlegungsvorgaben. Diese Entscheidungen gehoeren weiterhin in Ihre Journalisierungsrichtlinie und Ihren Governance-Ablauf. Artikel 12 wird damit zu einer geprueften Schicht im groesseren Hochrisiko-Paket und nicht zum ganzen Paket fuer sich.</p>
+    <table>
+      <thead><tr><th>Was Sie festlegen</th><th>Wann Sie es festlegen</th><th>Praktisches Format</th></tr></thead>
+      <tbody>
+        <tr><td>Aufbewahrungsdauer und Speicherort</td><td>Bevor Sie das Paket fuer eine Governance-Pruefung oder externe Uebergabe verwenden.</td><td>Eine kurze Richtlinien-Aussage dazu, wie lange Datensaetze aufbewahrt werden und wo die Dateien liegen.</td></tr><tr><td>Zugriffs- und Offenlegungsregeln</td><td>Wenn das Paket von Sicherheit, Governance, Rechtsberatung oder einer externen pruefenden Person geoeffnet werden kann.</td><td>Eine kurze Zugriffsmatrix, wer welche Journalisierungs-Artefakte unter welchem Ausloeser pruefen darf.</td></tr><tr><td>Referenzen auf externe Trace-Systeme</td><td>Immer dann, wenn Ihre Trace-Kette ueber Systeme ausserhalb des Toolkit-Pakets verlaeuft.</td><td>Systemname, Kennungsformat und Suchpfad, die fuer die Fortsetzung der Spur ausserhalb des Pakets noetig sind.</td></tr><tr><td>Bekannte Journalisierungs-Luecken und kompensierender Prozess</td><td>Wenn der verbundene Adapter nicht die gewuenschte Journalisierungs-Tiefe liefert.</td><td>Eine kurze Luecken-Notiz plus der manuelle oder externe Prozess, der die Luecke schliesst.</td></tr><tr><td>Rechtliche Export- und Loeschgrenzen</td><td>Bevor Nachweise an ein anderes Team uebergeben oder laenger aufbewahrt wird.</td><td>Kurzer Leitlinientext dazu, wann Datensaetze exportiert, geschwaerzt oder geloescht werden duerfen.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Artikel 12 wird ueber mehrere Journalisierungs- und Trace-Dateien belegt</h2>
+    <p>Es gibt keine einzelne Artikel-12-JSON-Datei im Paket. Die Anforderung wird ueber die unten stehenden Dateien abgedeckt. Ihr Layout ist das strukturierte Toolkit-Format fuer diese Anforderungen und keine EU-vorgeschriebene Form.</p>
+    <table>
+      <thead><tr><th>Datei im Paket</th><th>Warum sie fuer Artikel 12 wichtig ist</th><th>Datei oeffnen</th></tr></thead>
+      <tbody>
+        <tr><td>Vergleichsbericht - compare-report.json</td><td>Zentrale Pruefdatei, die Fallergebnisse, Trace-Integritaet und aufbewahrte Artefakte verknuepft.</td><td>demo/eu-ai-act/compare-report.json</td></tr><tr><td>Manifest - artifacts/manifest.json</td><td>Integritaetsindex, der zeigt, welche Dateien zum Paket gehoeren und wie sie verankert sind.</td><td>demo/eu-ai-act/artifacts/manifest.json</td></tr><tr><td>Quell-Laufprotokoll - _source_inputs/new/run.json</td><td>Beispielhafter Rohdatensatz eines Runs, mit dem sich ein konkreter Ausfuehrungspfad rekonstruieren laesst.</td><td>demo/eu-ai-act/_source_inputs/new/run.json</td></tr><tr><td>Aufbewahrungskontrollen - archive/retention-controls.json</td><td>Archiv- und Aufbewahrungsbeobachtungen, die dem Paket beigefuegt sind.</td><td>demo/eu-ai-act/archive/retention-controls.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <section><p>Use browser print to save this document as PDF.</p></section>
+</body>
+</html>

@@ -71,6 +71,16 @@ const ENVIRONMENT_CLUE_FIELDS = [
   },
 ];
 
+const PROVENANCE_FIELDS = [
+  "agent_id",
+  "agent_version",
+  "model",
+  "model_version",
+  "prompt_version",
+  "tools_version",
+  "config_hash",
+];
+
 function usage(exitCode = 0) {
   const msg = [
     "Usage:",
@@ -243,6 +253,40 @@ function pushEnvironmentWarnings(environmentClues, warnings) {
   }
 }
 
+function extractRunProvenance(runJson, label, errors) {
+  const provenance = asRecord(runJson.provenance);
+  if (!provenance) {
+    pushIssue(
+      errors,
+      "error",
+      `${label}.run_json.provenance`,
+      "run.json must include a complete provenance block for compare-safe qualification"
+    );
+    return null;
+  }
+  const normalized = {};
+  const missing = [];
+  for (const field of PROVENANCE_FIELDS) {
+    const value = typeof provenance[field] === "string" ? provenance[field].trim() : "";
+    if (!value) {
+      missing.push(field);
+      continue;
+    }
+    normalized[field] = value;
+  }
+  if (missing.length > 0) {
+    pushIssue(
+      errors,
+      "error",
+      `${label}.run_json.provenance`,
+      "run.json provenance is incomplete",
+      { missing_fields: missing }
+    );
+    return null;
+  }
+  return normalized;
+}
+
 function parseIdList(value, field, errors) {
   if (!Array.isArray(value)) {
     pushIssue(errors, "error", field, `${field} must be an array of case ids`);
@@ -390,6 +434,8 @@ function renderHuman(summary) {
     `new: ${summary.new_dir_href}`,
     `selectedCases: ${summary.summary.selected_case_count}`,
     `runnerMismatches: ${summary.summary.runner_mismatch_count}`,
+    `provenanceChanges: ${summary.summary.provenance_changed_field_count}`,
+    `missingProvenance: ${summary.summary.provenance_missing_count}`,
     `environmentDifferences: ${summary.summary.environment_difference_count}`,
     `missingSignals: ${summary.summary.environment_missing_signal_count}`,
     `missingArtifacts: ${summary.summary.missing_artifact_count}`,
@@ -469,6 +515,9 @@ function main() {
     ensureRunMetaShape(newRun, "new", errors, warnings);
   }
 
+  const baselineProvenance = errors.length === 0 ? extractRunProvenance(baselineRun, "baseline", errors) : null;
+  const newProvenance = errors.length === 0 ? extractRunProvenance(newRun, "new", errors) : null;
+
   const baselineSelectedCaseIds = parseIdList(baselineRun.selected_case_ids, "baseline.selected_case_ids", errors);
   const newSelectedCaseIds = parseIdList(newRun.selected_case_ids, "new.selected_case_ids", errors);
 
@@ -518,6 +567,21 @@ function main() {
     });
   }
 
+  const provenanceChangedFields = [];
+  if (baselineProvenance && newProvenance) {
+    if (baselineProvenance.agent_id !== newProvenance.agent_id) {
+      pushIssue(errors, "error", "provenance.agent_id", "Baseline and new provenance refer to different agent_id values", {
+        baseline: baselineProvenance.agent_id,
+        new: newProvenance.agent_id,
+      });
+    }
+    for (const field of PROVENANCE_FIELDS.filter((field) => field !== "agent_id")) {
+      if (baselineProvenance[field] !== newProvenance[field]) {
+        provenanceChangedFields.push(field);
+      }
+    }
+  }
+
   if (baselineRun.run_id && newRun.run_id && baselineRun.run_id !== newRun.run_id) {
     pushIssue(warnings, "warning", "run_id", "Baseline and new runs use different run_id values");
   }
@@ -562,17 +626,20 @@ function main() {
   const baselineRunFingerprint = {
     runner_envelope: baselineRunnerEnvelope,
     selected_case_ids: baselineSelectedCaseIds,
+    provenance: baselineProvenance,
     environment_clues: Object.fromEntries(environmentClues.map((clue) => [clue.field, clue.baseline])),
   };
   const newRunFingerprint = {
     runner_envelope: newRunnerEnvelope,
     selected_case_ids: newSelectedCaseIds,
+    provenance: newProvenance,
     environment_clues: Object.fromEntries(environmentClues.map((clue) => [clue.field, clue.new])),
   };
   const environmentDifferenceCount = environmentClues.filter((clue) => clue.status === "different").length;
   const environmentMissingSignalCount = environmentClues.filter(
     (clue) => clue.status === "not_recorded" || clue.status === "missing_on_one_side"
   ).length;
+  const provenanceMissingCount = [baselineProvenance, newProvenance].filter((item) => !item).length;
 
   const summary = {
     ok: errors.length === 0,
@@ -604,6 +671,8 @@ function main() {
         Number(asRecord(newRun.runner)?.runs ?? 0),
       ),
       runner_mismatch_count: runnerMismatchCount,
+      provenance_changed_field_count: provenanceChangedFields.length,
+      provenance_missing_count: provenanceMissingCount,
       environment_difference_count: environmentDifferenceCount,
       environment_missing_signal_count: environmentMissingSignalCount,
       missing_artifact_count: errors.filter((issue) => issue.field === "baseline.artifacts" || issue.field === "new.artifacts").length,
@@ -636,8 +705,15 @@ function main() {
         baseline_selected_case_ids: baselineSelectedCaseIds,
         new_selected_case_ids: newSelectedCaseIds,
       },
+      provenance: {
+        complete_on_both_sides: Boolean(baselineProvenance && newProvenance),
+        baseline: baselineProvenance,
+        new: newProvenance,
+        changed_fields: provenanceChangedFields,
+      },
       environment_clues: environmentClues,
       signal_availability: {
+        provenance_recorded: Boolean(baselineProvenance && newProvenance),
         git_context_recorded: environmentClues.some((clue) => clue.field.startsWith("git_") && clue.status !== "not_recorded"),
         adapter_runtime_recorded: environmentClues.some(
           (clue) => clue.category === "adapter_runtime" && clue.status !== "not_recorded"

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "artifact_type": "retention_archive_controls",
+  "framework": "AGENT_EVIDENCE",
+  "report_id": "agent-evidence-demo",
+  "generated_at": 1775100591645,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "retention_archive_controls_href": "archive/retention-controls.json"
+  },
+  "report_quality": {
+    "self_contained": true,
+    "portable_paths": true,
+    "transfer_class": "internal_only",
+    "redaction_status": "none",
+    "redaction_preset_id": null
+  },
+  "retention_observations": {
+    "baseline": {
+      "run_id": null,
+      "retention_days": null,
+      "keep_raw": null,
+      "save_full_body_on_error": null,
+      "redaction_applied": null,
+      "redaction_keep_raw": null
+    },
+    "new": {
+      "run_id": null,
+      "retention_days": null,
+      "keep_raw": null,
+      "save_full_body_on_error": null,
+      "redaction_applied": null,
+      "redaction_keep_raw": null
+    },
+    "evaluator_retention_days": 0,
+    "settings_consistent": true,
+    "differences": []
+  },
+  "archive_scope": {
+    "archive_entire_report_directory": true,
+    "immutable_archive_recommended": true,
+    "manifest_anchor_href": "artifacts/manifest.json",
+    "required_paths": [
+      "compare-report.json",
+      "report.html",
+      "artifacts/manifest.json",
+      "archive/retention-controls.json",
+      "_source_inputs/cases.json",
+      "_source_inputs/baseline/run.json",
+      "_source_inputs/new/run.json"
+    ],
+    "operator_required_inputs": [
+      "archive storage location",
+      "retention owner",
+      "approved retention period by artifact class",
+      "deletion and legal-hold procedure",
+      "authority export procedure"
+    ],
+    "external_surfaces": []
+  },
+  "residual_gaps": [
+    "Archive storage location, immutability controls, and access policy are operator-defined.",
+    "Deletion, legal hold, and authority export procedures are operator-defined."
+  ]
+}

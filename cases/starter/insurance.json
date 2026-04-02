@@ -1,0 +1,29 @@
+[
+  {
+    "id": "starter-insurance-claim-assessment",
+    "title": "Claim assessment",
+    "suite": "starter",
+    "input": {
+      "user": "Review this claim summary and identify the next questions an adjuster should ask."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-insurance-underwriting",
+    "title": "Underwriting check",
+    "suite": "starter",
+    "input": {
+      "user": "Summarize the main underwriting risk signals in this applicant profile."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-insurance-risk-lookup",
+    "title": "Risk lookup",
+    "suite": "starter",
+    "input": {
+      "user": "Look up relevant policy and risk information for a property with repeated water-damage claims."
+    },
+    "expected": {}
+  }
+]

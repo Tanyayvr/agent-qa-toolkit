@@ -1,0 +1,29 @@
+[
+  {
+    "id": "starter-healthcare-triage",
+    "title": "Symptom triage",
+    "suite": "starter",
+    "input": {
+      "user": "A patient reports fever, shortness of breath, and chest pain. Summarize the immediate triage considerations."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-healthcare-referral",
+    "title": "Referral support",
+    "suite": "starter",
+    "input": {
+      "user": "Based on these symptoms and notes, explain what specialist referral information should be gathered next."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-healthcare-information-request",
+    "title": "Information request",
+    "suite": "starter",
+    "input": {
+      "user": "Draft a short list of follow-up questions to clarify this patient case before any recommendation is made."
+    },
+    "expected": {}
+  }
+]

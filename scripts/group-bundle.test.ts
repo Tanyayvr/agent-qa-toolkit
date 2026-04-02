@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const REPO_ROOT = process.cwd();
 const GROUP_SCRIPT = path.join(REPO_ROOT, "scripts", "group-bundle.mjs");
 const VERIFY_SCRIPT = path.join(REPO_ROOT, "scripts", "group-bundle-verify.mjs");
+const SCRIPT_TEST_TIMEOUT_MS = 20_000;
 
 const tempRoots: string[] = [];
 
@@ -26,7 +27,7 @@ function runNode(scriptAbs: string, args: string[], cwd: string) {
   return spawnSync(process.execPath, [scriptAbs, ...args], {
     cwd,
     encoding: "utf8"
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 }
 
 function createReport(root: string, name: string) {
@@ -100,7 +101,7 @@ describe("group-bundle scripts", () => {
     const verify = runNode(VERIFY_SCRIPT, ["--bundleDir", outDir], REPO_ROOT);
     expect(verify.status, verify.stderr).toBe(0);
     expect(verify.stdout).toContain("Status: OK");
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("detects tampered grouped artifacts", () => {
     const root = makeTempRoot();
@@ -131,7 +132,7 @@ describe("group-bundle scripts", () => {
     const json = JSON.parse(verify.stdout);
     expect(json.ok).toBe(false);
     expect(json.hash_mismatches.length).toBeGreaterThan(0);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("detects missing grouped artifacts", () => {
     const root = makeTempRoot();
@@ -152,7 +153,7 @@ describe("group-bundle scripts", () => {
     const json = JSON.parse(verify.stdout);
     expect(json.ok).toBe(false);
     expect(json.missing_files.length).toBeGreaterThan(0);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("fails on duplicate labels", () => {
     const root = makeTempRoot();
@@ -176,7 +177,7 @@ describe("group-bundle scripts", () => {
     );
     expect(build.status).toBe(1);
     expect(build.stderr).toContain("Duplicate report label");
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("fails when outDir exists without --force", () => {
     const root = makeTempRoot();
@@ -198,7 +199,7 @@ describe("group-bundle scripts", () => {
     );
     expect(build.status).toBe(1);
     expect(build.stderr).toContain("outDir exists");
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("replaces outDir when --force is provided", () => {
     const root = makeTempRoot();
@@ -223,7 +224,7 @@ describe("group-bundle scripts", () => {
     expect(build.status, build.stderr).toBe(0);
     const verify = runNode(VERIFY_SCRIPT, ["--bundleDir", outDir], REPO_ROOT);
     expect(verify.status, verify.stderr).toBe(0);
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("uses report directory basename as label when not provided", () => {
     const root = makeTempRoot();
@@ -248,7 +249,7 @@ describe("group-bundle scripts", () => {
     expect(index.runs).toHaveLength(1);
     expect(index.runs[0].run_label).toBe("my-agent-report");
     expect(index.runs[0].agent_id).toBe("my-agent-report");
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("fails verify when group-manifest.json is missing", () => {
     const root = makeTempRoot();

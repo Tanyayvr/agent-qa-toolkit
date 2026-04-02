@@ -85,7 +85,15 @@ Fields:
   },
   "events": [
     { "type": "tool_call", "ts": 1738044000123, "call_id": "c1", "tool": "create_ticket", "args": { "customer_id": "CUST-1234" } },
-    { "type": "tool_result", "ts": 1738044000456, "call_id": "c1", "status": "ok", "latency_ms": 333, "payload_summary": { "ticket_id": "T-1234" } },
+    {
+      "type": "tool_result",
+      "ts": 1738044000456,
+      "call_id": "c1",
+      "status": "ok",
+      "latency_ms": 333,
+      "payload_summary": { "ticket_id": "T-1234" },
+      "result_ref": "tool://c1"
+    },
     { "type": "final_output", "ts": 1738044001300, "content_type": "json", "content": { "action": "create_ticket", "ticket_id": "T-1234" } }
   ],
   "assumption_state": {
@@ -136,6 +144,13 @@ Recommended (for full checks):
 - `events` (array; used for tool trace integrity + security signals)
 - `assumption_state` (object; decision-legibility state for selected/rejected candidates)
 - `token_usage` (object; optional cost + loop signals)
+
+Quality-grade tool-using contract:
+- emit `events`
+- emit `final_output` event
+- emit `tool_call` + matching `tool_result` for every declared tool execution
+- for `tool_result.status = "ok"`, include `payload_summary` or `result_ref`
+- for `tool_result.status = "error" | "timeout"`, include `error_code` or `error_message`
 
 Optional `token_usage` (if available):
 ```json
@@ -222,7 +237,7 @@ Response (example):
 ---
 
 ## Notes
-- The toolkit is tolerant to missing `events`, but correctness checks (tool_sequence, tool_required, evidence_required) rely on it.
+- Minimal compatibility still allows responses without `events`, but quality-grade tool-using evaluation does not.
 - If your agent does not execute tools, omit `proposed_actions` and `events`.
 - The evaluator reads response JSON directly from runner artifacts; ensure it is valid JSON.
 - Self-hosted does **not** remove prompt‑injection risk by itself; use layered scanning (regex baseline + optional entropy scanner).

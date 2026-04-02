@@ -14,16 +14,43 @@
 </head>
 <body>
   <h1>Annexe IV de l'AI Act - Modele de documentation technique</h1>
-  <section><p>L'Annexe IV est le point de convergence du dossier: identite du systeme, finalite, architecture, logging et preuves doivent etre coherents.</p></section>
+  <section><p>L'Annexe IV est le point de convergence du dossier: identite du systeme, finalite, architecture, journalisation et preuves doivent etre coherents.</p></section>
+  
   <section>
-    <h2>Section guide</h2>
+    <h2>Ce que l'Annexe IV exige, ce que le toolkit peut ajouter, et ce que votre equipe garde en charge</h2>
+    <p>Sans connecter votre agent, le toolkit ne peut que preparer le dossier a partir du dossier deja genere. Apres integration de l'adapter, il peut relier les references du dossier a des runs reels, a des sorties d'articles et a des preuves recurrentes.</p>
     <table>
-      <thead><tr><th>Section</th><th>Meaning</th><th>Evidence</th></tr></thead>
+      <thead><tr><th>L'Annexe IV exige</th><th>Toolkit avec dossier deja genere seulement</th><th>Toolkit apres integration de l'adapter</th><th>Toujours redige et approuve par votre equipe</th></tr></thead>
       <tbody>
-        <tr><td>Identite du systeme</td><td>Nom, version et contexte.</td><td>Metadonnees du report et environnement.</td></tr><tr><td>Finalite</td><td>Usage et contexte du systeme.</td><td>Export Builder plus texte humain.</td></tr><tr><td>Controles de risque</td><td>Mesures et risques residuels.</td><td>Evidence Article 9 et scans.</td></tr><tr><td>Traceabilite</td><td>Comment conserver les artefacts.</td><td>Manifest et preuves de logging.</td></tr><tr><td>Supervision</td><td>Comment la revue est effectuee.</td><td>Oversight summary et release review.</td></tr>
+        <tr><td>Identite du systeme et contexte technique</td><td>Cree un brouillon du dossier avec l'identite actuelle du systeme, l'environnement, les references de preuve et les zones non couvertes.</td><td>Relie cette identite aux runs reels, aux versions et aux sorties d'articles du systeme connecte.</td><td>Redigez le contexte final de deploiement, la frontiere propre a votre organisation et le recit des composants externes.</td></tr><tr><td>Finalite et contraintes d'exploitation</td><td>Peut montrer les entrees operateur encore necessaires pour la finalite et les contraintes.</td><td>Peut relier ces champs aux sorties les plus recentes d'Article 13, de supervision et de revue du systeme connecte.</td><td>Redigez la finalite definitive, les utilisateurs vises, les usages exclus et les hypotheses de deploiement.</td></tr><tr><td>Preuves reliees sur le risque, la journalisation, la supervision et la qualite</td><td>Peut deja relier le dossier aux sorties generees des Articles 9, 12, 13, 14, 15, 17, 72 et 73.</td><td>Garde ces liens a jour pendant que le systeme connecte est relance et surveille dans le temps.</td><td>Decidez si les preuves reliees suffisent pour l'affirmation que vous voulez faire dans le dossier.</td></tr><tr><td>Un dossier complet pret pour la validation finale</td><td>Peut lister les zones non couvertes et les ecarts residuels encore ouverts dans le dossier genere.</td><td>Ne redige toujours pas les sections manquantes et n'approuve pas la suffisance du dossier apres integration.</td><td>Completez les sections restantes, ajoutez l'interpretation juridique et validez le dossier final Annexe IV.</td></tr>
       </tbody>
     </table>
   </section>
+  
+  
+  <section>
+    <h2>Ce que votre equipe ajoute encore a l'Annexe IV</h2>
+    <p>Le toolkit peut generer la colonne vertebrale technique du dossier. Il ne remplace pas les parties redigees par des humains dans le dossier final Annexe IV.</p>
+    <table>
+      <thead><tr><th>Ce que vous ajoutez</th><th>Quand vous l'ajoutez</th><th>Format pratique a utiliser</th></tr></thead>
+      <tbody>
+        <tr><td>Finalite et utilisateurs vises</td><td>Quand le dossier est assemble pour la premiere fois puis a chaque changement de perimetre de deploiement.</td><td>Un court texte de finalite nommant le systeme, les utilisateurs vises, le contexte d'usage et les usages exclus.</td></tr><tr><td>Contexte de deploiement et frontiere du systeme</td><td>Avant de partager le dossier en dehors du workflow d'ingenierie.</td><td>Une note concise d'architecture ou de frontiere nommant les systemes externes, les dependances et la limite du produit.</td></tr><tr><td>Organisation operateur et roles</td><td>Quand le dossier doit montrer qui possede la supervision, la mise en production et la surveillance.</td><td>Une courte carte des roles nommant les equipes responsables et les points d'approbation.</td></tr><tr><td>Narratif humain pour les zones non couvertes</td><td>Quand des ecarts residuels ou des entrees operateur restent ouverts dans le dossier genere.</td><td>Une courte explication sur la maniere dont ces ecarts sont traites ou sur la raison de leur acceptabilite.</td></tr><tr><td>Validation juridique et gouvernance finale</td><td>Au moment ou le dossier Annexe IV devient le dossier officiel.</td><td>Un enregistrement de validation avec approbateur, date et conditions eventuelles.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>L'Annexe IV est le dossier de plus haut niveau reliant les sorties des articles</h2>
+    <p>Les fichiers ci-dessous sont les surfaces de preuve principales pour l'Annexe IV. Leur format est le format structure du toolkit pour ces exigences, et non une forme imposee par la loi.</p>
+    <table>
+      <thead><tr><th>Fichier dans le dossier</th><th>Pourquoi il compte pour l'Annexe IV</th><th>Ouvrir le fichier</th></tr></thead>
+      <tbody>
+        <tr><td>Dossier Annexe IV - eu-ai-act-annex-iv.json</td><td>Brouillon principal du dossier reliant l'identite du systeme, la couverture des clauses et les sorties d'articles.</td><td>demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json</td></tr><tr><td>Index de preuves - evidence-index.json</td><td>Montre les selecteurs de preuves par clause et les ecarts residuels qui se trouvent derriere le dossier.</td><td>demo/eu-ai-act/compliance/evidence-index.json</td></tr><tr><td>Registre de risques Article 9 - article-9-risk-register.json</td><td>Une des sorties d'article reliees dont le dossier depend pour la couverture du risque.</td><td>demo/eu-ai-act/compliance/article-9-risk-register.json</td></tr><tr><td>Instructions Article 13 - article-13-instructions.json</td><td>Une des sorties d'article reliees dont le dossier depend pour la finalite et les consignes d'exploitation.</td><td>demo/eu-ai-act/compliance/article-13-instructions.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
   <section><p>Use browser print to save this document as PDF.</p></section>
 </body>
 </html>

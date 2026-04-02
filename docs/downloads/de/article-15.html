@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EU KI-Verordnung Artikel 15 - Vorlage fuer Genauigkeit und Robustheit</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; max-width: 860px; margin: 40px auto; color: #0f172a; line-height: 1.6; }
+    h1, h2 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -0.03em; }
+    section { border: 1px solid #dbe5f1; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #dbe5f1; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>EU KI-Verordnung Artikel 15 - Vorlage fuer Genauigkeit und Robustheit</h1>
+  <section><p>In Artikel 15 hoeren Leistungsversprechen auf, Schlagwoerter zu sein, und brauchen echte Nachweise. Eine pruefende Person will Qualitaetssignale, Robustheits- und Sicherheitsbefunde, Vergleiche zwischen Versionen und einen klaren Punkt sehen, an dem das System nicht fuer die Inbetriebnahme freigegeben werden sollte.</p></section>
+  
+  <section>
+    <h2>Was Artikel 15 verlangt, was das Toolkit beitragen kann und was Ihr Team weiter verantwortet</h2>
+    <p>Ohne Verbindung zu Ihrem Agenten kann das Toolkit nur die Qualitaets- und Sicherheits-Ergebnisse zeigen, die bereits im erzeugten Paket vorhanden sind. Nach der Adapter-Integration kann es diese Ergebnisse an echte Runs, Versionsaenderungen und wiederholbare Nachweise ueber die Zeit binden.</p>
+    <table>
+      <thead><tr><th>Artikel 15 verlangt</th><th>Toolkit nur mit bereits erzeugtem Paket</th><th>Toolkit nach Adapter-Integration</th><th>Weiter von Ihrem Team geschrieben und freigegeben</th></tr></thead>
+      <tbody>
+        <tr><td>Qualitaets- und Genauigkeitssignale</td><td>Zeigt Pass-Rate, Ausfuehrungsqualitaet und Fallergebnisse, die bereits im Vergleichsbericht vorhanden sind.</td><td>Haelt diese Signale an echte Runs, Versionen und case-bezogene Nachweise des verbundenen Agenten gebunden.</td><td>Definieren Sie, welche Task-Metriken zaehlen, welcher Wert akzeptabel ist und was fuer Ihren Use Case als Erfolg gilt.</td></tr><tr><td>Robustheits- und Security-Findings</td><td>Zeigt aktuelle Sicherheitsbefunde und Risikostufen, die bereits im Paket vorhanden sind.</td><td>Kann diese Befunde an reale Runs, Tool-Verhalten und Fallergebnisse binden, die sie ausgeloest haben.</td><td>Erklaeren Sie, welche Robustheits- oder Sicherheitsbefunde akzeptabel sind und welche vor der Inbetriebnahme behoben werden muessen.</td></tr><tr><td>Vergleich von Version zu Version</td><td>Zeigt den Baseline-vs-New-Vergleich, der bereits im Vergleichsbericht eingebaut ist.</td><td>Ermoeglicht, dass dieser Vergleich ueber die Zeit an reale Run-Eingaben, Ergebnisse und aufbewahrte Artefakte gebunden bleibt.</td><td>Entscheiden Sie, ob die gewaehlten Faelle ausreichen, um die Aussage zu stuetzen, die Sie treffen wollen.</td></tr><tr><td>Eine Freigabe-Schwelle</td><td>Zeigt aktuelle Release-Empfehlung und Execution-Quality-Status, die bereits im Paket vorhanden sind.</td><td>Kann Schwellennachweise an wiederkehrende Runs und Freigabe-Historie binden, waehrend sich das System aendert.</td><td>Setzen Sie die finale Schwelle fuer Release, Eskalation oder Block und geben Sie diese Entscheidung frei.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Was Ihr Team rund um Artikel 15 noch definiert</h2>
+    <p>Das Toolkit kann das Nachweispaket erzeugen. Es entscheidet nicht, welches Qualitaetsniveau in Ihrer Domain akzeptabel ist oder ob die gewaehlte Fall-Suite ausreichend ist.</p>
+    <table>
+      <thead><tr><th>Was Sie definieren</th><th>Wann Sie es definieren</th><th>Praktisches Format</th></tr></thead>
+      <tbody>
+        <tr><td>Task-spezifischer Erfolgsschwellenwert</td><td>Bevor Sie sich auf das Paket stuetzen, um Release- oder Conformance-Aussagen zu rechtfertigen.</td><td>Eine kurze Schwellenwert-Aussage oder Tabelle mit Metrik, Zielwert und minimal akzeptablem Ergebnis.</td></tr><tr><td>Warum diese Case-Suite ausreicht</td><td>Wenn Sie behaupten, dass die aktuelle Evidence ausreicht, um eine Qualitaetsaussage zu stuetzen.</td><td>Eine kurze Begruendung, welche Faelle die wichtigsten Risiken, Failure Modes oder Edge Conditions abdecken.</td></tr><tr><td>Business-Auswirkung verbleibender Fehler</td><td>Wenn offene Regressionen, degradierte Ausfuehrung oder riskante Faelle im Paket verbleiben.</td><td>Ein oder zwei Saetze dazu, was diese Fehler fuer Ihren Einsatz und Ihre Nutzer bedeuten.</td></tr><tr><td>Akzeptiertes Robustheits- und Security-Risiko</td><td>Vor dem Sign-off, wenn ein signifikanter Punkt offen bleibt.</td><td>Eine kurze Akzeptieren-, Blockieren- oder Eskalieren-Entscheidung plus der verantwortlichen Person, die sie freigegeben hat.</td></tr><tr><td>Breitere Leistungsaussagen</td><td>Immer dann, wenn Sie mehr behaupten wollen, als das Paket direkt belegt.</td><td>Eine Klartext-Notiz, die trennt, was die Nachweise belegen und welche weitergehende Aussage Ihre Organisation treffen moechte.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  <section>
+    <h2>Artikel 15 wird ueber Vergleichs-, Integritaets- und Freigabe-Ergebnisse belegt</h2>
+    <p>Die unten stehenden Dateien sind die wichtigsten Nachweis-Oberflaechen fuer Artikel 15. Ihr Layout ist das strukturierte Toolkit-Format fuer diese Anforderungen und keine EU-vorgeschriebene Form.</p>
+    <table>
+      <thead><tr><th>Datei im Paket</th><th>Warum sie fuer Artikel 15 wichtig ist</th><th>Datei oeffnen</th></tr></thead>
+      <tbody>
+        <tr><td>Vergleichsbericht - compare-report.json</td><td>Zentrale maschinenlesbare Vergleichsdatei mit Pass-Raten, Ausfuehrungsqualitaet, Sicherheitsbefunden und hervorgehobenen Faellen.</td><td>demo/eu-ai-act/compare-report.json</td></tr><tr><td>Auswertungsbericht - report.html</td><td>Menschenlesbarer Bericht, mit dem dieselben Qualitaets- und Regressionsergebnisse geprueft werden.</td><td>demo/eu-ai-act/report.html</td></tr><tr><td>Manifest - artifacts/manifest.json</td><td>Integritaetsindex, der die Dateien verankert, welche die Aussagen nach Artikel 15 stuetzen.</td><td>demo/eu-ai-act/artifacts/manifest.json</td></tr><tr><td>Freigabepruefung - release-review.json</td><td>Zeigt, wie der aktuelle Qualitaetszustand den Release-Status und die Nachverfolgung beeinflusst.</td><td>demo/eu-ai-act/compliance/release-review.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <section><p>Use browser print to save this document as PDF.</p></section>
+</body>
+</html>

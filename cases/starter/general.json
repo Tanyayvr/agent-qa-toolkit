@@ -1,0 +1,29 @@
+[
+  {
+    "id": "starter-general-answer",
+    "title": "Basic question answering",
+    "suite": "starter",
+    "input": {
+      "user": "Explain in a few sentences what this system can do."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-general-followup",
+    "title": "Simple multi-step response",
+    "suite": "starter",
+    "input": {
+      "user": "List the first three steps you would take to investigate a customer issue, then summarize the answer in one sentence."
+    },
+    "expected": {}
+  },
+  {
+    "id": "starter-general-tool",
+    "title": "Tool-leaning request",
+    "suite": "starter",
+    "input": {
+      "user": "Look up the relevant information and give me the best answer you can."
+    },
+    "expected": {}
+  }
+]

@@ -104,5 +104,5 @@ It only ensures that the technical evidence layer is generated and handled insid
 
 - [Self-Hosted Deployment & Data Handling](self-hosted.md)
 - [Threat Model](threat-model.md)
-- [EU AI Act Buyer Guide](eu-ai-act-buyer-guide.md)
 - [EU AI Act Operator Runbook](eu-ai-act-operator-runbook.md)
+- [VERIFY.md](VERIFY.md)
