@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder</title>
+  <title>Technical Overview: from agent runs to an EU AI Act package | EU AI Evidence Builder</title>
   <meta name="description" content="Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   
@@ -13,7 +13,7 @@
 <link rel="alternate" hreflang="fr" href="https://tanyayvr.github.io/agent-qa-toolkit/fr/technology/" />
   <link rel="alternate" hreflang="x-default" href="https://tanyayvr.github.io/agent-qa-toolkit/en/" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder" />
+  <meta property="og:title" content="Technical Overview: from agent runs to an EU AI Act package | EU AI Evidence Builder" />
   <meta property="og:description" content="Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time." />
   <meta property="og:url" content="https://tanyayvr.github.io/agent-qa-toolkit/en/technology/" />
   <meta property="og:site_name" content="EU AI Evidence Builder" />
@@ -23,14 +23,14 @@
   <meta property="og:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
   <meta property="og:image:alt" content="EU AI Evidence Builder proof surface" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder" />
+  <meta name="twitter:title" content="Technical Overview: from agent runs to an EU AI Act package | EU AI Evidence Builder" />
   <meta name="twitter:description" content="Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time." />
   <meta name="twitter:image" content="https://tanyayvr.github.io/agent-qa-toolkit/assets/screenshots/05.png" />
   <link rel="stylesheet" href="../../site-assets/site.css?v=3ac87834b7" />
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder","description":"Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time.","inLanguage":"en","url":"https://tanyayvr.github.io/agent-qa-toolkit/en/technology/","isPartOf":{"@type":"WebSite","name":"EU AI Evidence Builder","url":"https://tanyayvr.github.io/agent-qa-toolkit/en/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Technical Overview: from agent runs to an EU AI Act package | EU AI Evidence Builder","description":"Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time.","inLanguage":"en","url":"https://tanyayvr.github.io/agent-qa-toolkit/en/technology/","isPartOf":{"@type":"WebSite","name":"EU AI Evidence Builder","url":"https://tanyayvr.github.io/agent-qa-toolkit/en/"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tanyayvr.github.io/agent-qa-toolkit/en/"},{"@type":"ListItem","position":2,"name":"Technical Overview","item":"https://tanyayvr.github.io/agent-qa-toolkit/en/technology/"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What should a technical team verify before integrating?","acceptedAnswer":{"@type":"Answer","text":"Check the reviewer dossier, the explicit verify and review gates, the split between machine-generated evidence and operator-owned completion, and the product boundary."}},{"@type":"Question","name":"Can we test this on our own agent before deeper setup?","acceptedAnswer":{"@type":"Answer","text":"Yes. The EU starter guide is the shortest honest path from the public draft flow to a lightweight EU starter package on your own running adapter."}},{"@type":"Question","name":"Do we need to read filenames and raw JSON first?","acceptedAnswer":{"@type":"Answer","text":"No. Start with the reviewer dossier and the product-facing fit checks on this page. The filenames, commands, and deeper technical docs are there once you decide the product deserves installation time."}},{"@type":"Question","name":"Does the toolkit automate legal approval?","acceptedAnswer":{"@type":"Answer","text":"No. It automates evidence operations and packaging. Legal classification, residual-risk judgment, and final sign-off remain human-owned."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What should a technical team verify before integrating?","acceptedAnswer":{"@type":"Answer","text":"Check the package boundary, the explicit verify gates, the split between machine-generated outputs and provider-owned completion, and the public self-serve path."}},{"@type":"Question","name":"Can we test this on our own agent before deeper setup?","acceptedAnswer":{"@type":"Answer","text":"Yes. The EU starter guide is the shortest honest path from the public draft flow to a lightweight EU starter package on your own running adapter."}},{"@type":"Question","name":"Do we need to read filenames and raw JSON first?","acceptedAnswer":{"@type":"Answer","text":"No. Start with the fit checks on this page. The commands, package shape, and deeper technical docs are there once you decide the product deserves installation time."}},{"@type":"Question","name":"Does the toolkit automate legal approval?","acceptedAnswer":{"@type":"Answer","text":"No. It automates evidence operations and packaging. Legal classification, residual-risk judgment, and final sign-off remain human-owned."}}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -65,22 +65,22 @@
       <div class="container split-grid">
         <div class="card fade-up">
           <p class="eyebrow">Technical Overview</p>
-          <h1>Technical Overview: from agent runs to reviewer-ready EU evidence</h1>
+          <h1>Technical Overview: from agent runs to an EU AI Act package</h1>
           <p class="lead">For CTOs and engineering leads deciding whether this is worth technical time now: what already exists, how to test fit on your own agent, what the engine actually does, where human approval still begins, and the fact that the default EU path here targets the provider side of a high-risk AI system.</p>
           <div class="button-row section-tight">
-            <a class="button" href="../../demo/en/eu-ai-act/compliance/eu-ai-act-reviewer.html" target="_blank" rel="noreferrer">Open reviewer dossier demo</a>
-            <a class="button-ghost" href="../../demo/en/agent-evidence/report.html" target="_blank" rel="noreferrer">Open demo agent report</a>
-            <a class="button-ghost" href="../../demo/en" target="_blank" rel="noreferrer">Open all demo documents</a>
+            <a class="button" href="../builder/">Open builder</a>
+            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">Open self-hosted guide</a>
+            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer">Open GitHub repo</a>
             <a class="button-soft" href="#first-run">See self-serve EU starter</a>
           </div>
         </div>
         <div class="proof-card fade-up">
-          <p class="eyebrow">Live proof</p>
+          <p class="eyebrow">Public path</p>
           <h3>What should already exist before installation time</h3>
           <div class="proof-frame">
             <img src="../../assets/screenshots/05.png" alt="Verified technical evidence bundle screenshot" />
           </div>
-          <p class="muted">A serious product should expose a reviewer-first dossier, explicit gates, and, for authority-facing paths, an authenticity story rather than hash-only integrity before your team spends time integrating it.</p>
+          <p class="muted">A serious product should expose a clear package boundary, explicit verify gates, and a real self-serve starter before your team spends time integrating it.</p>
         </div>
       </div>
     </section>
@@ -97,15 +97,15 @@
             </article>
             <article class="card fade-up">
               <h3>Real outputs</h3>
-              <p class="muted">The product ends in a portable report, machine contract, manifest, retention controls, review record, and optional authority package.</p>
+              <p class="muted">The product ends in a portable report, compare-report JSON, manifest, retention controls, and article-level EU outputs linked back to the same bundle.</p>
             </article>
             <article class="card fade-up">
-              <h3>Reviewer-ready EU outputs</h3>
-              <p class="muted">The EU path includes reviewer PDF, reviewer HTML, reviewer Markdown, and Annex-shaped dossier outputs linked back to the same evidence bundle.</p>
+              <h3>Provider-side package outputs</h3>
+              <p class="muted">The EU path produces Annex-shaped documentation outputs, provider-side JSON artifacts, and starter results tied back to the same runtime evidence.</p>
             </article>
             <article class="card fade-up">
               <h3>Hard gates and source-visible path</h3>
-              <p class="muted">Packaging, verify, review, and authority packaging all have explicit checks, and the commands, schemas, and artifacts are visible in the repository and reflected in the live proof surface.</p>
+              <p class="muted">Packaging and verify have explicit checks, and the commands, schemas, and artifacts are visible in the repository and reflected in the public Builder and starter path.</p>
             </article>
             <article class="card fade-up">
               <h3>What your team must already have</h3>
@@ -137,21 +137,21 @@
         </div>
         <div class="button-row">
           <a class="button" href="../eu-ai-act-starter/">Open EU starter guide</a>
-          <a class="button-ghost" href="../../demo/en/agent-evidence/report.html" target="_blank" rel="noreferrer">Open demo agent report</a>
-          <a class="button-soft" href="../../demo/en/eu-ai-act/compliance/eu-ai-act-reviewer.html" target="_blank" rel="noreferrer">Open reviewer dossier demo</a>
+          <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">Open self-hosted guide</a>
+          <a class="button-soft" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer">Open GitHub repo</a>
         </div>
       </div>
     </section>
     <section class="section section-tight">
       <div class="container">
         <h2 class="section-title">What this technology actually does</h2>
-        <p class="lead">The product turns comparable runs into reviewer-ready EU evidence, keeps the machine-verifiable core intact, and layers review, handoff, and dossier structure on top without pretending to automate legal sign-off.</p>
+        <p class="lead">The product turns comparable runs into a provider-side EU package, keeps the machine-verifiable core intact, and layers package structure and handoff on top without pretending to automate legal sign-off.</p>
         <div class="docs-grid">
           
             <article class="card fade-up">
               <h3>Evidence generation</h3>
               <ul class="pricing-list">
-                <li>Comparable baseline and new runs become a portable evidence bundle</li><li>The bundle includes a report, machine contract, manifest, retention controls, and reviewer-facing EU outputs</li><li>EU dossier sections attach to the same verified runtime evidence instead of diverging into a document-only workflow</li>
+                <li>Comparable baseline and new runs become a portable evidence bundle</li><li>The bundle includes a report, machine contract, manifest, retention controls, and provider-side EU outputs</li><li>EU dossier sections attach to the same verified runtime evidence instead of diverging into a document-only workflow</li>
               </ul>
             </article>
             <article class="card fade-up">
@@ -163,7 +163,7 @@
             <article class="card fade-up">
               <h3>Review and handoff</h3>
               <ul class="pricing-list">
-                <li>The package can move across engineering, governance, counsel, procurement, and authority-facing review</li><li>Reviewer PDF, reviewer HTML, review records, handoff notes, and authority bundles are part of the product surface</li><li>The goal is a package another reviewer can inspect without internal dashboards, screenshots, or unsigned file swaps</li>
+                <li>The package can move across engineering, governance, counsel, procurement, and authority-facing review</li><li>Readable package outputs, review records, handoff notes, and authority bundles can sit on the same package surface</li><li>The goal is a package another reviewer can inspect without internal dashboards, screenshots, or unsigned file swaps</li>
               </ul>
             </article>
             <article class="card fade-up">
@@ -180,7 +180,7 @@
         <div class="card fade-up">
           <p class="eyebrow">Workflow</p>
           <h2 class="section-title">What your team provides and what the engine does next</h2>
-          <p class="lead">The middle of the decision should stay practical. Your team brings a reachable adapter, a real change boundary, starter cases, and named owners. From there the engine handles comparable runs, verified packaging, and reviewer-ready EU outputs on top of the same bundle.</p>
+          <p class="lead">The middle of the decision should stay practical. Your team brings a reachable adapter, a real change boundary, starter cases, and named owners. From there the engine handles comparable runs, verified packaging, and provider-side EU outputs on top of the same bundle.</p>
           <div class="timeline section-tight">
             
               <article class="timeline-card">
@@ -197,7 +197,7 @@
               </article>
               <article class="timeline-card">
                 <span class="timeline-step">4</span>
-                <p>The engine generates reviewer-ready EU outputs from that same verified bundle; legal judgment and final approval still stay with your team.</p>
+                <p>The engine generates provider-side EU outputs from that same verified bundle; legal judgment and final approval still stay with your team.</p>
               </article>
           </div>
         </div>
@@ -223,7 +223,7 @@ npm run review:check -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
 npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt;</code></div>
         <div class="button-row">
           <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">Open GitHub repo</a>
-          <a class="button-ghost" href="../../demo/en/agent-evidence/report.html" target="_blank" rel="noreferrer">Open demo agent report</a>
+          <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">Open self-hosted guide</a>
         </div>
       </div>
     </section>
@@ -235,7 +235,7 @@ npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt
         <div class="button-row">
           <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">Open GitHub repo</a>
           <a class="button-ghost" href="#first-run">See self-serve EU starter</a>
-          <a class="button-soft" href="../../demo/en" target="_blank" rel="noreferrer">Open all demo documents</a>
+          <a class="button-soft" href="../builder/">Open builder</a>
         </div>
       </div>
     </section>

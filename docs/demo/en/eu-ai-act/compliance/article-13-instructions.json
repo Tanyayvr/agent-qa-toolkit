@@ -2,7 +2,7 @@
   "schema_version": 1,
   "framework": "EU_AI_ACT",
   "report_id": "eu-ai-act-demo",
-  "generated_at": 1775100600483,
+  "generated_at": 1775103464520,
   "bundle_artifacts": {
     "compare_report_href": "compare-report.json",
     "evaluator_report_html_href": "report.html",
@@ -19,12 +19,7 @@
     "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
     "human_oversight_summary_href": "compliance/human-oversight-summary.json",
     "post_market_monitoring_href": "compliance/post-market-monitoring.json",
-    "release_review_href": "compliance/release-review.json",
     "coverage_href": "compliance/eu-ai-act-coverage.json",
-    "report_html_href": "compliance/eu-ai-act-report.html",
-    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
-    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
-    "evidence_index_href": "compliance/evidence-index.json",
     "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
   },
   "document_scope": {
@@ -59,7 +54,6 @@
     "regressions": 0,
     "improvements": 1,
     "execution_quality_status": "healthy",
-    "execution_quality_reasons": [],
     "known_limitations": [
       "Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
       "Human oversight procedures for deployers still require operator-authored narrative.",

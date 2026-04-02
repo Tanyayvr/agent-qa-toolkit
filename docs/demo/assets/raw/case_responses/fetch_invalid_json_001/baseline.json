@@ -2,7 +2,6 @@
   "case_id": "fetch_invalid_json_001",
   "version": "baseline",
   "workflow_id": "support_ticketing_v1",
-  "proposed_actions": [],
   "final_output": {
     "content_type": "text",
     "content": "baseline ok"

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "framework": "EU_AI_ACT",
   "report_id": "eu-ai-act-demo",
-  "generated_at": 1775100600483,
+  "generated_at": 1775103464520,
   "bundle_artifacts": {
     "compare_report_href": "compare-report.json",
     "evaluator_report_html_href": "report.html",
@@ -19,12 +19,7 @@
     "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
     "human_oversight_summary_href": "compliance/human-oversight-summary.json",
     "post_market_monitoring_href": "compliance/post-market-monitoring.json",
-    "release_review_href": "compliance/release-review.json",
     "coverage_href": "compliance/eu-ai-act-coverage.json",
-    "report_html_href": "compliance/eu-ai-act-report.html",
-    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
-    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
-    "evidence_index_href": "compliance/evidence-index.json",
     "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
   },
   "summary": {
@@ -107,7 +102,6 @@
       "review_status": "review",
       "title": "Residual Article 9 governance gap",
       "description": "Operator-owned risk governance still sits outside the evaluator.",
-      "affected_case_ids": [],
       "evidence_hrefs": [
         "compliance/eu-ai-act-coverage.json",
         "compliance/eu-ai-act-annex-iv.json"
@@ -129,7 +123,6 @@
       "review_status": "review",
       "title": "Residual Article 9 governance gap",
       "description": "Annex III classification and legal interpretation still require counsel.",
-      "affected_case_ids": [],
       "evidence_hrefs": [
         "compliance/eu-ai-act-coverage.json",
         "compliance/eu-ai-act-annex-iv.json"
@@ -152,7 +145,6 @@
       "review_status": "review",
       "title": "Monitoring drift detected",
       "description": "Post-market monitoring detected drift: Approval-required cases increased from 0 to 1.; Blocking cases increased from 0 to 1.; High/critical signal volume increased by 2.; Critical signal count increased by 1..",
-      "affected_case_ids": [],
       "evidence_hrefs": [
         "compliance/post-market-monitoring.json",
         "compare-report.json"

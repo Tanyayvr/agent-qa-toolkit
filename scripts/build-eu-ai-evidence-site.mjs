@@ -36,7 +36,7 @@ export function parseCliArgs(argv) {
   return args;
 }
 
-export function buildSite({ origin = DEFAULT_ORIGIN, outputRoot = SITE_OUTPUT_ROOT, skipPublish = false } = {}) {
+export function buildSite({ origin = DEFAULT_ORIGIN, outputRoot = SITE_OUTPUT_ROOT, skipPublish = true } = {}) {
   if (!skipPublish) {
     const publishResult = spawnSync(process.execPath, [PUBLISH_SURFACES_SCRIPT, "--publishRoot", path.join(outputRoot, "demo")], {
       cwd: path.resolve(SCRIPT_DIR, ".."),

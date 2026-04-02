@@ -58,8 +58,8 @@ const LOCALES = {
       brandSubtitle: "Documentation builder for Agent QA Toolkit",
       trustLine: "Self-hosted · No data leaves your environment · Open source core",
       pilotCta: "Apply for Pilot",
-      liveDemos: "Live demos",
-      proofLabel: "Website proof",
+      liveDemos: "Builder and starter",
+      proofLabel: "Public path",
       docsLabel: "Open source docs",
       languageLabel: "Language",
       skipLink: "Skip to content",
@@ -72,7 +72,7 @@ const LOCALES = {
       no: "No",
       startFree: "Start Free",
       viewPricing: "See full pricing",
-      viewProof: "Open live evidence",
+      viewProof: "Open EU starter",
       bookCall: "Review pilot requirements",
     },
     landing: {
@@ -87,7 +87,7 @@ const LOCALES = {
       heroSubline:
         "This default path is for providers of high-risk AI systems. Importer, distributor, deployer, and authorised-representative obligations differ. If Article 25 makes your organization the provider, use this path.",
       primaryCta: "Start building your package",
-      secondaryCta: "See live proof",
+      secondaryCta: "Try EU starter",
       audienceTitle: "Choose your entry path",
       audienceLead:
         "Start with the job you are actually trying to complete: understand the EU workflow, inspect the technical overview, or start the package.",
@@ -103,7 +103,7 @@ const LOCALES = {
         {
           title: "Inspect the technology",
           text:
-            "See the architecture: how evidence is generated, verified, and packaged into reviewer-ready EU dossiers before your team spends time in the repo.",
+            "See the architecture: how technical evidence is generated, verified, and linked to the provider-side package before your team spends time in the repo.",
           result: "Best first click for CTOs, engineering leads, security, and technical diligence.",
           cta: "Open technical overview",
           href: "technical",
@@ -209,9 +209,9 @@ const LOCALES = {
           "Yes",
         ],
       ],
-      proofTitle: "See the proof before you read more",
+      proofTitle: "Choose the next step",
       proofBody:
-        "Open the builder, inspect the live dossier, or jump into the technical operating model. The site should route you to a real artifact, not a generic checklist.",
+        "Start in Builder, open the EU starter, or inspect the technical overview before your team spends time in the repository.",
       faq: [
         [
           "When does the EU AI Act start for high-risk AI?",
@@ -456,18 +456,18 @@ const LOCALES = {
       coverageLabel: "Technical contribution",
     },
     docs: {
-      title: "Source docs and proof hub",
+      title: "Source docs and public path",
       description:
-        "EU starter guide, operator runbooks, proof surfaces, and source-of-truth documentation behind the EU AI Evidence Builder.",
-      headline: "Source docs and proof hub",
+        "EU starter guide, operator runbooks, Builder entry points, and source-of-truth documentation behind the EU AI Evidence Builder.",
+      headline: "Source docs and public path",
       faq: [
         [
           "Which document should I open first?",
-          "Open the live reviewer dossier first if you want to see the EU-facing output. Open the EU starter guide first if you want to test the lightweight EU path on your own agent.",
+          "Open the Builder first if you want to draft the provider-side package. Open the EU starter guide first if you want to test the lightweight EU path on your own agent.",
         ],
         [
           "Do I need to read raw JSON first?",
-          "No. The reviewer dossier is the intended first reading surface. The JSON artifacts stay available as the deeper technical layer.",
+          "No. Start with the readable Builder and starter pages. The JSON artifacts stay available as the deeper technical layer.",
         ],
         [
           "Are the docs aligned across English, German, and French?",
@@ -478,7 +478,7 @@ const LOCALES = {
     contact: {
       title: "Contact the team",
       description:
-        "Apply for a pilot, review the proof surface, or open the open-source repository for the EU AI Evidence Builder.",
+        "Ask for help, open the EU starter, or inspect the open-source repository for the EU AI Evidence Builder.",
       headline: "Choose the fastest path to a serious pilot",
     },
     legalTitles: {
@@ -517,8 +517,8 @@ const LOCALES = {
       brandSubtitle: "Dokumentations-Assistent fuer Agent QA Toolkit",
       trustLine: "Bei Ihnen gehostet · Ihre Daten bleiben in Ihrer Umgebung · Open-Source-Kern",
       pilotCta: "Pilot beantragen",
-      liveDemos: "Live-Demos",
-      proofLabel: "Nachweis-Hub",
+      liveDemos: "Builder und Starter",
+      proofLabel: "Oeffentlicher Pfad",
       docsLabel: "Open-Source-Dokumentation",
       languageLabel: "Sprache",
       skipLink: "Zum Inhalt",
@@ -531,7 +531,7 @@ const LOCALES = {
       no: "Nein",
       startFree: "Kostenlos starten",
       viewPricing: "Preise ansehen",
-      viewProof: "Live-Nachweise öffnen",
+      viewProof: "EU-Starter oeffnen",
       bookCall: "Pilot prüfen",
     },
     landing: {
@@ -546,7 +546,7 @@ const LOCALES = {
       heroSubline:
         "Dieser Standardpfad gilt fuer Anbieter von Hochrisiko-KI-Systemen. Pflichten von Importeuren, Haendlern, Deployern und Bevollmaechtigten unterscheiden sich. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad.",
       primaryCta: "Dokumentation starten",
-      secondaryCta: "Live-Nachweise ansehen",
+      secondaryCta: "EU-Starter ausprobieren",
       audienceTitle: "Wählen Sie Ihren Einstieg",
       audienceLead:
         "Starten Sie mit der eigentlichen Aufgabe: den EU-Workflow verstehen, den technischen Ueberblick pruefen oder direkt mit dem Paket beginnen.",
@@ -668,9 +668,9 @@ const LOCALES = {
           "Ja",
         ],
       ],
-      proofTitle: "Nachweise sehen, bevor Sie mehr lesen",
+      proofTitle: "Waehlen Sie den naechsten Schritt",
       proofBody:
-        "Dokumentations-Assistent, Live-Dossier und technisches Betriebsmodell fuehren direkt zu echten Artefakten statt zu generischen Checklisten.",
+        "Starten Sie im Builder, oeffnen Sie den EU-Starter oder pruefen Sie den technischen Ueberblick, bevor Ihr Team Zeit im Repository investiert.",
       faq: [
         [
           "Wann beginnt die EU-KI-Verordnung fuer Hochrisiko-KI?",
@@ -980,8 +980,8 @@ const LOCALES = {
       brandSubtitle: "Generateur de documentation pour Agent QA Toolkit",
       trustLine: "Heberge chez vous · Vos donnees restent dans votre environnement · Noyau open source",
       pilotCta: "Demander un pilote",
-      liveDemos: "Demos live",
-      proofLabel: "Hub de preuve",
+      liveDemos: "Builder et starter",
+      proofLabel: "Parcours public",
       docsLabel: "Documentation open source",
       languageLabel: "Langue",
       skipLink: "Aller au contenu",
@@ -994,7 +994,7 @@ const LOCALES = {
       no: "Non",
       startFree: "Commencer gratuitement",
       viewPricing: "Voir les tarifs",
-      viewProof: "Voir les preuves live",
+      viewProof: "Ouvrir le starter UE",
       bookCall: "Verifier le pilote",
     },
     landing: {
@@ -1009,7 +1009,7 @@ const LOCALES = {
       heroSubline:
         "Le parcours par defaut ici concerne les fournisseurs de systemes d'IA a haut risque. Les obligations des importateurs, distributeurs, deployeurs et representants autorises sont differentes. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours.",
       primaryCta: "Commencer le dossier",
-      secondaryCta: "Voir la preuve live",
+      secondaryCta: "Essayer le starter UE",
       audienceTitle: "Choisissez votre point d'entree",
       audienceLead:
         "Commencez par le vrai travail a accomplir: comprendre le workflow EU, inspecter la vue technique, ou commencer le dossier.",
@@ -1131,9 +1131,9 @@ const LOCALES = {
           "Oui",
         ],
       ],
-      proofTitle: "Voir la preuve avant de lire plus",
+      proofTitle: "Choisissez l'etape suivante",
       proofBody:
-        "Ouvrez l'assistant de documentation, le dossier live ou le modele operationnel technique. Le site doit mener vers un vrai artefact, pas une checklist generique.",
+        "Commencez dans le builder, ouvrez le starter UE ou consultez la vue technique avant que votre equipe ne passe du temps dans le repository.",
       faq: [
         [
           "Quand le EU AI Act commence-t-il pour l'IA a haut risque ?",
@@ -1157,19 +1157,19 @@ const LOCALES = {
         ],
         [
           "Pourquoi un dashboard SaaS ou une plateforme d'evaluation ne suffit-il pas pour la preuve EU AI Act ?",
-          "Parce que la plupart des surfaces SaaS d'observabilite ou d'evaluation sont concues pour l'inspection interne, pas pour une transmission reviewer controlee. Elles peuvent etre des entrees utiles, mais elles ne resolvent en general ni le dossier hors ligne, ni la trace de revue, ni la frontiere de divulgation, ni le bundle machine-verifiable qu'un autre evaluateur peut verifier hors de la pile d'origine.",
+          "Parce que la plupart des surfaces SaaS d'observabilite ou d'evaluation sont concues pour l'inspection interne, pas pour remettre un package lisible et portable a d'autres equipes. Elles peuvent aider, mais elles ne resolvent en general ni le dossier hors ligne, ni la frontiere de divulgation, ni le bundle machine-verifiable qu'un autre evaluateur peut verifier hors de la pile d'origine.",
         ],
         [
-          "Pourquoi un package reviewer-ready demande-t-il plus qu'une checklist ou un PDF ?",
+          "Pourquoi un package lisible demande-t-il plus qu'une checklist ou un PDF ?",
           "Parce qu'une checklist ou un PDF statique peut decrire un systeme sans rester lie a la preuve d'execution qui soutient les affirmations. La revue haut risque devient douloureuse quand la couche documentaire et la couche de preuve se detachent. Le but ici est de les garder reliees.",
         ],
         [
           "Qu'est-ce que ce produit ajoute par rapport aux logs, aux dashboards SaaS et aux outils PDF ?",
-          "Il ajoute la couche que les outils plus simples laissent souvent manquer : un dossier reviewer lisible, une chaine de preuve machine-verifiable, des sorties reviewer hebergees chez vous, un chemin de transmission controle hors de l'ingenierie, et un package qui reste relie a de vrais runs d'execution au lieu de glisser vers des captures d'ecran ou du copier-coller.",
+          "Il ajoute la couche que les outils plus simples laissent souvent manquer : un package lisible, une chaine de preuve machine-verifiable, des sorties hebergees chez vous, un chemin de transmission controle hors de l'ingenierie, et un package qui reste relie a de vrais runs d'execution au lieu de glisser vers des captures d'ecran ou du copier-coller.",
         ],
         [
           "Est-ce que les donnees d'execution, les prompts ou les preuves quittent notre environnement ?",
-          "Non. Le workflow de preuve principal est concu pour fonctionner dans votre propre environnement, de sorte que les preuves d'execution, la mise en forme, la verification et les sorties reviewer peuvent rester dans votre perimetre controle.",
+          "Non. Le workflow principal est concu pour fonctionner dans votre propre environnement, de sorte que les preuves d'execution, la mise en forme, la verification et les sorties du package peuvent rester dans votre perimetre controle.",
         ],
         [
           "Est-ce que cela remplace la revue legale ou la validation finale ?",
@@ -1283,11 +1283,11 @@ const LOCALES = {
         ],
         [
           "Qu'est-ce qui est genere automatiquement et qu'est-ce qui reste humain ?",
-          "Le workflow peut organiser la structure du dossier, rattacher les materiaux techniques et preparer les sorties orientees evaluateur. L'interpretation legale, le jugement sur le risque residuel, les formulations pour deployeurs et la validation finale restent entre des mains nommees.",
+          "Le workflow peut organiser la structure du dossier, rattacher les materiaux techniques et preparer les sorties du package. L'interpretation legale, le jugement sur le risque residuel, les formulations pour deployeurs et la validation finale restent entre des mains nommees.",
         ],
         [
           "Que recoit l'evaluateur a la fin ?",
-          "L'evaluateur devrait recevoir un dossier lisible, des materiaux techniques relies, des sorties reviewer en PDF ou HTML et, si besoin, un package cible pour une revue client, juridique, achats ou autorite.",
+          "L'evaluateur devrait recevoir un dossier lisible, des materiaux techniques relies et, si besoin, un package cible pour une revue client, juridique, achats ou autorite.",
         ],
         [
           "Un meme workflow peut-il produire a la fois les documents et les materiaux techniques ?",
@@ -1295,7 +1295,7 @@ const LOCALES = {
         ],
         [
           "Les donnees d'execution et les preuves restent-elles dans notre environnement ?",
-          "Oui. Le workflow principal est concu pour que les preuves d'execution, la verification et les sorties reviewer puissent rester dans votre environnement controle.",
+          "Oui. Le workflow principal est concu pour que les preuves d'execution, la verification et les sorties du package puissent rester dans votre environnement controle.",
         ],
         [
           "Est-ce que cela remplace la revue legale ou la validation finale ?",
@@ -1748,11 +1748,11 @@ function getTechnicalShared(locale) {
 
 const TECHNICAL_PAGE = {
   en: {
-    title: "Technical Overview: from agent runs to reviewer-ready EU evidence | EU AI Evidence Builder",
+    title: "Technical Overview: from agent runs to an EU AI Act package | EU AI Evidence Builder",
     description:
       "Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time.",
     eyebrow: "Technical Overview",
-    headline: "Technical Overview: from agent runs to reviewer-ready EU evidence",
+    headline: "Technical Overview: from agent runs to an EU AI Act package",
     intro:
       "For CTOs and engineering leads deciding whether this is worth technical time now: what already exists, how to test fit on your own agent, what the engine actually does, where human approval still begins, and the fact that the default EU path here targets the provider side of a high-risk AI system.",
     inspectTitle: "What to check first",
@@ -1760,9 +1760,9 @@ const TECHNICAL_PAGE = {
       "Before installation, a CTO should be able to see concrete outputs, explicit gates, the split between machine evidence and human-owned completion, and the minimum your team must already have for an honest first run.",
     inspectCards: [
       ["Role scope", "The default EU path on this site is the provider-side path for high-risk AI systems. Other roles differ. If Article 25 makes your organization the provider, this is the correct path."],
-      ["Real outputs", "The product ends in a portable report, machine contract, manifest, retention controls, review record, and optional authority package."],
-      ["Reviewer-ready EU outputs", "The EU path includes reviewer PDF, reviewer HTML, reviewer Markdown, and Annex-shaped dossier outputs linked back to the same evidence bundle."],
-      ["Hard gates and source-visible path", "Packaging, verify, review, and authority packaging all have explicit checks, and the commands, schemas, and artifacts are visible in the repository and reflected in the live proof surface."],
+      ["Real outputs", "The product ends in a portable report, compare-report JSON, manifest, retention controls, and article-level EU outputs linked back to the same bundle."],
+      ["Provider-side package outputs", "The EU path produces Annex-shaped documentation outputs, provider-side JSON artifacts, and starter results tied back to the same runtime evidence."],
+      ["Hard gates and source-visible path", "Packaging and verify have explicit checks, and the commands, schemas, and artifacts are visible in the repository and reflected in the public Builder and starter path."],
       ["What your team must already have", "A reachable adapter, a clear release boundary, starter cases, and named owners for thresholds and sign-off are enough to test fit honestly before deeper integration."],
     ],
     credibilityEyebrow: "Core primitives",
@@ -1793,13 +1793,13 @@ const TECHNICAL_PAGE = {
     ],
     summaryTitle: "What this technology actually does",
     summaryLead:
-      "The product turns comparable runs into reviewer-ready EU evidence, keeps the machine-verifiable core intact, and layers review, handoff, and dossier structure on top without pretending to automate legal sign-off.",
+      "The product turns comparable runs into a provider-side EU package, keeps the machine-verifiable core intact, and layers package structure and handoff on top without pretending to automate legal sign-off.",
     summaryColumns: [
       {
         title: "Evidence generation",
         points: [
           "Comparable baseline and new runs become a portable evidence bundle",
-          "The bundle includes a report, machine contract, manifest, retention controls, and reviewer-facing EU outputs",
+          "The bundle includes a report, machine contract, manifest, retention controls, and provider-side EU outputs",
           "EU dossier sections attach to the same verified runtime evidence instead of diverging into a document-only workflow",
         ],
       },
@@ -1815,7 +1815,7 @@ const TECHNICAL_PAGE = {
         title: "Review and handoff",
         points: [
           "The package can move across engineering, governance, counsel, procurement, and authority-facing review",
-          "Reviewer PDF, reviewer HTML, review records, handoff notes, and authority bundles are part of the product surface",
+          "Readable package outputs, review records, handoff notes, and authority bundles can sit on the same package surface",
           "The goal is a package another reviewer can inspect without internal dashboards, screenshots, or unsigned file swaps",
         ],
       },
@@ -1830,12 +1830,12 @@ const TECHNICAL_PAGE = {
     ],
     compactWorkflowTitle: "What your team provides and what the engine does next",
     compactWorkflowLead:
-      "The middle of the decision should stay practical. Your team brings a reachable adapter, a real change boundary, starter cases, and named owners. From there the engine handles comparable runs, verified packaging, and reviewer-ready EU outputs on top of the same bundle.",
+      "The middle of the decision should stay practical. Your team brings a reachable adapter, a real change boundary, starter cases, and named owners. From there the engine handles comparable runs, verified packaging, and provider-side EU outputs on top of the same bundle.",
     compactWorkflowSteps: [
       "Your team exposes a reachable adapter and the baseline/new boundary that is actually worth reviewing.",
       "Your team supplies starter cases, intended-use context, and named owners for thresholds and sign-off.",
       "The engine runs comparable executions, packages the bundle, and verifies integrity and structure.",
-      "The engine generates reviewer-ready EU outputs from that same verified bundle; legal judgment and final approval still stay with your team.",
+      "The engine generates provider-side EU outputs from that same verified bundle; legal judgment and final approval still stay with your team.",
     ],
     commandsTitle: "Command surface",
     commandsLead:
@@ -1849,13 +1849,13 @@ const TECHNICAL_PAGE = {
       "Once outputs, gates, and the first-run path look real, the repository is the right next step for adapters, schemas, commands, and implementation detail.",
     extendedButton: "Open extended notes",
     opsButton: "Open self-hosted guide",
-    proofButton: "Open live evidence",
+    proofButton: "Open EU starter guide",
     docsButton: "Open OSS docs",
     repoButton: "Open GitHub repo",
     quickstartJumpButton: "See self-serve EU starter",
-    reviewerButton: "Open reviewer dossier demo",
-    demoAgentButton: "Open demo agent report",
-    allDocsButton: "Open all demo documents",
+    reviewerButton: "Open builder",
+    demoAgentButton: "Open self-hosted guide",
+    allDocsButton: "Open GitHub repo",
     quickstartTitle: "First self-serve EU starter",
     quickstartLead:
       "Use the EU starter guide when you want a lightweight first EU-shaped package on your own agent before deciding whether you need paid help.",
@@ -1914,7 +1914,7 @@ const TECHNICAL_PAGE = {
     faq: [
       [
         "What should a technical team verify before integrating?",
-        "Check the reviewer dossier, the explicit verify and review gates, the split between machine-generated evidence and operator-owned completion, and the product boundary.",
+        "Check the package boundary, the explicit verify gates, the split between machine-generated outputs and provider-owned completion, and the public self-serve path.",
       ],
       [
         "Can we test this on our own agent before deeper setup?",
@@ -1922,7 +1922,7 @@ const TECHNICAL_PAGE = {
       ],
       [
         "Do we need to read filenames and raw JSON first?",
-        "No. Start with the reviewer dossier and the product-facing fit checks on this page. The filenames, commands, and deeper technical docs are there once you decide the product deserves installation time.",
+        "No. Start with the fit checks on this page. The commands, package shape, and deeper technical docs are there once you decide the product deserves installation time.",
       ],
       [
         "Does the toolkit automate legal approval?",
@@ -2032,13 +2032,13 @@ const TECHNICAL_PAGE = {
       "Sobald Ausgaben, Kontrollpunkte und der Pfad fuer den ersten Lauf echt wirken, ist das Repository der richtige naechste Schritt fuer Adapter, Schemas, Befehle und Implementierungsdetails.",
     extendedButton: "Erweiterte Notizen oeffnen",
     opsButton: "Self-Hosted-Leitfaden öffnen",
-    proofButton: "Live-Nachweise oeffnen",
+    proofButton: "EU-Starter-Leitfaden oeffnen",
     docsButton: "OSS-Dokumentation oeffnen",
     repoButton: "GitHub-Repository oeffnen",
     quickstartJumpButton: "Ersten Lauf am eigenen Agenten sehen",
-    reviewerButton: "Reviewer-Demo oeffnen",
-    demoAgentButton: "Demo-Agent-Report oeffnen",
-    allDocsButton: "Alle Demo-Dokumente oeffnen",
+    reviewerButton: "Builder oeffnen",
+    demoAgentButton: "Self-Hosted-Leitfaden oeffnen",
+    allDocsButton: "GitHub-Repository oeffnen",
     quickstartTitle: "Schnellster ehrlicher erster Lauf",
     quickstartLead:
       "Wenn Ihr Adapter bereits laeuft, nutzen Sie den Schnellstart, um vor tieferer Integrationsarbeit ein echtes erstes Nachweispaket auf Ihrer eigenen Infrastruktur zu erzeugen.",
@@ -2181,7 +2181,7 @@ const TECHNICAL_PAGE = {
         title: "Revue et transmission",
         points: [
           "Le dossier peut circuler entre ingenierie, gouvernance, conseil juridique et revue tournee vers l'autorite",
-          "Les traces de revue, notes de transmission, sorties reviewer et dossiers pour autorite font partie du produit",
+          "Les traces de revue, notes de transmission, sorties du package et dossiers pour autorite font partie du produit",
           "Le but est un dossier qu'un autre evaluateur peut inspecter sans tableaux de bord internes ni echanges de fichiers non signes",
         ],
       },
@@ -2215,13 +2215,13 @@ const TECHNICAL_PAGE = {
       "Une fois les sorties, les verrous et le chemin du premier run juges credibles, le depot devient la bonne etape suivante pour les adapters, schemas, commandes et details d'implementation.",
     extendedButton: "Ouvrir les notes detaillees",
     opsButton: "Ouvrir le guide self-hosted",
-    proofButton: "Ouvrir la preuve live",
+    proofButton: "Ouvrir le guide starter UE",
     docsButton: "Ouvrir les docs OSS",
     repoButton: "Ouvrir le depot GitHub",
     quickstartJumpButton: "Voir le premier run sur votre propre agent",
-    reviewerButton: "Ouvrir la demo reviewer",
-    demoAgentButton: "Ouvrir le rapport de demo agent",
-    allDocsButton: "Ouvrir tous les documents de demo",
+    reviewerButton: "Ouvrir le builder",
+    demoAgentButton: "Ouvrir le guide self-hosted",
+    allDocsButton: "Ouvrir le repository GitHub",
     quickstartTitle: "Chemin le plus rapide vers un premier run honnete",
     quickstartLead:
       "Si votre adapter tourne deja, utilisez le demarrage rapide pour produire un vrai premier dossier de preuve sur votre propre infrastructure avant toute integration plus lourde.",
@@ -3048,9 +3048,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
           ],
           [
-            "Freigabepruefung - release-review.json",
-            "Wird genutzt, wenn ein offenes Risiko den Status der Inbetriebnahme oder die Nachverfolgung beeinflusst.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Aufsichtsuebersicht - human-oversight-summary.json",
+            "Wird genutzt, wenn ein offenes Risiko menschliche Pruefung, Blockierung oder Eskalation erfordert.",
+            "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
             "Beobachtung nach dem Inverkehrbringen - post-market-monitoring.json",
@@ -3077,9 +3077,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
           ],
           [
-            "Revue de mise en production - release-review.json",
-            "Utilisee quand un risque ouvert affecte le statut de mise en production ou le suivi.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Synthese de supervision humaine - human-oversight-summary.json",
+            "Utilisee quand un risque ouvert exige une revue humaine, un blocage ou une escalade.",
+            "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
             "Surveillance post-commercialisation - post-market-monitoring.json",
@@ -3110,12 +3110,12 @@ const TEMPLATE_CONTENT = {
     },
     resourcePanel: {
       en: {
-        eyebrow: "Open the template or live evidence",
+        eyebrow: "Open the template or next step",
         title: "Take Article 9 into a real review flow",
         lead:
-          "Use the template when you need the document shell. Open the live dossier when you need to inspect the machine-derived entries that the toolkit can contribute to your Article 9 work.",
+          "Use the template when you need the document shell. Open the EU starter when you want to see how runtime outputs can support the same Article 9 work.",
         downloadLabel: "Download free template",
-        liveLabel: "Open live dossier",
+        liveLabel: "Open EU starter",
       },
     },
     hideSectionGuide: true,
@@ -4424,9 +4424,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
-            "Freigabepruefung - release-review.json",
-            "Stuetzt jede Operator-Anleitung, die an den Status der Inbetriebnahme oder erforderliche Nachverfolgung gebunden ist.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Vergleichsbericht - compare-report.json",
+            "Stuetzt jede Anleitung, die an beobachtete Qualitaetsbefunde, Grenzen oder bekannte Unterschiede gebunden ist.",
+            "demo/eu-ai-act/compare-report.json",
           ],
           [
             "Anhang-IV-Dossier - eu-ai-act-annex-iv.json",
@@ -4453,9 +4453,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
-            "Revue de mise en production - release-review.json",
-            "Soutient toute consigne operateur liee au statut de mise en production ou au suivi requis.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Rapport de comparaison - compare-report.json",
+            "Soutient toute consigne liee aux constats de qualite observes, aux limites ou aux ecarts connus.",
+            "demo/eu-ai-act/compare-report.json",
           ],
           [
             "Dossier Annexe IV - eu-ai-act-annex-iv.json",
@@ -4762,9 +4762,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
-            "Freigabepruefung - release-review.json",
-            "Zeigt die Freigabeentscheidung und erforderliche menschliche Aktionen, die an Aufsichts-Ergebnisse gebunden sind.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Artikel-9-Risikoregister - article-9-risk-register.json",
+            "Zeigt, wie Aufsichtsbefunde offene Risiken, Eskalationen und erforderliche Folgeaktionen dokumentiert halten.",
+            "demo/eu-ai-act/compliance/article-9-risk-register.json",
           ],
           [
             "Vergleichsbericht - compare-report.json",
@@ -4791,9 +4791,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
-            "Revue de mise en production - release-review.json",
-            "Montre la decision de mise en production et les actions humaines requises liees aux sorties de supervision.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Registre de risques Article 9 - article-9-risk-register.json",
+            "Montre comment les constats de supervision gardent visibles les risques ouverts, les escalades et les actions de suivi requises.",
+            "demo/eu-ai-act/compliance/article-9-risk-register.json",
           ],
           [
             "Rapport de comparaison - compare-report.json",
@@ -5115,9 +5115,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/artifacts/manifest.json",
           ],
           [
-            "Freigabepruefung - release-review.json",
-            "Zeigt, wie der aktuelle Qualitaetszustand den Release-Status und die Nachverfolgung beeinflusst.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Artikel-9-Risikoregister - article-9-risk-register.json",
+            "Zeigt, wie aktuelle Qualitaets- oder Sicherheitsbefunde als dokumentierte Risiken und Folgemassnahmen festgehalten werden.",
+            "demo/eu-ai-act/compliance/article-9-risk-register.json",
           ],
         ],
       },
@@ -5144,9 +5144,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/artifacts/manifest.json",
           ],
           [
-            "Revue de mise en production - release-review.json",
-            "Montre comment l'etat qualite actuel affecte le statut de mise en production et le suivi.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Registre de risques Article 9 - article-9-risk-register.json",
+            "Montre comment les constats qualite ou securite actuels sont tenus comme risques documentes et actions de suivi.",
+            "demo/eu-ai-act/compliance/article-9-risk-register.json",
           ],
         ],
       },
@@ -5448,9 +5448,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/article-17-qms-lite.json",
           ],
           [
-            "Freigabepruefung - release-review.json",
-            "Zeigt die Kontrollen zur Inbetriebnahme und die menschlichen Aktionen, die in das QMS-Geruest einfliessen.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Artikel-16-Anbieterpflichten - article-16-provider-obligations.json",
+            "Zeigt die provider-seitigen Pflichten und Folgeaktionen, die in das QMS-Geruest einfliessen.",
+            "demo/eu-ai-act/compliance/article-16-provider-obligations.json",
           ],
           [
             "Beobachtung nach dem Inverkehrbringen - post-market-monitoring.json",
@@ -5477,9 +5477,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/article-17-qms-lite.json",
           ],
           [
-            "Revue de mise en production - release-review.json",
-            "Montre les controles de mise en production et les actions humaines qui alimentent le cadre QMS.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Obligations du fournisseur Article 16 - article-16-provider-obligations.json",
+            "Montre les obligations cote fournisseur et les actions de suivi qui alimentent le cadre QMS.",
+            "demo/eu-ai-act/compliance/article-16-provider-obligations.json",
           ],
           [
             "Surveillance post-commercialisation - post-market-monitoring.json",
@@ -5998,9 +5998,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
           [
-            "Freigabepruefung - release-review.json",
-            "Zeigt, wie Befunde aus der Beobachtung mit dem Status der Inbetriebnahme und der Nachverfolgung verknuepft sind.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Vergleichsbericht - compare-report.json",
+            "Zeigt, welche beobachteten Befunde, Fallsignale und Qualitaetsveraenderungen den Plan aktualisieren koennen.",
+            "demo/eu-ai-act/compare-report.json",
           ],
           [
             "Artikel-9-Risikoregister - article-9-risk-register.json",
@@ -6027,9 +6027,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
           [
-            "Revue de mise en production - release-review.json",
-            "Montre comment les constats de surveillance se relient au statut de mise en production et au suivi.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Rapport de comparaison - compare-report.json",
+            "Montre quels constats de surveillance, signaux par cas et variations de qualite peuvent mettre le plan a jour.",
+            "demo/eu-ai-act/compare-report.json",
           ],
           [
             "Registre de risques Article 9 - article-9-risk-register.json",
@@ -6089,7 +6089,7 @@ const TEMPLATE_CONTENT = {
           [
             "A trigger list for incident review",
             "Creates a serious-incident draft with current machine triage, trigger categories, and open operator inputs.",
-            "Can link that draft to real monitoring signals, blocked cases, approval cases, and release-review outcomes.",
+            "Can link that draft to real monitoring signals, blocked cases, approval cases, and related package outputs.",
             "Decide which triggers count as serious-incident review triggers in your legal and operational context.",
           ],
           [
@@ -6312,9 +6312,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
           [
-            "Release review - release-review.json",
-            "Provides review status and required human actions linked to the same package.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Human oversight summary - human-oversight-summary.json",
+            "Provides the human review, blocking, and escalation signals linked to the same incident package.",
+            "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
             "Article 9 risk register - article-9-risk-register.json",
@@ -6341,9 +6341,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
           [
-            "Freigabepruefung - release-review.json",
-            "Liefert Pruefstatus und erforderliche menschliche Aktionen, die an dasselbe Paket gebunden sind.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Aufsichtsuebersicht - human-oversight-summary.json",
+            "Liefert menschliche Pruef-, Blockierungs- und Eskalationssignale, die an dasselbe Vorfallspaket gebunden sind.",
+            "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
             "Artikel-9-Risikoregister - article-9-risk-register.json",
@@ -6370,9 +6370,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/post-market-monitoring.json",
           ],
           [
-            "Revue de mise en production - release-review.json",
-            "Fournit le statut de revue et les actions humaines requises liees au meme dossier.",
-            "demo/eu-ai-act/compliance/release-review.json",
+            "Synthese de supervision humaine - human-oversight-summary.json",
+            "Fournit les signaux de revue humaine, de blocage et d'escalade lies au meme dossier d'incident.",
+            "demo/eu-ai-act/compliance/human-oversight-summary.json",
           ],
           [
             "Registre de risques Article 9 - article-9-risk-register.json",
@@ -6679,9 +6679,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
           ],
           [
-            "Nachweisindex - evidence-index.json",
-            "Zeigt die abschnittsbezogenen Nachweis-Selektoren und Rest-Luecken hinter dem Dossier.",
-            "demo/eu-ai-act/compliance/evidence-index.json",
+            "Artikel-10-Daten-Governance - article-10-data-governance.json",
+            "Zeigt die Datenherkunft, Relevanz, Grenzpruefung und Governance-Hinweise, auf die sich das Dossier stuetzt.",
+            "demo/eu-ai-act/compliance/article-10-data-governance.json",
           ],
           [
             "Artikel-9-Risikoregister - article-9-risk-register.json",
@@ -6708,9 +6708,9 @@ const TEMPLATE_CONTENT = {
             "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
           ],
           [
-            "Index de preuves - evidence-index.json",
-            "Montre les selecteurs de preuves par clause et les ecarts residuels qui se trouvent derriere le dossier.",
-            "demo/eu-ai-act/compliance/evidence-index.json",
+            "Gouvernance des donnees Article 10 - article-10-data-governance.json",
+            "Montre la provenance des donnees, leur pertinence, les controles de limites et les indices de gouvernance dont le dossier depend.",
+            "demo/eu-ai-act/compliance/article-10-data-governance.json",
           ],
           [
             "Registre de risques Article 9 - article-9-risk-register.json",
@@ -6925,12 +6925,12 @@ const BLOG_CONTENT = {
         {
           heading: "What a useful evidence pack contains",
           body:
-            "For agent systems a useful pack usually contains risk signals, gate recommendations, structured event logs, trace anchors, release-review outputs, and recurring monitoring context. The pack should also be portable enough to move between engineering, security, legal, and governance teams without losing meaning.",
+            "For agent systems a useful pack usually contains risk signals, structured event logs, trace anchors, linked package outputs, and recurring monitoring context. The pack should also be portable enough to move between engineering, security, legal, and governance teams without losing meaning.",
         },
         {
           heading: "How to build one without inventing a second workflow",
           body:
-            "The strongest path is to use the same evaluation workflow for revue de mise en production and documentation support. When the same runs feed both technical review and compliance references, the package stays honest. That is why the product story should remain proof-first rather than template-only.",
+            "The strongest path is to use the same evaluation workflow for both technical review and documentation support. When the same runs feed both technical review and compliance references, the package stays honest. That is why the product story should remain runtime-linked rather than template-only.",
         },
       ],
       de: [
@@ -7018,23 +7018,21 @@ function formatDateLabel(value) {
 }
 
 function getProofSurfaceData(siteOutputRoot = SITE_OUTPUT_ROOT) {
-  const manifestPath = path.join(siteOutputRoot, "demo", "product-surfaces.json");
-  if (!existsSync(manifestPath)) {
-    return {
-      surfaces: {},
-      screenshotPaths: {
-        primary: "assets/screenshots/01.png",
-        secondary: "assets/screenshots/05.png",
-      },
-    };
-  }
-  const manifest = readJson(manifestPath);
-  const map = {};
-  for (const surface of manifest.surfaces || []) {
-    map[surface.id] = surface;
-  }
   return {
-    surfaces: map,
+    surfaces: {
+      "eu-ai-act": {
+        label: "EU AI Act starter snapshot",
+        summary: {
+          runs_in_window: 2,
+          approvals: 1,
+          blocks: 1,
+          cases_total: 2,
+          monitoring_status: "history_current",
+          portable_paths: true,
+          execution_quality_status: "healthy",
+        },
+      },
+    },
     screenshotPaths: {
       primary: "assets/screenshots/01.png",
       secondary: "assets/screenshots/05.png",
@@ -7408,10 +7406,10 @@ function renderLanding(locale, ctx) {
   const proofSurface = ctx.proof.surfaces["eu-ai-act"];
   const proofSurfaceTitle =
     locale === "de"
-      ? "EU-AI-Act-Nachweis-Engine"
+      ? "EU-AI-Act-Starter-Snapshot"
       : locale === "fr"
-        ? "Moteur de preuve EU AI Act"
-        : proofSurface?.label || "Live EU dossier demo";
+        ? "Capture starter EU AI Act"
+        : proofSurface?.label || "EU AI Act starter snapshot";
   const monitoringStatus =
     locale === "de"
       ? { history_current: "aktuell", history_stale: "veraltet", unknown: "unbekannt" }[proofSurface?.summary?.monitoring_status] ??
@@ -7458,7 +7456,7 @@ function renderLanding(locale, ctx) {
           ${copy.heroSubline ? `<p class="muted">${escapeHtml(copy.heroSubline)}</p>` : ""}
           <div class="button-row">
             <a class="button" href="${ctx.href("builder")}" data-track-event="landing_start_free">${escapeHtml(copy.primaryCta)}</a>
-            <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer" data-track-event="landing_proof">${escapeHtml(copy.secondaryCta)}</a>
+            <a class="button-ghost" href="${ctx.href("starter")}" data-track-event="landing_starter">${escapeHtml(copy.secondaryCta)}</a>
           </div>
           <div class="trust-line">
             ${LOCALES[locale].common.trustLine
@@ -7480,10 +7478,8 @@ function renderLanding(locale, ctx) {
             <div class="metric"><span>${escapeHtml(ui.metrics[3])}</span><strong>${escapeHtml(monitoringStatus)}</strong></div>
           </div>
           <div class="button-row">
-            <a class="button-soft" href="${ctx.assetHref("demo/")}" data-track-event="landing_demo_hub">${escapeHtml(common.liveDemos)}</a>
-            <a class="button-soft" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-        common.viewProof
-      )}</a>
+            <a class="button-soft" href="${ctx.href("builder")}" data-track-event="landing_builder">${escapeHtml(common.liveDemos)}</a>
+            <a class="button-soft" href="${ctx.href("starter")}">${escapeHtml(common.viewProof)}</a>
           </div>
         </aside>
       </div>
@@ -7602,9 +7598,7 @@ function renderLandingProofCta(locale, ctx) {
         <p class="muted">${escapeHtml(copy.proofBody)}</p>
         <div class="button-row">
           <a class="button" href="${ctx.href("builder")}" data-track-event="landing_builder_cta">${escapeHtml(copy.primaryCta)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-    LOCALES[locale].common.viewProof
-  )}</a>
+          <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(LOCALES[locale].common.viewProof)}</a>
           <a class="button-soft" href="${ctx.href("technical")}" data-track-event="landing_technical_cta">${escapeHtml(technicalCopy.landingButton)}</a>
         </div>
       </div>
@@ -7622,7 +7616,7 @@ function renderTechnicalCallout(locale, ctx) {
         <p class="muted">${escapeHtml(copy.landingBody)}</p>
         <div class="button-row">
           <a class="button" href="${ctx.href("technical")}" data-track-event="landing_technical">${escapeHtml(copy.landingButton)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.proofButton)}</a>
+          <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(copy.proofButton)}</a>
           <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
         </div>
       </div>
@@ -7740,9 +7734,7 @@ function renderHowItWorks(locale, ctx) {
         <p class="muted">${escapeHtml(copy.proofBody)}</p>
         <div class="button-row">
           <a class="button" href="${ctx.href("builder")}" data-track-event="how_builder">${escapeHtml(LOCALES[locale].landing.primaryCta)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(
-        LOCALES[locale].common.viewProof
-      )}</a>
+          <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(LOCALES[locale].common.viewProof)}</a>
           <a class="button-soft" href="${ctx.href("technical")}" data-track-event="how_technical">${escapeHtml(TECHNICAL_PAGE[locale]?.landingButton || TECHNICAL_PAGE.en.landingButton)}</a>
         </div>
       </div>
@@ -7763,10 +7755,10 @@ function renderTechnical(locale, ctx) {
       quickstartEyebrow: "Self-serve EU starter",
       commandsEyebrow: "Deeper technical inspection",
       extendedEyebrow: "Next step",
-      proofEyebrow: "Live proof",
+      proofEyebrow: "Public path",
       proofTitle: "What should already exist before installation time",
       proofBody:
-        "A serious product should expose a reviewer-first dossier, explicit gates, and, for authority-facing paths, an authenticity story rather than hash-only integrity before your team spends time integrating it.",
+        "A serious product should expose a clear package boundary, explicit verify gates, and a real self-serve starter before your team spends time integrating it.",
     },
     de: {
       verifyEyebrow: "Vor der Installation",
@@ -7775,10 +7767,10 @@ function renderTechnical(locale, ctx) {
       quickstartEyebrow: "Am eigenen Agenten pruefen",
       commandsEyebrow: "Tiefere technische Pruefung",
       extendedEyebrow: "Naechster Schritt",
-      proofEyebrow: "Live-Nachweise",
+      proofEyebrow: "Oeffentlicher Pfad",
       proofTitle: "Was schon vor Integrationsaufwand sichtbar sein sollte",
       proofBody:
-        "Ein ernstzunehmendes Produkt sollte ein reviewer-orientiertes Dossier, explizite Verifikationsschritte und fuer Behoerdenpfade eine Authentizitaetsgeschichte statt nur Hash-Integritaet zeigen, bevor Ihr Team Integrationszeit investiert.",
+        "Ein ernstzunehmendes Produkt sollte eine klare Paketgrenze, explizite Verifikationsschritte und einen echten Self-Serve-Starter zeigen, bevor Ihr Team Integrationszeit investiert.",
     },
     fr: {
       verifyEyebrow: "Avant installation",
@@ -7787,10 +7779,10 @@ function renderTechnical(locale, ctx) {
       quickstartEyebrow: "Tester sur votre propre agent",
       commandsEyebrow: "Inspection technique plus profonde",
       extendedEyebrow: "Etape suivante",
-      proofEyebrow: "Preuve live",
+      proofEyebrow: "Parcours public",
       proofTitle: "Ce qui doit deja exister avant de depenser du temps d'integration",
       proofBody:
-        "Un produit serieux doit montrer un dossier oriente reviewer, des etapes de verification explicites et, pour les chemins tournes vers l'autorite, une histoire d'authenticite plutot qu'une simple integrite par hash avant que votre equipe n'investisse du temps d'integration.",
+        "Un produit serieux doit montrer une frontiere de paquet claire, des etapes de verification explicites et un vrai starter self-serve avant que votre equipe n'investisse du temps d'integration.",
     },
   }[locale];
   return `
@@ -7801,9 +7793,9 @@ function renderTechnical(locale, ctx) {
           <h1>${escapeHtml(copy.headline)}</h1>
           <p class="lead">${escapeHtml(copy.intro)}</p>
           <div class="button-row section-tight">
-            <a class="button" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.reviewerButton)}</a>
-            <a class="button-ghost" href="${ctx.assetHref("demo/agent-evidence/report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
-            <a class="button-ghost" href="${ctx.assetHref("demo/")}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
+            <a class="button" href="${ctx.href("builder")}">${escapeHtml(copy.reviewerButton)}</a>
+            <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
+            <a class="button-ghost" href="${repoHref}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
             <a class="button-soft" href="#first-run">${escapeHtml(copy.quickstartJumpButton)}</a>
           </div>
         </div>
@@ -7862,8 +7854,8 @@ function renderTechnical(locale, ctx) {
         </div>
         <div class="button-row">
           <a class="button" href="${ctx.href("starter")}">${escapeHtml(copy.quickstartButton || copy.repoButton)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/agent-evidence/report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
-          <a class="button-soft" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.reviewerButton)}</a>
+          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
+          <a class="button-soft" href="${repoHref}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
         </div>
       </div>
     </section>
@@ -7922,7 +7914,7 @@ function renderTechnical(locale, ctx) {
         <div class="code-snippet"><code>${escapeHtml(TECHNICAL_SHARED.packageCommands.join("\n"))}</code></div>
         <div class="button-row">
           <a class="button" href="${repoHref}" target="_blank" rel="noreferrer" data-track-event="technical_repo">${escapeHtml(copy.repoButton)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/agent-evidence/report.html")}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
+          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
         </div>
       </div>
     </section>
@@ -7934,7 +7926,7 @@ function renderTechnical(locale, ctx) {
         <div class="button-row">
           <a class="button" href="${repoHref}" target="_blank" rel="noreferrer" data-track-event="technical_repo">${escapeHtml(copy.repoButton)}</a>
           <a class="button-ghost" href="#first-run">${escapeHtml(copy.quickstartJumpButton)}</a>
-          <a class="button-soft" href="${ctx.assetHref("demo/")}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
+          <a class="button-soft" href="${ctx.href("builder")}">${escapeHtml(copy.reviewerButton)}</a>
         </div>
       </div>
     </section>
@@ -8145,7 +8137,7 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
           <p class="muted">Download a print-ready template and then connect live evidence where the document requires proof.</p>
           <div class="button-row">
             ${renderTemplateDownloadLink(downloadHref, "Download free template")}
-            <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">See live evidence</a>
+            <a class="button-ghost" href="${ctx.href("builder")}">Open Builder</a>
           </div>
         </aside>
         `
@@ -8383,13 +8375,13 @@ function renderTemplatePage(locale, ctx, key, downloadHref) {
       <div class="container evidence-card fade-up">
         <p class="eyebrow">${escapeHtml(resourcePanel?.eyebrow || "Generate machine-verifiable evidence")}</p>
         <h3>${escapeHtml(resourcePanel?.title || "Attach real proof to this section")}</h3>
-        <p>${escapeHtml(resourcePanel?.lead || "Use the live proof surface to show exactly what technical evidence looks like when it is attached to a documentation package.")}</p>
+        <p>${escapeHtml(resourcePanel?.lead || "Use the template first, then connect the matching technical outputs from your own package.")}</p>
         <div class="button-row">
           ${resourcePanel
         ? renderTemplateDownloadLink(downloadHref, resourcePanel.downloadLabel || "Download free template")
         : `<a class="button" href="${ctx.href("pricing")}" data-track-event="template_get_evidence">${escapeHtml(launchPackLabel)}</a>`
       }
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-report.html")}" target="_blank" rel="noreferrer">${escapeHtml(resourcePanel?.liveLabel || "Open live dossier")}</a>
+          <a class="button-ghost" href="${ctx.href("builder")}">${escapeHtml(resourcePanel?.liveLabel || "Open builder")}</a>
         </div>
       </div>
     </section>
@@ -8486,10 +8478,10 @@ function renderBuilder(locale, ctx) {
   const proofSurface = ctx.proof.surfaces["eu-ai-act"];
   const proofSurfaceTitle =
     locale === "de"
-      ? "EU-AI-Act-Nachweis-Engine"
+      ? "EU-AI-Act-Starter-Snapshot"
       : locale === "fr"
-        ? "Moteur de preuve EU AI Act"
-        : proofSurface?.label || "EU AI Act demo";
+        ? "Capture starter EU AI Act"
+        : proofSurface?.label || "EU AI Act starter snapshot";
   const builderUi = {
     en: {
       stepLabel: "Step",
@@ -8558,7 +8550,7 @@ function renderBuilder(locale, ctx) {
         "This export is a browser-generated snapshot of your written EU AI Act draft. Return to the builder to revise any field and export again. Attach any supporting records already required for your system separately.",
       evidencePlaceholder:
         "Attach the supporting materials already required for your system, such as logs, technical documentation excerpts, testing summaries, conformity-assessment records, declaration details, and monitoring records.",
-      openProof: "Open live proof",
+      openProof: "Open EU starter",
       openDocs: "Open EU package runbook",
       downloadJson: "Download draft JSON",
       openPrintable: "Open draft preview",
@@ -8962,8 +8954,8 @@ function renderBuilder(locale, ctx) {
         },
       ],
       metrics: { approvals: "Approvals", blocks: "Blocks", runs: "Runs in window", execution: "Execution" },
-      liveProofEyebrow: "See the result first",
-      openDossierDemo: "Open reviewer dossier demo",
+      liveProofEyebrow: "Next step",
+      openDossierDemo: "Open EU starter",
       backLabel: "Back",
       casesLabel: "Cases",
       approvalsLabel: "Approvals",
@@ -9008,13 +9000,13 @@ function renderBuilder(locale, ctx) {
         "Dieses Paket ist ein im Browser erzeugter erster schriftlicher Entwurf fuer den provider-seitigen Pfad gegen die gewaehlten Anforderungen der EU-KI-Verordnung. Speichern Sie es bei Bedarf als PDF und haengen Sie die bereits fuer Ihr System und Ihre Rolle noetigen Unterlagen an. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad.",
       requiredArticles: "Erforderliche Artikel",
       evidencePlaceholder:
-        "Technische Nachweise sind besonders stark fuer Artikel 9, 12, 14, 15 und Anhang-IV-Referenzen. Nutzen Sie dafuer die Live-Nachweis-Oberflaeche, um Reviewer-PDF/HTML/Markdown und maschinenverifizierbare Runtime-Artefakte an diesen Teil des Pakets zu haengen.",
-      openProof: "Live-Nachweise oeffnen",
+        "Technische Nachweise sind besonders stark fuer Artikel 9, 12, 14, 15 und Anhang-IV-Referenzen. Nutzen Sie dafuer zuerst den EU-Starter und danach das echte Minimum-Paket aus Ihren eigenen Laeufen.",
+      openProof: "EU-Starter oeffnen",
       openDocs: "EU-Operator-Leitfaden oeffnen",
       downloadJson: "JSON herunterladen",
       openPrintable: "Druckansicht oeffnen",
       exportHint:
-        "Speichern Sie den druckfertigen Entwurf als PDF aus dem Browser, wenn Sie sofort ein Uebergabe-Dokument brauchen, und haengen Sie die reviewer-tauglichen Nachweis-Ausgaben danach separat an.",
+        "Speichern Sie den druckfertigen Entwurf als PDF aus dem Browser, wenn Sie sofort ein Uebergabe-Dokument brauchen, und haengen Sie die benoetigten technischen Unterlagen danach separat an.",
       placeholderText: "Fuegen Sie hier das Narrativ Ihres Teams ein.",
       placeholders: {
         risks: "Beschreiben Sie die wichtigsten Schaeden, Ausfallmuster und betroffenen Nutzer.",
@@ -9025,15 +9017,15 @@ function renderBuilder(locale, ctx) {
       ctaRiskEyebrow: "Nachweise erforderlich",
       ctaRiskTitle: "Dieser Abschnitt braucht maschinenverifizierbare Nachweise",
       ctaRiskBody:
-        "Artikel 9 wird staerker, wenn das Paket auf aktuelle Risikotests, Freigabeempfehlungen, Scanner-Ergebnisse und reviewer-taugliche Nachweis-Ausgaben verweisen kann.",
-      ctaRiskPoints: ["Risikoscores pro Testfall", "Freigabeempfehlungen", "Ergebnisse von Sicherheitsscans", "Reviewer-PDF / HTML / Markdown"],
+        "Artikel 9 wird staerker, wenn das Paket auf aktuelle Risikotests, klare Fallsignale, Scanner-Ergebnisse und wiederholbare technische Ausgaben verweisen kann.",
+      ctaRiskPoints: ["Risikoscores pro Testfall", "Fallsignale", "Ergebnisse von Sicherheitsscans", "Wiederholbare technische Ausgaben"],
       ctaOversightEyebrow: "Journalisierung und Aufsicht",
       ctaOversightTitle: "Journalisierungs- und Freigabepfade sollten auf reale Artefakte zeigen",
       ctaOversightBody:
-        "Nutzen Sie ein Live-Nachweispaket fuer Trace-Anker, strukturierte Ereignisse, reviewer-taugliche Exporte und prueffertige Review-Artefakte.",
+        "Nutzen Sie zuerst den EU-Starter und spaeter Ihr echtes Paket fuer Trace-Anker, strukturierte Ereignisse und wiederholbare technische Ausgaben.",
       metrics: { approvals: "Freigaben", blocks: "Blockierungen", runs: "Laeufe im Fenster", execution: "Ausfuehrung" },
-      liveProofEyebrow: "Reviewer-Nachweis",
-      openDossierDemo: "Reviewer-Demo oeffnen",
+      liveProofEyebrow: "Naechster Schritt",
+      openDossierDemo: "EU-Starter oeffnen",
       backLabel: "Zurueck",
       casesLabel: "Faelle",
       approvalsLabel: "Freigaben",
@@ -9088,8 +9080,8 @@ function renderBuilder(locale, ctx) {
         "Ce dossier est un premier brouillon ecrit genere dans le navigateur pour le parcours cote fournisseur vis-a-vis des exigences EU AI Act selectionnees. Enregistrez-le en PDF si besoin et joignez les documents deja requis pour votre systeme et votre role. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours.",
       requiredArticles: "Articles requis",
       evidencePlaceholder:
-        "Les preuves techniques sont les plus fortes pour les Articles 9, 12, 14, 15 et les references Annexe IV. Utilisez la surface de preuve live pour joindre le reviewer PDF/HTML/Markdown et les artefacts d'execution verifiables a cette partie du dossier.",
-      openProof: "Ouvrir la preuve live",
+        "Les preuves techniques sont les plus fortes pour les Articles 9, 12, 14, 15 et les references Annexe IV. Utilisez d'abord le starter UE puis le vrai paquet minimum base sur vos propres executions.",
+      openProof: "Ouvrir le starter UE",
       openDocs: "Ouvrir le guide operateur UE",
       downloadJson: "Telecharger le JSON",
       openPrintable: "Ouvrir la version imprimable",
@@ -9105,15 +9097,15 @@ function renderBuilder(locale, ctx) {
       ctaRiskEyebrow: "Preuve requise",
       ctaRiskTitle: "Cette section exige des preuves verifiables par machine",
       ctaRiskBody:
-        "L'Article 9 est plus solide quand le dossier peut pointer vers des tests de risque recents, des recommandations de passage, des resultats de scanner et des sorties de preuve lisibles par un evaluateur.",
-      ctaRiskPoints: ["Scores de risque par cas de test", "Recommandations de passage", "Resultats d'analyse de securite", "Reviewer PDF / HTML / Markdown"],
+        "L'Article 9 est plus solide quand le dossier peut pointer vers des tests de risque recents, des signaux clairs par cas, des resultats de scanner et des sorties techniques repetables.",
+      ctaRiskPoints: ["Scores de risque par cas de test", "Signaux par cas", "Resultats d'analyse de securite", "Sorties techniques repetables"],
       ctaOversightEyebrow: "Journalisation et supervision",
       ctaOversightTitle: "Les chemins de journalisation et d'approbation doivent pointer vers de vrais artefacts",
       ctaOversightBody:
-        "Utilisez un dossier de preuve live pour les ancres de trace, les evenements structures, les sorties reviewer et les artefacts de revue prets pour approbation.",
+        "Utilisez d'abord le starter UE puis votre vrai paquet pour les ancres de trace, les evenements structures et les sorties techniques repetables.",
       metrics: { approvals: "Approbations", blocks: "Blocages", runs: "Executions dans la fenetre", execution: "Execution" },
-      liveProofEyebrow: "Preuve reviewer",
-      openDossierDemo: "Ouvrir la demo reviewer",
+      liveProofEyebrow: "Etape suivante",
+      openDossierDemo: "Ouvrir le starter UE",
       backLabel: "Retour",
       casesLabel: "Cas",
       approvalsLabel: "Approbations",
@@ -9238,7 +9230,7 @@ function renderBuilder(locale, ctx) {
     requiredArticles: builderUi.requiredArticles || "",
     evidencePlaceholder: builderUi.evidencePlaceholder,
     getEvidence: locale === "de" ? "Kontakt aufnehmen" : locale === "fr" ? "Nous contacter" : "",
-    openProof: locale === "en" ? "" : builderUi.openProof,
+    openProof: "",
     openDocs: builderUi.openDocs,
     downloadJson: builderUi.downloadJson,
     openPrintable: builderUi.openPrintable,
@@ -9307,7 +9299,7 @@ function renderBuilder(locale, ctx) {
     legalSteps,
     links: {
       pricing: locale === "en" ? "" : ctx.href("pricing"),
-      proof: locale === "en" ? "" : ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html"),
+      proof: "",
       docs: `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`,
       nextStage: ctx.href("starter"),
     },
@@ -9471,7 +9463,7 @@ function renderBuilder(locale, ctx) {
             <div class="metric"><span>${escapeHtml(builderUi.blocksLabel)}</span><strong>${proofSurface?.summary?.blocks ?? 1}</strong></div>
             <div class="metric"><span>${escapeHtml(builderUi.portableLabel)}</span><strong>${proofSurface?.summary?.portable_paths ? "true" : "true"}</strong></div>
           </div>
-          <a class="button-ghost" href="${ctx.assetHref("demo/eu-ai-act/compliance/eu-ai-act-reviewer.html")}" target="_blank" rel="noreferrer">${escapeHtml(builderUi.openDossierDemo)}</a>
+          <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(builderUi.openDossierDemo)}</a>
         </aside>`;
 
   return `
@@ -9712,7 +9704,7 @@ function renderDocs(locale, ctx) {
   const copy = LOCALES[locale].docs;
   const ui = {
     en: {
-      lead: "Use this page when you want the source-of-truth docs behind the public site: how to run the toolkit, where to inspect live proof, and where the product boundary is documented plainly.",
+      lead: "Use this page when you want the source-of-truth docs behind the public site: how to run the toolkit, where the self-serve path starts, and where the product boundary is documented plainly.",
       startEyebrow: "Start and verify",
       startTitle: "First source docs to open",
       startLead: "These links are the fastest way to go from curiosity to real inspection on your own infrastructure.",
@@ -9722,14 +9714,14 @@ function renderDocs(locale, ctx) {
       cards: {
         quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", "__starter__", "Open starter page"],
         runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Open on GitHub"],
-        proof: ["Proof hub", "Published live demos and artifact surfaces for both product paths.", "__proof__", "Open proof hub"],
+        proof: ["Builder", "Start the provider-side draft and keep the public path grounded in the same minimum package flow.", "__builder__", "Open builder"],
         technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
         buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Open on GitHub"],
         boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
       },
     },
     de: {
-      lead: "Diese Seite verweist auf die massgeblichen Dokumente hinter der oeffentlichen Site: wie das Toolkit laeuft, wo die Live-Nachweise liegen und wo die Produktgrenze klar dokumentiert ist.",
+      lead: "Diese Seite verweist auf die massgeblichen Dokumente hinter der oeffentlichen Site: wie das Toolkit laeuft, wo der Self-Serve-Pfad beginnt und wo die Produktgrenze klar dokumentiert ist.",
       startEyebrow: "Start und Verifikation",
       startTitle: "Diese Referenzdokumente zuerst oeffnen",
       startLead: "Das sind die schnellsten Links von erster Neugier zu echter Pruefung auf Ihrer eigenen Infrastruktur.",
@@ -9739,14 +9731,14 @@ function renderDocs(locale, ctx) {
       cards: {
         quickstart: ["EU-Starter-Leitfaden", "Ein leichtes erstes EU-Paket auf dem eigenen Agenten ausfuehren.", "__starter__", "Starter-Seite oeffnen"],
         runbook: ["EU-Operator-Leitfaden", "Ende-zu-Ende-Hinweise fuer Run, Paketierung, Verifikation und Uebergabe im EU-Pfad.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Auf GitHub oeffnen"],
-        proof: ["Nachweis-Hub", "Veroeffentlichte Live-Demos und Artefakt-Oberflaechen fuer beide Produktpfade.", "__proof__", "Nachweis-Hub oeffnen"],
+        proof: ["Builder", "Starten Sie den provider-seitigen Entwurf und halten Sie den oeffentlichen Pfad am gleichen Mindestpaket ausgerichtet.", "__builder__", "Builder oeffnen"],
         technology: ["Technischer Ueberblick", "Architektur, Verifikationsmodell, Artefaktvertraege und Vertrauensgrenze.", "__technology__", "Technischen Ueberblick oeffnen"],
         buyer: ["EU Self-Hosted-Leitfaden", "Wie der EU-Pfad auf eigener Infrastruktur laeuft und wie Artefakte unter eigener Kontrolle bleiben.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Auf GitHub oeffnen"],
         boundary: ["Verifikations-Checkliste", "Was im erzeugten Paket zu pruefen ist und wie Ergebnisse reproduziert werden.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Auf GitHub oeffnen"],
       },
     },
     fr: {
-      lead: "Utilisez cette page pour la documentation de reference derriere le site public: comment lancer le toolkit, ou inspecter la preuve live, et ou la frontiere du produit est documentee clairement.",
+      lead: "Utilisez cette page pour la documentation de reference derriere le site public: comment lancer le toolkit, ou commence le parcours self-serve, et ou la frontiere du produit est documentee clairement.",
       startEyebrow: "Demarrer et verifier",
       startTitle: "Premiers docs source a ouvrir",
       startLead: "Ces liens sont le chemin le plus court entre la curiosite initiale et une vraie inspection sur votre propre infrastructure.",
@@ -9756,7 +9748,7 @@ function renderDocs(locale, ctx) {
       cards: {
         quickstart: ["Guide du starter UE", "Lancer un premier paquet UE leger sur votre propre agent.", "__starter__", "Ouvrir la page starter"],
         runbook: ["Guide operateur UE", "Guidage complet pour l'execution, la mise en forme, la verification et la transmission sur le chemin UE.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Ouvrir sur GitHub"],
-        proof: ["Hub de preuve", "Demos live publiees et surfaces d'artefacts pour les deux chemins produit.", "__proof__", "Ouvrir le hub de preuve"],
+        proof: ["Builder", "Commencez le brouillon cote fournisseur et gardez le parcours public aligne sur le meme paquet minimum.", "__builder__", "Ouvrir le builder"],
         technology: ["Vue technique", "Architecture, modele de verification, contrats d'artefacts et frontiere de confiance.", "__technology__", "Ouvrir la vue technique"],
         buyer: ["Guide self-hosted UE", "Comment executer le chemin UE sur votre propre infrastructure et garder les artefacts sous votre controle.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Ouvrir sur GitHub"],
         boundary: ["Checklist de verification", "Ce qu'il faut verifier dans le paquet genere et comment reproduire les resultats.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Ouvrir sur GitHub"],
@@ -9773,14 +9765,14 @@ function renderDocs(locale, ctx) {
     cards: {
       quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", "__starter__", "Open starter page"],
       runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Open on GitHub"],
-      proof: ["Proof hub", "Published live demos and artifact surfaces for both product paths.", "__proof__", "Open proof hub"],
+      proof: ["Builder", "Start the provider-side draft and keep the public path grounded in the same minimum package flow.", "__builder__", "Open builder"],
       technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
       buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Open on GitHub"],
       boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
     },
   };
   const hrefFor = (value) => {
-    if (value === "__proof__") return ctx.assetHref("demo/");
+    if (value === "__builder__") return ctx.href("builder");
     if (value === "__technology__") return ctx.href("technical");
     if (value === "__starter__") return ctx.href("starter");
     return value;
@@ -9827,9 +9819,9 @@ function renderContact(locale, ctx) {
       pilotTitle: "Open GitHub contact path",
       pilotBody: "Use the public GitHub issue flow if you want to ask a product or implementation question.",
       pilotCta: "Open GitHub issues",
-      proofTitle: "Review the live proof",
-      proofBody: "Send buyers directly to the published dossier and evidence pack surface.",
-      proofCta: "Open proof hub",
+      proofTitle: "Need the starter?",
+      proofBody: "Use the public starter page when you want the first self-serve check on your own running agent.",
+      proofCta: "Open EU starter",
       docsTitle: "Need the builder?",
       docsBody: "Start the provider-side draft first, then attach the supporting records already required for your system and role.",
       docsCta: "Open builder",
@@ -9839,11 +9831,11 @@ function renderContact(locale, ctx) {
       pilotTitle: "GitHub-Kontaktpfad oeffnen",
       pilotBody: "Nutzen Sie den oeffentlichen GitHub-Issue-Pfad, wenn Sie eine Produkt- oder Umsetzungsfrage stellen moechten.",
       pilotCta: "GitHub-Issues oeffnen",
-      proofTitle: "Live-Nachweise pruefen",
-      proofBody: "Leiten Sie Interessenten direkt zum veroeffentlichten Dossier und zur passenden Nachweisoberflaeche.",
-      proofCta: "Nachweis-Hub oeffnen",
+      proofTitle: "Starter noetig?",
+      proofBody: "Nutzen Sie die oeffentliche Starter-Seite fuer den ersten Self-Serve-Check am eigenen laufenden Agenten.",
+      proofCta: "EU-Starter oeffnen",
       docsTitle: "Brauchen Sie den Builder?",
-      docsBody: "Beginnen Sie mit dem operator-eigenen Entwurf und haengen Sie reviewer-taugliche Nachweise dort an, wo das Paket technische Belege braucht.",
+      docsBody: "Beginnen Sie mit dem provider-seitigen Entwurf und haengen Sie technische Unterlagen dort an, wo das Paket sie braucht.",
       docsCta: "Builder oeffnen",
     },
     fr: {
@@ -9851,9 +9843,9 @@ function renderContact(locale, ctx) {
       pilotTitle: "Ouvrir le parcours GitHub",
       pilotBody: "Utilisez le flux public GitHub si vous voulez poser une question produit ou implementation.",
       pilotCta: "Ouvrir les issues GitHub",
-      proofTitle: "Verifier la preuve live",
-      proofBody: "Envoyez directement les acheteurs vers le dossier publie et la surface de preuve correspondante.",
-      proofCta: "Ouvrir le hub de preuve",
+      proofTitle: "Besoin du starter ?",
+      proofBody: "Utilisez la page starter publique pour le premier test self-serve sur votre propre agent deja en cours d'execution.",
+      proofCta: "Ouvrir le starter UE",
       docsTitle: "Besoin du builder ?",
       docsBody: "Commencez par le brouillon reste a l'operateur, puis rattachez la preuve lisible par un evaluateur la ou le dossier a besoin d'une preuve technique.",
       docsCta: "Ouvrir le builder",
@@ -9873,7 +9865,7 @@ function renderContact(locale, ctx) {
           <article class="card fade-up">
             <h3>${escapeHtml(cards.proofTitle)}</h3>
             <p class="muted">${escapeHtml(cards.proofBody)}</p>
-            <a class="button-ghost" href="${ctx.assetHref("demo/")}" data-track-event="contact_demo_hub">${escapeHtml(cards.proofCta)}</a>
+            <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(cards.proofCta)}</a>
           </article>
           <article class="card fade-up">
             <h3>${escapeHtml(cards.docsTitle)}</h3>
@@ -10047,23 +10039,23 @@ function renderBlogPage(locale, ctx, key) {
     en: {
       eyebrow: "Blog",
       nextEyebrow: "Next step",
-      nextTitle: "Do not separate templates from proof",
+      nextTitle: "Continue with Builder or the starter",
       startBuilder: "Start free builder",
-      openProof: "Open proof hub",
+      openProof: "Open EU starter",
     },
     de: {
       eyebrow: "Blog",
       nextEyebrow: "Naechster Schritt",
-      nextTitle: "Vorlagen nicht von Nachweisen trennen",
+      nextTitle: "Mit Builder oder Starter fortfahren",
       startBuilder: "Kostenlosen Dokumentations-Assistenten starten",
-      openProof: "Nachweis-Hub oeffnen",
+      openProof: "EU-Starter oeffnen",
     },
     fr: {
       eyebrow: "Blog",
       nextEyebrow: "Etape suivante",
-      nextTitle: "Ne separez pas les modeles de la preuve",
+      nextTitle: "Continuer avec le builder ou le starter",
       startBuilder: "Demarrer le builder gratuit",
-      openProof: "Ouvrir le hub de preuve",
+      openProof: "Ouvrir le starter UE",
     },
   }[locale];
   return `
@@ -10095,7 +10087,7 @@ function renderBlogPage(locale, ctx, key) {
         <h3>${escapeHtml(ui.nextTitle)}</h3>
         <div class="button-row">
           <a class="button" href="${ctx.href("builder")}" data-track-event="blog_start_builder">${escapeHtml(ui.startBuilder)}</a>
-          <a class="button-ghost" href="${ctx.assetHref("demo/")}" data-track-event="blog_demo_hub">${escapeHtml(ui.openProof)}</a>
+          <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(ui.openProof)}</a>
         </div>
       </div>
     </section>
@@ -10467,7 +10459,7 @@ function renderRobots(origin) {
 function renderLlmsTxt(origin) {
   return `# EU AI Evidence Builder
 
-> Self-hosted reviewer-ready EU AI Act evidence built from verified runtime data for tool-using AI agents.
+> Self-hosted EU AI Act package builder and starter workflow for tool-using AI agents.
 
 ## Start here
 - [English homepage](${origin}/en/)
@@ -10476,16 +10468,15 @@ function renderLlmsTxt(origin) {
 - [Builder](${origin}/en/builder/)
 - [Documentation templates](${origin}/en/templates/)
 
-## Live proof
-- [EU reviewer dossier HTML](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.html)
-- [EU reviewer dossier PDF](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf)
-- [EU proof hub](${origin}/demo/)
-- [Machine-readable proof index](${origin}/demo/product-surfaces.json)
+## Public path
+- [Builder](${origin}/en/builder/)
+- [EU starter](${origin}/en/eu-ai-act-starter/)
+- [Pricing](${origin}/en/pricing/)
 
 ## Product boundary
 - Core evidence engine for tool-using AI agents
-- EU AI Act vertical with reviewer dossier plus expanded technical pack
-- Article 12-style record-keeping is necessary but not sufficient for high-risk review on its own
+- EU AI Act vertical with provider-side documentation and technical evidence from real runs
+- Article 12-style record-keeping supports, but does not replace, the wider provider-side package
 - Not legal advice, legal classification, or final sign-off automation
 
 ## Languages
@@ -10506,8 +10497,8 @@ function renderLlmsFullTxt(origin) {
 
 ## What this product is
 - A self-hosted evidence engine for tool-using AI agents
-- Strongest current vertical: EU AI Act evidence and reviewer-facing dossier outputs
-- Built for teams that need verified runtime evidence to survive review outside engineering tooling
+- Strongest current vertical: EU AI Act provider-side documentation and starter workflow
+- Built for teams that need documentation plus technical evidence from real runs
 
 ## What it is not
 - Not legal advice
@@ -10519,18 +10510,17 @@ function renderLlmsFullTxt(origin) {
 - Portable evidence bundle
 - Machine-readable compare report
 - Integrity manifest and optional signature path
-- Reviewer-first EU outputs: PDF, HTML, Markdown
-- Expanded technical pack with linked JSON artifacts
-- Article-level scaffolds for Articles 9, 12, 13, 14, 15, 17, 72, 73 and Annex IV
+- Builder-driven provider-side draft sections
+- Minimum EU package outputs with linked JSON artifacts
+- Article-level scaffolds for Articles 9, 10, 12, 13, 14, 15, 16, 17, 43, 47, 48, 49, 72 and Annex IV / Annex V
 
 ## Preferred reading order
 1. [English homepage](${origin}/en/)
 2. [How it works](${origin}/en/how-it-works/)
 3. [Technical Overview](${origin}/en/technology/)
 4. [Builder](${origin}/en/builder/)
-5. [EU reviewer dossier HTML](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.html)
-6. [EU reviewer dossier PDF](${origin}/demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf)
-7. [Proof hub](${origin}/demo/)
+5. [EU starter](${origin}/en/eu-ai-act-starter/)
+6. [Pricing](${origin}/en/pricing/)
 
 ## Key English pages
 - [Landing](${origin}/en/)
@@ -10555,9 +10545,9 @@ function renderLlmsFullTxt(origin) {
 - [Builder](${origin}/fr/builder/)
 
 ## Important product boundary for EU AI Act readers
-- Article 12 record-keeping matters, but high-risk review still needs Annex-shaped documentation, operator-owned completion, monitoring continuity, and readable reviewer outputs
-- The reviewer dossier and expanded technical pack are generated from the same evidence base
-- The product automates evidence operations and packaging, not legal classification or final approval
+- Article 12 record-keeping matters, but high-risk review still needs Annex-shaped documentation, operator-owned completion, and monitoring continuity
+- The product combines provider-side documentation with technical evidence from real runs
+- The product automates packaging support, not legal classification or final approval
 
 ## Source docs and guides
 - [README](${GITHUB_REPO}#readme)
@@ -10617,47 +10607,35 @@ const REQUIRED_STATIC_FILES = [
   "site-assets/site.css",
   "site-assets/site.js",
   "site-assets/builder.js",
-  "demo/index.html",
-  "demo/agent-evidence/report.html",
   "demo/eu-ai-act/report.html",
   "demo/eu-ai-act/compare-report.json",
   "demo/eu-ai-act/artifacts/manifest.json",
   "demo/eu-ai-act/archive/retention-controls.json",
   "demo/eu-ai-act/_source_inputs/new/run.json",
-  "demo/eu-ai-act/compliance/eu-ai-act-report.html",
-  "demo/eu-ai-act/compliance/eu-ai-act-reviewer.html",
-  "demo/eu-ai-act/compliance/eu-ai-act-reviewer.md",
-  "demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf",
   "demo/eu-ai-act/compliance/article-9-risk-register.json",
   "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json",
-  "demo/eu-ai-act/compliance/release-review.json",
   "demo/eu-ai-act/compliance/post-market-monitoring.json",
   "demo/eu-ai-act/compliance/article-13-instructions.json",
+  "demo/eu-ai-act/compliance/article-10-data-governance.json",
+  "demo/eu-ai-act/compliance/article-16-provider-obligations.json",
   "demo/eu-ai-act/compliance/human-oversight-summary.json",
   "demo/eu-ai-act/compliance/article-17-qms-lite.json",
   "demo/eu-ai-act/compliance/article-72-monitoring-plan.json",
   "demo/eu-ai-act/compliance/article-73-serious-incident-pack.json",
-  "demo/product-surfaces.json",
   "assets/screenshots/01.png",
   "assets/screenshots/05.png",
   ...SITE_LOCALES.flatMap((locale) => [
-    `demo/${locale}/index.html`,
-    `demo/${locale}/product-surfaces.json`,
-    `demo/${locale}/agent-evidence/report.html`,
     `demo/${locale}/eu-ai-act/report.html`,
     `demo/${locale}/eu-ai-act/compare-report.json`,
     `demo/${locale}/eu-ai-act/artifacts/manifest.json`,
     `demo/${locale}/eu-ai-act/archive/retention-controls.json`,
     `demo/${locale}/eu-ai-act/_source_inputs/new/run.json`,
-    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-report.html`,
-    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-reviewer.html`,
-    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-reviewer.md`,
-    `demo/${locale}/eu-ai-act/compliance/eu-ai-act-reviewer.pdf`,
     `demo/${locale}/eu-ai-act/compliance/article-9-risk-register.json`,
     `demo/${locale}/eu-ai-act/compliance/eu-ai-act-annex-iv.json`,
-    `demo/${locale}/eu-ai-act/compliance/release-review.json`,
     `demo/${locale}/eu-ai-act/compliance/post-market-monitoring.json`,
     `demo/${locale}/eu-ai-act/compliance/article-13-instructions.json`,
+    `demo/${locale}/eu-ai-act/compliance/article-10-data-governance.json`,
+    `demo/${locale}/eu-ai-act/compliance/article-16-provider-obligations.json`,
     `demo/${locale}/eu-ai-act/compliance/human-oversight-summary.json`,
     `demo/${locale}/eu-ai-act/compliance/article-17-qms-lite.json`,
     `demo/${locale}/eu-ai-act/compliance/article-72-monitoring-plan.json`,

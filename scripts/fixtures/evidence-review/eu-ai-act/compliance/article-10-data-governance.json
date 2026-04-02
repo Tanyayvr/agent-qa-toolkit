@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1775103464520,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "article_10_data_governance_href": "compliance/article-10-data-governance.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_16_provider_obligations_href": "compliance/article-16-provider-obligations.json",
+    "article_43_conformity_assessment_href": "compliance/article-43-conformity-assessment.json",
+    "article_47_declaration_of_conformity_href": "compliance/article-47-declaration-of-conformity.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json",
+    "release_review_href": "compliance/release-review.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
+    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
+  },
+  "document_scope": {
+    "article": "Art_10",
+    "generated_scope": "data_governance_scaffold",
+    "operator_inputs_required": [
+      "training, validation, and testing data sources and provenance",
+      "data collection criteria, inclusion and exclusion rules, and representativeness rationale",
+      "known data limitations, possible bias, and data-quality review results",
+      "data preparation operations used before training, validation, or testing"
+    ]
+  },
+  "governed_system": {
+    "report_id": "eu-ai-act-demo",
+    "environment": {
+      "agent_id": "golden-eu-agent",
+      "agent_version": "golden-eu-agent-v2",
+      "model": "golden-model-v1",
+      "model_version": "2026-03-01",
+      "prompt_version": "prompt-golden-v1",
+      "tools_version": "tools-golden-v1",
+      "config_hash": "cfg-golden-eu-v1"
+    },
+    "toolkit_version": "1.4.0",
+    "spec_version": "aepf-v1"
+  },
+  "available_evidence": {
+    "manifest_href": "artifacts/manifest.json",
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "retained_case_artifact_count": 10,
+    "monitored_case_count": 2,
+    "trace_anchor_coverage": {
+      "cases_with_anchor_baseline": 0,
+      "cases_with_anchor_new": 0
+    }
+  },
+  "data_governance_sections": [
+    {
+      "id": "data_sources_and_provenance",
+      "title": "Training, validation, and testing data sources and provenance",
+      "supporting_artifacts": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compare-report.json",
+        "artifacts/manifest.json"
+      ],
+      "operator_inputs_required": [
+        "identify each dataset or data source used for training, validation, and testing",
+        "state where the data comes from and under what collection or access basis it is used"
+      ]
+    },
+    {
+      "id": "data_relevance_and_representativeness",
+      "title": "Data relevance, representativeness, and scope",
+      "supporting_artifacts": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compare-report.json"
+      ],
+      "operator_inputs_required": [
+        "state why the data is relevant for the intended purpose of the relevant AI system",
+        "state how representativeness, completeness, and possible gaps were reviewed"
+      ]
+    },
+    {
+      "id": "data_quality_and_possible_bias",
+      "title": "Data quality checks and possible bias review",
+      "supporting_artifacts": [
+        "compare-report.json",
+        "report.html"
+      ],
+      "operator_inputs_required": [
+        "record known errors, imbalances, limitations, and possible bias affecting health, safety, or fundamental rights",
+        "record any measures used to detect, reduce, or document those issues"
+      ]
+    },
+    {
+      "id": "data_preparation_operations",
+      "title": "Data preparation operations",
+      "supporting_artifacts": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compare-report.json",
+        "artifacts/manifest.json"
+      ],
+      "operator_inputs_required": [
+        "record data cleaning, labeling, filtering, augmentation, or transformation operations",
+        "record the order and ownership of those preparation steps"
+      ]
+    }
+  ],
+  "residual_gaps": [
+    "Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.",
+    "System-specific data governance, provenance, bias review, and preparation details remain provider-authored."
+  ]
+}

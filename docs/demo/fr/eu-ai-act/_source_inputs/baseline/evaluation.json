@@ -13,11 +13,7 @@
       },
       {
         "name": "must_include",
-        "pass": true,
-        "details": {
-          "missing_phrases": [],
-          "semantic_phrase_matches": []
-        }
+        "pass": true
       },
       {
         "name": "semantic_quality",
@@ -42,10 +38,7 @@
       },
       {
         "name": "tool_execution",
-        "pass": true,
-        "details": {
-          "failed": []
-        }
+        "pass": true
       },
       {
         "name": "hallucination_signal_check",
@@ -100,11 +93,7 @@
       },
       {
         "name": "must_include",
-        "pass": true,
-        "details": {
-          "missing_phrases": [],
-          "semantic_phrase_matches": []
-        }
+        "pass": true
       },
       {
         "name": "semantic_quality",
@@ -129,10 +118,7 @@
       },
       {
         "name": "tool_execution",
-        "pass": true,
-        "details": {
-          "failed": []
-        }
+        "pass": true
       },
       {
         "name": "hallucination_signal_check",

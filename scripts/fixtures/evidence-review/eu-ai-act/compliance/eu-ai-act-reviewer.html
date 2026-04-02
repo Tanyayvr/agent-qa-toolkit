@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EU AI Act reviewer pack · eu-ai-act-demo</title>
+<style>
+  :root {
+    --bg: #f6f7fb;
+    --panel: #ffffff;
+    --muted: #4b5563;
+    --border: #d7dce5;
+    --ink: #111827;
+    --accent: #1d4ed8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "IBM Plex Sans", "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 48px; }
+  .hero, .card { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 20px; }
+  .card { margin-top: 16px; }
+  h1, h2, h3 { margin: 0; }
+  h1 { font-size: 2rem; letter-spacing: -0.03em; }
+  h2 { font-size: 1.25rem; margin-bottom: 14px; }
+  h3 { font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+  .muted { color: var(--muted); }
+  .hero-grid, .section-grid { display: grid; gap: 14px; margin-top: 16px; }
+  .hero-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .section-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .section-nav { margin-top: 16px; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); list-style: none; padding-left: 0; }
+  .section-nav a { display: block; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: #fbfcff; }
+  .metric { border: 1px solid var(--border); border-radius: 14px; background: #fbfcff; padding: 14px; }
+  .metric span { display: block; font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .metric strong { display: block; margin-top: 8px; font-size: 1.05rem; }
+  .lists { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 16px; }
+  ul { margin: 0; padding-left: 18px; }
+  li { margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.95rem; }
+  th, td { border-top: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { color: var(--accent); }
+  @media print {
+    body { background: #fff; }
+    .wrap { max-width: none; padding: 0; }
+    .hero, .card { border: 1px solid #d1d5db; box-shadow: none; break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>EU AI Act reviewer pack</h1>
+      <div class="muted" style="margin-top:8px;">Report <code>eu-ai-act-demo</code> · generated 2026-04-02T04:17:44.520Z</div>
+      <div class="hero-grid">
+        <div class="metric"><span>Release decision</span><strong>reject</strong></div><div class="metric"><span>Execution quality</span><strong>healthy</strong></div><div class="metric"><span>Coverage snapshot</span><strong>3 covered / 17 partial / 0 missing EU AI Act clause(s)</strong></div><div class="metric"><span>Human review queue</span><strong>1 approval case(s), 1 blocking case(s)</strong></div>
+      </div>
+      <div class="lists">
+        <div>
+          <h3>How to read this pack</h3>
+          <ul><li>Start with the reviewer PDF or reviewer HTML, not with raw JSON files.</li><li>Read sections in Annex order; each section answers what it is for, what is generated here, what the operator still completes, and what is still open.</li><li>Use the claim-to-evidence map before opening deeper technical files.</li></ul>
+        </div>
+        <div>
+          <h3>If you are not reading from engineering tooling</h3>
+          <ul><li>Read the summary at the top of each section first.</li><li>Focus on &#39;Completed by the operator&#39; and &#39;Still open&#39; to see what remains outside the generated machine layer.</li><li>Use the reviewer PDF for handoff, printing, procurement, or counsel-facing review.</li></ul>
+        </div>
+        <div>
+          <h3>If you are doing technical verification</h3>
+          <ul><li>Use the reviewer HTML as the readable map, then open the linked Compare report, Expanded technical pack, and Manifest where deeper verification is needed.</li><li>Check claim-to-evidence rows before opening raw artifacts so you know which file answers which reviewer question.</li><li>Treat filenames as secondary; Annex order and section purpose come first.</li></ul>
+        </div>
+      </div>
+      <div class="lists">
+        <div>
+          <h3>What this pack proves</h3>
+          <ul><li>Which exact evaluated system version produced this package.</li><li>How the release performed on the reviewed case suite.</li><li>Which machine-derived risks, review actions, and monitoring signals were observed.</li><li>Which supporting files back each reviewer-facing section.</li></ul>
+        </div>
+        <div>
+          <h3>What this pack does not complete for you</h3>
+          <ul><li>That the provider has completed every operator-authored Annex IV or Annex V field.</li><li>That sector-specific legal, actuarial, clinical, or financial validation obligations are fully satisfied.</li><li>That the declaration of conformity or market-placement decision can be signed without human review.</li></ul>
+        </div>
+        <div>
+          <h3>Linked outputs</h3>
+          <ul><li><a href="eu-ai-act-reviewer.pdf">Reviewer PDF</a> — Printable reviewer-facing dossier generated during EU packaging.</li><li><a href="eu-ai-act-reviewer.html">Reviewer HTML</a> — Linked reviewer-facing dossier for browser review.</li><li><a href="eu-ai-act-reviewer.md">Reviewer Markdown</a> — Editable reviewer-facing dossier source.</li><li><a href="eu-ai-act-report.html">Expanded technical pack</a> — Full engineering-facing Annex IV dossier with raw tables and detailed scaffolds.</li><li><a href="eu-ai-act-annex-iv.json">Annex IV JSON</a> — Structured machine-readable Annex IV export.</li><li><a href="article-10-data-governance.json">Article 10 data governance</a> — System-specific data-governance scaffold for the evaluated release.</li><li><a href="article-16-provider-obligations.json">Article 16 provider obligations</a> — Provider-obligations scaffold tied to the evaluated system version.</li><li><a href="article-43-conformity-assessment.json">Article 43 conformity assessment</a> — Conformity-assessment scaffold and route inputs for the evaluated system.</li><li><a href="article-47-declaration-of-conformity.json">Article 47 declaration scaffold</a> — Declaration-of-conformity scaffold for the evaluated system version.</li><li><a href="annex-v-declaration-content.json">Annex V declaration content</a> — Structured Annex V declaration-content scaffold.</li><li><a href="../compare-report.json">Compare report</a> — Underlying release-qualification report for this run.</li><li><a href="../artifacts/manifest.json">Manifest</a> — Portable evidence index for artifact integrity.</li><li><a href="release-review.json">Release review</a> — Machine-generated release decision and reviewer checklist.</li></ul>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-top:16px;">Review this pack in Annex order</h3>
+        <ul class="section-nav"><li><a href="#general-description">1. General description of the system</a></li><li><a href="#development-description">2. Detailed description of development</a></li><li><a href="#operation-control">3. Monitoring, functioning, and control</a></li><li><a href="#performance-limits">4. Performance metrics and limitations</a></li><li><a href="#risk-management">5. Risk management system (Article 9)</a></li><li><a href="#lifecycle-changes">6. Changes over the lifecycle</a></li><li><a href="#standards-specifications">7. Standards and alternative controls</a></li><li><a href="#declaration-boundary">8. EU Declaration of Conformity boundary (Annex V)</a></li><li><a href="#post-market-serious-incidents">9. Post-market monitoring and serious incidents</a></li></ul>
+      </div>
+    </section>
+    <section class="card section-card" id="general-description">
+  <h2>1. General description of the system</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section identifies the exact agent, model, prompt, tools, and report scope used for the evaluated release.</li><li>It is the reviewer-first entry point for understanding which system version produced the evidence in this package.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>Report ID eu-ai-act-demo with generated timestamp 2026-04-02T04:17:44.520Z.</li><li>Environment identity: agent golden-eu-agent / golden-eu-agent-v2, model golden-model-v1 / 2026-03-01.</li><li>Package scope: cases _source_inputs/cases.json, baseline _source_inputs/baseline, new _source_inputs/new.</li><li>Transfer class internal_only and redaction status none.</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>Provider legal identity, authorised representative, and external contact details.</li><li>Narrative intended purpose and target user/deployer description.</li><li>Market placement form, hardware/software integration context, and user-interface description.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>-</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The package identifies the exact evaluated system version and run scope.</td>
+  <td>Generated here</td>
+  <td>Confirms that the dossier is tied to one concrete evaluated system rather than a generic product description.</td>
+  <td><a href="eu-ai-act-annex-iv.json">Annex IV JSON</a> (System identity block.)<br/><a href="../compare-report.json">Compare report</a> (Release scope and runtime provenance.)<br/><a href="../artifacts/manifest.json">Manifest</a> (Integrity index for included artifacts.)</td>
+</tr><tr>
+  <td>Provider legal identity and intended-purpose narrative still need to be completed by the operator.</td>
+  <td>Completed by the operator</td>
+  <td>Separates the technical identity already present from the provider-authored context still needed for formal dossier completion.</td>
+  <td><a href="eu-ai-act-annex-iv.json">Annex IV JSON</a> (System identity block.)</td>
+</tr><tr>
+  <td>The generated bundle does not itself supply market-placement form or UI-description narrative.</td>
+  <td>Still open</td>
+  <td>Prevents a reviewer from mistaking technical identity for a full product-description section.</td>
+  <td><a href="eu-ai-act-annex-iv.json">Annex IV JSON</a> (System identity block.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Annex IV JSON</td>
+  <td><a href="eu-ai-act-annex-iv.json">eu-ai-act-annex-iv.json</a></td>
+  <td>System identity block.</td>
+</tr><tr>
+  <td>Compare report</td>
+  <td><a href="../compare-report.json">../compare-report.json</a></td>
+  <td>Release scope and runtime provenance.</td>
+</tr><tr>
+  <td>Manifest</td>
+  <td><a href="../artifacts/manifest.json">../artifacts/manifest.json</a></td>
+  <td>Integrity index for included artifacts.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="development-description">
+  <h2>2. Detailed description of development</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section captures how the evaluated release was exercised and which machine-verifiable artifacts back the technical record.</li><li>It is evidence-backed, but it does not replace provider-authored architecture and data-governance writing.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>13 manifest-backed artifact(s) indexed across 20 EU AI Act coverage clause(s).</li><li>2 case artifact row(s) with response, replay, and trace references where available.</li><li>Execution exercised on suite(s): release.</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>Architecture narrative, algorithmic design decisions, trade-offs, and computational resources.</li><li>Training/data provenance, labelling, cleaning, and datasheet material.</li><li>Cybersecurity design narrative beyond the emitted runtime and scanner evidence.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Art_10: missing required evidence compare-report.json.environment.training_data_provenance</li><li>Art_9: Operator-owned risk governance still sits outside the evaluator.</li><li>Art_9: Annex III classification and legal interpretation still require counsel.</li><li>Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.</li><li>Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Art_13: Human oversight procedures for deployers still require operator-authored narrative.</li><li>Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.</li><li>Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.</li><li>Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.</li><li>Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.</li><li>Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.</li><li>Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.</li><li>Art_43: The provider-owned conformity assessment route and any notified-body records remain required.</li><li>Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.</li><li>Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.</li><li>Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.</li><li>Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The bundle preserves enough runtime artifacts to reconstruct how the evaluated release was exercised.</td>
+  <td>Generated here</td>
+  <td>Lets the reviewer verify that development-stage claims are backed by retained evidence rather than narrative alone.</td>
+  <td><a href="article-10-data-governance.json">Article 10 data governance</a> (Data-governance scaffold for sources, representativeness, and preparation steps.)<br/><a href="evidence-index.json">Evidence index</a> (Clause-to-artifact mapping for the bundle.)<br/><a href="../artifacts/manifest.json">Manifest</a> (Artifact-level integrity data.)<br/><a href="eu-ai-act-report.html">Expanded technical pack</a> (Detailed tables and clause-by-clause scaffolds.)</td>
+</tr><tr>
+  <td>Architecture, training-data, and broader development-process narrative still need provider-authored text.</td>
+  <td>Completed by the operator</td>
+  <td>Shows where the evidence engine stops and provider engineering documentation still needs to be attached.</td>
+  <td><a href="article-10-data-governance.json">Article 10 data governance</a> (Data-governance scaffold for sources, representativeness, and preparation steps.)<br/><a href="eu-ai-act-report.html">Expanded technical pack</a> (Detailed tables and clause-by-clause scaffolds.)<br/><a href="evidence-index.json">Evidence index</a> (Clause-to-artifact mapping for the bundle.)</td>
+</tr><tr>
+  <td>The generated section does not claim complete training-data governance or full architecture coverage.</td>
+  <td>Still open</td>
+  <td>Avoids over-reading runtime evidence as if it were the whole development record.</td>
+  <td><a href="article-10-data-governance.json">Article 10 data governance</a> (Data-governance scaffold for sources, representativeness, and preparation steps.)<br/><a href="evidence-index.json">Evidence index</a> (Clause-to-artifact mapping for the bundle.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Article 10 data governance</td>
+  <td><a href="article-10-data-governance.json">article-10-data-governance.json</a></td>
+  <td>Data-governance scaffold for sources, representativeness, and preparation steps.</td>
+</tr><tr>
+  <td>Evidence index</td>
+  <td><a href="evidence-index.json">evidence-index.json</a></td>
+  <td>Clause-to-artifact mapping for the bundle.</td>
+</tr><tr>
+  <td>Expanded technical pack</td>
+  <td><a href="eu-ai-act-report.html">eu-ai-act-report.html</a></td>
+  <td>Detailed tables and clause-by-clause scaffolds.</td>
+</tr><tr>
+  <td>Manifest</td>
+  <td><a href="../artifacts/manifest.json">../artifacts/manifest.json</a></td>
+  <td>Artifact-level integrity data.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="operation-control">
+  <h2>3. Monitoring, functioning, and control</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section gives reviewers a short view of how the evaluated release is meant to be operated, overseen, and escalated.</li><li>It combines deployer-facing Article 13 scaffolding with human-oversight and release-review outputs.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>Execution quality is healthy with new pass rate 50.0%.</li><li>1 case(s) require approval and 1 case(s) are blocked in the current review queue.</li><li>2 case(s) show missing assumption-state capture.</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>intended purpose statement for deployers</li><li>known limitations and acceptable operating conditions</li><li>human oversight and escalation instructions</li><li>monitoring and maintenance contact path</li><li>Named oversight roles, escalation owner, and customer/deployer contact path.</li><li>Final instructions-for-use text and safe operating boundary wording.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Human oversight procedures for deployers still require operator-authored narrative.</li><li>The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_10: missing required evidence compare-report.json.environment.training_data_provenance</li><li>Art_9: Operator-owned risk governance still sits outside the evaluator.</li><li>Art_9: Annex III classification and legal interpretation still require counsel.</li><li>Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.</li><li>Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Art_13: Human oversight procedures for deployers still require operator-authored narrative.</li><li>Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.</li><li>Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.</li><li>Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.</li><li>Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.</li><li>Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.</li><li>Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.</li><li>Art_43: The provider-owned conformity assessment route and any notified-body records remain required.</li><li>Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.</li><li>Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.</li><li>Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.</li><li>Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The package shows the current oversight queue, release status, and deployer-facing instruction scaffold for this release.</td>
+  <td>Generated here</td>
+  <td>Lets the reviewer see whether oversight and operation controls are grounded in the actual evaluated release.</td>
+  <td><a href="article-13-instructions.json">Article 13 instructions</a> (Instructions-for-use scaffold.)<br/><a href="human-oversight-summary.json">Human oversight summary</a> (Reviewer queue and action map.)<br/><a href="release-review.json">Release review</a> (Release gate status and signoff expectation.)</td>
+</tr><tr>
+  <td>Named oversight roles, escalation ownership, and final instructions-for-use wording must be completed by the operator.</td>
+  <td>Completed by the operator</td>
+  <td>Separates generated release and review facts from the deployer instructions that still need human ownership.</td>
+  <td><a href="article-13-instructions.json">Article 13 instructions</a> (Instructions-for-use scaffold.)<br/><a href="human-oversight-summary.json">Human oversight summary</a> (Reviewer queue and action map.)</td>
+</tr><tr>
+  <td>Known limitations and assumption-state gaps remain open until the operator closes them in the final dossier and workflow.</td>
+  <td>Still open</td>
+  <td>Keeps the reviewer focused on whether the operating boundary is complete enough for handoff.</td>
+  <td><a href="article-13-instructions.json">Article 13 instructions</a> (Instructions-for-use scaffold.)<br/><a href="release-review.json">Release review</a> (Release gate status and signoff expectation.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Article 13 instructions</td>
+  <td><a href="article-13-instructions.json">article-13-instructions.json</a></td>
+  <td>Instructions-for-use scaffold.</td>
+</tr><tr>
+  <td>Human oversight summary</td>
+  <td><a href="human-oversight-summary.json">human-oversight-summary.json</a></td>
+  <td>Reviewer queue and action map.</td>
+</tr><tr>
+  <td>Release review</td>
+  <td><a href="release-review.json">release-review.json</a></td>
+  <td>Release gate status and signoff expectation.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="performance-limits">
+  <h2>4. Performance metrics and limitations</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section is where a reviewer sees whether the release is technically healthy, what changed, and what limitations were observed.</li><li>It is backed by comparable runs, but the business acceptability of those metrics remains operator-owned.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>Execution quality status healthy; regressions 0; improvements 1.</li><li>Security signal snapshot: 2 case(s) with new signals; top kinds prompt_injection_marker, unsafe_code_execution.</li><li>Release decision is reject with 1 approval case(s) and 1 blocking case(s).</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>Domain-specific acceptance thresholds and explanation of why these metrics are sufficient for deployment.</li><li>Business-harm narrative, acceptable error levels, and customer impact interpretation.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Human oversight procedures for deployers still require operator-authored narrative.</li><li>The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_10: missing required evidence compare-report.json.environment.training_data_provenance</li><li>Art_9: Operator-owned risk governance still sits outside the evaluator.</li><li>Art_9: Annex III classification and legal interpretation still require counsel.</li><li>Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.</li><li>Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Art_13: Human oversight procedures for deployers still require operator-authored narrative.</li><li>Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.</li><li>Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.</li><li>Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.</li><li>Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.</li><li>Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.</li><li>Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.</li><li>Art_43: The provider-owned conformity assessment route and any notified-body records remain required.</li><li>Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.</li><li>Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.</li><li>Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.</li><li>Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The release&#39;s current quality and blocking status are backed by comparable-run evidence and release review outputs.</td>
+  <td>Generated here</td>
+  <td>Supports a fast decision on whether the technical release evidence is healthy enough to read further.</td>
+  <td><a href="../compare-report.json">Compare report</a> (Comparable run results and execution-quality details.)<br/><a href="release-review.json">Release review</a> (Release gate summary and rationale.)<br/><a href="eu-ai-act-report.html">Expanded technical pack</a> (Detailed highlighted cases and signal summaries.)</td>
+</tr><tr>
+  <td>Acceptance thresholds and harm interpretation still need operator judgment.</td>
+  <td>Completed by the operator</td>
+  <td>Shows that technical metrics are present, but deployment acceptability is still a human decision.</td>
+  <td><a href="../compare-report.json">Compare report</a> (Comparable run results and execution-quality details.)<br/><a href="release-review.json">Release review</a> (Release gate summary and rationale.)</td>
+</tr><tr>
+  <td>Any unresolved known limitations remain open unless explicitly dispositioned by the operator.</td>
+  <td>Still open</td>
+  <td>Prevents a reviewer from treating the measured outputs as a complete deployment approval by themselves.</td>
+  <td><a href="eu-ai-act-report.html">Expanded technical pack</a> (Detailed highlighted cases and signal summaries.)<br/><a href="release-review.json">Release review</a> (Release gate summary and rationale.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Compare report</td>
+  <td><a href="../compare-report.json">../compare-report.json</a></td>
+  <td>Comparable run results and execution-quality details.</td>
+</tr><tr>
+  <td>Release review</td>
+  <td><a href="release-review.json">release-review.json</a></td>
+  <td>Release gate summary and rationale.</td>
+</tr><tr>
+  <td>Expanded technical pack</td>
+  <td><a href="eu-ai-act-report.html">eu-ai-act-report.html</a></td>
+  <td>Detailed highlighted cases and signal summaries.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="risk-management">
+  <h2>5. Risk management system (Article 9)</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section gives reviewers a machine-derived draft risk register tied to observed runs, review decisions, and monitoring signals.</li><li>It is a starting point for Article 9, not a complete provider-authored risk management system.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>5 machine-derived risk entry(ies): 2 from case behaviour, 2 from coverage gaps, 0 from execution quality, 1 from monitoring.</li><li>1 blocking, 4 review, and 0 monitor entry(ies).</li><li>Post-release monitoring status history_current with 4 drift signal(s).</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>likelihood and severity rationale owned by the operator</li><li>control owner and target review date for each open risk</li><li>residual-risk acceptance rationale for any accepted risk</li><li>provider decision linkage for block or review risks</li><li>Residual-risk acceptance, control owners, and target review dates.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Operator-owned risk governance still sits outside the evaluator.</li><li>Annex III classification and legal interpretation still require counsel.</li><li>This register is generated from runtime evidence and still requires operator-owned likelihood, impact, and acceptance rationale.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The bundle generates a machine-derived draft risk register from observed runs, review outcomes, and monitoring signals.</td>
+  <td>Generated here</td>
+  <td>Lets the reviewer see that Article 9 starts from runtime evidence rather than from a blank narrative template.</td>
+  <td><a href="article-9-risk-register.json">Article 9 risk register</a> (Machine-derived risk register scaffold.)<br/><a href="release-review.json">Release review</a> (Current release decision and escalation rationale.)<br/><a href="post-market-monitoring.json">Post-market monitoring</a> (Signals that reopen or update risks after release.)</td>
+</tr><tr>
+  <td>Likelihood rationale, owners, review dates, and residual-risk acceptance still need operator completion.</td>
+  <td>Completed by the operator</td>
+  <td>Shows exactly which parts of Article 9 remain human-owned even after the machine-derived draft is present.</td>
+  <td><a href="article-9-risk-register.json">Article 9 risk register</a> (Machine-derived risk register scaffold.)</td>
+</tr><tr>
+  <td>Open residual gaps remain visible until the operator dispositiones them in the final governance workflow.</td>
+  <td>Still open</td>
+  <td>Prevents a reviewer from misreading the generated register as a final approved risk-management system.</td>
+  <td><a href="article-9-risk-register.json">Article 9 risk register</a> (Machine-derived risk register scaffold.)<br/><a href="post-market-monitoring.json">Post-market monitoring</a> (Signals that reopen or update risks after release.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Article 9 risk register</td>
+  <td><a href="article-9-risk-register.json">article-9-risk-register.json</a></td>
+  <td>Machine-derived risk register scaffold.</td>
+</tr><tr>
+  <td>Release review</td>
+  <td><a href="release-review.json">release-review.json</a></td>
+  <td>Current release decision and escalation rationale.</td>
+</tr><tr>
+  <td>Post-market monitoring</td>
+  <td><a href="post-market-monitoring.json">post-market-monitoring.json</a></td>
+  <td>Signals that reopen or update risks after release.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="lifecycle-changes">
+  <h2>6. Changes over the lifecycle</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section links QMS-lite controls and monitoring continuity into one lifecycle view.</li><li>It shows whether the evaluated release triggered additional review, remediation, or follow-up process requirements.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>QMS-lite scaffold covers 6 process area(s) with 1 approval-required case(s) and 1 blocking case(s).</li><li>Monitoring status history_current; execution quality healthy.</li><li>2 run(s) in monitoring window and 2 monitored case(s).</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>named quality management owner and document approver</li><li>written change-management procedure and approval workflow</li><li>incident, complaint, and corrective-action handling workflow</li><li>document-control, retention, and versioning policy</li><li>training, competency, and supplier-management responsibilities</li><li>authority and customer communication procedure for material issues</li><li>Formal change-control procedures, ownership matrix, training, and communications outside the generated scaffold.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.</li><li>Operator-authored instructions for use are still required before deployer handoff.</li><li>This export summarizes technical evidence; it does not replace deployer-facing operating instructions.</li><li>Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Human oversight procedures for deployers still require operator-authored narrative.</li><li>The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_10: missing required evidence compare-report.json.environment.training_data_provenance</li><li>Art_9: Operator-owned risk governance still sits outside the evaluator.</li><li>Art_9: Annex III classification and legal interpretation still require counsel.</li><li>Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.</li><li>Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Art_13: Human oversight procedures for deployers still require operator-authored narrative.</li><li>Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.</li><li>Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.</li><li>Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.</li><li>Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.</li><li>Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.</li><li>Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.</li><li>Art_43: The provider-owned conformity assessment route and any notified-body records remain required.</li><li>Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.</li><li>Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.</li><li>Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.</li><li>Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.</li><li>Operator-owned risk governance still sits outside the evaluator.</li><li>Annex III classification and legal interpretation still require counsel.</li><li>This register is generated from runtime evidence and still requires operator-owned likelihood, impact, and acceptance rationale.</li><li>This plan is a technical scaffold and still requires operator-owned monitoring ownership, cadence, retention, and authority-reporting decisions.</li><li>This QMS-lite export is a technical scaffold, not a complete quality management system.</li><li>Competency management, supplier management, authority communication, and formal document-control procedures remain operator-authored.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The bundle shows a machine-generated lifecycle view across QMS-lite controls and monitoring continuity.</td>
+  <td>Generated here</td>
+  <td>Lets the reviewer check whether lifecycle evidence exists for this release instead of inferring process continuity from static prose.</td>
+  <td><a href="article-17-qms-lite.json">Article 17 QMS-lite</a> (Lifecycle and process scaffold.)<br/><a href="release-review.json">Release review</a> (Current promotion decision and checklist.)<br/><a href="post-market-monitoring.json">Post-market monitoring</a> (Monitoring continuity and drift signals.)</td>
+</tr><tr>
+  <td>Formal procedures, accountable roles, and training expectations still need operator-authored process documentation.</td>
+  <td>Completed by the operator</td>
+  <td>Keeps the reviewer aware that QMS-lite is a technical scaffold, not a complete QMS document set.</td>
+  <td><a href="article-17-qms-lite.json">Article 17 QMS-lite</a> (Lifecycle and process scaffold.)</td>
+</tr><tr>
+  <td>Residual process gaps remain open until they are closed in the provider&#39;s management system.</td>
+  <td>Still open</td>
+  <td>Makes lifecycle incompleteness visible instead of hiding it behind release status alone.</td>
+  <td><a href="article-17-qms-lite.json">Article 17 QMS-lite</a> (Lifecycle and process scaffold.)<br/><a href="post-market-monitoring.json">Post-market monitoring</a> (Monitoring continuity and drift signals.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Article 17 QMS-lite</td>
+  <td><a href="article-17-qms-lite.json">article-17-qms-lite.json</a></td>
+  <td>Lifecycle and process scaffold.</td>
+</tr><tr>
+  <td>Release review</td>
+  <td><a href="release-review.json">release-review.json</a></td>
+  <td>Current promotion decision and checklist.</td>
+</tr><tr>
+  <td>Post-market monitoring</td>
+  <td><a href="post-market-monitoring.json">post-market-monitoring.json</a></td>
+  <td>Monitoring continuity and drift signals.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="standards-specifications">
+  <h2>7. Standards and alternative controls</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section is intentionally narrow: the toolkit can point to the evidence that would support standards mapping, but it does not infer harmonised standards or common-specification claims.</li><li>Reviewers should treat this as a support layer, not as an auto-generated conformity statement.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>Coverage snapshot: 3 covered, 17 partial, 0 missing clause(s).</li><li>Machine-readable evidence selectors and bundle artifacts that can be referenced inside a standards-mapping appendix.</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>Harmonised standards or common specifications actually relied upon.</li><li>Alternative control rationale where harmonised standards are not used.</li><li>Notified body references and any external conformity-assessment narrative.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Art_10: missing required evidence compare-report.json.environment.training_data_provenance</li><li>Art_9: Operator-owned risk governance still sits outside the evaluator.</li><li>Art_9: Annex III classification and legal interpretation still require counsel.</li><li>Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.</li><li>Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Art_13: Human oversight procedures for deployers still require operator-authored narrative.</li><li>Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.</li><li>Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.</li><li>Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.</li><li>Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.</li><li>Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.</li><li>Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.</li><li>Art_43: The provider-owned conformity assessment route and any notified-body records remain required.</li><li>Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.</li><li>Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.</li><li>Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.</li><li>Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The bundle can support standards mapping by exposing clause coverage and evidence selectors.</td>
+  <td>Generated here</td>
+  <td>Lets the reviewer anchor standards discussion to actual evidence instead of to unlinked narrative references.</td>
+  <td><a href="eu-ai-act-coverage.json">EU coverage export</a> (Clause status and residual gaps.)<br/><a href="article-43-conformity-assessment.json">Article 43 conformity assessment</a> (Conformity-assessment route and supporting record scaffold.)<br/><a href="evidence-index.json">Evidence index</a> (Selectors and manifest-backed links.)<br/><a href="eu-ai-act-annex-iv.json">Annex IV JSON</a> (Structured coverage-ready dossier data.)</td>
+</tr><tr>
+  <td>Any actual standards reliance or alternative-control rationale must be completed by the operator.</td>
+  <td>Completed by the operator</td>
+  <td>Prevents readers from treating coverage selectors as if they were already a standards claim.</td>
+  <td><a href="eu-ai-act-coverage.json">EU coverage export</a> (Clause status and residual gaps.)<br/><a href="article-43-conformity-assessment.json">Article 43 conformity assessment</a> (Conformity-assessment route and supporting record scaffold.)<br/><a href="eu-ai-act-annex-iv.json">Annex IV JSON</a> (Structured coverage-ready dossier data.)</td>
+</tr><tr>
+  <td>This section does not itself establish harmonised-standard or common-specification compliance.</td>
+  <td>Still open</td>
+  <td>Keeps the boundary explicit between technical evidence support and formal conformity positioning.</td>
+  <td><a href="eu-ai-act-coverage.json">EU coverage export</a> (Clause status and residual gaps.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>EU coverage export</td>
+  <td><a href="eu-ai-act-coverage.json">eu-ai-act-coverage.json</a></td>
+  <td>Clause status and residual gaps.</td>
+</tr><tr>
+  <td>Annex IV JSON</td>
+  <td><a href="eu-ai-act-annex-iv.json">eu-ai-act-annex-iv.json</a></td>
+  <td>Structured coverage-ready dossier data.</td>
+</tr><tr>
+  <td>Article 43 conformity assessment</td>
+  <td><a href="article-43-conformity-assessment.json">article-43-conformity-assessment.json</a></td>
+  <td>Conformity-assessment route and supporting record scaffold.</td>
+</tr><tr>
+  <td>Evidence index</td>
+  <td><a href="evidence-index.json">evidence-index.json</a></td>
+  <td>Selectors and manifest-backed links.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="declaration-boundary">
+  <h2>8. EU Declaration of Conformity boundary (Annex V)</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>The toolkit does not generate the legal declaration itself.</li><li>What it does provide is the technical record that can support the declaration&#39;s factual statements about system identity, review scope, and supporting evidence.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>Versioned system identity and release review status that can be cited in a declaration pack.</li><li>Portable evidence links that can be attached or referenced from the declaration package.</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>The Annex V declaration text, legal basis, and provider-responsibility statement.</li><li>Applicable-law references, notified body details, date, place, signer name, and title.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Declaration drafting and legal signoff remain outside the generated toolkit outputs.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The bundle provides technical facts that can support declaration drafting.</td>
+  <td>Generated here</td>
+  <td>Lets the reviewer reuse verified system identity and release evidence when assembling a declaration package.</td>
+  <td><a href="eu-ai-act-annex-iv.json">Annex IV JSON</a> (Technical support for declaration drafting.)<br/><a href="article-43-conformity-assessment.json">Article 43 conformity assessment</a> (Conformity-assessment route backing the declaration path.)<br/><a href="article-47-declaration-of-conformity.json">Article 47 declaration scaffold</a> (Provider declaration scaffold for the evaluated system version.)<br/><a href="annex-v-declaration-content.json">Annex V declaration content</a> (Required Annex V declaration-content items and gaps.)<br/><a href="../compare-report.json">Compare report</a> (Technical release results backing the declaration.)<br/><a href="release-review.json">Release review</a> (Current release status for the evaluated system version.)</td>
+</tr><tr>
+  <td>The legal declaration text and sign-off remain operator-owned.</td>
+  <td>Completed by the operator</td>
+  <td>Makes it explicit that the technical pack supports the declaration but does not replace it.</td>
+  <td><a href="article-43-conformity-assessment.json">Article 43 conformity assessment</a> (Conformity-assessment route backing the declaration path.)<br/><a href="article-47-declaration-of-conformity.json">Article 47 declaration scaffold</a> (Provider declaration scaffold for the evaluated system version.)<br/><a href="annex-v-declaration-content.json">Annex V declaration content</a> (Required Annex V declaration-content items and gaps.)<br/><a href="release-review.json">Release review</a> (Current release status for the evaluated system version.)</td>
+</tr><tr>
+  <td>No declaration of conformity is generated by the toolkit outputs.</td>
+  <td>Still open</td>
+  <td>Prevents a reviewer from mistaking technical support for a completed Annex V declaration.</td>
+  <td><a href="article-47-declaration-of-conformity.json">Article 47 declaration scaffold</a> (Provider declaration scaffold for the evaluated system version.)<br/><a href="annex-v-declaration-content.json">Annex V declaration content</a> (Required Annex V declaration-content items and gaps.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Annex IV JSON</td>
+  <td><a href="eu-ai-act-annex-iv.json">eu-ai-act-annex-iv.json</a></td>
+  <td>Technical support for declaration drafting.</td>
+</tr><tr>
+  <td>Article 43 conformity assessment</td>
+  <td><a href="article-43-conformity-assessment.json">article-43-conformity-assessment.json</a></td>
+  <td>Conformity-assessment route backing the declaration path.</td>
+</tr><tr>
+  <td>Article 47 declaration scaffold</td>
+  <td><a href="article-47-declaration-of-conformity.json">article-47-declaration-of-conformity.json</a></td>
+  <td>Provider declaration scaffold for the evaluated system version.</td>
+</tr><tr>
+  <td>Annex V declaration content</td>
+  <td><a href="annex-v-declaration-content.json">annex-v-declaration-content.json</a></td>
+  <td>Required Annex V declaration-content items and gaps.</td>
+</tr><tr>
+  <td>Compare report</td>
+  <td><a href="../compare-report.json">../compare-report.json</a></td>
+  <td>Technical release results backing the declaration.</td>
+</tr><tr>
+  <td>Release review</td>
+  <td><a href="release-review.json">release-review.json</a></td>
+  <td>Current release status for the evaluated system version.</td>
+</tr></tbody>
+  </table>
+</section><section class="card section-card" id="post-market-serious-incidents">
+  <h2>9. Post-market monitoring and serious incidents</h2>
+  <div class="section-grid">
+    <div>
+      <h3>What this section is for</h3>
+      <ul><li>This section groups the post-market monitoring plan and serious-incident triage into one reviewer-facing end-of-dossier section.</li><li>It is designed for fast external reading: what is being watched, what triggered concern, and what still requires human reporting judgment.</li></ul>
+    </div>
+    <div>
+      <h3>Generated here (machine-generated)</h3>
+      <ul><li>Monitoring plan status history_current with 2 run(s) in window.</li><li>Serious-incident machine triage review_for_serious_incident with 5 trigger(s).</li><li>2 high/critical signal(s) and release decision reject.</li></ul>
+    </div>
+    <div>
+      <h3>Completed by the operator before handoff</h3>
+      <ul><li>named monitoring owner and backup owner</li><li>monitoring cadence and SLA by deployment context</li><li>incident, customer, and authority notification workflow</li><li>retention period and archive location for monitoring artifacts</li><li>corrective-action and rollback authority for repeated drift or blocking findings</li><li>named serious-incident owner and escalation backup</li><li>human determination of whether the event meets Article 73 serious-incident threshold</li><li>authority, customer, and internal notification routing by jurisdiction</li><li>incident impact assessment and affected-person analysis</li><li>reporting deadline calculation and external communications approver</li><li>Legal incident threshold assessment, authority routing, and disclosure decision.</li></ul>
+    </div>
+    <div>
+      <h3>Still open</h3>
+      <ul><li>Operator-owned risk governance still sits outside the evaluator.</li><li>Annex III classification and legal interpretation still require counsel.</li><li>This register is generated from runtime evidence and still requires operator-owned likelihood, impact, and acceptance rationale.</li><li>Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Operator-authored instructions for use are still required before deployer handoff.</li><li>This export summarizes technical evidence; it does not replace deployer-facing operating instructions.</li><li>Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Human oversight procedures for deployers still require operator-authored narrative.</li><li>The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Art_10: missing required evidence compare-report.json.environment.training_data_provenance</li><li>Art_9: Operator-owned risk governance still sits outside the evaluator.</li><li>Art_9: Annex III classification and legal interpretation still require counsel.</li><li>Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.</li><li>Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.</li><li>Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.</li><li>Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.</li><li>Art_13: Human oversight procedures for deployers still require operator-authored narrative.</li><li>Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.</li><li>Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.</li><li>Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.</li><li>Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.</li><li>Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.</li><li>Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.</li><li>Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.</li><li>Art_43: The provider-owned conformity assessment route and any notified-body records remain required.</li><li>Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.</li><li>Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.</li><li>Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.</li><li>Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.</li><li>This plan is a technical scaffold and still requires operator-owned monitoring ownership, cadence, retention, and authority-reporting decisions.</li><li>This export does not decide whether the legal threshold for a serious incident has been met.</li><li>Authority reporting workflow, deadlines, and jurisdiction-specific notification content remain operator-authored.</li><li>Final incident narrative, impact assessment, and external communications approval remain outside the evaluator.</li></ul>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>Status</th><th>Why it matters to the reviewer</th><th>Evidence</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>The package provides machine-generated monitoring and incident-triage scaffolds tied to current and historical signals.</td>
+  <td>Generated here</td>
+  <td>Gives the reviewer a fast end-of-dossier view of what is being monitored and whether serious-incident triggers are already visible.</td>
+  <td><a href="article-72-monitoring-plan.json">Article 72 monitoring plan</a> (Technical monitoring-plan scaffold.)<br/><a href="post-market-monitoring.json">Post-market monitoring</a> (Observed history and drift/watchlist summary.)<br/><a href="article-73-serious-incident-pack.json">Article 73 serious-incident pack</a> (Machine-generated incident triage scaffold.)</td>
+</tr><tr>
+  <td>Monitoring ownership, reporting obligations, and incident routing still need operator completion.</td>
+  <td>Completed by the operator</td>
+  <td>Shows where operational and legal reporting duties still sit outside the generated machine layer.</td>
+  <td><a href="article-72-monitoring-plan.json">Article 72 monitoring plan</a> (Technical monitoring-plan scaffold.)<br/><a href="article-73-serious-incident-pack.json">Article 73 serious-incident pack</a> (Machine-generated incident triage scaffold.)</td>
+</tr><tr>
+  <td>Open monitoring and incident gaps remain visible until the operator closes them in the final post-market workflow.</td>
+  <td>Still open</td>
+  <td>Keeps unresolved monitoring and reporting gaps visible instead of burying them inside the technical scaffolds.</td>
+  <td><a href="post-market-monitoring.json">Post-market monitoring</a> (Observed history and drift/watchlist summary.)<br/><a href="article-73-serious-incident-pack.json">Article 73 serious-incident pack</a> (Machine-generated incident triage scaffold.)</td>
+</tr></tbody>
+  </table>
+  <table>
+    <thead>
+      <tr><th>Evidence file</th><th>Path</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody><tr>
+  <td>Article 72 monitoring plan</td>
+  <td><a href="article-72-monitoring-plan.json">article-72-monitoring-plan.json</a></td>
+  <td>Technical monitoring-plan scaffold.</td>
+</tr><tr>
+  <td>Post-market monitoring</td>
+  <td><a href="post-market-monitoring.json">post-market-monitoring.json</a></td>
+  <td>Observed history and drift/watchlist summary.</td>
+</tr><tr>
+  <td>Article 73 serious-incident pack</td>
+  <td><a href="article-73-serious-incident-pack.json">article-73-serious-incident-pack.json</a></td>
+  <td>Machine-generated incident triage scaffold.</td>
+</tr></tbody>
+  </table>
+</section>
+  </div>
+</body>
+</html>

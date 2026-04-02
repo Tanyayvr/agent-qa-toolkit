@@ -19,7 +19,7 @@ The repository now exposes two product surfaces on top of one evidence engine, p
   - `npm run compliance:eu-ai-act:contracts`
   - `npm run demo:eu-ai-act`
   - `npm run release:gate:eu-ai-act`
-- **EU AI Evidence Builder Website**: a static multilingual website generated into `docs/` and linked to the live proof hub.
+- **EU AI Evidence Builder Website**: a static multilingual website generated into `docs/` around the public Builder, starter, and pricing flow.
   Operator entrypoints:
   - `npm run site:build`
   - `npm run site:verify`
@@ -363,16 +363,10 @@ self-contained checks, and writes a machine-readable summary at
 Product-grade contract freeze now exists for both product surfaces:
 - `npm run evidence:agent:contracts`
 - `npm run compliance:eu-ai-act:contracts`
-Product-grade demo entrypoints also exist for both product surfaces:
+Local demo entrypoints also exist for both product surfaces:
 - `npm run demo:agent-evidence`
 - `npm run demo:eu-ai-act`
-Website publishing entrypoint:
-- `npm run demo:publish:surfaces`
-It publishes a stable proof surface under `docs/demo/` with:
-- `index.html`
-- `product-surfaces.json`
-- `agent-evidence/`
-- `eu-ai-act/`
+The public site no longer depends on a published demo hub. Public EU pages are generated directly into `docs/`, and optional demo outputs stay local unless you publish them intentionally.
 
 ## Optional adapters (plugin packages)
 

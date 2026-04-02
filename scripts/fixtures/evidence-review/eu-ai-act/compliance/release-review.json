@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1775103464520,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "article_10_data_governance_href": "compliance/article-10-data-governance.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_16_provider_obligations_href": "compliance/article-16-provider-obligations.json",
+    "article_43_conformity_assessment_href": "compliance/article-43-conformity-assessment.json",
+    "article_47_declaration_of_conformity_href": "compliance/article-47-declaration-of-conformity.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json",
+    "release_review_href": "compliance/release-review.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
+    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
+  },
+  "release_decision": {
+    "status": "reject",
+    "rationale": [
+      "1 case(s) are marked block.",
+      "1 case(s) require human approval."
+    ],
+    "approval_case_ids": [
+      "c-approval"
+    ],
+    "blocking_case_ids": [
+      "c-block"
+    ],
+    "required_human_actions": [
+      "Assigned reviewer must clear approval-required cases before release.",
+      "Blocked cases must be remediated and rerun before release."
+    ]
+  },
+  "release_gate_summary": {
+    "execution_quality_status": "healthy",
+    "regressions": 0,
+    "improvements": 1,
+    "cases_requiring_approval": 1,
+    "cases_block_recommended": 1,
+    "compliance_clause_status_counts": {
+      "covered": 3,
+      "partial": 17,
+      "missing": 0
+    }
+  },
+  "checklist": [
+    {
+      "id": "execution_quality",
+      "label": "Execution quality is healthy",
+      "status": "pass",
+      "summary": "Execution quality is healthy.",
+      "evidence_selectors": [
+        "compare-report.json.summary.execution_quality"
+      ],
+      "artifact_hrefs": [
+        "compare-report.json",
+        "compliance/eu-ai-act-report.html"
+      ]
+    },
+    {
+      "id": "blocking_cases",
+      "label": "No cases are blocked",
+      "status": "fail",
+      "summary": "1 blocking case(s): c-block",
+      "evidence_selectors": [
+        "compare-report.json.summary.cases_block_recommended",
+        "compare-report.json.items[].gate_recommendation"
+      ],
+      "artifact_hrefs": [
+        "compare-report.json",
+        "compliance/human-oversight-summary.json"
+      ]
+    },
+    {
+      "id": "approval_cases",
+      "label": "Approval-required cases are reviewed",
+      "status": "review",
+      "summary": "1 case(s) still require human approval.",
+      "evidence_selectors": [
+        "compare-report.json.summary.cases_requiring_approval",
+        "compare-report.json.items[].gate_recommendation"
+      ],
+      "artifact_hrefs": [
+        "compare-report.json",
+        "compliance/human-oversight-summary.json"
+      ]
+    },
+    {
+      "id": "evidence_pack_integrity",
+      "label": "Evidence pack is self-contained and portable",
+      "status": "pass",
+      "summary": "Evidence pack is self-contained, portable, and has no missing assets.",
+      "evidence_selectors": [
+        "compare-report.json.quality_flags",
+        "artifacts/manifest.json"
+      ],
+      "artifact_hrefs": [
+        "compare-report.json",
+        "artifacts/manifest.json"
+      ]
+    },
+    {
+      "id": "residual_compliance_gaps",
+      "label": "Residual compliance gaps are acknowledged",
+      "status": "review",
+      "summary": "20 residual gap(s) remain documented in the bundle.",
+      "evidence_selectors": [
+        "compare-report.json.compliance_coverage",
+        "compliance/eu-ai-act-annex-iv.json"
+      ],
+      "artifact_hrefs": [
+        "compliance/eu-ai-act-annex-iv.json",
+        "compliance/eu-ai-act-coverage.json"
+      ]
+    }
+  ],
+  "reviewer_signoff": {
+    "required": true,
+    "recommended_role": "AI reviewer / release owner",
+    "reason": "Blocking cases or degraded execution quality prevent release."
+  },
+  "recommended_next_step": "Remediate blocking or degraded cases and rerun the evaluation bundle."
+}

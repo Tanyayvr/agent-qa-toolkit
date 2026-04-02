@@ -183,8 +183,6 @@
     "missing_assets_count": 0,
     "path_violations_count": 0,
     "large_payloads_count": 2,
-    "missing_assets": [],
-    "path_violations": [],
     "large_payloads": [
       "baseline/matrix_data_large_json_1mb.json (1000237 bytes)",
       "new/matrix_data_large_json_1mb.json (1000232 bytes)"
@@ -207,7 +205,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-fmt_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -219,48 +216,34 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_not_include",
-          "pass": true,
-          "details": {
-            "found_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "json_schema",
-          "pass": true,
-          "details": {
-            "schema_errors": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -271,10 +254,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -287,24 +267,15 @@
       "assertions_new": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_not_include",
-          "pass": true,
-          "details": {
-            "found_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "json_schema",
-          "pass": true,
-          "details": {
-            "schema_errors": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -315,10 +286,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -331,24 +299,15 @@
       "assertions": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_not_include",
-          "pass": true,
-          "details": {
-            "found_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "json_schema",
-          "pass": true,
-          "details": {
-            "schema_errors": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -359,10 +318,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -404,21 +360,17 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
@@ -430,17 +382,11 @@
       "assertions_baseline": [
         {
           "name": "action_required",
-          "pass": true,
-          "details": {
-            "missing_actions": []
-          }
+          "pass": true
         },
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "tool_sequence",
@@ -458,24 +404,15 @@
         },
         {
           "name": "json_schema",
-          "pass": true,
-          "details": {
-            "schema_errors": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
-          "pass": true,
-          "details": {
-            "actions_missing_evidence": []
-          }
+          "pass": true
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -488,17 +425,11 @@
       "assertions_new": [
         {
           "name": "action_required",
-          "pass": true,
-          "details": {
-            "missing_actions": []
-          }
+          "pass": true
         },
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "tool_sequence",
@@ -533,17 +464,11 @@
         },
         {
           "name": "evidence_required_for_actions",
-          "pass": true,
-          "details": {
-            "actions_missing_evidence": []
-          }
+          "pass": true
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -556,17 +481,11 @@
       "assertions": [
         {
           "name": "action_required",
-          "pass": true,
-          "details": {
-            "missing_actions": []
-          }
+          "pass": true
         },
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "tool_sequence",
@@ -601,17 +520,11 @@
         },
         {
           "name": "evidence_required_for_actions",
-          "pass": true,
-          "details": {
-            "actions_missing_evidence": []
-          }
+          "pass": true
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -640,7 +553,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-fmt_003.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -652,12 +564,10 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
@@ -710,17 +620,11 @@
       "assertions_baseline": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "json_schema",
-          "pass": true,
-          "details": {
-            "schema_errors": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -731,10 +635,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -747,17 +648,11 @@
       "assertions_new": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "json_schema",
-          "pass": true,
-          "details": {
-            "schema_errors": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -768,10 +663,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -784,17 +676,11 @@
       "assertions": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "json_schema",
-          "pass": true,
-          "details": {
-            "schema_errors": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -805,10 +691,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -850,21 +733,17 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
@@ -876,10 +755,7 @@
       "assertions_baseline": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "tool_sequence",
@@ -904,10 +780,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -951,10 +824,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -998,10 +868,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1046,12 +913,10 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
@@ -1150,10 +1015,7 @@
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1164,10 +1026,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1189,10 +1048,7 @@
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1203,10 +1059,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1228,10 +1081,7 @@
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1242,10 +1092,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1290,21 +1137,17 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
@@ -1316,17 +1159,11 @@
       "assertions_baseline": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1337,10 +1174,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1355,17 +1189,11 @@
       "assertions_new": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1376,10 +1204,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1394,17 +1219,11 @@
       "assertions": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1415,10 +1234,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1449,7 +1265,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-tool_004.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -1461,41 +1276,30 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1506,10 +1310,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1522,17 +1323,11 @@
       "assertions_new": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1543,10 +1338,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1559,17 +1351,11 @@
       "assertions": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -1580,10 +1366,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1626,21 +1409,17 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
@@ -1652,16 +1431,12 @@
       "assertions_baseline": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "retrieval_required",
           "pass": true,
           "details": {
-            "missing_doc_ids": [],
             "actual_doc_ids": [
               "policy_refund_annual_v1",
               "faq_refunds_v3"
@@ -1677,10 +1452,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1693,10 +1465,7 @@
       "assertions_new": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "retrieval_required",
@@ -1719,10 +1488,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1735,10 +1501,7 @@
       "assertions": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "retrieval_required",
@@ -1761,10 +1524,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1793,7 +1553,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-data_002.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -1805,40 +1564,31 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "retrieval_required",
           "pass": true,
           "details": {
-            "missing_doc_ids": [],
             "actual_doc_ids": [
               "sla_support_v2"
             ]
@@ -1853,10 +1603,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1869,16 +1616,12 @@
       "assertions_new": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "retrieval_required",
           "pass": true,
           "details": {
-            "missing_doc_ids": [],
             "actual_doc_ids": [
               "sla_support_v2"
             ]
@@ -1893,10 +1636,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1909,16 +1649,12 @@
       "assertions": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "retrieval_required",
           "pass": true,
           "details": {
-            "missing_doc_ids": [],
             "actual_doc_ids": [
               "sla_support_v2"
             ]
@@ -1933,10 +1669,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -1964,7 +1697,6 @@
       "baseline_pass": true,
       "new_pass": false,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-fail_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -1976,21 +1708,17 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
@@ -2002,24 +1730,15 @@
       "assertions_baseline": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "must_not_include",
-          "pass": true,
-          "details": {
-            "found_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -2030,10 +1749,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2048,24 +1764,15 @@
       "assertions_new": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "must_not_include",
-          "pass": true,
-          "details": {
-            "found_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -2097,24 +1804,15 @@
       "assertions": [
         {
           "name": "tool_required",
-          "pass": true,
-          "details": {
-            "missing_tools": []
-          }
+          "pass": true
         },
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "must_not_include",
-          "pass": true,
-          "details": {
-            "found_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -2162,7 +1860,6 @@
       "baseline_pass": false,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-improve_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -2174,26 +1871,21 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         }
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
@@ -2214,10 +1906,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2230,10 +1919,7 @@
       "assertions_new": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -2244,10 +1930,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2260,10 +1943,7 @@
       "assertions": [
         {
           "name": "must_include",
-          "pass": true,
-          "details": {
-            "missing_phrases": []
-          }
+          "pass": true
         },
         {
           "name": "evidence_required_for_actions",
@@ -2274,10 +1954,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2312,7 +1989,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-fetch_http_500_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -2328,8 +2004,7 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
           "status": "partial",
@@ -2341,7 +2016,6 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
@@ -2383,10 +2057,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2406,10 +2077,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2429,10 +2097,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2473,7 +2138,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-fetch_invalid_json_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -2489,8 +2153,7 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
           "status": "partial",
@@ -2502,7 +2165,6 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
@@ -2544,10 +2206,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2567,10 +2226,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2590,10 +2246,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2633,7 +2286,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-fetch_timeout_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -2645,8 +2297,7 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
           "status": "partial",
@@ -2658,7 +2309,6 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": true
         },
         "new": {
@@ -2700,10 +2350,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2723,10 +2370,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2746,10 +2390,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2789,7 +2430,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-fetch_network_drop_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -2801,8 +2441,7 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
           "status": "partial",
@@ -2814,7 +2453,6 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": true
         },
         "new": {
@@ -2856,10 +2494,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2879,10 +2514,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2902,10 +2534,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -2952,7 +2581,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_net_http_500_small.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -3049,10 +2677,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3072,10 +2697,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3095,10 +2717,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3151,7 +2770,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_net_http_500_large.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -3248,10 +2866,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3271,10 +2886,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3294,10 +2906,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3348,7 +2957,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_net_timeout.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -3437,10 +3045,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3460,10 +3065,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3483,10 +3085,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3535,7 +3134,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_net_drop.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -3624,10 +3222,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3647,10 +3242,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3670,10 +3262,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3722,7 +3311,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_net_partial.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -3811,10 +3399,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3834,10 +3419,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3857,10 +3439,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -3909,7 +3488,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_empty_body.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -4006,10 +3584,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4029,10 +3604,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4052,10 +3624,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4104,7 +3673,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_invalid_json.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -4201,10 +3769,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4224,10 +3789,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4247,10 +3809,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4289,7 +3848,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_wrong_types.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -4319,16 +3877,13 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
@@ -4340,10 +3895,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4363,10 +3915,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4386,10 +3935,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4416,7 +3962,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_missing_fields.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -4446,16 +3991,13 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
@@ -4467,10 +4009,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4490,10 +4029,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4513,10 +4049,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4543,7 +4076,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_extra_fields.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -4571,16 +4103,13 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
@@ -4592,10 +4121,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4615,10 +4141,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4638,10 +4161,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4668,7 +4188,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_large_json_1mb.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -4751,10 +4270,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4774,10 +4290,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4797,10 +4310,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4837,7 +4347,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_large_json_5mb.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -4934,10 +4443,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4957,10 +4463,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -4980,10 +4483,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -5022,7 +4522,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_data_huge_string_900k.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -5050,16 +4549,13 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
@@ -5071,10 +4567,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -5094,10 +4587,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -5117,10 +4607,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -5147,7 +4634,6 @@
       "baseline_pass": true,
       "new_pass": true,
       "preventable_by_policy": false,
-      "recommended_policy_rules": [],
       "artifacts": {
         "replay_diff_href": "case-matrix_trace_diff_001.html",
         "baseline_run_meta_href": "assets/raw/run_meta/baseline.run.json",
@@ -5159,8 +4645,7 @@
       },
       "trace_integrity": {
         "baseline": {
-          "status": "ok",
-          "issues": []
+          "status": "ok"
         },
         "new": {
           "status": "broken",
@@ -5172,16 +4657,13 @@
       },
       "security": {
         "baseline": {
-          "signals": [],
           "requires_gate_recommendation": false
         },
         "new": {
-          "signals": [],
           "requires_gate_recommendation": false
         }
       },
       "risk_level": "low",
-      "risk_tags": [],
       "gate_recommendation": "none",
       "assertions_baseline": [
         {
@@ -5193,10 +4675,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -5216,10 +4695,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",
@@ -5239,10 +4715,7 @@
         },
         {
           "name": "tool_execution",
-          "pass": true,
-          "details": {
-            "failed": []
-          }
+          "pass": true
         },
         {
           "name": "hallucination_signal_check",

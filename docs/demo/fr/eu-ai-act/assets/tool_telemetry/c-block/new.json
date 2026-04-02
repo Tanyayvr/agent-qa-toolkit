@@ -5,13 +5,11 @@
   "version": "new",
   "telemetry_mode": null,
   "contract_required": false,
-  "contract_reasons": [],
   "event_count": 3,
   "tool_call_count": 1,
   "tool_result_count": 1,
   "final_output_event_present": true,
   "status": "ok",
-  "issues": [],
   "tool_calls": [
     {
       "call_id": "call-1",
@@ -32,7 +30,6 @@
       "tool": "run_shell",
       "status": "ok",
       "payload_summary": "command executed",
-      "issues": [],
       "normalized_result_artifact_href": "assets/tool_telemetry/c-block/new/results/01-call-1.json",
       "normalized_result_artifact_key": "c-block/new/tool_result_call-1"
     }

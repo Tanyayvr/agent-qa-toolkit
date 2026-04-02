@@ -2,7 +2,7 @@
   "schema_version": 1,
   "framework": "EU_AI_ACT",
   "report_id": "eu-ai-act-demo",
-  "generated_at": 1775100600483,
+  "generated_at": 1775103464520,
   "bundle_artifacts": {
     "compare_report_href": "compare-report.json",
     "evaluator_report_html_href": "report.html",
@@ -19,12 +19,7 @@
     "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
     "human_oversight_summary_href": "compliance/human-oversight-summary.json",
     "post_market_monitoring_href": "compliance/post-market-monitoring.json",
-    "release_review_href": "compliance/release-review.json",
     "coverage_href": "compliance/eu-ai-act-coverage.json",
-    "report_html_href": "compliance/eu-ai-act-report.html",
-    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
-    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
-    "evidence_index_href": "compliance/evidence-index.json",
     "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
   },
   "document_scope": {
@@ -63,7 +58,6 @@
         "c-block"
       ],
       "artifact_hrefs": [
-        "compliance/release-review.json",
         "compliance/human-oversight-summary.json",
         "compliance/article-9-risk-register.json"
       ]
@@ -87,7 +81,6 @@
       "trigger_type": "drift_signal",
       "severity": "review",
       "summary": "Monitoring detected drift: Approval-required cases increased from 0 to 1.; Blocking cases increased from 0 to 1.; High/critical signal volume increased by 2.; Critical signal count increased by 1..",
-      "case_ids": [],
       "artifact_hrefs": [
         "compliance/post-market-monitoring.json",
         "compliance/article-72-monitoring-plan.json"
@@ -100,9 +93,6 @@
       "summary": "Machine release review currently rejects release for this bundle.",
       "case_ids": [
         "c-block"
-      ],
-      "artifact_hrefs": [
-        "compliance/release-review.json"
       ]
     },
     {
@@ -126,7 +116,6 @@
       "compliance/article-9-risk-register.json",
       "compliance/article-72-monitoring-plan.json",
       "compliance/article-17-qms-lite.json",
-      "compliance/release-review.json",
       "compliance/post-market-monitoring.json"
     ],
     "reporting_fields_required": [
@@ -151,7 +140,6 @@
       "Determine whether authority reporting is required and document the basis for the decision."
     ],
     "related_artifacts": [
-      "compliance/release-review.json",
       "compliance/post-market-monitoring.json",
       "compliance/article-72-monitoring-plan.json",
       "compliance/article-17-qms-lite.json"

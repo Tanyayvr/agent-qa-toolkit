@@ -14,8 +14,7 @@
       "params": {
         "ticket_id": "T-2002"
       },
-      "risk_level": "low",
-      "evidence_refs": []
+      "risk_level": "low"
     },
     {
       "action_id": "a10",

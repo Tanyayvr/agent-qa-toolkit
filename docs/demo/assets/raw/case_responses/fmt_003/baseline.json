@@ -14,8 +14,7 @@
         "to": "customer@example.com",
         "subject": "Apology for the delay"
       },
-      "risk_level": "low",
-      "evidence_refs": []
+      "risk_level": "low"
     }
   ],
   "final_output": {

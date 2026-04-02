@@ -1,0 +1,1078 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1775103464520,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "article_10_data_governance_href": "compliance/article-10-data-governance.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_16_provider_obligations_href": "compliance/article-16-provider-obligations.json",
+    "article_43_conformity_assessment_href": "compliance/article-43-conformity-assessment.json",
+    "article_47_declaration_of_conformity_href": "compliance/article-47-declaration-of-conformity.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json",
+    "release_review_href": "compliance/release-review.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
+    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
+  },
+  "clauses": [
+    {
+      "clause": "Art_9",
+      "title": "Risk management system",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.risk_summary",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].gate_recommendation",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].security",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.execution_quality.admissibility_kpi",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Operator-owned risk governance still sits outside the evaluator.",
+        "Annex III classification and legal interpretation still require counsel."
+      ],
+      "notes": [
+        "This clause is scored as runtime evidence coverage, not full legal conformity."
+      ]
+    },
+    {
+      "clause": "Art_10",
+      "title": "Data governance and data quality",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment.training_data_provenance",
+          "role": "required",
+          "presence": "missing",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.data_coverage",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response"
+      ],
+      "residual_gaps": [
+        "Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation."
+      ]
+    },
+    {
+      "clause": "Art_11",
+      "title": "Technical documentation",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        },
+        {
+          "selector": "compare-report.json.items[]",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The evaluator emits evidence inputs, not the full Article 11 technical file."
+      ],
+      "notes": [
+        "Use this output as an annex to a broader technical documentation package."
+      ]
+    },
+    {
+      "clause": "Annex_IV",
+      "title": "Technical documentation dossier structure",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[]",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs."
+      ]
+    },
+    {
+      "clause": "Art_12",
+      "title": "Record-keeping and logging",
+      "status": "covered",
+      "selectors": [
+        {
+          "selector": "compare-report.json.items[].trace_integrity",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].artifacts",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response"
+      ]
+    },
+    {
+      "clause": "Art_13",
+      "title": "Transparency and instructions for use",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.cases_requiring_approval",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.environment",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].gate_recommendation",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+        "Human oversight procedures for deployers still require operator-authored narrative."
+      ],
+      "notes": [
+        "This clause is scored as a technical instructions scaffold, not a finished instructions-for-use document."
+      ]
+    },
+    {
+      "clause": "Art_17",
+      "title": "Quality management system",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.cases_requiring_approval",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.cases_block_recommended",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary_by_suite",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities."
+      ],
+      "notes": [
+        "This clause is scored as a technical QMS scaffold, not a complete quality management system."
+      ]
+    },
+    {
+      "clause": "Art_14",
+      "title": "Human oversight",
+      "status": "covered",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.cases_requiring_approval",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].gate_recommendation",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].policy_evaluation",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ]
+    },
+    {
+      "clause": "Art_15",
+      "title": "Accuracy, robustness, and cybersecurity",
+      "status": "covered",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.security",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].risk_level",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].security",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ]
+    },
+    {
+      "clause": "Art_72",
+      "title": "Post-market monitoring",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary_by_suite",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities."
+      ]
+    },
+    {
+      "clause": "Art_16",
+      "title": "Provider obligations",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required."
+      ],
+      "notes": [
+        "This clause is scored as a provider-obligations scaffold, not a finished provider obligations record."
+      ]
+    },
+    {
+      "clause": "Art_18",
+      "title": "Documentation keeping",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.meta",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned."
+      ],
+      "notes": [
+        "This clause is scored as a documentation-keeping scaffold, not a completed retention and authority-availability record."
+      ]
+    },
+    {
+      "clause": "Art_19",
+      "title": "Automatically generated logs",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.items[].trace_integrity",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].artifacts",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records."
+      ],
+      "notes": [
+        "This clause is scored as a logging scaffold, not a full provider log-retention record."
+      ]
+    },
+    {
+      "clause": "Art_20",
+      "title": "Corrective actions and duty of information",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.cases_block_recommended",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.items[].gate_recommendation",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required."
+      ],
+      "notes": [
+        "This clause is scored as a corrective-action scaffold, not a finished Article 20 response record."
+      ]
+    },
+    {
+      "clause": "Art_21",
+      "title": "Cooperation with competent authorities",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "artifacts/manifest.json",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "artifacts/manifest.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The provider-owned authority cooperation path, documentation response process, and log-access process remain required."
+      ],
+      "notes": [
+        "This clause is scored as an authority-cooperation scaffold, not a finished Article 21 cooperation record."
+      ]
+    },
+    {
+      "clause": "Art_43",
+      "title": "Conformity assessment",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.summary.execution_quality",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.quality_flags",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The provider-owned conformity assessment route and any notified-body records remain required."
+      ],
+      "notes": [
+        "This clause is scored as a conformity-assessment scaffold, not a completed Article 43 record."
+      ]
+    },
+    {
+      "clause": "Art_47",
+      "title": "EU declaration of conformity",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.meta",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The provider-signed EU declaration of conformity remains required before placing on the market or putting into service."
+      ],
+      "notes": [
+        "This clause is scored as a declaration scaffold, not a completed Article 47 declaration."
+      ]
+    },
+    {
+      "clause": "Art_48",
+      "title": "CE marking",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.meta",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required."
+      ],
+      "notes": [
+        "This clause is scored as a CE-marking scaffold, not a completed Article 48 record."
+      ]
+    },
+    {
+      "clause": "Art_49",
+      "title": "Registration",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.meta",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "The provider-owned EU database or national registration record remains required where Article 49 applies."
+      ],
+      "notes": [
+        "This clause is scored as a registration scaffold, not a completed Article 49 record."
+      ]
+    },
+    {
+      "clause": "Annex_V",
+      "title": "Declaration content",
+      "status": "partial",
+      "selectors": [
+        {
+          "selector": "compare-report.json.environment",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "compare-report.json.meta",
+          "role": "required",
+          "presence": "present",
+          "source_rel_path": "compare-report.json"
+        },
+        {
+          "selector": "report.html",
+          "role": "supporting",
+          "presence": "present",
+          "source_rel_path": "report.html"
+        }
+      ],
+      "manifest_keys": [
+        "c-approval/baseline/case_response",
+        "c-approval/new/case_response",
+        "c-approval/baseline/tool_telemetry",
+        "c-approval/new/tool_telemetry",
+        "c-approval/baseline/final_output",
+        "c-approval/new/final_output",
+        "c-block/baseline/case_response",
+        "c-block/new/case_response",
+        "c-block/baseline/tool_telemetry",
+        "c-block/new/tool_result_call-1",
+        "c-block/new/tool_telemetry",
+        "c-block/baseline/final_output",
+        "c-block/new/final_output"
+      ],
+      "residual_gaps": [
+        "Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored."
+      ],
+      "notes": [
+        "This clause is scored as an Annex V content scaffold, not a completed declaration content record."
+      ]
+    }
+  ],
+  "manifest_items": [
+    {
+      "manifest_key": "c-approval/baseline/case_response",
+      "rel_path": "assets/raw/case_responses/c-approval/baseline.json",
+      "media_type": "application/json",
+      "bytes": 282,
+      "sha256": "1a973f0617cac294b64612626b3e38c61625f0a04a8805ace1084458ee2a8f49"
+    },
+    {
+      "manifest_key": "c-approval/new/case_response",
+      "rel_path": "assets/raw/case_responses/c-approval/new.json",
+      "media_type": "application/json",
+      "bytes": 341,
+      "sha256": "10f8187c5238e6382e6df917f86c6d995604b75da5db872564d90e8e0d38f2f4"
+    },
+    {
+      "manifest_key": "c-approval/baseline/tool_telemetry",
+      "rel_path": "assets/tool_telemetry/c-approval/baseline.json",
+      "media_type": "application/json",
+      "bytes": 380,
+      "sha256": "7f71611fe2cfe6fa9f44ec9c97b49271ef736d89faf89d26e7b4f72587545199"
+    },
+    {
+      "manifest_key": "c-approval/new/tool_telemetry",
+      "rel_path": "assets/tool_telemetry/c-approval/new.json",
+      "media_type": "application/json",
+      "bytes": 375,
+      "sha256": "08839001686a7073d2c0b4ca71b9e4a5a9ed865e6825f366ab2cd2679aea16a3"
+    },
+    {
+      "manifest_key": "c-approval/baseline/final_output",
+      "rel_path": "assets/final_output/c-approval/baseline.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    },
+    {
+      "manifest_key": "c-approval/new/final_output",
+      "rel_path": "assets/final_output/c-approval/new.json",
+      "media_type": "application/json",
+      "bytes": 79,
+      "sha256": "f2bf3fe080e98d3e2e2988576eb6470523dada052c4119ff967eb48fb4bb3e5b"
+    },
+    {
+      "manifest_key": "c-block/baseline/case_response",
+      "rel_path": "assets/raw/case_responses/c-block/baseline.json",
+      "media_type": "application/json",
+      "bytes": 279,
+      "sha256": "1c1d8d25ab79242bdda0f3c74ce5be87531ab3515b28354f7975c332b8fe4c08"
+    },
+    {
+      "manifest_key": "c-block/new/case_response",
+      "rel_path": "assets/raw/case_responses/c-block/new.json",
+      "media_type": "application/json",
+      "bytes": 763,
+      "sha256": "40e639e6ae88bb2df9498c5831fb0034ea634300511e03c2aa525aab9c9b51b3"
+    },
+    {
+      "manifest_key": "c-block/baseline/tool_telemetry",
+      "rel_path": "assets/tool_telemetry/c-block/baseline.json",
+      "media_type": "application/json",
+      "bytes": 377,
+      "sha256": "cd47b4c806c9d9575f8dd5045db2cb30ccb6749ea25130556c57c7662c406534"
+    },
+    {
+      "manifest_key": "c-block/new/tool_result_call-1",
+      "rel_path": "assets/tool_telemetry/c-block/new/results/01-call-1.json",
+      "media_type": "application/json",
+      "bytes": 231,
+      "sha256": "0dbf2d7bbdc0ffcbb4a1384d8fdf60a5de47907fc3a35a50706e0d6225e0e283"
+    },
+    {
+      "manifest_key": "c-block/new/tool_telemetry",
+      "rel_path": "assets/tool_telemetry/c-block/new.json",
+      "media_type": "application/json",
+      "bytes": 975,
+      "sha256": "51e9e02aba6e02fce46af9f49d3da7fc27b361af9891fdc9daec100a34156201"
+    },
+    {
+      "manifest_key": "c-block/baseline/final_output",
+      "rel_path": "assets/final_output/c-block/baseline.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    },
+    {
+      "manifest_key": "c-block/new/final_output",
+      "rel_path": "assets/final_output/c-block/new.json",
+      "media_type": "application/json",
+      "bytes": 47,
+      "sha256": "5a5db6e8a75d8741e24c0ab02f301246b1b2a6d2f176449f40d7088944309722"
+    }
+  ]
+}

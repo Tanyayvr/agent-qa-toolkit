@@ -2,7 +2,7 @@
   "schema_version": 1,
   "framework": "EU_AI_ACT",
   "report_id": "eu-ai-act-demo",
-  "generated_at": 1775100600479,
+  "generated_at": 1775103464515,
   "bundle_artifacts": {
     "compare_report_href": "compare-report.json",
     "evaluator_report_html_href": "report.html",
@@ -19,12 +19,7 @@
     "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
     "human_oversight_summary_href": "compliance/human-oversight-summary.json",
     "post_market_monitoring_href": "compliance/post-market-monitoring.json",
-    "release_review_href": "compliance/release-review.json",
     "coverage_href": "compliance/eu-ai-act-coverage.json",
-    "report_html_href": "compliance/eu-ai-act-report.html",
-    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
-    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
-    "evidence_index_href": "compliance/evidence-index.json",
     "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
   },
   "summary": {
@@ -47,12 +42,12 @@
     "last_runs": 20,
     "agent_id": "golden-eu-agent",
     "model": "golden-model-v1",
-    "earliest_generated_at": 1775100595876,
-    "latest_generated_at": 1775100600453
+    "earliest_generated_at": 1775103460166,
+    "latest_generated_at": 1775103464488
   },
   "current_run": {
     "report_id": "eu-ai-act-demo",
-    "generated_at": 1775100600453,
+    "generated_at": 1775103464488,
     "model": "golden-model-v1",
     "executed_cases": 2,
     "pass_count": 1,
@@ -73,7 +68,7 @@
   },
   "previous_run": {
     "report_id": "eu-ai-act-demo-seed",
-    "generated_at": 1775100595876,
+    "generated_at": 1775103460166,
     "model": "golden-model-v1",
     "executed_cases": 2,
     "pass_count": 0,
@@ -103,7 +98,7 @@
   "run_history": [
     {
       "report_id": "eu-ai-act-demo-seed",
-      "generated_at": 1775100595876,
+      "generated_at": 1775103460166,
       "model": "golden-model-v1",
       "executed_cases": 2,
       "pass_count": 0,
@@ -124,7 +119,7 @@
     },
     {
       "report_id": "eu-ai-act-demo",
-      "generated_at": 1775100600453,
+      "generated_at": 1775103464488,
       "model": "golden-model-v1",
       "executed_cases": 2,
       "pass_count": 1,
@@ -172,7 +167,7 @@
       "timeline": [
         {
           "report_id": "eu-ai-act-demo-seed",
-          "generated_at": 1775100595876,
+          "generated_at": 1775103460166,
           "new_pass": false,
           "risk_level": "low",
           "gate_recommendation": "none",
@@ -181,7 +176,7 @@
         },
         {
           "report_id": "eu-ai-act-demo",
-          "generated_at": 1775100600453,
+          "generated_at": 1775103464488,
           "new_pass": false,
           "risk_level": "medium",
           "gate_recommendation": "require_approval",
@@ -218,7 +213,7 @@
       "timeline": [
         {
           "report_id": "eu-ai-act-demo-seed",
-          "generated_at": 1775100595876,
+          "generated_at": 1775103460166,
           "new_pass": false,
           "risk_level": "low",
           "gate_recommendation": "none",
@@ -227,7 +222,7 @@
         },
         {
           "report_id": "eu-ai-act-demo",
-          "generated_at": 1775100600453,
+          "generated_at": 1775103464488,
           "new_pass": true,
           "risk_level": "high",
           "gate_recommendation": "block",
@@ -237,11 +232,9 @@
       ]
     }
   ],
-  "residual_gaps": [],
   "governance_review_attachment": {
     "recommended_artifacts": [
       "compliance/post-market-monitoring.json",
-      "compliance/release-review.json",
       "compliance/human-oversight-summary.json",
       "compliance/article-13-instructions.json",
       "compliance/article-9-risk-register.json",

@@ -15,8 +15,7 @@
         "summary": "Billing page shows error 500",
         "priority": "high"
       },
-      "risk_level": "medium",
-      "evidence_refs": []
+      "risk_level": "medium"
     }
   ],
   "final_output": {

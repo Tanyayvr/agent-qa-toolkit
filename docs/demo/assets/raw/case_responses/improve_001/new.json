@@ -2,7 +2,6 @@
   "case_id": "improve_001",
   "version": "new",
   "workflow_id": "support_ticketing_v1",
-  "proposed_actions": [],
   "final_output": {
     "content_type": "text",
     "content": "Verified fix applied. Customer notified."

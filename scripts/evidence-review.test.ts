@@ -1,4 +1,5 @@
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
+import { closeSync, mkdtempSync, openSync } from "node:fs";
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -10,12 +11,20 @@ const SCRIPT_TEST_TIMEOUT_MS = 20_000;
 
 function runScript(script: string, args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
-    execFile("node", [script, ...args], { cwd: REPO_ROOT }, (error, stdout, stderr) => {
-      const code = (error as NodeJS.ErrnoException & { code?: number } | null)?.code;
+    const ioRoot = mkdtempSync(path.join(tmpdir(), "aq-review-io-"));
+    tempRoots.push(ioRoot);
+    const stdoutPath = path.join(ioRoot, "stdout.txt");
+    const stderrPath = path.join(ioRoot, "stderr.txt");
+    const stdoutFd = openSync(stdoutPath, "w");
+    const stderrFd = openSync(stderrPath, "w");
+    const child = spawn("node", [script, ...args], { cwd: REPO_ROOT, stdio: ["ignore", stdoutFd, stderrFd] });
+    child.on("close", async (code) => {
+      closeSync(stdoutFd);
+      closeSync(stderrFd);
       resolve({
         code: typeof code === "number" ? code : 0,
-        stdout: stdout.toString(),
-        stderr: stderr.toString(),
+        stdout: await readFile(stdoutPath, "utf8"),
+        stderr: await readFile(stderrPath, "utf8"),
       });
     });
   }, SCRIPT_TEST_TIMEOUT_MS);
@@ -400,7 +409,7 @@ afterEach(async () => {
 
 describe("evidence review scripts", () => {
   it("scaffolds a core review bundle and fails check until human fields are completed", async () => {
-    const reportDir = await copyReportFixture("docs/demo/agent-evidence");
+    const reportDir = await copyReportFixture("scripts/fixtures/evidence-review/agent-evidence");
 
     const init = await runScript("scripts/evidence-review-init.mjs", [
       "--reportDir",
@@ -426,7 +435,7 @@ describe("evidence review scripts", () => {
   }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("passes review check for a completed core review bundle", async () => {
-    const reportDir = await copyReportFixture("docs/demo/agent-evidence");
+    const reportDir = await copyReportFixture("scripts/fixtures/evidence-review/agent-evidence");
 
     const init = await runScript("scripts/evidence-review-init.mjs", [
       "--reportDir",
@@ -449,7 +458,7 @@ describe("evidence review scripts", () => {
   });
 
   it("creates an intake snapshot and passes review check for a completed EU bundle", async () => {
-    const reportDir = await copyReportFixture("docs/demo/eu-ai-act");
+    const reportDir = await copyReportFixture("scripts/fixtures/evidence-review/eu-ai-act");
     const tempRoot = path.dirname(reportDir);
     const intakeDir = await writeIntake(tempRoot, "support");
 

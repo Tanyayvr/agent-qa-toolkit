@@ -33,15 +33,12 @@ function writeStaticDependencies(root: string) {
     "eu-ai-act/artifacts/manifest.json",
     "eu-ai-act/archive/retention-controls.json",
     "eu-ai-act/_source_inputs/new/run.json",
-    "eu-ai-act/compliance/eu-ai-act-report.html",
-    "eu-ai-act/compliance/eu-ai-act-reviewer.html",
-    "eu-ai-act/compliance/eu-ai-act-reviewer.md",
-    "eu-ai-act/compliance/eu-ai-act-reviewer.pdf",
     "eu-ai-act/compliance/article-9-risk-register.json",
     "eu-ai-act/compliance/eu-ai-act-annex-iv.json",
-    "eu-ai-act/compliance/release-review.json",
+    "eu-ai-act/compliance/article-10-data-governance.json",
     "eu-ai-act/compliance/post-market-monitoring.json",
     "eu-ai-act/compliance/article-13-instructions.json",
+    "eu-ai-act/compliance/article-16-provider-obligations.json",
     "eu-ai-act/compliance/human-oversight-summary.json",
     "eu-ai-act/compliance/article-17-qms-lite.json",
     "eu-ai-act/compliance/article-72-monitoring-plan.json",
@@ -50,54 +47,6 @@ function writeStaticDependencies(root: string) {
   writeText(path.join(root, "site-assets", "site.css"), "body{}");
   writeText(path.join(root, "site-assets", "site.js"), "console.log('site');");
   writeText(path.join(root, "site-assets", "builder.js"), "console.log('builder');");
-  writeText(
-    path.join(root, "demo", "product-surfaces.json"),
-    JSON.stringify(
-      {
-        surfaces: [
-          {
-            id: "eu-ai-act",
-            label: "EU AI Act Evidence Engine",
-            summary: {
-              approvals: 1,
-              blocks: 1,
-              runs_in_window: 2,
-              monitoring_status: "history_current",
-              portable_paths: true,
-              execution_quality_status: "degraded",
-            },
-          },
-        ],
-      },
-      null,
-      2
-    )
-  );
-  for (const locale of ["en", "de", "fr"]) {
-    writeText(
-      path.join(root, "demo", locale, "product-surfaces.json"),
-      JSON.stringify(
-        {
-          surfaces: [
-            {
-              id: "eu-ai-act",
-              label: "EU AI Act Evidence Engine",
-              summary: {
-                approvals: 1,
-                blocks: 1,
-                runs_in_window: 2,
-                monitoring_status: "history_current",
-                portable_paths: true,
-                execution_quality_status: "degraded",
-              },
-            },
-          ],
-        },
-        null,
-        2
-      )
-    );
-  }
   for (const relPath of demoFiles) {
     const content =
       relPath.endsWith(".html")
@@ -286,7 +235,7 @@ describe("eu-ai-evidence-site", () => {
     expect(docs).toContain("Page moved");
     expect(docs).toContain("../builder/");
     expect(docs).not.toContain("blob/main/docs/eu-ai-act-starter.md");
-    expect(technology).toContain("Technical Overview: from agent runs to reviewer-ready EU evidence");
+    expect(technology).toContain("Technical Overview: from agent runs to an EU AI Act package");
     expect(technology).toContain("What to check first");
     expect(technology).toContain("First self-serve EU starter");
     expect(technology).toContain("What this technology actually does");
@@ -295,11 +244,14 @@ describe("eu-ai-evidence-site", () => {
     expect(technology).toContain("npm run compliance:eu-ai-act");
     expect(technology).toContain("If the fit is real, open the repo");
     expect(technology).toContain("Open EU starter guide");
+    expect(technology).toContain("Open builder");
+    expect(technology).toContain("Open self-hosted guide");
+    expect(technology).toContain("Open GitHub repo");
     expect(technology).toContain("See self-serve EU starter");
     expect(technology).toContain("../eu-ai-act-starter/");
-    expect(technology).toContain("Open reviewer dossier demo");
-    expect(technology).toContain("Open demo agent report");
-    expect(technology).toContain("demo/en/agent-evidence/report.html");
+    expect(technology).not.toContain("Open reviewer dossier demo");
+    expect(technology).not.toContain("Open demo agent report");
+    expect(technology).not.toContain("demo/en/agent-evidence/report.html");
     expect(technology).not.toContain("Open OSS docs");
     expect(technology).not.toContain("evidence-operations-model.md");
     expect(technology).not.toContain("quickstart-your-agent.md");

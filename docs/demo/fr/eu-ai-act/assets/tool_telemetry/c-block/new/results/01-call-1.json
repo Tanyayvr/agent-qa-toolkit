@@ -6,6 +6,5 @@
   "call_id": "call-1",
   "tool": "run_shell",
   "status": "ok",
-  "payload_summary": "command executed",
-  "issues": []
+  "payload_summary": "command executed"
 }

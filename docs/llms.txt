@@ -1,6 +1,6 @@
 # EU AI Evidence Builder
 
-> Self-hosted reviewer-ready EU AI Act evidence built from verified runtime data for tool-using AI agents.
+> Self-hosted EU AI Act package builder and starter workflow for tool-using AI agents.
 
 ## Start here
 - [English homepage](https://tanyayvr.github.io/agent-qa-toolkit/en/)
@@ -9,16 +9,15 @@
 - [Builder](https://tanyayvr.github.io/agent-qa-toolkit/en/builder/)
 - [Documentation templates](https://tanyayvr.github.io/agent-qa-toolkit/en/templates/)
 
-## Live proof
-- [EU reviewer dossier HTML](https://tanyayvr.github.io/agent-qa-toolkit/demo/eu-ai-act/compliance/eu-ai-act-reviewer.html)
-- [EU reviewer dossier PDF](https://tanyayvr.github.io/agent-qa-toolkit/demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf)
-- [EU proof hub](https://tanyayvr.github.io/agent-qa-toolkit/demo/)
-- [Machine-readable proof index](https://tanyayvr.github.io/agent-qa-toolkit/demo/product-surfaces.json)
+## Public path
+- [Builder](https://tanyayvr.github.io/agent-qa-toolkit/en/builder/)
+- [EU starter](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-starter/)
+- [Pricing](https://tanyayvr.github.io/agent-qa-toolkit/en/pricing/)
 
 ## Product boundary
 - Core evidence engine for tool-using AI agents
-- EU AI Act vertical with reviewer dossier plus expanded technical pack
-- Article 12-style record-keeping is necessary but not sufficient for high-risk review on its own
+- EU AI Act vertical with provider-side documentation and technical evidence from real runs
+- Article 12-style record-keeping supports, but does not replace, the wider provider-side package
 - Not legal advice, legal classification, or final sign-off automation
 
 ## Languages

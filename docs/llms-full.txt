@@ -4,8 +4,8 @@
 
 ## What this product is
 - A self-hosted evidence engine for tool-using AI agents
-- Strongest current vertical: EU AI Act evidence and reviewer-facing dossier outputs
-- Built for teams that need verified runtime evidence to survive review outside engineering tooling
+- Strongest current vertical: EU AI Act provider-side documentation and starter workflow
+- Built for teams that need documentation plus technical evidence from real runs
 
 ## What it is not
 - Not legal advice
@@ -17,18 +17,17 @@
 - Portable evidence bundle
 - Machine-readable compare report
 - Integrity manifest and optional signature path
-- Reviewer-first EU outputs: PDF, HTML, Markdown
-- Expanded technical pack with linked JSON artifacts
-- Article-level scaffolds for Articles 9, 12, 13, 14, 15, 17, 72, 73 and Annex IV
+- Builder-driven provider-side draft sections
+- Minimum EU package outputs with linked JSON artifacts
+- Article-level scaffolds for Articles 9, 10, 12, 13, 14, 15, 16, 17, 43, 47, 48, 49, 72 and Annex IV / Annex V
 
 ## Preferred reading order
 1. [English homepage](https://tanyayvr.github.io/agent-qa-toolkit/en/)
 2. [How it works](https://tanyayvr.github.io/agent-qa-toolkit/en/how-it-works/)
 3. [Technical Overview](https://tanyayvr.github.io/agent-qa-toolkit/en/technology/)
 4. [Builder](https://tanyayvr.github.io/agent-qa-toolkit/en/builder/)
-5. [EU reviewer dossier HTML](https://tanyayvr.github.io/agent-qa-toolkit/demo/eu-ai-act/compliance/eu-ai-act-reviewer.html)
-6. [EU reviewer dossier PDF](https://tanyayvr.github.io/agent-qa-toolkit/demo/eu-ai-act/compliance/eu-ai-act-reviewer.pdf)
-7. [Proof hub](https://tanyayvr.github.io/agent-qa-toolkit/demo/)
+5. [EU starter](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-starter/)
+6. [Pricing](https://tanyayvr.github.io/agent-qa-toolkit/en/pricing/)
 
 ## Key English pages
 - [Landing](https://tanyayvr.github.io/agent-qa-toolkit/en/)
@@ -53,9 +52,9 @@
 - [Builder](https://tanyayvr.github.io/agent-qa-toolkit/fr/builder/)
 
 ## Important product boundary for EU AI Act readers
-- Article 12 record-keeping matters, but high-risk review still needs Annex-shaped documentation, operator-owned completion, monitoring continuity, and readable reviewer outputs
-- The reviewer dossier and expanded technical pack are generated from the same evidence base
-- The product automates evidence operations and packaging, not legal classification or final approval
+- Article 12 record-keeping matters, but high-risk review still needs Annex-shaped documentation, operator-owned completion, and monitoring continuity
+- The product combines provider-side documentation with technical evidence from real runs
+- The product automates packaging support, not legal classification or final approval
 
 ## Source docs and guides
 - [README](https://github.com/Tanyayvr/agent-qa-toolkit#readme)

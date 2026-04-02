@@ -15,8 +15,7 @@
         "summary": "App crashes on login",
         "priority": "high"
       },
-      "risk_level": "medium",
-      "evidence_refs": []
+      "risk_level": "medium"
     }
   ],
   "final_output": {

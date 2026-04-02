@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1775103464515,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "article_10_data_governance_href": "compliance/article-10-data-governance.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_16_provider_obligations_href": "compliance/article-16-provider-obligations.json",
+    "article_43_conformity_assessment_href": "compliance/article-43-conformity-assessment.json",
+    "article_47_declaration_of_conformity_href": "compliance/article-47-declaration-of-conformity.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json",
+    "release_review_href": "compliance/release-review.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
+    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
+  },
+  "summary": {
+    "monitoring_status": "history_current",
+    "trend_ingest_enabled": true,
+    "scope": "agent_model",
+    "current_run_included_in_history": true,
+    "runs_in_window": 2,
+    "prior_runs_in_window": 1,
+    "monitored_case_count": 2,
+    "drift_detected": true,
+    "drift_signals": [
+      "Approval-required cases increased from 0 to 1.",
+      "Blocking cases increased from 0 to 1.",
+      "High/critical signal volume increased by 2.",
+      "Critical signal count increased by 1."
+    ]
+  },
+  "monitoring_window": {
+    "last_runs": 20,
+    "agent_id": "golden-eu-agent",
+    "model": "golden-model-v1",
+    "earliest_generated_at": 1775103460166,
+    "latest_generated_at": 1775103464488
+  },
+  "current_run": {
+    "report_id": "eu-ai-act-demo",
+    "generated_at": 1775103464488,
+    "model": "golden-model-v1",
+    "executed_cases": 2,
+    "pass_count": 1,
+    "fail_count": 1,
+    "skipped_count": 0,
+    "pass_rate": 0.5,
+    "regressions": 0,
+    "improvements": 1,
+    "cases_requiring_approval": 1,
+    "cases_block_recommended": 1,
+    "high_risk_cases": 1,
+    "signal_totals": {
+      "low": 0,
+      "medium": 0,
+      "high": 1,
+      "critical": 1
+    }
+  },
+  "previous_run": {
+    "report_id": "eu-ai-act-demo-seed",
+    "generated_at": 1775103460166,
+    "model": "golden-model-v1",
+    "executed_cases": 2,
+    "pass_count": 0,
+    "fail_count": 2,
+    "skipped_count": 0,
+    "pass_rate": 0,
+    "regressions": 0,
+    "improvements": 0,
+    "cases_requiring_approval": 0,
+    "cases_block_recommended": 0,
+    "high_risk_cases": 0,
+    "signal_totals": {
+      "low": 0,
+      "medium": 0,
+      "high": 0,
+      "critical": 0
+    }
+  },
+  "change_over_time": {
+    "pass_rate_delta_vs_previous_run": 0.5,
+    "fail_count_delta_vs_previous_run": -1,
+    "approval_cases_delta_vs_previous_run": 1,
+    "blocking_cases_delta_vs_previous_run": 1,
+    "high_signal_delta_vs_previous_run": 2,
+    "critical_signal_delta_vs_previous_run": 1
+  },
+  "run_history": [
+    {
+      "report_id": "eu-ai-act-demo-seed",
+      "generated_at": 1775103460166,
+      "model": "golden-model-v1",
+      "executed_cases": 2,
+      "pass_count": 0,
+      "fail_count": 2,
+      "skipped_count": 0,
+      "pass_rate": 0,
+      "regressions": 0,
+      "improvements": 0,
+      "cases_requiring_approval": 0,
+      "cases_block_recommended": 0,
+      "high_risk_cases": 0,
+      "signal_totals": {
+        "low": 0,
+        "medium": 0,
+        "high": 0,
+        "critical": 0
+      }
+    },
+    {
+      "report_id": "eu-ai-act-demo",
+      "generated_at": 1775103464488,
+      "model": "golden-model-v1",
+      "executed_cases": 2,
+      "pass_count": 1,
+      "fail_count": 1,
+      "skipped_count": 0,
+      "pass_rate": 0.5,
+      "regressions": 0,
+      "improvements": 1,
+      "cases_requiring_approval": 1,
+      "cases_block_recommended": 1,
+      "high_risk_cases": 1,
+      "signal_totals": {
+        "low": 0,
+        "medium": 0,
+        "high": 1,
+        "critical": 1
+      }
+    }
+  ],
+  "monitored_cases": [
+    {
+      "case_id": "c-approval",
+      "title": "approval review case",
+      "suite": "release",
+      "flagged_because": [
+        "Current run requires human approval.",
+        "Current run emitted 1 security signal(s)."
+      ],
+      "current_state": {
+        "new_pass": false,
+        "risk_level": "medium",
+        "gate_recommendation": "require_approval",
+        "new_signal_count": 1
+      },
+      "history_summary": {
+        "runs_observed": 2,
+        "pass_count": 0,
+        "fail_count": 2,
+        "pass_rate": 0,
+        "approval_runs": 1,
+        "blocking_runs": 0,
+        "high_risk_runs": 0,
+        "high_or_critical_signal_runs": 1
+      },
+      "timeline": [
+        {
+          "report_id": "eu-ai-act-demo-seed",
+          "generated_at": 1775103460166,
+          "new_pass": false,
+          "risk_level": "low",
+          "gate_recommendation": "none",
+          "sec_high": 0,
+          "sec_critical": 0
+        },
+        {
+          "report_id": "eu-ai-act-demo",
+          "generated_at": 1775103464488,
+          "new_pass": false,
+          "risk_level": "medium",
+          "gate_recommendation": "require_approval",
+          "sec_high": 1,
+          "sec_critical": 0
+        }
+      ]
+    },
+    {
+      "case_id": "c-block",
+      "title": "blocking release case",
+      "suite": "release",
+      "flagged_because": [
+        "Current run recommends blocking release.",
+        "Current run risk level is high.",
+        "Current run emitted 1 security signal(s)."
+      ],
+      "current_state": {
+        "new_pass": true,
+        "risk_level": "high",
+        "gate_recommendation": "block",
+        "new_signal_count": 1
+      },
+      "history_summary": {
+        "runs_observed": 2,
+        "pass_count": 1,
+        "fail_count": 1,
+        "pass_rate": 0.5,
+        "approval_runs": 0,
+        "blocking_runs": 1,
+        "high_risk_runs": 1,
+        "high_or_critical_signal_runs": 1
+      },
+      "timeline": [
+        {
+          "report_id": "eu-ai-act-demo-seed",
+          "generated_at": 1775103460166,
+          "new_pass": false,
+          "risk_level": "low",
+          "gate_recommendation": "none",
+          "sec_high": 0,
+          "sec_critical": 0
+        },
+        {
+          "report_id": "eu-ai-act-demo",
+          "generated_at": 1775103464488,
+          "new_pass": true,
+          "risk_level": "high",
+          "gate_recommendation": "block",
+          "sec_high": 0,
+          "sec_critical": 1
+        }
+      ]
+    }
+  ],
+  "residual_gaps": [],
+  "governance_review_attachment": {
+    "recommended_artifacts": [
+      "compliance/post-market-monitoring.json",
+      "compliance/release-review.json",
+      "compliance/human-oversight-summary.json",
+      "compliance/article-13-instructions.json",
+      "compliance/article-9-risk-register.json",
+      "compliance/article-72-monitoring-plan.json",
+      "compliance/article-17-qms-lite.json",
+      "compliance/eu-ai-act-annex-iv.json",
+      "compare-report.json"
+    ],
+    "recurring_review_questions": [
+      "Did approval-required or blocking cases increase compared with the previous monitored run?",
+      "Is pass rate declining or are high/critical security findings accumulating over time?",
+      "Do monitored cases show repeat gating patterns that require operator remediation or workflow changes?"
+    ]
+  }
+}

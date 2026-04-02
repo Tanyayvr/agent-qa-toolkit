@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "framework": "EU_AI_ACT",
+  "report_id": "eu-ai-act-demo",
+  "generated_at": 1775103464520,
+  "bundle_artifacts": {
+    "compare_report_href": "compare-report.json",
+    "evaluator_report_html_href": "report.html",
+    "manifest_href": "artifacts/manifest.json",
+    "annex_iv_href": "compliance/eu-ai-act-annex-iv.json",
+    "article_10_data_governance_href": "compliance/article-10-data-governance.json",
+    "article_13_instructions_href": "compliance/article-13-instructions.json",
+    "article_16_provider_obligations_href": "compliance/article-16-provider-obligations.json",
+    "article_43_conformity_assessment_href": "compliance/article-43-conformity-assessment.json",
+    "article_47_declaration_of_conformity_href": "compliance/article-47-declaration-of-conformity.json",
+    "article_9_risk_register_href": "compliance/article-9-risk-register.json",
+    "article_72_monitoring_plan_href": "compliance/article-72-monitoring-plan.json",
+    "article_17_qms_lite_href": "compliance/article-17-qms-lite.json",
+    "annex_v_declaration_content_href": "compliance/annex-v-declaration-content.json",
+    "human_oversight_summary_href": "compliance/human-oversight-summary.json",
+    "post_market_monitoring_href": "compliance/post-market-monitoring.json",
+    "release_review_href": "compliance/release-review.json",
+    "coverage_href": "compliance/eu-ai-act-coverage.json",
+    "report_html_href": "compliance/eu-ai-act-report.html",
+    "reviewer_html_href": "compliance/eu-ai-act-reviewer.html",
+    "reviewer_markdown_href": "compliance/eu-ai-act-reviewer.md",
+    "evidence_index_href": "compliance/evidence-index.json",
+    "article_73_serious_incident_pack_href": "compliance/article-73-serious-incident-pack.json"
+  },
+  "document_scope": {
+    "article": "Art_17",
+    "generated_scope": "technical_qms_lite_scaffold",
+    "operator_inputs_required": [
+      "named quality management owner and document approver",
+      "written change-management procedure and approval workflow",
+      "incident, complaint, and corrective-action handling workflow",
+      "document-control, retention, and versioning policy",
+      "training, competency, and supplier-management responsibilities",
+      "authority and customer communication procedure for material issues"
+    ]
+  },
+  "managed_system": {
+    "agent_id": "golden-eu-agent",
+    "agent_version": "golden-eu-agent-v2",
+    "model": "golden-model-v1",
+    "model_version": "2026-03-01",
+    "prompt_version": "prompt-golden-v1",
+    "tools_version": "tools-golden-v1",
+    "config_hash": "cfg-golden-eu-v1",
+    "execution_quality_status": "healthy",
+    "monitoring_status": "history_current",
+    "approval_case_count": 1,
+    "blocking_case_count": 1
+  },
+  "process_areas": [
+    {
+      "id": "change_management",
+      "title": "Change management",
+      "objective": "Ensure material system changes trigger review, evidence refresh, and explicit approval before release.",
+      "current_controls": [
+        "Current compare-report and oversight outputs preserve approval and blocking signals for the current bundle.",
+        "The evidence bundle preserves compare-report, report.html, and manifest references for each packaged run."
+      ],
+      "evidence_hrefs": [
+        "compare-report.json",
+        "compliance/human-oversight-summary.json",
+        "report.html"
+      ],
+      "operator_inputs_required": [
+        "define what counts as a material change",
+        "name approvers for operation and rollback decisions"
+      ],
+      "residual_gaps": [
+        "Formal change-approval workflow and document ownership remain operator-authored."
+      ]
+    },
+    {
+      "id": "testing_and_validation",
+      "title": "Testing and validation",
+      "objective": "Keep validation, risk review, and evidence refresh repeatable for every meaningful change.",
+      "current_controls": [
+        "Execution quality, pass/fail outcomes, and per-case risk signals are retained for the current run.",
+        "Machine-derived risk register entries identify block and review findings for remediation."
+      ],
+      "evidence_hrefs": [
+        "compare-report.json",
+        "compliance/article-9-risk-register.json",
+        "compliance/article-17-qms-lite.json"
+      ],
+      "operator_inputs_required": [
+        "set minimum testing cadence and acceptance criteria",
+        "define who signs off repeated approval-required cases"
+      ],
+      "residual_gaps": [
+        "Written validation procedure, acceptance thresholds, and exception handling remain operator-owned."
+      ]
+    },
+    {
+      "id": "incident_and_corrective_action",
+      "title": "Incident and corrective action",
+      "objective": "Escalate degraded execution, blocking cases, drift, or incidents into a documented remediation loop.",
+      "current_controls": [
+        "Risk register and oversight outputs capture degraded execution, blocking cases, and human follow-up needs.",
+        "Monitoring plan scaffold defines event-driven escalation triggers for drift and blocking findings."
+      ],
+      "evidence_hrefs": [
+        "compliance/article-9-risk-register.json",
+        "compliance/article-72-monitoring-plan.json",
+        "compliance/post-market-monitoring.json"
+      ],
+      "operator_inputs_required": [
+        "define incident severity thresholds and response SLA",
+        "define corrective-action ownership and evidence retention after remediation"
+      ],
+      "residual_gaps": [
+        "Serious-incident reporting workflow and authority communication procedure remain outside this scaffold."
+      ]
+    },
+    {
+      "id": "documentation_and_record_control",
+      "title": "Documentation and record control",
+      "objective": "Keep technical documentation, evidence references, and retained artifacts versioned and reviewable.",
+      "current_controls": [
+        "Manifest, evidence index, and Annex IV export give a stable artifact map for the current bundle.",
+        "Portable-path and self-contained checks verify that packaged evidence can be handed off without local path leakage."
+      ],
+      "evidence_hrefs": [
+        "artifacts/manifest.json",
+        "compliance/evidence-index.json",
+        "compliance/eu-ai-act-annex-iv.json"
+      ],
+      "operator_inputs_required": [
+        "define document approval workflow and retention owner",
+        "define where controlled QMS documents and evidence snapshots are archived"
+      ],
+      "residual_gaps": [
+        "Formal document-control policy, retention periods, and archive approvals remain operator-authored."
+      ]
+    },
+    {
+      "id": "oversight_and_release_control",
+      "title": "Oversight and operational control",
+      "objective": "Bind human oversight, approval, and deployer-facing instructions into one governed provider path.",
+      "current_controls": [
+        "Human oversight summary records approval-required and blocked cases.",
+        "Article 13 instructions scaffold records oversight and escalation expectations for deployers and operators."
+      ],
+      "evidence_hrefs": [
+        "compliance/human-oversight-summary.json",
+        "compliance/article-13-instructions.json",
+        "compliance/article-9-risk-register.json"
+      ],
+      "operator_inputs_required": [
+        "define reviewer roles and escalation chain",
+        "complete operator-facing and deployer-facing narrative instructions"
+      ],
+      "residual_gaps": [
+        "Named oversight roles, approval authority, and final deployer instructions still require operator completion."
+      ]
+    },
+    {
+      "id": "monitoring_and_feedback",
+      "title": "Monitoring and feedback",
+      "objective": "Run recurring monitoring, detect drift, and feed monitoring outcomes back into risk and provider decisions.",
+      "current_controls": [
+        "Post-market monitoring export records longitudinal history and monitored-case watchlists.",
+        "Article 72 monitoring-plan scaffold defines cadence and escalation hooks for recurring review."
+      ],
+      "evidence_hrefs": [
+        "compliance/post-market-monitoring.json",
+        "compliance/article-72-monitoring-plan.json",
+        "compliance/article-9-risk-register.json"
+      ],
+      "operator_inputs_required": [
+        "set routine monitoring cadence and governance checkpoint schedule",
+        "define how customer feedback, incidents, and drift findings update the risk register"
+      ],
+      "residual_gaps": [
+        "Operational feedback intake, complaint handling, and authority/customer communication still require written process ownership."
+      ]
+    }
+  ],
+  "governance_roles": [
+    {
+      "role": "system owner",
+      "responsibilities": [
+        "Own intended use, deployment boundary, and residual-risk acceptance.",
+        "Approve remediation priorities for open block or review findings."
+      ]
+    },
+    {
+      "role": "provider operations owner",
+      "responsibilities": [
+        "Decide whether the current system state can proceed, requires review, or must be blocked.",
+        "Ensure material changes trigger evidence refresh before the system is relied on in scope."
+      ]
+    },
+    {
+      "role": "platform or evaluation engineer",
+      "responsibilities": [
+        "Maintain runner, adapter, and evidence-packaging workflow health.",
+        "Investigate degraded execution quality, drift, or packaging integrity failures."
+      ]
+    },
+    {
+      "role": "compliance or governance reviewer",
+      "responsibilities": [
+        "Review residual gaps, monitoring escalations, and control ownership.",
+        "Escalate to legal or audit workflows when technical evidence is insufficient on its own."
+      ]
+    }
+  ],
+  "management_review_triggers": [
+    "One or more cases recommend blocking operation or require human approval.",
+    "Execution quality is degraded or any case is marked block.",
+    "Monitoring drift is detected or monitoring history becomes stale.",
+    "Deployment context, target market, or intended use changes materially.",
+    "Residual compliance gaps change, expand, or lose a named owner."
+  ],
+  "current_signals": {
+    "residual_compliance_gap_count": 39,
+    "drift_detected": true,
+    "drift_signal_count": 4,
+    "review_queue_count": 2,
+    "runs_in_window": 2
+  },
+  "operator_inputs_required": [
+    "named quality management owner and document approver",
+    "written change-management procedure and approval workflow",
+    "incident, complaint, and corrective-action handling workflow",
+    "document-control, retention, and versioning policy",
+    "training, competency, and supplier-management responsibilities",
+    "authority and customer communication procedure for material issues"
+  ],
+  "residual_gaps": [
+    "Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.",
+    "Operator-authored instructions for use are still required before deployer handoff.",
+    "This export summarizes technical evidence; it does not replace deployer-facing operating instructions.",
+    "Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+    "Human oversight procedures for deployers still require operator-authored narrative.",
+    "The evaluator emits evidence inputs, not the full Article 11 technical file.",
+    "The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.",
+    "Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.",
+    "Art_10: missing required evidence compare-report.json.environment.training_data_provenance",
+    "Art_9: Operator-owned risk governance still sits outside the evaluator.",
+    "Art_9: Annex III classification and legal interpretation still require counsel.",
+    "Art_10: Training-data lineage, labeling, representativeness, and bias controls are outside runtime evaluation.",
+    "Art_11: The evaluator emits evidence inputs, not the full Article 11 technical file.",
+    "Annex_IV: The generated dossier still requires operator-authored intended-use, system-boundary, and deployment-context inputs.",
+    "Art_13: Operator-authored intended-use, deployer-facing instructions, and operating constraints remain required.",
+    "Art_13: Human oversight procedures for deployers still require operator-authored narrative.",
+    "Art_17: Written QMS procedures, training, document control, supplier management, and authority communication remain operator responsibilities.",
+    "Art_72: Recurring monitoring cadence, escalation workflow, and regulator-facing reporting remain operator responsibilities.",
+    "Art_16: Provider-owned records for Section 2 compliance, declaration, marking, registration, and authority-facing obligations remain required.",
+    "Art_18: The 10-year documentation-keeping record for Article 11, Article 17, notified-body records where applicable, and Article 47 remains provider-owned.",
+    "Art_19: Provider-controlled log retention, six-month minimum retention, and retrieval path still require provider-authored records.",
+    "Art_20: The provider-owned corrective-action, withdrawal or disabling, recall, and notification workflow remains required.",
+    "Art_21: The provider-owned authority cooperation path, documentation response process, and log-access process remain required.",
+    "Art_43: The provider-owned conformity assessment route and any notified-body records remain required.",
+    "Art_47: The provider-signed EU declaration of conformity remains required before placing on the market or putting into service.",
+    "Art_48: The provider-owned CE marking record, including digital or physical placement and notified-body identification where applicable, remains required.",
+    "Art_49: The provider-owned EU database or national registration record remains required where Article 49 applies.",
+    "Annex_V: Provider identification, system identification, legal references, and signatory details for the declaration remain provider-authored.",
+    "Operator-owned risk governance still sits outside the evaluator.",
+    "Annex III classification and legal interpretation still require counsel.",
+    "This register is generated from runtime evidence and still requires operator-owned likelihood, impact, and acceptance rationale.",
+    "This plan is a technical scaffold and still requires operator-owned monitoring ownership, cadence, retention, and authority-reporting decisions.",
+    "This QMS-lite export is a technical scaffold, not a complete quality management system.",
+    "Competency management, supplier management, authority communication, and formal document-control procedures remain operator-authored."
+  ]
+}

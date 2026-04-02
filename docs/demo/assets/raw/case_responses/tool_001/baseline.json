@@ -14,8 +14,7 @@
       "params": {
         "customer_id": "CUST-1004"
       },
-      "risk_level": "low",
-      "evidence_refs": []
+      "risk_level": "low"
     },
     {
       "action_id": "a2",
