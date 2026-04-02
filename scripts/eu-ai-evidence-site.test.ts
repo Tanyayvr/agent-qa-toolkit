@@ -117,6 +117,7 @@ describe("eu-ai-evidence-site", () => {
     const builder = readFileSync(path.join(root, "en", "builder", "index.html"), "utf8");
     const agentCheck = readFileSync(path.join(root, "en", "agent-check", "index.html"), "utf8");
     const starter = readFileSync(path.join(root, "en", "eu-ai-act-starter", "index.html"), "utf8");
+    const demoPage = readFileSync(path.join(root, "en", "eu-ai-act-demo", "index.html"), "utf8");
     const about = readFileSync(path.join(root, "en", "about", "index.html"), "utf8");
     const docs = readFileSync(path.join(root, "en", "docs", "index.html"), "utf8");
     const pricing = readFileSync(path.join(root, "en", "pricing", "index.html"), "utf8");
@@ -141,6 +142,7 @@ describe("eu-ai-evidence-site", () => {
     expect(landing).toContain("Understand the EU workflow");
     expect(landing).toContain("Open technical overview");
     expect(landing).toContain("Open package path");
+    expect(landing).toContain("eu-ai-act-demo/");
     expect(landing).toContain("Law-grounded written draft");
     expect(landing).not.toContain("Authority-ready package");
     expect(landing).not.toContain("Why does a reviewer-ready package need more than a checklist or PDF?");
@@ -210,11 +212,21 @@ describe("eu-ai-evidence-site", () => {
     expect(starter).toContain("What you get");
     expect(starter).toContain("What this is not");
     expect(starter).toContain("Need the full package?");
+    expect(starter).toContain("../eu-ai-act-demo/");
     expect(starter).not.toContain("How the draft and runtime report connect");
     expect(starter).not.toContain("Checks adapter health at the base URL you provide.");
     expect(starter).toContain("../pricing/");
     expect(starter).not.toContain("Back to Builder");
     expect(starter).not.toContain("blob/main/docs/eu-ai-act-starter.md");
+    expect(demoPage).toContain("See a sample EU AI Act minimum package");
+    expect(demoPage).toContain("What this sample includes");
+    expect(demoPage).toContain("Open the sample files");
+    expect(demoPage).toContain("What this sample does not show");
+    expect(demoPage).toContain("../builder/");
+    expect(demoPage).toContain("../eu-ai-act-starter/");
+    expect(demoPage).toContain("../../demo/en/eu-ai-act/report.html");
+    expect(demoPage).toContain("../../demo/en/eu-ai-act/compliance/eu-ai-act-annex-iv.json");
+    expect(demoPage).toContain("../../demo/en/eu-ai-act/compliance/article-9-risk-register.json");
     expect(pricing).toContain("EU AI Act pricing for high-risk AI systems");
     expect(pricing).toContain("PAID HELP");
     expect(pricing).toContain("ENTERPRISE");
@@ -277,6 +289,7 @@ describe("eu-ai-evidence-site", () => {
     expect(technicalRedirect).toContain("Page moved");
     expect(technicalRedirect).toContain("../technology/");
     expect(sitemap).toContain("https://example.com/en/");
+    expect(sitemap).toContain("https://example.com/en/eu-ai-act-demo/");
     expect(sitemap).toContain("https://example.com/de/");
     expect(sitemap).not.toContain("/holding/");
     expect(sitemap).not.toContain("/en/docs/");

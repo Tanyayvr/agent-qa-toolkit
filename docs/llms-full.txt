@@ -26,14 +26,16 @@
 2. [How it works](https://tanyayvr.github.io/agent-qa-toolkit/en/how-it-works/)
 3. [Technical Overview](https://tanyayvr.github.io/agent-qa-toolkit/en/technology/)
 4. [Builder](https://tanyayvr.github.io/agent-qa-toolkit/en/builder/)
-5. [EU starter](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-starter/)
-6. [Pricing](https://tanyayvr.github.io/agent-qa-toolkit/en/pricing/)
+5. [Sample EU package](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-demo/)
+6. [EU starter](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-starter/)
+7. [Pricing](https://tanyayvr.github.io/agent-qa-toolkit/en/pricing/)
 
 ## Key English pages
 - [Landing](https://tanyayvr.github.io/agent-qa-toolkit/en/)
 - [How it works](https://tanyayvr.github.io/agent-qa-toolkit/en/how-it-works/)
 - [Technical Overview](https://tanyayvr.github.io/agent-qa-toolkit/en/technology/)
 - [Templates](https://tanyayvr.github.io/agent-qa-toolkit/en/templates/)
+- [Sample EU package](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-demo/)
 - [Builder](https://tanyayvr.github.io/agent-qa-toolkit/en/builder/)
 - [Pricing](https://tanyayvr.github.io/agent-qa-toolkit/en/pricing/)
 

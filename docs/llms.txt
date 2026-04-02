@@ -11,6 +11,7 @@
 
 ## Public path
 - [Builder](https://tanyayvr.github.io/agent-qa-toolkit/en/builder/)
+- [Sample EU package](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-demo/)
 - [EU starter](https://tanyayvr.github.io/agent-qa-toolkit/en/eu-ai-act-starter/)
 - [Pricing](https://tanyayvr.github.io/agent-qa-toolkit/en/pricing/)
 

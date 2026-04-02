@@ -58,7 +58,7 @@ const LOCALES = {
       brandSubtitle: "Documentation builder for Agent QA Toolkit",
       trustLine: "Self-hosted · No data leaves your environment · Open source core",
       pilotCta: "Apply for Pilot",
-      liveDemos: "Builder and starter",
+      liveDemos: "Open Builder",
       proofLabel: "Public path",
       docsLabel: "Open source docs",
       languageLabel: "Language",
@@ -73,6 +73,7 @@ const LOCALES = {
       startFree: "Start Free",
       viewPricing: "See full pricing",
       viewProof: "Open EU starter",
+      viewDemo: "See sample package",
       bookCall: "Review pilot requirements",
     },
     landing: {
@@ -517,7 +518,7 @@ const LOCALES = {
       brandSubtitle: "Dokumentations-Assistent fuer Agent QA Toolkit",
       trustLine: "Bei Ihnen gehostet · Ihre Daten bleiben in Ihrer Umgebung · Open-Source-Kern",
       pilotCta: "Pilot beantragen",
-      liveDemos: "Builder und Starter",
+      liveDemos: "Builder oeffnen",
       proofLabel: "Oeffentlicher Pfad",
       docsLabel: "Open-Source-Dokumentation",
       languageLabel: "Sprache",
@@ -532,6 +533,7 @@ const LOCALES = {
       startFree: "Kostenlos starten",
       viewPricing: "Preise ansehen",
       viewProof: "EU-Starter oeffnen",
+      viewDemo: "Beispielpaket ansehen",
       bookCall: "Pilot prüfen",
     },
     landing: {
@@ -980,7 +982,7 @@ const LOCALES = {
       brandSubtitle: "Generateur de documentation pour Agent QA Toolkit",
       trustLine: "Heberge chez vous · Vos donnees restent dans votre environnement · Noyau open source",
       pilotCta: "Demander un pilote",
-      liveDemos: "Builder et starter",
+      liveDemos: "Ouvrir le builder",
       proofLabel: "Parcours public",
       docsLabel: "Documentation open source",
       languageLabel: "Langue",
@@ -995,6 +997,7 @@ const LOCALES = {
       startFree: "Commencer gratuitement",
       viewPricing: "Voir les tarifs",
       viewProof: "Ouvrir le starter UE",
+      viewDemo: "Voir un package exemple",
       bookCall: "Verifier le pilote",
     },
     landing: {
@@ -7080,6 +7083,7 @@ function pageLabel(page, locale) {
     technical: localeCopy.nav.technical,
     templates: localeCopy.nav.templates,
     pricing: localeCopy.nav.pricing,
+    demo: locale === "de" ? "EU-Demo" : locale === "fr" ? "Demo UE" : "EU demo",
     docs: localeCopy.nav.docs,
     builder: localeCopy.nav.start,
     contact: localeCopy.footer.contact,
@@ -7479,7 +7483,7 @@ function renderLanding(locale, ctx) {
           </div>
           <div class="button-row">
             <a class="button-soft" href="${ctx.href("builder")}" data-track-event="landing_builder">${escapeHtml(common.liveDemos)}</a>
-            <a class="button-soft" href="${ctx.href("starter")}">${escapeHtml(common.viewProof)}</a>
+            <a class="button-soft" href="${ctx.href("demo")}">${escapeHtml(common.viewDemo)}</a>
           </div>
         </aside>
       </div>
@@ -7598,7 +7602,7 @@ function renderLandingProofCta(locale, ctx) {
         <p class="muted">${escapeHtml(copy.proofBody)}</p>
         <div class="button-row">
           <a class="button" href="${ctx.href("builder")}" data-track-event="landing_builder_cta">${escapeHtml(copy.primaryCta)}</a>
-          <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(LOCALES[locale].common.viewProof)}</a>
+          <a class="button-ghost" href="${ctx.href("demo")}">${escapeHtml(LOCALES[locale].common.viewDemo)}</a>
           <a class="button-soft" href="${ctx.href("technical")}" data-track-event="landing_technical_cta">${escapeHtml(technicalCopy.landingButton)}</a>
         </div>
       </div>
@@ -7734,7 +7738,7 @@ function renderHowItWorks(locale, ctx) {
         <p class="muted">${escapeHtml(copy.proofBody)}</p>
         <div class="button-row">
           <a class="button" href="${ctx.href("builder")}" data-track-event="how_builder">${escapeHtml(LOCALES[locale].landing.primaryCta)}</a>
-          <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(LOCALES[locale].common.viewProof)}</a>
+          <a class="button-ghost" href="${ctx.href("demo")}">${escapeHtml(LOCALES[locale].common.viewDemo)}</a>
           <a class="button-soft" href="${ctx.href("technical")}" data-track-event="how_technical">${escapeHtml(TECHNICAL_PAGE[locale]?.landingButton || TECHNICAL_PAGE.en.landingButton)}</a>
         </div>
       </div>
@@ -9640,6 +9644,133 @@ const STARTER_PAGE = {
     ],
     buttons: {
       pricing: "See pricing",
+      demo: "See sample package",
+    },
+  },
+};
+
+const DEMO_PAGE = {
+  en: {
+    title: "Sample EU AI Act package | EU AI Evidence Builder",
+    description:
+      "See a controlled public example of the minimum EU AI Act package for a high-risk AI system.",
+    eyebrow: "Public EU demo",
+    headline: "See a sample EU AI Act minimum package",
+    intro:
+      "This is a controlled public example of the minimum package path. It shows what the output can look like before your team runs the workflow on its own system.",
+    includesTitle: "What this sample includes",
+    includes: [
+      "Provider-side package sections from the minimum EU path.",
+      "Technical evidence files generated from sample runs.",
+      "Only a small curated set of outputs, not the whole internal workspace.",
+    ],
+    outputsTitle: "Open the sample files",
+    outputsLead:
+      "Start with the readable runtime report, then open the article-level outputs that make the package concrete.",
+    outputs: [
+      ["Readable runtime report", "A readable technical report built from the sample runs.", "demo/eu-ai-act/report.html"],
+      ["Compare report", "The machine-readable comparison between baseline and new runs.", "demo/eu-ai-act/compare-report.json"],
+      ["Annex IV technical documentation", "A sample Annex IV technical documentation output.", "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json"],
+      ["Article 9 risk register", "A sample risk-management output for Article 9.", "demo/eu-ai-act/compliance/article-9-risk-register.json"],
+      ["Article 10 data governance", "A sample data-governance output for Article 10.", "demo/eu-ai-act/compliance/article-10-data-governance.json"],
+      ["Human oversight summary", "A sample oversight and traceability output.", "demo/eu-ai-act/compliance/human-oversight-summary.json"],
+    ],
+    limitsTitle: "What this sample does not show",
+    limits: [
+      "It is not your final package.",
+      "It does not replace the draft your team writes in Builder.",
+      "It does not replace system-specific runs on your own agent.",
+    ],
+    nextTitle: "What to do next",
+    next: [
+      "Open Builder if you want to draft the provider-side package.",
+      "Open the EU starter if you want a first self-serve check on your own agent.",
+    ],
+    buttons: {
+      builder: "Open Builder",
+      starter: "Open EU starter",
+    },
+  },
+  de: {
+    title: "Beispiel fuer ein EU-AI-Act-Paket | EU AI Evidence Builder",
+    description:
+      "Sehen Sie ein kontrolliertes oeffentliches Beispiel fuer den minimalen EU-AI-Act-Paketpfad.",
+    eyebrow: "Oeffentliches EU-Demo",
+    headline: "Beispiel fuer ein minimales EU-AI-Act-Paket",
+    intro:
+      "Dies ist ein kontrolliertes oeffentliches Beispiel fuer den Minimalpfad. Es zeigt, wie der Output aussehen kann, bevor Ihr Team den Workflow auf dem eigenen System ausfuehrt.",
+    includesTitle: "Was dieses Beispiel enthaelt",
+    includes: [
+      "Provider-seitige Paketabschnitte aus dem minimalen EU-Pfad.",
+      "Technische Nachweisdateien aus Beispiel-Runs.",
+      "Nur eine kleine kuratierte Auswahl, nicht den ganzen internen Workspace.",
+    ],
+    outputsTitle: "Beispieldateien oeffnen",
+    outputsLead:
+      "Beginnen Sie mit dem lesbaren Laufzeitbericht und oeffnen Sie dann die artikelbezogenen Ausgaben.",
+    outputs: [
+      ["Lesbarer Laufzeitbericht", "Ein lesbarer technischer Bericht aus den Beispiel-Runs.", "demo/eu-ai-act/report.html"],
+      ["Compare Report", "Der maschinenlesbare Vergleich zwischen Baseline- und neuen Runs.", "demo/eu-ai-act/compare-report.json"],
+      ["Annex-IV-Technikdokumentation", "Ein Beispiel fuer den Annex-IV-Output.", "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json"],
+      ["Artikel-9-Risikoregister", "Ein Beispiel fuer den Risikomanagement-Output nach Artikel 9.", "demo/eu-ai-act/compliance/article-9-risk-register.json"],
+      ["Artikel-10-Daten-Governance", "Ein Beispiel fuer den Daten-Governance-Output nach Artikel 10.", "demo/eu-ai-act/compliance/article-10-data-governance.json"],
+      ["Zusammenfassung menschlicher Aufsicht", "Ein Beispiel fuer Aufsicht und Rueckverfolgbarkeit.", "demo/eu-ai-act/compliance/human-oversight-summary.json"],
+    ],
+    limitsTitle: "Was dieses Beispiel nicht zeigt",
+    limits: [
+      "Es ist nicht Ihr finales Paket.",
+      "Es ersetzt nicht den Entwurf, den Ihr Team im Builder schreibt.",
+      "Es ersetzt keine systemspezifischen Runs auf Ihrem eigenen Agenten.",
+    ],
+    nextTitle: "Naechster Schritt",
+    next: [
+      "Oeffnen Sie den Builder fuer den provider-seitigen Entwurf.",
+      "Oeffnen Sie den EU-Starter fuer den ersten Self-Serve-Check am eigenen Agenten.",
+    ],
+    buttons: {
+      builder: "Builder oeffnen",
+      starter: "EU-Starter oeffnen",
+    },
+  },
+  fr: {
+    title: "Exemple de package EU AI Act | EU AI Evidence Builder",
+    description:
+      "Voir un exemple public controle du parcours minimum de package EU AI Act.",
+    eyebrow: "Demo UE public",
+    headline: "Voir un exemple de package minimum EU AI Act",
+    intro:
+      "Ceci est un exemple public controle du parcours minimum. Il montre a quoi le resultat peut ressembler avant que votre equipe n'execute le workflow sur son propre systeme.",
+    includesTitle: "Ce que cet exemple contient",
+    includes: [
+      "Des sections de package cote fournisseur issues du parcours minimum.",
+      "Des fichiers de preuve technique generes a partir de runs exemple.",
+      "Seulement un petit ensemble choisi, pas tout le workspace interne.",
+    ],
+    outputsTitle: "Ouvrir les fichiers exemple",
+    outputsLead:
+      "Commencez par le rapport runtime lisible puis ouvrez les sorties par article.",
+    outputs: [
+      ["Rapport runtime lisible", "Un rapport technique lisible construit a partir des runs exemple.", "demo/eu-ai-act/report.html"],
+      ["Compare report", "La comparaison machine-readable entre baseline et nouveaux runs.", "demo/eu-ai-act/compare-report.json"],
+      ["Documentation technique Annexe IV", "Un exemple de sortie Annexe IV.", "demo/eu-ai-act/compliance/eu-ai-act-annex-iv.json"],
+      ["Registre des risques Article 9", "Un exemple de sortie de gestion des risques pour l'Article 9.", "demo/eu-ai-act/compliance/article-9-risk-register.json"],
+      ["Gouvernance des donnees Article 10", "Un exemple de sortie de gouvernance des donnees pour l'Article 10.", "demo/eu-ai-act/compliance/article-10-data-governance.json"],
+      ["Resume de supervision humaine", "Un exemple de sortie de supervision et de tracabilite.", "demo/eu-ai-act/compliance/human-oversight-summary.json"],
+    ],
+    limitsTitle: "Ce que cet exemple ne montre pas",
+    limits: [
+      "Ce n'est pas votre package final.",
+      "Il ne remplace pas le brouillon que votre equipe ecrit dans le builder.",
+      "Il ne remplace pas des runs reellement executes sur votre propre agent.",
+    ],
+    nextTitle: "Que faire ensuite",
+    next: [
+      "Ouvrez le builder si vous voulez rediger le package cote fournisseur.",
+      "Ouvrez le starter UE si vous voulez un premier check self-serve sur votre propre agent.",
+    ],
+    buttons: {
+      builder: "Ouvrir le builder",
+      starter: "Ouvrir le starter UE",
     },
   },
 };
@@ -9655,6 +9786,7 @@ function renderStarterPage(locale, ctx) {
           <p class="lead">${escapeHtml(copy.intro)}</p>
           <div class="button-row section-tight">
             <a class="button" href="${ctx.href("pricing")}">${escapeHtml(copy.buttons.pricing)}</a>
+            <a class="button-ghost" href="${ctx.href("demo")}">${escapeHtml(copy.buttons.demo)}</a>
           </div>
         </div>
       </div>
@@ -9695,6 +9827,68 @@ function renderStarterPage(locale, ctx) {
             ${copy.next.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
           </ul>
         </article>
+      </div>
+    </section>
+  `;
+}
+
+function renderDemoPage(locale, ctx) {
+  const copy = DEMO_PAGE[locale] || DEMO_PAGE.en;
+  const openLabel = locale === "de" ? "Beispieldatei oeffnen" : locale === "fr" ? "Ouvrir le fichier exemple" : "Open sample file";
+  return `
+    <section class="section">
+      <div class="container">
+        <div class="card fade-up">
+          ${copy.eyebrow ? `<p class="eyebrow">${escapeHtml(copy.eyebrow)}</p>` : ""}
+          <h1>${escapeHtml(copy.headline)}</h1>
+          <p class="lead">${escapeHtml(copy.intro)}</p>
+          <div class="button-row section-tight">
+            <a class="button" href="${ctx.href("builder")}">${escapeHtml(copy.buttons.builder)}</a>
+            <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(copy.buttons.starter)}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container split-grid">
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.includesTitle)}</h2>
+          <ul class="pricing-list">
+            ${copy.includes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+        <article class="card fade-up">
+          <h2>${escapeHtml(copy.limitsTitle)}</h2>
+          <ul class="pricing-list">
+            ${copy.limits.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container">
+        <h2 class="section-title">${escapeHtml(copy.outputsTitle)}</h2>
+        <p class="lead">${escapeHtml(copy.outputsLead)}</p>
+        <div class="docs-grid">
+          ${copy.outputs
+            .map(
+              ([title, text, href]) => `
+                <article class="card fade-up">
+                  <h3>${escapeHtml(title)}</h3>
+                  <p class="muted">${escapeHtml(text)}</p>
+                  <a class="button-ghost" href="${ctx.assetHref(href)}" target="_blank" rel="noreferrer">${escapeHtml(openLabel)}</a>
+                </article>`
+            )
+            .join("")}
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container evidence-card fade-up">
+        <h2>${escapeHtml(copy.nextTitle)}</h2>
+        <ul class="pricing-list">
+          ${copy.next.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
       </div>
     </section>
   `;
@@ -10324,6 +10518,13 @@ export function buildSiteDefinition(origin = DEFAULT_ORIGIN, siteOutputRoot = SI
       })
     );
     add(
+      createPage(locale, "demo", "eu-ai-act-demo", {
+        title: (DEMO_PAGE[locale] || DEMO_PAGE.en).title,
+        description: (DEMO_PAGE[locale] || DEMO_PAGE.en).description,
+        body: (ctx) => renderDemoPage(locale, ctx),
+      })
+    );
+    add(
       createPage(locale, "templates", "templates", {
         title: meta.templates.title,
         description: meta.templates.description,
@@ -10470,6 +10671,7 @@ function renderLlmsTxt(origin) {
 
 ## Public path
 - [Builder](${origin}/en/builder/)
+- [Sample EU package](${origin}/en/eu-ai-act-demo/)
 - [EU starter](${origin}/en/eu-ai-act-starter/)
 - [Pricing](${origin}/en/pricing/)
 
@@ -10519,14 +10721,16 @@ function renderLlmsFullTxt(origin) {
 2. [How it works](${origin}/en/how-it-works/)
 3. [Technical Overview](${origin}/en/technology/)
 4. [Builder](${origin}/en/builder/)
-5. [EU starter](${origin}/en/eu-ai-act-starter/)
-6. [Pricing](${origin}/en/pricing/)
+5. [Sample EU package](${origin}/en/eu-ai-act-demo/)
+6. [EU starter](${origin}/en/eu-ai-act-starter/)
+7. [Pricing](${origin}/en/pricing/)
 
 ## Key English pages
 - [Landing](${origin}/en/)
 - [How it works](${origin}/en/how-it-works/)
 - [Technical Overview](${origin}/en/technology/)
 - [Templates](${origin}/en/templates/)
+- [Sample EU package](${origin}/en/eu-ai-act-demo/)
 - [Builder](${origin}/en/builder/)
 - [Pricing](${origin}/en/pricing/)
 
