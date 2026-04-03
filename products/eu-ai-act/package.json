@@ -1,0 +1,15 @@
+{
+  "name": "@agent-qa-toolkit/eu-ai-act",
+  "private": true,
+  "description": "EU AI Act product surface for the Agent QA Toolkit monorepo",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install-shared-core.mjs",
+    "starter": "node scripts/starter.mjs",
+    "package": "node scripts/package.mjs",
+    "verify": "node scripts/verify.mjs",
+    "contracts": "node scripts/contracts.mjs"
+  }
+}

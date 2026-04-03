@@ -69,8 +69,8 @@
           <p class="lead">Pour les CTO et engineering leads qui doivent decider si cela merite du temps technique maintenant : ce qui existe deja, comment tester l'adequation sur votre propre agent, ce que l'engine fait reellement, ou commence encore la validation humaine, et le fait que le parcours UE par defaut ici vise la partie fournisseur d'un systeme d'IA a haut risque.</p>
           <div class="button-row section-tight">
             <a class="button" href="../builder/">Ouvrir le builder</a>
-            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">Ouvrir le guide self-hosted</a>
-            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer">Ouvrir le repository GitHub</a>
+            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/docs/self-hosted.md" target="_blank" rel="noreferrer">Ouvrir le guide self-hosted</a>
+            <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/README.md" target="_blank" rel="noreferrer">Ouvrir le guide open-source UE</a>
             <a class="button-soft" href="#first-run">Voir le premier run sur votre propre agent</a>
           </div>
         </div>
@@ -137,8 +137,8 @@
         </div>
         <div class="button-row">
           <a class="button" href="../eu-ai-act-starter/">Ouvrir le guide du starter UE sur GitHub</a>
-          <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">Ouvrir le guide self-hosted</a>
-          <a class="button-soft" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer">Ouvrir le repository GitHub</a>
+          <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/docs/self-hosted.md" target="_blank" rel="noreferrer">Ouvrir le guide self-hosted</a>
+          <a class="button-soft" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/README.md" target="_blank" rel="noreferrer">Ouvrir le guide open-source UE</a>
         </div>
       </div>
     </section>
@@ -216,14 +216,16 @@
         <p class="eyebrow">Inspection technique plus profonde</p>
         <h3>Surface de commande</h3>
         <p class="muted">Si l'adequation est reelle, ce sont les vraies commandes derriere le packaging, la signature, la verification, la revue et la preparation pour une autorite.</p>
-        <div class="code-snippet"><code>npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt;
-AQ_MANIFEST_PRIVATE_KEY=... npm run compliance:eu-ai-act -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt; --verify-strict --sign
+        <div class="code-snippet"><code>cd products/eu-ai-act
+npm install
+npm run package -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt;
+AQ_MANIFEST_PRIVATE_KEY=... npm run package -- --cases &lt;cases.json&gt; --baselineDir &lt;run-dir&gt; --newDir &lt;run-dir&gt; --outDir &lt;report-dir&gt; --reportId &lt;id&gt; --verify-strict --sign
 npm run review:init -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
 npm run review:check -- --reportDir &lt;report-dir&gt; [--profile &lt;name&gt;]
 npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt;</code></div>
         <div class="button-row">
-          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">Ouvrir le depot GitHub</a>
-          <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">Ouvrir le guide self-hosted</a>
+          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/README.md" target="_blank" rel="noreferrer" data-track-event="technical_repo">Ouvrir le guide open-source UE</a>
+          <a class="button-ghost" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/docs/self-hosted.md" target="_blank" rel="noreferrer">Ouvrir le guide self-hosted</a>
         </div>
       </div>
     </section>
@@ -233,7 +235,7 @@ npm run compliance:eu-ai-act:authority-response -- --reportDir &lt;report-dir&gt
         <h3>Si l'adequation est reelle, ouvrez le depot</h3>
         <p class="muted">Une fois les sorties, les verrous et le chemin du premier run juges credibles, le depot devient la bonne etape suivante pour les adapters, schemas, commandes et details d'implementation.</p>
         <div class="button-row">
-          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit" target="_blank" rel="noreferrer" data-track-event="technical_repo">Ouvrir le depot GitHub</a>
+          <a class="button" href="https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/README.md" target="_blank" rel="noreferrer" data-track-event="technical_repo">Ouvrir le guide open-source UE</a>
           <a class="button-ghost" href="#first-run">Voir le premier run sur votre propre agent</a>
           <a class="button-soft" href="../builder/">Ouvrir le builder</a>
         </div>

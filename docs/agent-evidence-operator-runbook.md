@@ -38,7 +38,7 @@ It must still be reviewed and completed by the evaluation owner before it become
 
 ```bash
 npm run evidence:agent:package -- \
-  --cases cases/agents/autonomous-cli-agent-quality.json \
+  --cases cases/agents/cli-agent-quality.json \
   --baselineDir apps/runner/runs/baseline/r1 \
   --newDir apps/runner/runs/new/r1 \
   --outDir apps/evaluator/reports/agent-evidence-demo \
@@ -154,4 +154,4 @@ Use the EU runbook when you need:
 ## Related Docs
 
 - [Architecture](architecture.md)
-- [EU AI Act Operator Runbook](eu-ai-act-operator-runbook.md)
+- [EU AI Act Operator Runbook](../products/eu-ai-act/docs/runbook.md)

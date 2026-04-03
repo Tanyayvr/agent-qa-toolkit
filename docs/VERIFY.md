@@ -56,9 +56,9 @@ Run one local campaign (example):
 
 ```bash
 BASE_URL=http://127.0.0.1:8788 \
-CASES=cases/agents/autonomous-cli-agent-quality.json \
-RUN_PREFIX=auto_prod_auto_verify \
-REPORT_PREFIX=auto-prod-auto-verify \
+CASES=cases/agents/cli-agent-quality.json \
+RUN_PREFIX=cli_prod_auto_verify \
+REPORT_PREFIX=cli-prod-auto-verify \
 TIMEOUT_PROFILE=auto \
 TIMEOUT_MS=120000 \
 TIMEOUT_AUTO_CAP_MS=5400000 \
@@ -71,11 +71,11 @@ FAIL_FAST_TRANSPORT_STREAK=0 \
 ```
 
 Expected output directories:
-- `apps/runner/runs/baseline/auto_prod_auto_verify_base`
-- `apps/runner/runs/new/auto_prod_auto_verify_base`
-- `apps/evaluator/reports/auto-prod-auto-verify`
-- `apps/evaluator/reports/auto-prod-auto-verify-2`
-- `apps/evaluator/reports/auto-prod-auto-verify-3`
+- `apps/runner/runs/baseline/cli_prod_auto_verify_base`
+- `apps/runner/runs/new/cli_prod_auto_verify_base`
+- `apps/evaluator/reports/cli-prod-auto-verify`
+- `apps/evaluator/reports/cli-prod-auto-verify-2`
+- `apps/evaluator/reports/cli-prod-auto-verify-3`
 
 ## 6) Mandatory Evidence Files
 
@@ -90,7 +90,7 @@ Optional but recommended:
 ## 7) Contract and KPI Checks
 
 ```bash
-node scripts/proof-otel-anchors.mjs --reportDir apps/evaluator/reports/auto-prod-auto-verify --minCases 1
+node scripts/proof-otel-anchors.mjs --reportDir apps/evaluator/reports/cli-prod-auto-verify --minCases 1
 npm run trend -- runs --last 20 --format json
 ```
 

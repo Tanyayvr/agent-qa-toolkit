@@ -77,8 +77,10 @@
       <div class="container split-grid">
         <article class="card fade-up">
           <h2>Starter command</h2>
-          <p class="muted">This command does not start your adapter for you. It runs the starter check against your already-running adapter.</p>
-          <div class="code-snippet"><code>npm run compliance:eu-ai-act:starter -- --baseUrl http://localhost:8787 --systemType fraud --profile my-agent</code></div>
+          <p class="muted">Run this from the EU product surface. This command does not start your adapter for you; it runs the starter check against your already-running adapter.</p>
+          <div class="code-snippet"><code>cd products/eu-ai-act
+npm install
+npm run starter -- --baseUrl http://localhost:8787 --systemType fraud --profile my-agent</code></div>
         </article>
         <article class="card fade-up">
           <h2>Before you run it</h2>

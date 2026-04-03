@@ -81,36 +81,25 @@ Details:
 
 ## EU AI Act Path
 
-The EU path is built on top of the same open core.
+The EU path is built on top of the same open core, but it now has one canonical entry surface:
 
-### 1. Build the draft
+- [products/eu-ai-act/README.md](products/eu-ai-act/README.md)
 
-Open the Builder on the public site and complete the first provider-side draft:
+Use that folder if you want:
 
-- https://tanyayvr.github.io/agent-qa-toolkit/en/builder/
-
-### 2. Run the self-serve EU starter
-
-```bash
-npm run compliance:eu-ai-act:starter -- --baseUrl http://localhost:8787 --systemType fraud --profile my-agent
-```
-
-This is a lightweight first EU starter check on your own running adapter.
-
-### 3. Build the real minimum package
-
-```bash
-npm run compliance:eu-ai-act -- --cases <cases> --baselineDir <baseline> --newDir <new> --outDir <out> --reportId <id>
-```
-
-This is the real self-hosted EU AI Act minimum package path from real runs.
+- the shortest EU-specific install path
+- the EU starter command surface
+- the real minimum-package command surface
+- the canonical EU docs
 
 Useful EU docs:
 
-- [docs/eu-ai-act-starter.md](docs/eu-ai-act-starter.md)
+- [products/eu-ai-act/docs/get-started.md](products/eu-ai-act/docs/get-started.md)
+- [products/eu-ai-act/docs/commands.md](products/eu-ai-act/docs/commands.md)
+- [products/eu-ai-act/docs/starter.md](products/eu-ai-act/docs/starter.md)
 - [docs/eu-ai-act-evidence-engine.md](docs/eu-ai-act-evidence-engine.md)
-- [docs/eu-ai-act-self-hosted-guidance.md](docs/eu-ai-act-self-hosted-guidance.md)
-- [docs/eu-ai-act-operator-runbook.md](docs/eu-ai-act-operator-runbook.md)
+- [products/eu-ai-act/docs/self-hosted.md](products/eu-ai-act/docs/self-hosted.md)
+- [products/eu-ai-act/docs/runbook.md](products/eu-ai-act/docs/runbook.md)
 
 ---
 
@@ -186,9 +175,11 @@ It does **not** include:
 | Architecture | [docs/architecture.md](docs/architecture.md) |
 | Agent integration contract | [docs/agent-integration-contract.md](docs/agent-integration-contract.md) |
 | EU AI Act engine | [docs/eu-ai-act-evidence-engine.md](docs/eu-ai-act-evidence-engine.md) |
-| EU starter | [docs/eu-ai-act-starter.md](docs/eu-ai-act-starter.md) |
-| EU self-hosted guidance | [docs/eu-ai-act-self-hosted-guidance.md](docs/eu-ai-act-self-hosted-guidance.md) |
-| EU operator runbook | [docs/eu-ai-act-operator-runbook.md](docs/eu-ai-act-operator-runbook.md) |
+| EU product surface | [products/eu-ai-act/README.md](products/eu-ai-act/README.md) |
+| EU getting started | [products/eu-ai-act/docs/get-started.md](products/eu-ai-act/docs/get-started.md) |
+| EU starter | [products/eu-ai-act/docs/starter.md](products/eu-ai-act/docs/starter.md) |
+| EU self-hosted guidance | [products/eu-ai-act/docs/self-hosted.md](products/eu-ai-act/docs/self-hosted.md) |
+| EU operator runbook | [products/eu-ai-act/docs/runbook.md](products/eu-ai-act/docs/runbook.md) |
 | CI integration | [docs/ci.md](docs/ci.md) |
 | Security scanners | [docs/security-scanners.md](docs/security-scanners.md) |
 | Threat model | [docs/threat-model.md](docs/threat-model.md) |

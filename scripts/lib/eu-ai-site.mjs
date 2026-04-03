@@ -7,6 +7,10 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "../..");
 export const SITE_OUTPUT_ROOT = path.join(REPO_ROOT, "docs");
 const GITHUB_REPO = "https://github.com/Tanyayvr/agent-qa-toolkit";
+const EU_GITHUB_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/README.md`;
+const EU_STARTER_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/docs/starter.md`;
+const EU_SELF_HOSTED_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/docs/self-hosted.md`;
+const EU_RUNBOOK_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/docs/runbook.md`;
 const SITE_NAME = "EU AI Evidence Builder";
 
 export const DEFAULT_ORIGIN = process.env.EU_AI_SITE_ORIGIN || "https://tanyayvr.github.io/agent-qa-toolkit";
@@ -77,46 +81,28 @@ const LOCALES = {
       bookCall: "Review pilot requirements",
     },
     landing: {
-      title: "EU AI Act Evidence Pack Builder | High-Risk AI Compliance for August 2026",
+      title: "EU AI Act package builder for high-risk AI systems | Agent QA Toolkit",
       description:
-        "Build the provider-side EU AI Act documentation path for high-risk AI systems, with law-grounded drafts, statutory sections, and supporting records for the relevant AI system and its version.",
+        "Turn scattered documents, logs, testing notes, and internal records into one EU AI Act package for a high-risk AI system.",
       keywords:
-        "EU AI Act evidence pack, EU AI Act compliance tool, high risk AI August 2026, AI Act documentation builder, insurance AI compliance, hiring AI compliance, healthcare AI compliance, finance AI compliance",
-      heroTitle: "2 August 2026 is coming. Can your AI system hand evidence to a reviewer?",
+        "EU AI Act package builder, high risk AI documentation, Annex IV builder, EU AI Act starter, provider-side AI package, agent compliance workflow",
+      heroTitle: "EU AI Act package builder for high-risk AI systems",
       heroText:
-        "Build the provider-side EU AI Act documentation path for high-risk AI systems, with law-grounded drafts, statutory sections, and supporting records for the relevant AI system and its version.",
+        "Most teams already have draft documents, logs, testing notes, and internal records. What they still need is one package they can complete, review, and keep for a high-risk AI system.",
       heroSubline:
-        "This default path is for providers of high-risk AI systems. Importer, distributor, deployer, and authorised-representative obligations differ. If Article 25 makes your organization the provider, use this path.",
-      primaryCta: "Start building your package",
-      secondaryCta: "Try EU starter",
-      audienceTitle: "Choose your entry path",
-      audienceLead:
-        "Start with the job you are actually trying to complete: understand the EU workflow, inspect the technical overview, or start the package.",
-      audienceCards: [
-        {
-          title: "Understand the EU workflow",
-          text:
-            "Use this route when you need to understand the provider-side documentation flow, what your team has to write, what can be attached as supporting records, and what stays human-owned.",
-          result: "Best first click for governance, legal, consultants, and mixed review teams.",
-          cta: "Open workflow path",
-          href: "how-it-works",
-        },
-        {
-          title: "Inspect the technology",
-          text:
-            "See the architecture: how technical evidence is generated, verified, and linked to the provider-side package before your team spends time in the repo.",
-          result: "Best first click for CTOs, engineering leads, security, and technical diligence.",
-          cta: "Open technical overview",
-          href: "technical",
-        },
-        {
-          title: "Start the package",
-          text:
-            "Use this route when you already want to draft the provider-side statutory sections for a high-risk AI system and complete the minimum legal package article by article.",
-          result: "Best first click for operators and implementation owners who need a practical starting point.",
-          cta: "Open package path",
-          href: "builder",
-        },
+        "For companies developing or materially modifying high-risk AI systems for the EU market. For most Annex III systems, the main application date is 2 August 2026.",
+      primaryCta: "Start your draft",
+      secondaryCta: "See sample package",
+      tertiaryCta: "See pricing",
+      heroCardEyebrow: "Sample output",
+      heroCardTitle: "See what the package looks like",
+      heroCardText:
+        "Open a public example to see what the result looks like before you start.",
+      heroCardItems: [
+        "A sample document draft",
+        "A sample risk and data section",
+        "A sample agent check report",
+        "The minimum output files in one place",
       ],
       solutionTitle: "How EU AI Act Evidence Builder works",
       steps: [
@@ -124,95 +110,36 @@ const LOCALES = {
         "Use the builder and templates to structure the statutory sections that need written draft text.",
         "Attach the supporting records already required for your system and export one organized provider-side package.",
       ],
-      strongestFitTitle: "Strongest fit",
+      strongestFitTitle: "Why this product exists",
       strongestFitBody:
-        "Best when a team needs to assemble the provider-side minimum package without inventing the structure from scratch. Legal classification, final sign-off, and role-specific legal judgment stay outside the product.",
+        "Teams usually hit the same problems before they can finish the package.",
+      fitCards: [
+        ["Scattered materials", "Draft text, logs, testing notes, and declarations usually live in different places."],
+        ["No package structure", "Teams know the system, but still need a structure for the package they have to prepare."],
+        ["Hard to connect to the real system", "It is easy for the document layer to drift away from the actual system, version, and records."],
+        ["Hard to hand over", "Internal tools and notes are difficult to hand over to legal, governance, or other reviewers."],
+      ],
       deliverablesTitle: "What you actually get",
       deliverablesLead:
-        "The product should be legible in outputs, not only in process language.",
+        "This is what your team gets from the minimum path.",
       deliverablesCards: [
         {
-          title: "Law-grounded written draft",
-          text: "A first provider-side written draft that follows Annex IV and the linked statutory sections your team has to complete.",
+          title: "Document draft",
+          text: "A first written draft for the main required documents your team needs to complete.",
         },
         {
-          title: "Statutory section structure",
-          text: "Annex IV plus the linked provider-side sections for Articles 9, 10, 12, 13, 14, 15, 16, 17, 43, 47, 48, 49, 72, and Annex V.",
+          title: "Required section structure",
+          text: "A structured set of sections covering purpose, risk, data, oversight, monitoring, and declaration material.",
         },
         {
           title: "Supporting records list",
           text: "One place to attach the records your system already requires, such as logs, testing summaries, monitoring notes, declarations, and conformity records.",
         },
         {
-          title: "Exportable provider package",
-          text: "A print-ready and JSON draft that your team can review, complete, and save as part of the provider-side package.",
+          title: "Reviewable package",
+          text: "HTML and JSON exports that your team can review, complete, and save as one package.",
         },
       ],
-      fitMatrixTitle: "What teams usually need under review",
-      fitMatrixLead:
-        "For the provider-side minimum path, teams still need more than raw logs or static notes because the law requires one structured package across multiple sections.",
-      fitMatrixHeaders: ["What teams need", "Basic logs", "SaaS dashboard / eval tool", "Checklist / PDF tool", "This product"],
-      fitMatrixRows: [
-        [
-          "Technical documentation structure",
-          "No",
-          "Partial",
-          "Partial",
-          "Yes",
-        ],
-        [
-          "Record-keeping and logs",
-          "Partial",
-          "Partial",
-          "Yes",
-          "Yes",
-        ],
-        [
-          "Instructions and deployer information",
-          "No",
-          "Partial",
-          "Partial",
-          "Yes",
-        ],
-        [
-          "Human oversight material",
-          "Yes",
-          "Partial",
-          "Partial",
-          "Yes",
-        ],
-        [
-          "Risk-management draft",
-          "No",
-          "Partial",
-          "Partial",
-          "Yes",
-        ],
-        [
-          "Conformity and declaration sections",
-          "No",
-          "No",
-          "Partial",
-          "Yes",
-        ],
-        [
-          "Post-market monitoring section",
-          "No",
-          "Partial",
-          "Partial",
-          "Yes",
-        ],
-        [
-          "One organized provider-side package",
-          "No",
-          "Partial",
-          "Partial",
-          "Yes",
-        ],
-      ],
-      proofTitle: "Choose the next step",
-      proofBody:
-        "Start in Builder, open the EU starter, or inspect the technical overview before your team spends time in the repository.",
       faq: [
         [
           "When does the EU AI Act start for high-risk AI?",
@@ -220,43 +147,35 @@ const LOCALES = {
         ],
         [
           "Which industries usually fall into Annex III high-risk AI systems?",
-          "The broad search buckets are insurance, finance, hiring, healthcare, education, biometrics, law enforcement, border control, and justice. The legal scope is narrower than those labels: common Annex III examples include hiring and worker management, educational access and assessment, credit scoring, life and health insurance risk assessment, emergency triage, biometrics, and other listed high-impact uses. This site stays broad in the headline and more precise here in the answer.",
+          "The broad search buckets are insurance, finance, hiring, healthcare, education, biometrics, law enforcement, border control, and justice. The legal scope is narrower than those labels: common Annex III examples include hiring and worker management, educational access and assessment, credit scoring, life and health insurance risk assessment, emergency triage, biometrics, and other listed high-impact uses.",
         ],
         [
-          "Which EU AI Act articles require more than logs and traces?",
-          "For high-risk systems, logs help with only one part of the package. Article 11 and Annex IV require technical documentation; Article 12 requires record-keeping; Article 13 requires information for deployers; Article 14 requires human oversight; Article 17 requires a documented quality management system; Article 72 requires a post-market monitoring plan; and Article 47 together with Annex V requires an EU declaration of conformity. The product exists because those obligations need to survive review together.",
+          "Who is this path for?",
+          "This path is for companies developing or materially modifying high-risk AI systems for the EU market.",
         ],
         [
-          "Why are basic logs not enough for high-risk AI review?",
+          "Why do teams struggle to prepare an EU AI Act package?",
+          "Because the required material is usually split across draft documents, logs, test outputs, monitoring notes, declarations, and internal records. The work is not only writing text. It is assembling one package that another team can actually review.",
+        ],
+        [
+          "What documents are included in the EU AI Act package?",
+          "The package includes a first technical documentation draft, structured sections for risk, data, logging, oversight, monitoring, provider and declaration material, plus the supporting records your team needs to attach for the system.",
+        ],
+        [
+          "Which EU AI Act articles and annexes does this product cover?",
+          "The minimum path covers Annex IV technical documentation, Annex V declaration content, and linked provider-side sections for Articles 9, 10, 12, 13, 14, 15, 16, 17, 22 where needed, 43, 47, 48, 49, and 72.",
+        ],
+        [
+          "Why are basic logs not enough for a high-risk AI package?",
           "Because high-risk review needs more than runtime traceability. Article 12 record-keeping matters, but teams may still need technical documentation, deployer information, human-oversight material, monitoring outputs, and a conformity-facing package that another reviewer can actually read and verify. Logs are necessary, but they are not the whole deliverable.",
         ],
         [
-          "Is this default path for importers, distributors, deployers, or authorised representatives?",
-          "No. The default path on this site is the provider-side path for high-risk AI systems. Those other roles have different obligations. If Article 25 makes your organization the provider, use this provider path. If a provider is established outside the Union, Article 22 adds the authorised-representative duty on top of the provider path.",
-        ],
-        [
-          "Why isn't a SaaS dashboard or eval platform enough for EU AI Act evidence?",
-          "Because most SaaS observability and eval surfaces are built for internal inspection, not for controlled reviewer handoff. They can be useful inputs, but they usually do not solve the offline dossier, review record, disclosure boundary, or machine-verifiable bundle another reviewer can inspect outside the original stack.",
-        ],
-        [
-          "Why does the provider-side package need more than a checklist or PDF?",
-          "Because the provider-side path still has to cover technical documentation, record-keeping, deployer information, human oversight, monitoring, and conformity-facing sections together. A checklist or static PDF can help with one slice of that work, but not with the whole package structure.",
-        ],
-        [
-          "What does this product add beyond logs, SaaS dashboards, and PDF tools?",
-          "It adds the provider-side package structure that simpler tools usually leave missing: law-grounded draft sections, linked article templates, a single place for required supporting records, and an exportable draft your team can complete and review.",
-        ],
-        [
-          "Will runtime data, prompts, or evidence leave our environment?",
-          "No. The core evidence workflow is designed to run inside your own environment, so runtime evidence, packaging, verification, and reviewer outputs can stay within your controlled boundary.",
+          "What is the difference between the starter and the full package?",
+          "The starter is a first self-serve check on your own running agent. It shows how the workflow behaves and produces a lightweight first output. The full package still needs the provider-side draft, the supporting records your team must attach, and the real package path for the system you are documenting.",
         ],
         [
           "Does this replace legal review or final sign-off?",
-          "No. The product structures the written provider-side package and the supporting records around it. Legal classification, residual-risk judgment, and final approval remain human-owned.",
-        ],
-        [
-          "In which formats can the package be delivered?",
-          "The builder produces a browser-generated written draft, a JSON export, and a print-ready version that your team can save as PDF. Supporting records stay attached to the same provider-side package.",
+          "No. The product structures the package and helps your team prepare the required material, but legal classification, final wording, and sign-off stay with your human owners.",
         ],
       ],
     },
@@ -384,18 +303,22 @@ const LOCALES = {
     pricing: {
       title: "EU AI Act pricing for high-risk AI systems",
       description:
-        "Free self-serve access, paid help for the first real package, and enterprise support for broader EU AI Act work.",
+        "Free self-serve access, one-time first-package help, supported self-hosted subscriptions for up to 3 or 10 agents, and enterprise support for broader EU AI Act work.",
       headline: "EU AI Act pricing for high-risk AI systems",
       lead:
-        "Choose the path that matches your stage: free self-serve, paid help for the first real package, or enterprise support for broader rollout.",
+        "Choose the path that matches your stage: free self-serve, one-time help for the first real package, supported self-hosted use for up to 3 or 10 agents, or enterprise support for broader rollout.",
       subscriptionsLabel: "Commercial paths",
       entryTitle: "Free self-serve",
       entryLead:
         "Use the open-source repo, Builder, templates, and EU starter when your team wants to evaluate the workflow on its own.",
       launchEyebrow: "Paid help",
-      launchTitle: "Paid help for the first real package",
+      launchTitle: "First package help for one real system",
       launchLead:
         "Choose this when one system needs a real package and your team wants hands-on help reaching it faster.",
+      subscriptionEyebrow: "Subscriptions",
+      subscriptionTitle: "Supported self-hosted use for recurring agent work",
+      subscriptionLead:
+        "Choose a recurring plan when the workflow is already in real use and your team wants supported self-hosted operation for up to 3 or 10 agents.",
       tiersEyebrow: "Enterprise",
       tiersTitle: "Enterprise support for broader rollout",
       tiersLead:
@@ -405,7 +328,9 @@ const LOCALES = {
         "Stay self-serve while you are evaluating. Pay only when the work moves from trial to delivery.",
       fitCards: [
         ["Free self-serve", "Best when your team can run the workflow on its own and wants to evaluate fit first."],
-        ["Paid help", "Best when one system needs a first real package and your team wants help reaching it."],
+        ["First package help", "Best when one system needs a first real package and your team wants hands-on activation help."],
+        ["Up to 3 agents", "Best when the workflow is already useful in-house and your team needs recurring support for a smaller operating footprint."],
+        ["Up to 10 agents", "Best when multiple agents already rely on the workflow and your team wants broader operating headroom."],
         ["Enterprise support", "Best when support spans multiple systems, multiple teams, or formal procurement and review."],
       ],
       faq: [
@@ -415,15 +340,23 @@ const LOCALES = {
         },
         {
           q: "What should I start with?",
-          a: "Start free with Builder and the EU starter if you are still evaluating fit or can run the workflow yourself. Use paid help when one system needs a first real package. Use enterprise support when the work is broader or more formal.",
+          a: "Start free with Builder and the EU starter if you are still evaluating fit or can run the workflow yourself. Use first-package help when one system needs its first real package. Move to the 3-agent or 10-agent subscription only when the workflow is already in real use. Use enterprise support when the work is broader or more formal.",
         },
         {
-          q: "What exactly does paid help buy?",
-          a: "Paid help helps your team reach the first real package on its own system faster. It does not replace legal review, governance review, or final sign-off.",
+          q: "What exactly does first package help buy?",
+          a: "First package help gets one real system to its first package faster. It does not replace legal review, governance review, or final sign-off.",
         },
         {
-          q: "When should I move beyond self-serve?",
-          a: "Move beyond self-serve when one real system needs a real package and your team does not want to piece the path together alone.",
+          q: "What counts as a supported agent?",
+          a: "A supported agent is one real agent or system workflow with its own package lifecycle inside the paid support scope.",
+        },
+        {
+          q: "Can I add more agents without moving straight to the 10-agent plan?",
+          a: "Yes. Additional supported agents are EUR120 per month each. For some teams that is cheaper than moving immediately to the 10-agent tier.",
+        },
+        {
+          q: "Do subscriptions include done-for-you setup?",
+          a: "No. The recurring plans cover supported self-hosted use, updates, and ongoing support. First-time setup help is sold separately.",
         },
         {
           q: "Does this replace legal counsel?",
@@ -537,18 +470,29 @@ const LOCALES = {
       bookCall: "Pilot prüfen",
     },
     landing: {
-      title: "EU KI-Verordnung Nachweispaket | Hochrisiko-KI-Compliance fuer August 2026",
+      title: "EU-KI-Verordnung Paket-Builder fuer Hochrisiko-KI-Systeme | Agent QA Toolkit",
       description:
-        "Bauen Sie den provider-seitigen Dokumentationspfad der EU-KI-Verordnung fuer Hochrisiko-KI-Systeme mit rechtsnahen Entwuerfen, Pflichtabschnitten und unterstuetzenden Unterlagen fuer das konkrete KI-System und seine Version.",
+        "Machen Sie aus verteilten Dokumenten, Logs, Testnotizen und internen Unterlagen ein EU-KI-Verordnungs-Paket fuer ein Hochrisiko-KI-System.",
       keywords:
-        "KI-Verordnung August 2026, Hochrisiko KI Nachweis, KI Konformitaetsbewertung, KI-Verordnung Dokumentation, Versicherung KI Compliance, Recruiting KI Compliance, Gesundheitswesen KI, Finanz KI, DSGVO KI",
-      heroTitle: "Der 2. August 2026 kommt. Kann Ihr KI-System Nachweise an Reviewende uebergeben?",
+        "EU-KI-Verordnung Paket-Builder, Hochrisiko-KI Dokumentation, Anhang IV Builder, EU-KI-Starter, provider-seitiges KI-Paket",
+      heroTitle: "EU-KI-Verordnungs Paket-Builder fuer Hochrisiko-KI-Systeme",
       heroText:
-        "Bauen Sie den provider-seitigen Dokumentationspfad der EU-KI-Verordnung fuer Hochrisiko-KI-Systeme mit rechtsnahen Entwuerfen, Pflichtabschnitten und unterstuetzenden Unterlagen fuer das konkrete KI-System und seine Version.",
+        "Die meisten Teams haben bereits Entwurfstexte, Logs, Testnotizen und interne Unterlagen. Was ihnen noch fehlt, ist ein Paket, das sie fuer ein Hochrisiko-KI-System vervollstaendigen, pruefen und aufbewahren koennen.",
       heroSubline:
-        "Dieser Standardpfad gilt fuer Anbieter von Hochrisiko-KI-Systemen. Pflichten von Importeuren, Haendlern, Deployern und Bevollmaechtigten unterscheiden sich. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Pfad.",
-      primaryCta: "Dokumentation starten",
-      secondaryCta: "EU-Starter ausprobieren",
+        "Fuer Unternehmen, die Hochrisiko-KI-Systeme fuer den EU-Markt entwickeln oder wesentlich veraendern. Fuer die meisten Systeme aus Anhang III gilt der 2. August 2026 als Hauptanwendungsdatum.",
+      primaryCta: "Entwurf starten",
+      secondaryCta: "Beispielpaket ansehen",
+      tertiaryCta: "Preise ansehen",
+      heroCardEyebrow: "Beispielausgabe",
+      heroCardTitle: "Sehen Sie, wie das Paket aussieht",
+      heroCardText:
+        "Oeffnen Sie ein oeffentliches Beispiel, um das Ergebnis vor dem Start zu sehen.",
+      heroCardItems: [
+        "Ein Beispiel fuer den Dokumententwurf",
+        "Ein Beispiel fuer Risiko- und Datenabschnitte",
+        "Ein Beispiel fuer den Agenten-Check-Report",
+        "Die Mindest-Ausgabedateien an einem Ort",
+      ],
       audienceTitle: "Wählen Sie Ihren Einstieg",
       audienceLead:
         "Starten Sie mit der eigentlichen Aufgabe: den EU-Workflow verstehen, den technischen Ueberblick pruefen oder direkt mit dem Paket beginnen.",
@@ -584,28 +528,34 @@ const LOCALES = {
         "Mit Dokumentations-Assistent und Vorlagen die Dossier-Abschnitte mit Narrativ und Nachweis-Referenzen strukturieren.",
         "Den technischen Workflow in der eigenen Umgebung ausfuehren und das portable Nachweispaket dort anhaengen, wo das Paket Belege braucht.",
       ],
-      strongestFitTitle: "Stärkster Fit",
+      strongestFitTitle: "Warum dieses Produkt existiert",
       strongestFitBody:
-        "Am staerksten, wenn Nachweise extern oder teamuebergreifend standhalten muessen: Beratung, Hochrisiko-Vorpruefung, regulierte Beschaffung, Vorfall-Uebergabe oder behoerdennahe Anfragen. Rechtliche Klassifizierung und finale Freigabe bleiben ausserhalb des Produkts.",
+        "Teams treffen meist auf dieselben Probleme, bevor sie das Paket wirklich fertigstellen koennen.",
+      fitCards: [
+        ["Verteilte Materialien", "Entwurfstexte, Logs, Testnotizen und Erklaerungen liegen meist an verschiedenen Orten."],
+        ["Keine Paketstruktur", "Teams kennen ihr System, brauchen aber trotzdem eine Struktur fuer das Paket."],
+        ["Schwer mit dem echten System zu verbinden", "Die Dokumentebene kann leicht von System, Version und Unterlagen auseinanderlaufen."],
+        ["Schwer zu uebergeben", "Interne Werkzeuge und Notizen lassen sich schwer an Recht, Governance oder andere Reviewende uebergeben."],
+      ],
       deliverablesTitle: "Was man konkret bekommt",
       deliverablesLead:
-        "Das Produkt sollte ueber konkrete Ergebnisse verstaendlich werden, nicht nur ueber Prozesssprache.",
+        "Das bekommt Ihr Team aus dem Mindestpfad.",
       deliverablesCards: [
         {
-          title: "Portables Nachweispaket",
-          text: "Offline-Report, Compare-Report-JSON, signiertes Manifest bei Bedarf, Reviewer-PDF/HTML/Markdown und Archivkontrollen, die ausserhalb der Engineering-Tools uebergeben werden koennen.",
+          title: "Dokumententwurf",
+          text: "Ein erster schriftlicher Entwurf fuer die wichtigsten Dokumente, die Ihr Team vervollstaendigen muss.",
         },
         {
-          title: "Dossier-nahe Exporte",
-          text: "Anhang-IV-Struktur plus reviewer-orientierte Ausgaben und Gerueste fuer Artikel 9, 13, 17, 72 und 73 mit Bezug zu Ausfuehrungsnachweisen.",
+          title: "Struktur der Pflichtabschnitte",
+          text: "Ein strukturierter Satz von Abschnitten fuer Zweck, Risiko, Daten, Aufsicht, Monitoring und Erklaerungsmaterial.",
         },
         {
-          title: "Strukturiertes Pruefprotokoll",
-          text: "Benannte Entscheidung, Uebergabe-Notiz, Abschlusspruefungen und wiederkehrende Kontinuitaet bei Korrekturmassnahmen.",
+          title: "Liste der Unterlagen",
+          text: "Ein Ort fuer die Unterlagen, die Ihr System ohnehin braucht, etwa Logs, Testzusammenfassungen, Monitoring-Notizen, Erklaerungen und Konformitaetsunterlagen.",
         },
         {
-          title: "Behoerdentaugliches Paket",
-          text: "Wenn noetig: ein abgegrenztes Behoerdenpaket mit Offenlegungs- und Archiventscheidungen.",
+          title: "Pruefbares Paket",
+          text: "HTML- und JSON-Exporte, die Ihr Team pruefen, vervollstaendigen und als ein Paket speichern kann.",
         },
       ],
       fitMatrixTitle: "Was Teams unter Pruefung normalerweise brauchen",
@@ -676,47 +626,39 @@ const LOCALES = {
       faq: [
         [
           "Wann beginnt die EU-KI-Verordnung fuer Hochrisiko-KI?",
-          "Stand 28. Maerz 2026 ist der zentrale Anwendungszeitpunkt fuer die meisten Hochrisiko-KI-Systeme aus Anhang III der 2. August 2026. Bestimmte Pfade nach Artikel 6 Absatz 1 in Verbindung mit Anhang-I-Sicherheitskomponenten greifen ab dem 2. August 2027. Teams mit moeglichem Hochrisiko-Scope sollten 2026 als Betriebsdatum fuer Nachweise, Dokumentation und Review-Workflows behandeln.",
+          "Stand 28. Maerz 2026 ist der zentrale Anwendungszeitpunkt fuer die meisten Hochrisiko-KI-Systeme aus Anhang III der 2. August 2026. Bestimmte Pfade nach Artikel 6 Absatz 1 in Verbindung mit Anhang-I-Sicherheitskomponenten greifen ab dem 2. August 2027.",
         ],
         [
           "Welche Branchen fallen typischerweise unter Hochrisiko-KI nach Anhang III?",
-          "Die breiten Suchbegriffe sind Versicherung, Finanzen, Recruiting, Gesundheitswesen, Bildung, Biometrie, Strafverfolgung, Grenzkontrolle und Justiz. Der rechtliche Scope ist enger als diese Schlagworte: typische Beispiele aus Anhang III sind Recruiting und Arbeitnehmermanagement, Bildungszugang und Bewertung, Kreditpruefung, Risiko- oder Preisbewertung in Lebens- und Krankenversicherung, Notfall-Triage, Biometrie und andere aufgelistete Hochwirkungsfaelle. Die Seite bleibt im Einstieg bewusst breiter und wird hier in der Antwort praeziser.",
+          "Die breiten Suchbegriffe sind Versicherung, Finanzen, Recruiting, Gesundheitswesen, Bildung, Biometrie, Strafverfolgung, Grenzkontrolle und Justiz. Typische Beispiele aus Anhang III sind Recruiting und Arbeitnehmermanagement, Bildungszugang und Bewertung, Kreditpruefung, Risiko- oder Preisbewertung in Lebens- und Krankenversicherung, Notfall-Triage und Biometrie.",
         ],
         [
-          "Welche EU-AI-Act-Artikel verlangen mehr als Logs und Traces?",
-          "Bei Hochrisiko-Systemen helfen Logs nur fuer einen Teil des Pakets. Artikel 11 und Anhang IV verlangen technische Dokumentation; Artikel 12 verlangt Journalisierung; Artikel 13 verlangt Informationen fuer Deployers; Artikel 14 verlangt menschliche Aufsicht; Artikel 17 verlangt ein dokumentiertes Qualitaetsmanagementsystem; Artikel 72 verlangt einen Post-Market-Monitoring-Plan; und Artikel 47 zusammen mit Anhang V verlangt eine EU-Konformitaetserklaerung. Genau deshalb gibt es hier ein prueffertiges Paket: weil diese Pflichten gemeinsam einer Pruefung standhalten muessen.",
+          "Fuer wen ist dieser Pfad gedacht?",
+          "Dieser Pfad ist fuer Unternehmen gedacht, die Hochrisiko-KI-Systeme fuer den EU-Markt entwickeln oder wesentlich veraendern.",
         ],
         [
-          "Warum reichen Basis-Logs nicht fuer die Pruefung von Hochrisiko-KI aus?",
-          "Weil Hochrisiko-Review mehr als Runtime-Rueckverfolgbarkeit braucht. Artikel-12-Journalisierung ist wichtig, aber Teams koennen trotzdem technische Dokumentation, Deployers-Informationen, Materialien fuer menschliche Aufsicht, Monitoring-Ausgaben und ein konformitaetsfaehiges Paket brauchen, das eine andere Person wirklich lesen und verifizieren kann. Logs sind noetig, aber nicht das ganze Deliverable.",
+          "Warum tun sich Teams mit einem EU-KI-Verordnungs-Paket so schwer?",
+          "Weil das benoetigte Material meist ueber Entwurfstexte, Logs, Testergebnisse, Monitoring-Notizen, Erklaerungen und interne Unterlagen verteilt ist. Es geht nicht nur darum, Text zu schreiben. Es geht darum, ein Paket zusammenzustellen, das ein anderes Team wirklich pruefen kann.",
         ],
         [
-          "Gilt dieser Standardpfad fuer Importeure, Haendler, Deployers oder Bevollmaechtigte?",
-          "Nein. Der Standardpfad auf dieser Website ist der provider-seitige Pfad fuer Hochrisiko-KI-Systeme. Diese anderen Rollen haben eigene Pflichten. Wenn Artikel 25 Ihre Organisation zum Anbieter macht, nutzen Sie diesen Provider-Pfad. Wenn der Anbieter ausserhalb der Union niedergelassen ist, kommt Artikel 22 als Pflicht zum Bevollmaechtigten auf denselben Provider-Pfad hinzu.",
+          "Welche Dokumente enthaelt das EU-KI-Verordnungs-Paket?",
+          "Das Paket enthaelt einen ersten Entwurf der technischen Dokumentation, strukturierte Abschnitte fuer Risiko, Daten, Logging, Aufsicht, Monitoring, Anbieter- und Erklaerungsmaterial sowie die Unterlagen, die Ihr Team fuer das System anhaengen muss.",
         ],
         [
-          "Warum reicht ein SaaS-Dashboard oder Eval-Tool fuer EU-AI-Act-Nachweise nicht aus?",
-          "Weil die meisten SaaS-Observability- und Eval-Oberflaechen fuer interne Inspektion gebaut sind, nicht fuer kontrollierte reviewer-taugliche Uebergabe. Sie koennen nuetzliche Inputs sein, loesen aber meist weder Offline-Dossier, Pruefprotokoll, Offenlegungsgrenzen noch ein maschinenverifizierbares Bundle fuer andere Reviewende ausserhalb des Ursprungs-Stacks.",
+          "Welche Artikel und Anhaenge der EU-KI-Verordnung deckt dieses Produkt ab?",
+          "Der Mindestpfad deckt die technische Dokumentation nach Anhang IV, die Erklaerungsinhalte nach Anhang V und die verknuepften provider-seitigen Abschnitte fuer die Artikel 9, 10, 12, 13, 14, 15, 16, 17, 22 falls noetig, 43, 47, 48, 49 und 72 ab.",
         ],
         [
-          "Warum braucht ein reviewer-taugliches Paket mehr als eine Checklist oder ein PDF?",
-          "Weil ein Checklist- oder statisches PDF-Tool ein System beschreiben kann, ohne mit den Runtime-Nachweisen verbunden zu bleiben, die die Aussagen tragen. Hochrisiko-Review wird genau dann schmerzhaft, wenn Dokumentebene und Nachweis-Ebene auseinanderlaufen. Der Punkt hier ist, beide verbunden zu halten.",
+          "Warum reichen Basis-Logs nicht fuer ein Hochrisiko-KI-Paket aus?",
+          "Weil Hochrisiko-Pruefung mehr als Runtime-Rueckverfolgbarkeit braucht. Journalisierung nach Artikel 12 ist wichtig, aber Teams koennen trotzdem technische Dokumentation, Deployers-Informationen, Materialien fuer menschliche Aufsicht, Monitoring-Ausgaben und ein lesbares Konformitaetspaket brauchen.",
         ],
         [
-          "Was fuegt dieses Produkt ueber Logs, SaaS-Dashboards und PDF-Tools hinaus hinzu?",
-          "Es fuegt genau die Schicht hinzu, die einfachere Tools meist offenlassen: ein lesbares Reviewer-Dossier, eine maschinenverifizierbare Nachweiskette, selbst gehostete Reviewer-Ausgaben, einen kontrollierten Uebergabepfad ausserhalb von Engineering und ein Paket, das an echte Runtime-Runs gebunden bleibt statt in Screenshots oder Copy-Paste zu zerfallen.",
-        ],
-        [
-          "Verlassen Laufzeitdaten, Prompts oder Nachweise unsere Umgebung?",
-          "Nein. Der Kern-Workflow ist so gebaut, dass Laufzeit-Nachweise, Paketierung, Verifikation und Reviewer-Ausgaben innerhalb Ihrer kontrollierten Umgebung bleiben koennen.",
+          "Was ist der Unterschied zwischen Starter und vollstaendigem Paket?",
+          "Der Starter ist ein erster Self-Serve-Check auf Ihrem laufenden Agenten. Er zeigt, wie sich der Workflow verhaelt, und erzeugt eine leichte erste Ausgabe. Fuer das vollstaendige Paket brauchen Sie weiterhin den provider-seitigen Entwurf, die Unterlagen Ihres Teams und den echten Paketpfad fuer das dokumentierte System.",
         ],
         [
           "Ersetzt das rechtliche Pruefung oder die finale Freigabe?",
-          "Nein. Das Produkt automatisiert Nachweisbetrieb, reviewer-taugliche Paketierung und dossier-nahe Exporte. Rechtsklassifizierung, Rest-Risiko-Urteil und finale Freigabe bleiben menschlich gefuehrt.",
-        ],
-        [
-          "In welchen Formaten kann das Paket an Reviewende uebergeben werden?",
-          "Die reviewer-orientierte Schicht steht als PDF, HTML und Markdown bereit, darunter liegen maschinenverifizierbare JSON-Artefakte und dossier-nahe Exporte. So koennen nichttechnische Reviewende mit dem lesbaren Dossier beginnen, waehrend technische Reviewende die zugrunde liegende Nachweiskette weiter pruefen koennen.",
+          "Nein. Das Produkt strukturiert das Paket und hilft Ihrem Team bei den erforderlichen Unterlagen, aber rechtliche Einordnung, finale Formulierung und Freigabe bleiben bei benannten Menschen.",
         ],
       ],
     },
@@ -845,18 +787,22 @@ const LOCALES = {
     pricing: {
       title: "Preise fuer EU AI Act Nachweise",
       description:
-        "Kostenloser OSS-Selbstbetrieb, optionale bezahlte Hilfe fuer das erste echte Paket und Enterprise-Begleitung fuer groessere EU-AI-Act-Arbeit.",
-      headline: "Kostenlos starten. Nur dann bezahlen, wenn Ihr Team Hilfe fuer das erste echte Paket braucht.",
+        "Kostenloser OSS-Selbstbetrieb, einmalige Hilfe fuer das erste echte Paket, betreute Self-Hosted-Abos fuer bis zu 3 oder 10 Agenten und Enterprise-Begleitung fuer groessere EU-AI-Act-Arbeit.",
+      headline: "EU AI Act Preise fuer Hochrisiko-KI-Systeme",
       lead:
-        "Der OSS-Kern ist kostenlos. Bezahlte Hilfe ist fuer Teams gedacht, die das erste echte Paket auf ihrem eigenen System schneller erreichen wollen. Enterprise passt fuer breiteren Rollout oder formale Pruefung.",
+        "Waehlen Sie den Weg passend zu Ihrem Reifegrad: kostenloser Selbstbetrieb, einmalige Hilfe fuer das erste echte Paket, betreute Self-Hosted-Nutzung fuer bis zu 3 oder 10 Agenten oder Enterprise-Unterstuetzung fuer breiteren Rollout.",
       subscriptionsLabel: "Kommerzielle Wege",
       entryTitle: "Mit OSS starten",
       entryLead:
         "Nutzen Sie den kostenlosen Weg, wenn Sie das Produkt pruefen, den Schnellstart auf Ihrem eigenen Agenten ausfuehren und erst dann entscheiden wollen, ob der Workflow in Ihren Stack gehoert.",
       launchEyebrow: "Bezahlte Hilfe",
-      launchTitle: "Brauchen Sie Hilfe fuer das erste Paket auf Ihrem eigenen System?",
+      launchTitle: "Hilfe fuer das erste Paket eines echten Systems",
       launchLead:
         "Nutzen Sie den bezahlten Weg, wenn Ihr Team Hilfe beim Anschluss des eigenen Systems, bei der ersten Einrichtung und beim ersten echten Paket braucht.",
+      subscriptionEyebrow: "Abonnements",
+      subscriptionTitle: "Betreute Self-Hosted-Nutzung fuer wiederkehrende Agenten-Arbeit",
+      subscriptionLead:
+        "Waehlen Sie ein laufendes Abo, wenn der Workflow bereits real genutzt wird und Ihr Team unterstuetzte Self-Hosted-Nutzung fuer bis zu 3 oder 10 Agenten braucht.",
       tiersEyebrow: "Enterprise",
       tiersTitle: "Brauchen Sie breitere Begleitung?",
       tiersLead:
@@ -866,7 +812,9 @@ const LOCALES = {
         "Der erste Schritt soll einfach bleiben. Bleiben Sie im Selbstbetrieb, solange es reicht. Zahlen Sie nur dann, wenn Ihr Team Hilfe fuer den Weg vom Test zum echten Paket braucht.",
       fitCards: [
         ["Beim Selbstbetrieb bleiben", "Repo, Schnellstart, Dokumentation und Demos reichen aus, solange Sie den Workflow selbst pruefen oder betreiben koennen."],
-        ["Bezahlte Hilfe nutzen", "Das ist der richtige Weg, wenn ein System schnell zu einem echten ersten Paket kommen soll, ohne dass Ihr Team den Pfad allein suchen muss."],
+        ["Hilfe fuer das erste Paket", "Das passt, wenn ein System schnell zu einem echten ersten Paket kommen soll und Ihr Team Hilfe fuer die Aktivierung will."],
+        ["Bis zu 3 Agenten", "Das passt, wenn der Workflow intern schon genutzt wird und Ihr Team wiederkehrenden Support fuer einen kleineren Umfang braucht."],
+        ["Bis zu 10 Agenten", "Das passt, wenn mehrere Agenten bereits auf dem Workflow laufen und mehr operativer Spielraum gebraucht wird."],
         ["Enterprise nutzen", "Hier passt es, wenn Pruefungen extern, systemuebergreifend, konformitaetsnah oder wiederkehrend unter hoher Kontrolle laufen muessen."],
       ],
       faq: [
@@ -876,15 +824,23 @@ const LOCALES = {
         },
         {
           q: "Womit sollte ich anfangen?",
-          a: "OSS passt fuer die erste Eignungspruefung oder fuer Teams, die den Workflow selbst betreiben koennen. Bezahlte Hilfe passt, wenn ein System schnell zu einem echten ersten Paket kommen soll. Enterprise ist fuer teamuebergreifende oder externe Pruefungen gedacht.",
+          a: "OSS passt fuer die erste Eignungspruefung oder fuer Teams, die den Workflow selbst betreiben koennen. Hilfe fuer das erste Paket passt, wenn ein System schnell zum ersten echten Paket kommen soll. In ein 3- oder 10-Agenten-Abo wechseln Sie erst, wenn der Workflow bereits im echten Betrieb ist. Enterprise ist fuer teamuebergreifende oder externe Pruefungen gedacht.",
         },
         {
-          q: "Was kaufe ich mit bezahlter Hilfe genau?",
-          a: "Bezahlte Hilfe bringt Ihr Team schneller durch das erste echte Paket auf dem eigenen System. Vollstaendiges Case-Design, Governance-Pruefung und rechtliche Freigabe ersetzt sie nicht.",
+          q: "Was kaufe ich mit der Hilfe fuer das erste Paket genau?",
+          a: "Diese Hilfe bringt ein echtes System schneller zum ersten Paket. Vollstaendiges Case-Design, Governance-Pruefung und rechtliche Freigabe ersetzt sie nicht.",
         },
         {
-          q: "Wann sollte ich ueber den Selbstbetrieb hinausgehen?",
-          a: "Dann, wenn Ihr Team das erste echte Paket auf dem eigenen System braucht und den Pfad nicht allein zusammensetzen will.",
+          q: "Was zaehlt als unterstuetzter Agent?",
+          a: "Ein unterstuetzter Agent ist ein reales Agenten- oder System-Workflow mit eigenem Paket-Lebenszyklus innerhalb des bezahlten Support-Umfangs.",
+        },
+        {
+          q: "Kann ich weitere Agenten hinzufuegen, ohne gleich den 10-Agenten-Tarif zu nehmen?",
+          a: "Ja. Jeder weitere unterstuetzte Agent kostet EUR120 pro Monat. Fuer manche Teams ist das guenstiger als sofort in den 10-Agenten-Tarif zu wechseln.",
+        },
+        {
+          q: "Enthalten die Abos ein Done-for-you-Setup?",
+          a: "Nein. Die laufenden Tarife decken betreute Self-Hosted-Nutzung, Updates und wiederkehrenden Support ab. Hilfe fuer die erste Einrichtung wird separat verkauft.",
         },
         {
           q: "Ersetzt das rechtliche Beratung?",
@@ -1001,18 +957,29 @@ const LOCALES = {
       bookCall: "Verifier le pilote",
     },
     landing: {
-      title: "Dossier de preuve EU AI Act | Conformite IA a haut risque pour aout 2026",
+      title: "Builder de package EU AI Act pour systemes IA a haut risque | Agent QA Toolkit",
       description:
-        "Construisez le parcours de documentation cote fournisseur du EU AI Act pour les systemes d'IA a haut risque, avec des brouillons ancrés dans le droit, des sections obligatoires et des pieces d'appui pour le systeme d'IA concerne et sa version.",
+        "Transformez des documents, logs, notes de test et enregistrements internes disperses en un package EU AI Act pour un systeme d'IA a haut risque.",
       keywords:
-        "EU AI Act aout 2026, IA haut risque preuve, outil conformite IA, documentation EU AI Act, assurance IA conformite, recrutement IA conformite, sante IA, finance IA, RGPD IA",
-      heroTitle: "Le 2 aout 2026 approche. Votre systeme IA peut-il remettre une preuve a un evaluateur ?",
+        "EU AI Act package builder, documentation IA a haut risque, builder Annexe IV, starter EU AI Act, package fournisseur IA",
+      heroTitle: "Builder de package EU AI Act pour systemes IA a haut risque",
       heroText:
-        "Construisez le parcours de documentation cote fournisseur du EU AI Act pour les systemes d'IA a haut risque, avec des brouillons ancrés dans le droit, des sections obligatoires et des pieces d'appui pour le systeme d'IA concerne et sa version.",
+        "La plupart des equipes ont deja des brouillons de documents, des logs, des notes de test et des enregistrements internes. Ce qui leur manque encore, c'est un package qu'elles peuvent completer, relire et conserver pour un systeme d'IA a haut risque.",
       heroSubline:
-        "Le parcours par defaut ici concerne les fournisseurs de systemes d'IA a haut risque. Les obligations des importateurs, distributeurs, deployeurs et representants autorises sont differentes. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours.",
-      primaryCta: "Commencer le dossier",
-      secondaryCta: "Essayer le starter UE",
+        "Pour les entreprises qui developpent ou modifient de facon substantielle des systemes d'IA a haut risque pour le marche europeen. Pour la plupart des systemes de l'Annexe III, la date principale d'application est le 2 aout 2026.",
+      primaryCta: "Commencer le brouillon",
+      secondaryCta: "Voir un package exemple",
+      tertiaryCta: "Voir les tarifs",
+      heroCardEyebrow: "Sortie exemple",
+      heroCardTitle: "Voyez a quoi ressemble le package",
+      heroCardText:
+        "Ouvrez un exemple public pour voir le resultat avant de commencer.",
+      heroCardItems: [
+        "Un exemple de brouillon de document",
+        "Un exemple de sections risque et donnees",
+        "Un exemple de rapport de verification de l'agent",
+        "Les fichiers minimum dans un seul endroit",
+      ],
       audienceTitle: "Choisissez votre point d'entree",
       audienceLead:
         "Commencez par le vrai travail a accomplir: comprendre le workflow EU, inspecter la vue technique, ou commencer le dossier.",
@@ -1048,28 +1015,34 @@ const LOCALES = {
         "Structurer avec l'assistant de documentation les sections du dossier qui demandent un texte explicatif et des references de preuve.",
         "Executer le workflow technique dans votre environnement et rattacher un dossier de preuve portable la ou le dossier a besoin de preuve.",
       ],
-      strongestFitTitle: "Meilleure adequation",
+      strongestFitTitle: "Pourquoi ce produit existe",
       strongestFitBody:
-        "Le plus utile quand la preuve doit survivre a une revue externe ou multi-equipe: mission de conseil, tri a haut risque, achat reglemente, transmission d'incident ou demandes d'autorite. La classification legale et la validation finale restent hors du produit.",
+        "Les equipes rencontrent souvent les memes problemes avant de pouvoir vraiment terminer le package.",
+      fitCards: [
+        ["Materiaux disperses", "Les textes de brouillon, les logs, les notes de test et les declarations vivent souvent dans des endroits differents."],
+        ["Pas de structure de package", "Les equipes connaissent leur systeme, mais ont encore besoin d'une structure pour preparer le package."],
+        ["Difficile a relier au vrai systeme", "La couche documentaire peut facilement se decoller du systeme reel, de sa version et des enregistrements."],
+        ["Difficile a transmettre", "Les outils internes et les notes sont difficiles a transmettre au juridique, a la gouvernance ou a d'autres relecteurs."],
+      ],
       deliverablesTitle: "Ce que le produit donne vraiment",
       deliverablesLead:
-        "Le produit doit se lire par ses resultats, pas seulement par le langage de process.",
+        "Voici ce que votre equipe obtient avec le parcours minimum.",
       deliverablesCards: [
         {
-          title: "Dossier de preuve portable",
-          text: "Rapport hors ligne, compare-report JSON, manifeste signe si necessaire, reviewer PDF/HTML/Markdown et controles de retention qui restent exploitables lors d'une transmission hors des outils d'ingenierie.",
+          title: "Brouillon de document",
+          text: "Un premier brouillon ecrit pour les principaux documents que votre equipe doit completer.",
         },
         {
-          title: "Exports orientes dossier",
-          text: "Structure Annexe IV plus sorties orientees relecteur et brouillons pour les articles 9, 13, 17, 72 et 73 relies aux preuves d'execution.",
+          title: "Structure des sections requises",
+          text: "Un ensemble structure de sections pour la finalite, le risque, les donnees, la supervision, le monitoring et la declaration.",
         },
         {
-          title: "Trace de revue structuree",
-          text: "Decision nommee, note de transmission, verifications de completion et continuite recurrente des actions correctives.",
+          title: "Liste des pieces d'appui",
+          text: "Un seul endroit pour joindre les pieces deja requises par votre systeme, comme les logs, resumes de test, notes de monitoring, declarations et enregistrements de conformite.",
         },
         {
-          title: "Dossier pret pour une autorite",
-          text: "Quand necessaire, un dossier cible pour reponse a une autorite avec decisions de divulgation et d'archivage.",
+          title: "Package relisible",
+          text: "Des exports HTML et JSON que votre equipe peut relire, completer et conserver comme un seul package.",
         },
       ],
       fitMatrixTitle: "Ce dont les equipes ont generalement besoin sous revue",
@@ -1140,47 +1113,39 @@ const LOCALES = {
       faq: [
         [
           "Quand le EU AI Act commence-t-il pour l'IA a haut risque ?",
-          "Au 28 mars 2026, la date principale d'application pour la plupart des systemes IA a haut risque relevant de l'Annexe III est le 2 aout 2026. Certaines voies relevant de l'article 6(1) et de produits-composants de securite de l'Annexe I s'appliquent a partir du 2 aout 2027. Les equipes qui peuvent tomber dans le scope haut risque devraient traiter 2026 comme la date operationnelle pour la preuve, la documentation et la revue.",
+          "Au 28 mars 2026, la date principale d'application pour la plupart des systemes IA a haut risque relevant de l'Annexe III est le 2 aout 2026. Certaines voies relevant de l'article 6(1) et de produits-composants de securite de l'Annexe I s'appliquent a partir du 2 aout 2027.",
         ],
         [
           "Quels secteurs tombent le plus souvent dans les systemes IA a haut risque de l'Annexe III ?",
-          "Les grandes familles de recherche sont l'assurance, la finance, le recrutement, la sante, l'education, la biometrie, l'application de la loi, le controle aux frontieres et la justice. Le scope juridique est plus etroit que ces mots-cles : les exemples frequents de l'Annexe III couvrent le recrutement et la gestion des travailleurs, l'acces et l'evaluation dans l'education, l'evaluation de la solvabilite, l'evaluation du risque ou du prix en assurance vie ou sante, le triage d'urgence, la biometrie et d'autres usages a fort impact listes par le texte. Le site reste volontairement plus large en entree et plus precis dans cette reponse.",
+          "Les grandes familles de recherche sont l'assurance, la finance, le recrutement, la sante, l'education, la biometrie, l'application de la loi, le controle aux frontieres et la justice. Les exemples frequents de l'Annexe III couvrent le recrutement et la gestion des travailleurs, l'acces et l'evaluation dans l'education, l'evaluation de la solvabilite, l'evaluation du risque ou du prix en assurance vie ou sante, le triage d'urgence et la biometrie.",
         ],
         [
-          "Quels articles du EU AI Act exigent plus que des logs et des traces ?",
-          "Pour les systemes a haut risque, les logs ne couvrent qu'une partie du dossier. L'article 11 et l'Annexe IV exigent une documentation technique ; l'article 12 exige la journalisation ; l'article 13 exige des informations pour les deployeurs ; l'article 14 exige la supervision humaine ; l'article 17 exige un systeme de gestion de la qualite documente ; l'article 72 exige un plan de suivi post-marche ; et l'article 47 avec l'Annexe V exige une declaration UE de conformite. Le produit existe parce que ces obligations doivent tenir ensemble sous revue.",
+          "A qui s'adresse ce parcours ?",
+          "Ce parcours s'adresse aux entreprises qui developpent ou modifient de facon substantielle des systemes d'IA a haut risque pour le marche europeen.",
         ],
         [
-          "Pourquoi les logs de base ne suffisent-ils pas pour la revue d'une IA a haut risque ?",
-          "Parce que la revue haut risque demande plus que la tracabilite d'execution. La journalisation de l'article 12 compte, mais les equipes peuvent quand meme avoir besoin de documentation technique, d'informations pour les deployeurs, de materiel de supervision humaine, de sorties de monitoring et d'un package oriente conformite qu'un autre evaluateur peut reellement lire et verifier. Les logs sont necessaires, mais ils ne constituent pas tout le livrable.",
+          "Pourquoi les equipes ont-elles du mal a preparer un package EU AI Act ?",
+          "Parce que le materiel requis est souvent disperse entre brouillons de documents, logs, sorties de test, notes de monitoring, declarations et enregistrements internes. Le travail ne consiste pas seulement a rediger du texte. Il consiste a assembler un package qu'une autre equipe peut reellement relire.",
         ],
         [
-          "Ce parcours par defaut vaut-il pour les importateurs, distributeurs, deployeurs ou representants autorises ?",
-          "Non. Le parcours par defaut sur ce site est le parcours cote fournisseur pour les systemes d'IA a haut risque. Ces autres roles ont leurs propres obligations. Si l'article 25 fait de votre organisation le fournisseur, utilisez ce parcours. Si le fournisseur est etabli hors de l'Union, l'article 22 ajoute la charge du representant autorise au meme parcours fournisseur.",
+          "Quels documents sont inclus dans le package EU AI Act ?",
+          "Le package comprend un premier brouillon de documentation technique, des sections structurees pour le risque, les donnees, le logging, la supervision, le monitoring, les obligations fournisseur et la declaration, ainsi que les pieces d'appui que votre equipe doit joindre pour le systeme.",
         ],
         [
-          "Pourquoi un dashboard SaaS ou une plateforme d'evaluation ne suffit-il pas pour la preuve EU AI Act ?",
-          "Parce que la plupart des surfaces SaaS d'observabilite ou d'evaluation sont concues pour l'inspection interne, pas pour remettre un package lisible et portable a d'autres equipes. Elles peuvent aider, mais elles ne resolvent en general ni le dossier hors ligne, ni la frontiere de divulgation, ni le bundle machine-verifiable qu'un autre evaluateur peut verifier hors de la pile d'origine.",
+          "Quels articles et annexes du EU AI Act ce produit couvre-t-il ?",
+          "Le parcours minimum couvre la documentation technique de l'Annexe IV, le contenu de declaration de l'Annexe V, et les sections cote fournisseur liees aux articles 9, 10, 12, 13, 14, 15, 16, 17, 22 si necessaire, 43, 47, 48, 49 et 72.",
         ],
         [
-          "Pourquoi un package lisible demande-t-il plus qu'une checklist ou un PDF ?",
-          "Parce qu'une checklist ou un PDF statique peut decrire un systeme sans rester lie a la preuve d'execution qui soutient les affirmations. La revue haut risque devient douloureuse quand la couche documentaire et la couche de preuve se detachent. Le but ici est de les garder reliees.",
+          "Pourquoi les logs de base ne suffisent-ils pas pour un package IA a haut risque ?",
+          "Parce que la revue haut risque demande plus que la tracabilite d'execution. La journalisation de l'article 12 compte, mais les equipes peuvent quand meme avoir besoin de documentation technique, d'informations pour les deployeurs, de materiel de supervision humaine, de sorties de monitoring et d'un package lisible oriente conformite.",
         ],
         [
-          "Qu'est-ce que ce produit ajoute par rapport aux logs, aux dashboards SaaS et aux outils PDF ?",
-          "Il ajoute la couche que les outils plus simples laissent souvent manquer : un package lisible, une chaine de preuve machine-verifiable, des sorties hebergees chez vous, un chemin de transmission controle hors de l'ingenierie, et un package qui reste relie a de vrais runs d'execution au lieu de glisser vers des captures d'ecran ou du copier-coller.",
-        ],
-        [
-          "Est-ce que les donnees d'execution, les prompts ou les preuves quittent notre environnement ?",
-          "Non. Le workflow principal est concu pour fonctionner dans votre propre environnement, de sorte que les preuves d'execution, la mise en forme, la verification et les sorties du package peuvent rester dans votre perimetre controle.",
+          "Quelle est la difference entre le starter et le package complet ?",
+          "Le starter est un premier check self-serve sur votre agent deja en cours d'execution. Il montre comment le workflow se comporte et produit une premiere sortie legere. Le package complet demande encore le brouillon cote fournisseur, les pieces d'appui de votre equipe et le vrai parcours package pour le systeme documente.",
         ],
         [
           "Est-ce que cela remplace la revue legale ou la validation finale ?",
-          "Non. Le produit automatise les operations de preuve, la mise en forme lisible par un evaluateur et les exports orientes dossier. La classification legale, le jugement sur le risque residuel et la validation finale restent humains.",
-        ],
-        [
-          "Dans quels formats le package peut-il etre remis aux evaluateurs ?",
-          "La couche orientee evaluateur est disponible en PDF, HTML et Markdown, avec dessous des artefacts JSON machine-verifiables et des exports orientes dossier. Les relecteurs non techniques peuvent donc commencer par le dossier lisible, tandis que les relecteurs techniques peuvent verifier la chaine de preuve sous-jacente.",
+          "Non. Le produit structure le package et aide votre equipe a preparer le materiel requis, mais la classification legale, la formulation finale et la validation restent humaines.",
         ],
       ],
     },
@@ -1309,18 +1274,22 @@ const LOCALES = {
     pricing: {
       title: "Tarifs pour les preuves EU AI Act",
       description:
-        "Acces OSS gratuit, aide payante optionnelle pour le premier vrai paquet, et accompagnement enterprise pour un travail EU AI Act plus large.",
-      headline: "Commencez gratuitement. Payez seulement quand votre equipe a besoin d'aide pour le premier vrai paquet.",
+        "Acces OSS gratuit, aide ponctuelle pour le premier vrai paquet, abonnements self-hosted pris en charge pour jusqu'a 3 ou 10 agents, et accompagnement enterprise pour un travail EU AI Act plus large.",
+      headline: "Tarifs EU AI Act pour les systemes d'IA a haut risque",
       lead:
-        "Le coeur OSS est gratuit. L'aide payante sert aux equipes qui veulent atteindre plus vite le premier vrai paquet sur leur propre systeme. Enterprise convient a un deploiement plus large ou a une revue formelle.",
+        "Choisissez le parcours qui correspond a votre stade : autonomie gratuite, aide ponctuelle pour le premier vrai paquet, usage self-hosted pris en charge pour jusqu'a 3 ou 10 agents, ou support enterprise pour un deploiement plus large.",
       subscriptionsLabel: "Parcours commerciaux",
       entryTitle: "Commencer avec OSS",
       entryLead:
         "Utilisez la voie gratuite si vous voulez inspecter le produit, lancer le demarrage rapide sur votre propre agent, puis decider si le workflow merite une place dans votre environnement.",
       launchEyebrow: "Aide payante",
-      launchTitle: "Besoin d'aide pour obtenir le premier paquet sur votre propre systeme ?",
+      launchTitle: "Aide pour le premier paquet d'un systeme reel",
       launchLead:
         "Utilisez la voie payante quand votre equipe veut de l'aide pour connecter son propre systeme, revoir la premiere configuration et obtenir plus vite le premier vrai paquet.",
+      subscriptionEyebrow: "Abonnements",
+      subscriptionTitle: "Usage self-hosted pris en charge pour un travail recurrent sur les agents",
+      subscriptionLead:
+        "Choisissez un abonnement recurrent quand le workflow est deja utilise en production et que votre equipe veut un usage self-hosted pris en charge pour jusqu'a 3 ou 10 agents.",
       tiersEyebrow: "Enterprise",
       tiersTitle: "Besoin d'un accompagnement plus large ?",
       tiersLead:
@@ -1330,7 +1299,9 @@ const LOCALES = {
         "Gardez la premiere etape simple. Restez en autonomie tant que cela suffit. Payez seulement quand votre equipe a besoin d'aide pour passer du test au vrai paquet.",
       fitCards: [
         ["Rester en autonomie", "Le depot, le demarrage rapide, la documentation et les demonstrations suffisent tant que vous evaluez l'adequation ou pouvez operer le workflow seuls."],
-        ["Prendre l'aide payante", "C'est le bon choix quand un systeme doit atteindre vite un vrai premier paquet sans que votre equipe perde des semaines a trouver le chemin seule."],
+        ["Aide pour le premier paquet", "Le bon choix quand un systeme doit atteindre vite un vrai premier paquet et que votre equipe veut de l'aide pour l'activation."],
+        ["Jusqu'a 3 agents", "Le bon choix quand le workflow sert deja en interne et que votre equipe veut un support recurrent sur un petit perimetre."],
+        ["Jusqu'a 10 agents", "Le bon choix quand plusieurs agents utilisent deja le workflow et qu'il faut plus de marge operationnelle."],
         ["Prendre Enterprise", "C'est le bon niveau quand la revue devient externe, multi-systeme, orientee conformite, ou recurrente sous examen serre."],
       ],
       faq: [
@@ -1340,15 +1311,23 @@ const LOCALES = {
         },
         {
           q: "Par quoi dois-je commencer ?",
-          a: "Commencez par OSS si vous evaluez encore l'adequation ou si votre equipe peut operer le workflow seule. Prenez l'aide payante quand un systeme doit atteindre vite un vrai premier paquet. Prenez Enterprise quand le dossier doit survivre a une revue multi-equipe ou externe.",
+          a: "Commencez par OSS si vous evaluez encore l'adequation ou si votre equipe peut operer le workflow seule. Prenez l'aide pour le premier paquet quand un systeme doit atteindre vite son premier vrai paquet. Passez a l'abonnement 3 ou 10 agents seulement quand le workflow est deja en usage reel. Prenez Enterprise quand le dossier doit survivre a une revue multi-equipe ou externe.",
         },
         {
-          q: "Que paie exactement l'aide payante ?",
-          a: "L'aide payante fait gagner du temps a votre equipe pour obtenir le premier vrai paquet sur son propre systeme. Elle ne remplace ni la vraie conception des cas, ni la revue de gouvernance, ni la validation juridique finale.",
+          q: "Que paie exactement l'aide pour le premier paquet ?",
+          a: "Cette aide fait gagner du temps a votre equipe pour obtenir le premier vrai paquet sur son propre systeme. Elle ne remplace ni la vraie conception des cas, ni la revue de gouvernance, ni la validation juridique finale.",
         },
         {
-          q: "Quand faut-il aller au-dela de l'autonomie ?",
-          a: "Quand votre equipe a besoin du premier vrai paquet sur son propre systeme et ne veut pas reconstruire seule tout le chemin.",
+          q: "Qu'est-ce qu'un agent pris en charge ?",
+          a: "Un agent pris en charge est un workflow reel d'agent ou de systeme avec son propre cycle de vie de package dans le perimetre du support payant.",
+        },
+        {
+          q: "Puis-je ajouter des agents sans passer tout de suite au plan 10 agents ?",
+          a: "Oui. Chaque agent pris en charge supplementaire coute EUR120 par mois. Pour certaines equipes c'est moins cher que de passer tout de suite au plan 10 agents.",
+        },
+        {
+          q: "Les abonnements incluent-ils un setup fait pour vous ?",
+          a: "Non. Les offres recurrentes couvrent l'usage self-hosted pris en charge, les mises a jour et le support continu. L'aide au premier setup est vendue a part.",
         },
         {
           q: "Cela remplace-t-il un conseil juridique ?",
@@ -1427,8 +1406,10 @@ const LOCALES = {
 
 const TECHNICAL_SHARED = {
   packageCommands: [
-    "npm run compliance:eu-ai-act -- --cases <cases.json> --baselineDir <run-dir> --newDir <run-dir> --outDir <report-dir> --reportId <id>",
-    "AQ_MANIFEST_PRIVATE_KEY=... npm run compliance:eu-ai-act -- --cases <cases.json> --baselineDir <run-dir> --newDir <run-dir> --outDir <report-dir> --reportId <id> --verify-strict --sign",
+    "cd products/eu-ai-act",
+    "npm install",
+    "npm run package -- --cases <cases.json> --baselineDir <run-dir> --newDir <run-dir> --outDir <report-dir> --reportId <id>",
+    "AQ_MANIFEST_PRIVATE_KEY=... npm run package -- --cases <cases.json> --baselineDir <run-dir> --newDir <run-dir> --outDir <report-dir> --reportId <id> --verify-strict --sign",
     "npm run review:init -- --reportDir <report-dir> [--profile <name>]",
     "npm run review:check -- --reportDir <report-dir> [--profile <name>]",
     "npm run compliance:eu-ai-act:authority-response -- --reportDir <report-dir>",
@@ -1490,9 +1471,10 @@ const TECHNICAL_SHARED = {
   ],
   supportRows: [
     ["OSS self-serve", "Teams that can scope, integrate, and operate the workflow alone.", "No setup help, no supported-agent scope, no done-for-you onboarding."],
-    ["Paid help", "One supported system that needs first-time setup and a first serious package.", "Not unlimited case authoring, not full legal drafting, not multi-agent implementation."],
-    ["Enterprise support", "Broader scopes that need recurring or multi-system help.", "Not sold as unlimited done-for-you setup for every new system."],
-  ],
+    ["First package help", "One supported system that needs first-time setup and a first serious package.", "Not unlimited case authoring, not full legal drafting, not multi-agent implementation."],
+    ["Supported self-hosted use", "Recurring support for teams running the workflow across up to 3 or 10 agents.", "Additional supported agents cost EUR120 per month each; first-time setup is sold separately."],
+      ["Support enterprise", "Perimetres plus larges avec aide recurrente ou multi-systeme.", "Pas vendu comme un setup complet illimite pour chaque nouveau systeme."],
+    ],
   failureCards: [
     ["Weak cases", "Critical cases use empty or weak `expected` blocks, so the bundle looks green while proving very little."],
     ["Shallow adapter", "The endpoint returns final text but not the telemetry depth required for tool, trace, or assumption evidence."],
@@ -1603,7 +1585,8 @@ const TECHNICAL_SHARED_I18N = {
     ],
     supportRows: [
       ["OSS im Selbstbetrieb", "Teams, die den Workflow allein eingrenzen, integrieren und betreiben koennen.", "Keine Setup-Hilfe, kein abgegrenzter Umfang fuer unterstuetzte Agenten, kein Onboarding als Komplettservice."],
-      ["Bezahlte Hilfe", "Ein unterstuetztes System, das das erste Setup und ein erstes ernstes Paket braucht.", "Keine unbegrenzte Fallausarbeitung, kein vollstaendiges rechtliches Verfassen, keine Multi-System-Implementierung."],
+      ["Hilfe fuer das erste Paket", "Ein unterstuetztes System, das das erste Setup und ein erstes ernstes Paket braucht.", "Keine unbegrenzte Fallausarbeitung, kein vollstaendiges rechtliches Verfassen, keine Multi-System-Implementierung."],
+      ["Betreute Self-Hosted-Nutzung", "Wiederkehrender Support fuer Teams, die den Workflow fuer bis zu 3 oder 10 Agenten betreiben.", "Jeder weitere unterstuetzte Agent kostet EUR120 pro Monat; Erst-Setup wird separat verkauft."],
       ["Enterprise-Support", "Breitere Umfaenge mit wiederkehrender oder systemuebergreifender Hilfe.", "Nicht als unbegrenztes Komplettsetup fuer jedes neue System verkauft."],
     ],
     failureCards: [
@@ -1702,8 +1685,8 @@ const TECHNICAL_SHARED_I18N = {
     ],
     supportRows: [
       ["OSS en autonomie", "Equipes capables de cadrer, integrer et operer le workflow seules.", "Pas d'aide au setup, pas de perimetre dedie pour agent pris en charge, pas d'onboarding fait pour vous."],
-      ["Pack de lancement", "Un agent pris en charge ayant besoin du premier setup et d'un premier dossier serieux.", "Pas d'ecriture de cas illimitee, pas de redaction legale complete, pas d'implementation multi-agent."],
-      ["Support mensuel", "Agents pris en charge ayant deja passe l'onboarding et ayant maintenant besoin d'aide recurrente.", "Pas de setup entierement fait pour chaque nouvel agent sauf si perimetre separe."],
+      ["Aide pour le premier paquet", "Un systeme pris en charge qui a besoin du premier setup et d'un premier vrai dossier.", "Pas d'ecriture de cas illimitee, pas de redaction legale complete, pas d'implementation multi-agent."],
+      ["Usage self-hosted pris en charge", "Support recurrent pour des equipes qui exploitent deja le workflow sur jusqu'a 3 ou 10 agents.", "Chaque agent pris en charge supplementaire coute EUR120 par mois ; le premier setup est vendu a part."],
     ],
     failureCards: [
       ["Cas faibles", "Des cas critiques utilisent des blocs `expected` vides ou faibles, si bien que le dossier parait vert mais prouve tres peu."],
@@ -1854,11 +1837,11 @@ const TECHNICAL_PAGE = {
     opsButton: "Open self-hosted guide",
     proofButton: "Open EU starter guide",
     docsButton: "Open OSS docs",
-    repoButton: "Open GitHub repo",
+    repoButton: "Open EU open-source guide",
     quickstartJumpButton: "See self-serve EU starter",
     reviewerButton: "Open builder",
     demoAgentButton: "Open self-hosted guide",
-    allDocsButton: "Open GitHub repo",
+    allDocsButton: "Open EU open-source guide",
     quickstartTitle: "First self-serve EU starter",
     quickstartLead:
       "Use the EU starter guide when you want a lightweight first EU-shaped package on your own agent before deciding whether you need paid help.",
@@ -2037,11 +2020,11 @@ const TECHNICAL_PAGE = {
     opsButton: "Self-Hosted-Leitfaden öffnen",
     proofButton: "EU-Starter-Leitfaden oeffnen",
     docsButton: "OSS-Dokumentation oeffnen",
-    repoButton: "GitHub-Repository oeffnen",
+    repoButton: "EU-Open-Source-Leitfaden oeffnen",
     quickstartJumpButton: "Ersten Lauf am eigenen Agenten sehen",
     reviewerButton: "Builder oeffnen",
     demoAgentButton: "Self-Hosted-Leitfaden oeffnen",
-    allDocsButton: "GitHub-Repository oeffnen",
+    allDocsButton: "EU-Open-Source-Leitfaden oeffnen",
     quickstartTitle: "Schnellster ehrlicher erster Lauf",
     quickstartLead:
       "Wenn Ihr Adapter bereits laeuft, nutzen Sie den Schnellstart, um vor tieferer Integrationsarbeit ein echtes erstes Nachweispaket auf Ihrer eigenen Infrastruktur zu erzeugen.",
@@ -2220,11 +2203,11 @@ const TECHNICAL_PAGE = {
     opsButton: "Ouvrir le guide self-hosted",
     proofButton: "Ouvrir le guide starter UE",
     docsButton: "Ouvrir les docs OSS",
-    repoButton: "Ouvrir le depot GitHub",
+    repoButton: "Ouvrir le guide open-source UE",
     quickstartJumpButton: "Voir le premier run sur votre propre agent",
     reviewerButton: "Ouvrir le builder",
     demoAgentButton: "Ouvrir le guide self-hosted",
-    allDocsButton: "Ouvrir le repository GitHub",
+    allDocsButton: "Ouvrir le guide open-source UE",
     quickstartTitle: "Chemin le plus rapide vers un premier run honnete",
     quickstartLead:
       "Si votre adapter tourne deja, utilisez le demarrage rapide pour produire un vrai premier dossier de preuve sur votre propre infrastructure avant toute integration plus lourde.",
@@ -2517,16 +2500,16 @@ const PLANS = [
       de: "Sie nutzen das OSS-Repo selbst. Kein kommerzieller Support-Scope ist enthalten.",
       fr: "Vous utilisez seul le depot OSS. Aucun perimetre de support commercial n'est inclus.",
     },
-    cta: { en: "Open GitHub repo", de: "GitHub-Repo oeffnen", fr: "Ouvrir le depot GitHub" },
-    href: GITHUB_REPO,
+    cta: { en: "Open EU open-source guide", de: "EU-Open-Source-Leitfaden oeffnen", fr: "Ouvrir le guide open-source UE" },
+    href: EU_GITHUB_GUIDE,
   },
   {
     key: "launch-pack",
     name: { en: "PAID HELP", de: "BEZAHLTE HILFE", fr: "AIDE PAYANTE" },
     heading: {
-      en: "Paid help for one real system",
-      de: "Bezahlte Hilfe fuer ein echtes System",
-      fr: "Aide payante pour un systeme reel",
+      en: "First package help for one real system",
+      de: "Hilfe fuer das erste Paket eines echten Systems",
+      fr: "Aide pour le premier paquet d'un systeme reel",
     },
     price: { en: "EUR499", de: "EUR499", fr: "EUR499" },
     featured: true,
@@ -2563,82 +2546,92 @@ const PLANS = [
   },
   {
     key: "team",
-    name: { en: "TEAM", de: "TEAM", fr: "TEAM" },
+    name: { en: "UP TO 3 AGENTS", de: "BIS ZU 3 AGENTEN", fr: "JUSQU'A 3 AGENTS" },
+    heading: {
+      en: "Supported self-hosted use for up to 3 agents",
+      de: "Betreute Self-Hosted-Nutzung fuer bis zu 3 Agenten",
+      fr: "Usage self-hosted pris en charge pour jusqu'a 3 agents",
+    },
     price: {
-      en: "EUR299/month billed annually",
-      de: "EUR299/Monat bei Jahresabrechnung",
-      fr: "EUR299/mois facture annuellement",
+      en: "EUR299/month",
+      de: "EUR299/Monat",
+      fr: "EUR299/mois",
     },
     featured: false,
     items: {
       en: [
-        "Up to 3 agents",
+        "Up to 3 supported agents",
         "Self-hosted product use",
-        "Updates and exports",
+        "EU content updates and exports",
         "Async support",
-        "For teams already running the workflow in-house",
+        "Additional supported agents: +EUR120/month each",
       ],
       de: [
-        "Bis zu 3 Agenten",
+        "Bis zu 3 unterstuetzte Agenten",
         "Produktnutzung bei Ihnen gehostet",
-        "Updates und Exporte",
+        "EU-Updates und Exporte",
         "Asynchroner Support",
-        "Fuer Teams, die den Workflow bereits intern nutzen",
+        "Jeder weitere unterstuetzte Agent: +EUR120/Monat",
       ],
       fr: [
-        "Jusqu'a 3 agents",
+        "Jusqu'a 3 agents pris en charge",
         "Usage produit heberge chez vous",
-        "Mises a jour et exports",
+        "Mises a jour UE et exports",
         "Support asynchrone",
-        "Pour les equipes qui exploitent deja le workflow en interne",
+        "Chaque agent pris en charge supplementaire : +EUR120/mois",
       ],
     },
     note: {
-      en: "This is the small-team operating tier. It is not sold as unlimited monthly custom implementation.",
-      de: "Das ist die Betriebsstufe fuer kleine Teams. Sie wird nicht als unbegrenzte monatliche Sonderimplementierung verkauft.",
-      fr: "C'est l'offre d'exploitation pour petites equipes. Elle n'est pas vendue comme une implementation sur mesure illimitee chaque mois.",
+      en: "Choose this when the workflow is already useful in-house and your team needs recurring support for a smaller operating footprint.",
+      de: "Waehlen Sie das, wenn der Workflow intern bereits nuetzlich ist und Ihr Team wiederkehrenden Support fuer einen kleineren Betriebsumfang braucht.",
+      fr: "Choisissez-le quand le workflow est deja utile en interne et que votre equipe a besoin d'un support recurrent sur un perimetre plus reduit.",
     },
-    cta: { en: "Choose Team", de: "Team waehlen", fr: "Choisir Team" },
+    cta: { en: "Contact us", de: "Kontakt aufnehmen", fr: "Nous contacter" },
     href: "contact",
   },
   {
     key: "studio",
-    name: { en: "STUDIO", de: "STUDIO", fr: "STUDIO" },
+    name: { en: "UP TO 10 AGENTS", de: "BIS ZU 10 AGENTEN", fr: "JUSQU'A 10 AGENTS" },
+    heading: {
+      en: "Supported self-hosted use for up to 10 agents",
+      de: "Betreute Self-Hosted-Nutzung fuer bis zu 10 Agenten",
+      fr: "Usage self-hosted pris en charge pour jusqu'a 10 agents",
+    },
     price: {
-      en: "EUR890/month billed annually",
-      de: "EUR890/Monat bei Jahresabrechnung",
-      fr: "EUR890/mois facture annuellement",
+      en: "EUR890/month",
+      de: "EUR890/Monat",
+      fr: "EUR890/mois",
     },
     featured: false,
     items: {
       en: [
-        "Up to 10 agents",
+        "Up to 10 supported agents",
         "Priority support",
         "Stronger review and export assistance",
-        "Better operating headroom than Team",
-        "Discounted per-agent economics at larger volume",
+        "Better operating headroom than the 3-agent tier",
+        "Additional supported agents above plan scope: +EUR120/month each",
       ],
       de: [
-        "Bis zu 10 Agenten",
+        "Bis zu 10 unterstuetzte Agenten",
         "Priorisierter Support",
         "Staerkere Unterstuetzung fuer Pruefung und Export",
-        "Mehr operativer Spielraum als Team",
-        "Guenstigere Agenten-Oekonomie bei hoeherem Volumen",
+        "Mehr operativer Spielraum als im 3-Agenten-Tarif",
+        "Weitere Agenten oberhalb des Tarifs: +EUR120/Monat je Agent",
       ],
       fr: [
-        "Jusqu'a 10 agents",
+        "Jusqu'a 10 agents pris en charge",
         "Support prioritaire",
         "Aide plus forte pour revue et export",
-        "Plus de marge operationnelle que Team",
-        "Economies par agent plus favorables a plus grand volume",
+        "Plus de marge operationnelle que l'offre 3 agents",
+        "Agents supplementaires au-dela du plan : +EUR120/mois chacun",
       ],
     },
     note: {
-      en: "This is the larger-team operating tier. Use it when the toolkit is already part of real operations across multiple agents.",
-      de: "Das ist die Betriebsstufe fuer groessere Teams. Sie passt, wenn das Toolkit bereits Teil des realen Betriebs ueber mehrere Agenten ist.",
-      fr: "C'est l'offre d'exploitation pour des equipes plus larges. Utilisez-la quand le toolkit fait deja partie des operations reelles sur plusieurs agents.",
+      en: "Choose this when several agents already rely on the workflow and your team needs broader recurring support than the 3-agent tier.",
+      de: "Waehlen Sie das, wenn mehrere Agenten bereits auf dem Workflow laufen und Ihr Team breiteren wiederkehrenden Support als im 3-Agenten-Tarif braucht.",
+      fr: "Choisissez-le quand plusieurs agents utilisent deja le workflow et que votre equipe a besoin d'un support recurrent plus large que l'offre 3 agents.",
     },
-    cta: { en: "Choose Studio", de: "Studio waehlen", fr: "Choisir Studio" },
+    cta: { en: "Contact us", de: "Kontakt aufnehmen", fr: "Nous contacter" },
     href: "contact",
   },
   {
@@ -7406,48 +7399,27 @@ function renderPageHtml(page, allPages, proof, origin) {
 
 function renderLanding(locale, ctx) {
   const copy = LOCALES[locale].landing;
-  const common = LOCALES[locale].common;
-  const proofSurface = ctx.proof.surfaces["eu-ai-act"];
-  const proofSurfaceTitle =
-    locale === "de"
-      ? "EU-AI-Act-Starter-Snapshot"
-      : locale === "fr"
-        ? "Capture starter EU AI Act"
-        : proofSurface?.label || "EU AI Act starter snapshot";
-  const monitoringStatus =
-    locale === "de"
-      ? { history_current: "aktuell", history_stale: "veraltet", unknown: "unbekannt" }[proofSurface?.summary?.monitoring_status] ??
-      proofSurface?.summary?.monitoring_status ??
-      "aktuell"
-      : locale === "fr"
-        ? { history_current: "a jour", history_stale: "obsolete", unknown: "inconnu" }[proofSurface?.summary?.monitoring_status] ??
-        proofSurface?.summary?.monitoring_status ??
-        "a jour"
-        : proofSurface?.summary?.monitoring_status ?? "history_current";
+  const technicalCopy = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
+  const heroCardItems = copy.heroCardItems || [];
+  const fitCards = copy.fitCards || [];
   const ui = {
     en: {
-      metrics: ["Runs in window", "Approvals", "Blocks", "Monitoring"],
-      entryEyebrow: "Entry paths",
-      fitEyebrow: "Comparison",
-      heroAlt: "Real evidence report screenshot",
+      sampleEyebrow: "Sample output",
+      sampleTitle: "See the minimum package before you start",
+      sampleText: "Inspect the public minimum path before using the Builder or running the starter.",
+      fitEyebrow: "Fit",
     },
     de: {
-      metrics: ["Laeufe im Fenster", "Freigaben", "Blockierungen", "Beobachtung"],
-      entryEyebrow: "Einstiegspfade",
-      fitEyebrow: "Vergleich",
-      heroAlt: "Screenshot eines echten Nachweisberichts",
+      sampleEyebrow: "Beispielausgabe",
+      sampleTitle: "Sehen Sie das Mindestpaket vor dem Start",
+      sampleText: "Pruefen Sie den oeffentlichen Mindestpfad, bevor Sie den Builder oder den Starter nutzen.",
+      fitEyebrow: "Fit",
     },
     fr: {
-      metrics: ["Runs dans la fenetre", "Approbations", "Blocages", "Surveillance"],
-      entryEyebrow: "Parcours d'entree",
-      fitEyebrow: "Comparaison",
-      heroAlt: "Capture d'un vrai rapport de preuve",
-    },
-    en: {
-      metrics: ["Runs in window", "Approvals", "Blocks", "Monitoring"],
-      entryEyebrow: "Entry paths",
-      fitEyebrow: "Comparison",
-      heroAlt: "Real evidence report screenshot",
+      sampleEyebrow: "Sortie exemple",
+      sampleTitle: "Voyez le package minimum avant de commencer",
+      sampleText: "Inspectez le parcours minimum public avant d'utiliser le Builder ou de lancer le starter.",
+      fitEyebrow: "Adequation",
     },
   }[locale];
   return `
@@ -7460,7 +7432,8 @@ function renderLanding(locale, ctx) {
           ${copy.heroSubline ? `<p class="muted">${escapeHtml(copy.heroSubline)}</p>` : ""}
           <div class="button-row">
             <a class="button" href="${ctx.href("builder")}" data-track-event="landing_start_free">${escapeHtml(copy.primaryCta)}</a>
-            <a class="button-ghost" href="${ctx.href("starter")}" data-track-event="landing_starter">${escapeHtml(copy.secondaryCta)}</a>
+            <a class="button-ghost" href="${ctx.href("demo")}" data-track-event="landing_demo">${escapeHtml(copy.secondaryCta)}</a>
+            ${copy.tertiaryCta ? `<a class="button-soft" href="${ctx.href("pricing")}" data-track-event="landing_pricing">${escapeHtml(copy.tertiaryCta)}</a>` : ""}
           </div>
           <div class="trust-line">
             ${LOCALES[locale].common.trustLine
@@ -7470,69 +7443,40 @@ function renderLanding(locale, ctx) {
           </div>
         </div>
         <aside class="hero-card fade-up">
-          <p class="eyebrow">${escapeHtml(common.proofLabel)}</p>
-          <h3>${escapeHtml(proofSurfaceTitle)}</h3>
-          <div class="proof-frame">
-            <img src="${ctx.assetHref(ctx.proof.screenshotPaths.secondary)}" alt="${escapeHtml(ui.heroAlt)}" />
-          </div>
-          <div class="metric-grid">
-            <div class="metric"><span>${escapeHtml(ui.metrics[0])}</span><strong>${proofSurface?.summary?.runs_in_window ?? 2}</strong></div>
-            <div class="metric"><span>${escapeHtml(ui.metrics[1])}</span><strong>${proofSurface?.summary?.approvals ?? 1}</strong></div>
-            <div class="metric"><span>${escapeHtml(ui.metrics[2])}</span><strong>${proofSurface?.summary?.blocks ?? 1}</strong></div>
-            <div class="metric"><span>${escapeHtml(ui.metrics[3])}</span><strong>${escapeHtml(monitoringStatus)}</strong></div>
-          </div>
+          <p class="eyebrow">${escapeHtml(copy.heroCardEyebrow || ui.sampleEyebrow)}</p>
+          <h3>${escapeHtml(copy.heroCardTitle || ui.sampleTitle)}</h3>
+          <p class="muted">${escapeHtml(copy.heroCardText || ui.sampleText)}</p>
+          ${heroCardItems.length === 0
+      ? ""
+      : `<ul class="check-list">
+            ${heroCardItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>`}
           <div class="button-row">
-            <a class="button-soft" href="${ctx.href("builder")}" data-track-event="landing_builder">${escapeHtml(common.liveDemos)}</a>
-            <a class="button-soft" href="${ctx.href("demo")}">${escapeHtml(common.viewDemo)}</a>
+            <a class="button-soft" href="${ctx.href("starter")}" data-track-event="landing_starter">${escapeHtml(LOCALES[locale].common.viewProof)}</a>
+            <a class="button-soft" href="${ctx.href("technical")}" data-track-event="landing_technical">${escapeHtml(technicalCopy.landingButton)}</a>
           </div>
         </aside>
       </div>
     </section>
     <section class="section section-tight">
       <div class="container">
-        <p class="eyebrow">${escapeHtml(ui.entryEyebrow)}</p>
-        <h2 class="section-title">${escapeHtml(copy.audienceTitle)}</h2>
-        <p class="lead">${escapeHtml(copy.audienceLead)}</p>
+        <p class="eyebrow">${escapeHtml(ui.fitEyebrow)}</p>
+        <h2 class="section-title">${escapeHtml(copy.strongestFitTitle)}</h2>
+        <p class="lead">${escapeHtml(copy.strongestFitBody)}</p>
         <div class="docs-grid">
-          ${copy.audienceCards
+          ${fitCards
       .map(
-        (card) => `
+        ([title, text]) => `
             <article class="card fade-up">
-              <h3>${escapeHtml(card.title)}</h3>
-              <p class="muted">${escapeHtml(card.text)}</p>
-              <p><strong>${escapeHtml(card.result)}</strong></p>
-              <div class="button-row">
-                <a class="button-soft" href="${ctx.href(card.href)}">${escapeHtml(card.cta)}</a>
-              </div>
+              <h3>${escapeHtml(title)}</h3>
+              <p class="muted">${escapeHtml(text)}</p>
             </article>`
       )
       .join("")}
         </div>
       </div>
     </section>
-    <section class="section section-tight">
-      <div class="container table-card fade-up">
-        <p class="eyebrow">${escapeHtml(ui.fitEyebrow)}</p>
-        <h2 class="section-title">${escapeHtml(copy.fitMatrixTitle || copy.strongestFitTitle)}</h2>
-        <p class="lead">${escapeHtml(copy.fitMatrixLead || copy.strongestFitBody)}</p>
-        <table class="coverage-table">
-          <thead>
-            <tr>${(copy.fitMatrixHeaders || ["Situation", "Why basic logs are weak", "What this adds"]).map((cell) => `<th>${escapeHtml(cell)}</th>`).join("")}</tr>
-          </thead>
-          <tbody>
-            ${(copy.fitMatrixRows || [])
-      .map(
-        (row) => `
-              <tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
-      )
-      .join("")}
-          </tbody>
-        </table>
-        <p class="muted">${escapeHtml(copy.strongestFitTitle)}: ${escapeHtml(copy.strongestFitBody)}</p>
-      </div>
-    </section>
     ${renderLandingDeliverables(locale)}
-    ${renderLandingProofCta(locale, ctx)}
     ${renderPageFaqSection(locale, copy.faq)}
   `;
 }
@@ -7590,26 +7534,6 @@ function renderLandingDeliverables(locale) {
   `;
 }
 
-function renderLandingProofCta(locale, ctx) {
-  const copy = LOCALES[locale].landing;
-  const technicalCopy = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
-  const eyebrow = locale === "de" ? "Nachweise" : locale === "fr" ? "Preuve" : "Proof";
-  return `
-    <section class="section section-tight">
-      <div class="container evidence-card fade-up">
-        <p class="eyebrow">${escapeHtml(eyebrow)}</p>
-        <h3>${escapeHtml(copy.proofTitle)}</h3>
-        <p class="muted">${escapeHtml(copy.proofBody)}</p>
-        <div class="button-row">
-          <a class="button" href="${ctx.href("builder")}" data-track-event="landing_builder_cta">${escapeHtml(copy.primaryCta)}</a>
-          <a class="button-ghost" href="${ctx.href("demo")}">${escapeHtml(LOCALES[locale].common.viewDemo)}</a>
-          <a class="button-soft" href="${ctx.href("technical")}" data-track-event="landing_technical_cta">${escapeHtml(technicalCopy.landingButton)}</a>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
 function renderTechnicalCallout(locale, ctx) {
   const copy = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
   return `
@@ -7621,7 +7545,7 @@ function renderTechnicalCallout(locale, ctx) {
         <div class="button-row">
           <a class="button" href="${ctx.href("technical")}" data-track-event="landing_technical">${escapeHtml(copy.landingButton)}</a>
           <a class="button-ghost" href="${ctx.href("starter")}">${escapeHtml(copy.proofButton)}</a>
-          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
+          <a class="button-ghost" href="${EU_SELF_HOSTED_GUIDE}" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
         </div>
       </div>
     </section>
@@ -7750,7 +7674,7 @@ function renderHowItWorks(locale, ctx) {
 function renderTechnical(locale, ctx) {
   const copy = TECHNICAL_PAGE[locale] || TECHNICAL_PAGE.en;
   const shared = getTechnicalShared(locale);
-  const repoHref = GITHUB_REPO;
+  const repoHref = EU_GITHUB_GUIDE;
   const ui = {
     en: {
       verifyEyebrow: "Before installation",
@@ -7798,7 +7722,7 @@ function renderTechnical(locale, ctx) {
           <p class="lead">${escapeHtml(copy.intro)}</p>
           <div class="button-row section-tight">
             <a class="button" href="${ctx.href("builder")}">${escapeHtml(copy.reviewerButton)}</a>
-            <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
+            <a class="button-ghost" href="${EU_SELF_HOSTED_GUIDE}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
             <a class="button-ghost" href="${repoHref}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
             <a class="button-soft" href="#first-run">${escapeHtml(copy.quickstartJumpButton)}</a>
           </div>
@@ -7858,7 +7782,7 @@ function renderTechnical(locale, ctx) {
         </div>
         <div class="button-row">
           <a class="button" href="${ctx.href("starter")}">${escapeHtml(copy.quickstartButton || copy.repoButton)}</a>
-          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
+          <a class="button-ghost" href="${EU_SELF_HOSTED_GUIDE}" target="_blank" rel="noreferrer">${escapeHtml(copy.demoAgentButton)}</a>
           <a class="button-soft" href="${repoHref}" target="_blank" rel="noreferrer">${escapeHtml(copy.allDocsButton)}</a>
         </div>
       </div>
@@ -7918,7 +7842,7 @@ function renderTechnical(locale, ctx) {
         <div class="code-snippet"><code>${escapeHtml(TECHNICAL_SHARED.packageCommands.join("\n"))}</code></div>
         <div class="button-row">
           <a class="button" href="${repoHref}" target="_blank" rel="noreferrer" data-track-event="technical_repo">${escapeHtml(copy.repoButton)}</a>
-          <a class="button-ghost" href="${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
+          <a class="button-ghost" href="${EU_SELF_HOSTED_GUIDE}" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
         </div>
       </div>
     </section>
@@ -8416,6 +8340,8 @@ function renderPricing(locale, ctx) {
   }[locale];
   const starterPlan = getPlan("starter");
   const helpPlan = getPlan("launch-pack");
+  const teamPlan = getPlan("team");
+  const studioPlan = getPlan("studio");
   const enterprisePlan = getPlan("enterprise");
   return `
     <section class="section">
@@ -8439,6 +8365,17 @@ function renderPricing(locale, ctx) {
           <h2>${escapeHtml(copy.launchTitle)}</h2>
           <p class="muted">${escapeHtml(copy.launchLead)}</p>
           ${helpPlan ? renderPlanCard(helpPlan, locale, ctx.href, { fade: false }) : ""}
+        </div>
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="container">
+        <p class="eyebrow">${escapeHtml(copy.subscriptionEyebrow)}</p>
+        <h2>${escapeHtml(copy.subscriptionTitle)}</h2>
+        <p class="muted">${escapeHtml(copy.subscriptionLead)}</p>
+        <div class="pricing-grid section-tight">
+          ${teamPlan ? renderPlanCard(teamPlan, locale, ctx.href) : ""}
+          ${studioPlan ? renderPlanCard(studioPlan, locale, ctx.href) : ""}
         </div>
       </div>
     </section>
@@ -9304,7 +9241,7 @@ function renderBuilder(locale, ctx) {
     links: {
       pricing: locale === "en" ? "" : ctx.href("pricing"),
       proof: "",
-      docs: `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`,
+      docs: EU_RUNBOOK_GUIDE,
       nextStage: ctx.href("starter"),
     },
     metrics: builderUi.metrics,
@@ -9615,8 +9552,8 @@ const STARTER_PAGE = {
       "This is a first self-serve check, not the full package. It shows whether the toolkit can reach your running adapter and produce a lightweight starter result.",
     commandTitle: "Starter command",
     commandLead:
-      "This command does not start your adapter for you. It runs the starter check against your already-running adapter.",
-    command: "npm run compliance:eu-ai-act:starter -- --baseUrl http://localhost:8787 --systemType fraud --profile my-agent",
+      "Run this from the EU product surface. This command does not start your adapter for you; it runs the starter check against your already-running adapter.",
+    command: "cd products/eu-ai-act\nnpm install\nnpm run starter -- --baseUrl http://localhost:8787 --systemType fraud --profile my-agent",
     needsTitle: "Before you run it",
     needs: [
       "Your adapter is already running and responds to GET /health and POST /run-case.",
@@ -9906,11 +9843,11 @@ function renderDocs(locale, ctx) {
       scopeTitle: "Docs that explain what this product is and is not",
       scopeLead: "Use these once you have seen the proof path and want the clearer source-of-truth explanation behind it.",
       cards: {
-        quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", "__starter__", "Open starter page"],
-        runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Open on GitHub"],
+        quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", EU_STARTER_GUIDE, "Open on GitHub"],
+        runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", EU_RUNBOOK_GUIDE, "Open on GitHub"],
         proof: ["Builder", "Start the provider-side draft and keep the public path grounded in the same minimum package flow.", "__builder__", "Open builder"],
         technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
-        buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Open on GitHub"],
+        buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", EU_SELF_HOSTED_GUIDE, "Open on GitHub"],
         boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
       },
     },
@@ -9923,11 +9860,11 @@ function renderDocs(locale, ctx) {
       scopeTitle: "Dokumente, die erklaeren, was das Produkt ist und was nicht",
       scopeLead: "Diese Quellen helfen, sobald der Nachweis-Pfad klar ist und Sie die saubere Referenzerklaerung dahinter brauchen.",
       cards: {
-        quickstart: ["EU-Starter-Leitfaden", "Ein leichtes erstes EU-Paket auf dem eigenen Agenten ausfuehren.", "__starter__", "Starter-Seite oeffnen"],
-        runbook: ["EU-Operator-Leitfaden", "Ende-zu-Ende-Hinweise fuer Run, Paketierung, Verifikation und Uebergabe im EU-Pfad.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Auf GitHub oeffnen"],
+        quickstart: ["EU-Starter-Leitfaden", "Ein leichtes erstes EU-Paket auf dem eigenen Agenten ausfuehren.", EU_STARTER_GUIDE, "Auf GitHub oeffnen"],
+        runbook: ["EU-Operator-Leitfaden", "Ende-zu-Ende-Hinweise fuer Run, Paketierung, Verifikation und Uebergabe im EU-Pfad.", EU_RUNBOOK_GUIDE, "Auf GitHub oeffnen"],
         proof: ["Builder", "Starten Sie den provider-seitigen Entwurf und halten Sie den oeffentlichen Pfad am gleichen Mindestpaket ausgerichtet.", "__builder__", "Builder oeffnen"],
         technology: ["Technischer Ueberblick", "Architektur, Verifikationsmodell, Artefaktvertraege und Vertrauensgrenze.", "__technology__", "Technischen Ueberblick oeffnen"],
-        buyer: ["EU Self-Hosted-Leitfaden", "Wie der EU-Pfad auf eigener Infrastruktur laeuft und wie Artefakte unter eigener Kontrolle bleiben.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Auf GitHub oeffnen"],
+        buyer: ["EU Self-Hosted-Leitfaden", "Wie der EU-Pfad auf eigener Infrastruktur laeuft und wie Artefakte unter eigener Kontrolle bleiben.", EU_SELF_HOSTED_GUIDE, "Auf GitHub oeffnen"],
         boundary: ["Verifikations-Checkliste", "Was im erzeugten Paket zu pruefen ist und wie Ergebnisse reproduziert werden.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Auf GitHub oeffnen"],
       },
     },
@@ -9940,11 +9877,11 @@ function renderDocs(locale, ctx) {
       scopeTitle: "Les docs qui expliquent ce que le produit est et n'est pas",
       scopeLead: "Utilisez-les apres avoir vu le chemin de preuve, quand vous voulez une explication de reference plus nette.",
       cards: {
-        quickstart: ["Guide du starter UE", "Lancer un premier paquet UE leger sur votre propre agent.", "__starter__", "Ouvrir la page starter"],
-        runbook: ["Guide operateur UE", "Guidage complet pour l'execution, la mise en forme, la verification et la transmission sur le chemin UE.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Ouvrir sur GitHub"],
+        quickstart: ["Guide du starter UE", "Lancer un premier paquet UE leger sur votre propre agent.", EU_STARTER_GUIDE, "Ouvrir sur GitHub"],
+        runbook: ["Guide operateur UE", "Guidage complet pour l'execution, la mise en forme, la verification et la transmission sur le chemin UE.", EU_RUNBOOK_GUIDE, "Ouvrir sur GitHub"],
         proof: ["Builder", "Commencez le brouillon cote fournisseur et gardez le parcours public aligne sur le meme paquet minimum.", "__builder__", "Ouvrir le builder"],
         technology: ["Vue technique", "Architecture, modele de verification, contrats d'artefacts et frontiere de confiance.", "__technology__", "Ouvrir la vue technique"],
-        buyer: ["Guide self-hosted UE", "Comment executer le chemin UE sur votre propre infrastructure et garder les artefacts sous votre controle.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Ouvrir sur GitHub"],
+        buyer: ["Guide self-hosted UE", "Comment executer le chemin UE sur votre propre infrastructure et garder les artefacts sous votre controle.", EU_SELF_HOSTED_GUIDE, "Ouvrir sur GitHub"],
         boundary: ["Checklist de verification", "Ce qu'il faut verifier dans le paquet genere et comment reproduire les resultats.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Ouvrir sur GitHub"],
       },
     },
@@ -9957,11 +9894,11 @@ function renderDocs(locale, ctx) {
     scopeTitle: "Docs that explain what this product is and is not",
     scopeLead: "Use these once you have seen the proof path and want the clearer source-of-truth explanation behind it.",
     cards: {
-      quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", "__starter__", "Open starter page"],
-      runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md`, "Open on GitHub"],
+      quickstart: ["EU starter guide", "Run a lightweight first EU-shaped package on your own agent.", EU_STARTER_GUIDE, "Open on GitHub"],
+      runbook: ["EU operator runbook", "End-to-end run, package, verify, and handoff guidance for the EU evidence path.", EU_RUNBOOK_GUIDE, "Open on GitHub"],
       proof: ["Builder", "Start the provider-side draft and keep the public path grounded in the same minimum package flow.", "__builder__", "Open builder"],
       technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
-      buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", `${GITHUB_REPO}/blob/main/docs/eu-ai-act-self-hosted-guidance.md`, "Open on GitHub"],
+      buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", EU_SELF_HOSTED_GUIDE, "Open on GitHub"],
       boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
     },
   };
@@ -10688,7 +10625,7 @@ function renderLlmsTxt(origin) {
 
 ## Source docs
 - [README](${GITHUB_REPO}#readme)
-- [EU operator runbook](${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md)
+- [EU operator runbook](${EU_RUNBOOK_GUIDE})
 `;
 }
 
@@ -10755,7 +10692,7 @@ function renderLlmsFullTxt(origin) {
 
 ## Source docs and guides
 - [README](${GITHUB_REPO}#readme)
-- [EU operator runbook](${GITHUB_REPO}/blob/main/docs/eu-ai-act-operator-runbook.md)
+- [EU operator runbook](${EU_RUNBOOK_GUIDE})
 `;
 }
 

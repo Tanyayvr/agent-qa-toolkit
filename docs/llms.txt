@@ -28,4 +28,4 @@
 
 ## Source docs
 - [README](https://github.com/Tanyayvr/agent-qa-toolkit#readme)
-- [EU operator runbook](https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/docs/eu-ai-act-operator-runbook.md)
+- [EU operator runbook](https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/docs/runbook.md)

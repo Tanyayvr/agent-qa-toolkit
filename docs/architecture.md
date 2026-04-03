@@ -14,9 +14,10 @@ The repository now exposes two product surfaces on top of one evidence engine, p
   - `npm run release:gate:agent-evidence`
 - **EU AI Act Evidence Engine**: a vertical package on top of the core Agent Evidence surface.
   Operator entrypoints:
-  - `npm run compliance:eu-ai-act -- ...`
-  - `npm run compliance:eu-ai-act:verify -- --reportDir <dir>`
-  - `npm run compliance:eu-ai-act:contracts`
+  - `cd products/eu-ai-act && npm install`
+  - `npm run package -- ...`
+  - `npm run verify -- --reportDir <dir>`
+  - `npm run contracts`
   - `npm run demo:eu-ai-act`
   - `npm run release:gate:eu-ai-act`
 - **EU AI Evidence Builder Website**: a static multilingual website generated into `docs/` around the public Builder, starter, and pricing flow.
@@ -120,7 +121,7 @@ Automation boundary:
 - automated: schema validation, cross-file consistency checks, starter case scaffolding, case completeness checks against the intake contract, adapter onboarding probes against `/health` plus live `/run-case`, and baseline/new run comparability checks before packaging
 - still human-owned: intended use, business harms, deployment assumptions, approval/block policy choices, final narrative, legal signoff
 
-For a public view of what is automated and how to verify the generated package, use [EU AI Act Self-Hosted Guidance](eu-ai-act-self-hosted-guidance.md) and [VERIFY.md](VERIFY.md).
+For a public view of what is automated and how to verify the generated package, use [products/eu-ai-act/docs/self-hosted.md](../products/eu-ai-act/docs/self-hosted.md) and [VERIFY.md](VERIFY.md).
 
 ## Core pipeline
 
