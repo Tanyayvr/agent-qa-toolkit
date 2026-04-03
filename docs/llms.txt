@@ -27,5 +27,6 @@
 - [Français](https://tanyayvr.github.io/agent-qa-toolkit/fr/)
 
 ## Source docs
-- [README](https://github.com/Tanyayvr/agent-qa-toolkit#readme)
+- [EU open-source guide](https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/README.md)
 - [EU operator runbook](https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/docs/runbook.md)
+- [EU verification checklist](https://github.com/Tanyayvr/agent-qa-toolkit/blob/main/products/eu-ai-act/docs/verification.md)

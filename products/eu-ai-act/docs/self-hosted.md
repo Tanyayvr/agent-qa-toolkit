@@ -67,4 +67,4 @@ It only keeps the technical package workflow inside the customer environment.
 - [Get started](get-started.md)
 - [EU starter](starter.md)
 - [Operator runbook](runbook.md)
-- [Verification checklist](../../../docs/VERIFY.md)
+- [Verification checklist](verification.md)

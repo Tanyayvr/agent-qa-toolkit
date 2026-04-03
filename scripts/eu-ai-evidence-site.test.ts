@@ -143,6 +143,7 @@ describe("eu-ai-evidence-site", () => {
     expect(landing).toContain("Start your draft");
     expect(landing).toContain("See sample package");
     expect(landing).toContain("See pricing");
+    expect(landing).toContain("products/eu-ai-act/README.md");
     expect(landing).toContain("See what the package looks like");
     expect(landing).toContain("Open EU starter");
     expect(landing).toContain("Open technical overview");
@@ -282,6 +283,7 @@ describe("eu-ai-evidence-site", () => {
     expect(technology).toContain("Open builder");
     expect(technology).toContain("Open self-hosted guide");
     expect(technology).toContain("Open EU open-source guide");
+    expect(technology).toContain("products/eu-ai-act/docs/verification.md");
     expect(technology).toContain("See self-serve EU starter");
     expect(technology).toContain("../eu-ai-act-starter/");
     expect(technology).not.toContain("Open reviewer dossier demo");

@@ -11,6 +11,7 @@ const EU_GITHUB_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/README.md`;
 const EU_STARTER_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/docs/starter.md`;
 const EU_SELF_HOSTED_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/docs/self-hosted.md`;
 const EU_RUNBOOK_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/docs/runbook.md`;
+const EU_VERIFICATION_GUIDE = `${GITHUB_REPO}/blob/main/products/eu-ai-act/docs/verification.md`;
 const SITE_NAME = "EU AI Evidence Builder";
 
 export const DEFAULT_ORIGIN = process.env.EU_AI_SITE_ORIGIN || "https://tanyayvr.github.io/agent-qa-toolkit";
@@ -1836,6 +1837,7 @@ const TECHNICAL_PAGE = {
     extendedButton: "Open extended notes",
     opsButton: "Open self-hosted guide",
     proofButton: "Open EU starter guide",
+    verifyButton: "Open verification checklist",
     docsButton: "Open OSS docs",
     repoButton: "Open EU open-source guide",
     quickstartJumpButton: "See self-serve EU starter",
@@ -2019,6 +2021,7 @@ const TECHNICAL_PAGE = {
     extendedButton: "Erweiterte Notizen oeffnen",
     opsButton: "Self-Hosted-Leitfaden öffnen",
     proofButton: "EU-Starter-Leitfaden oeffnen",
+    verifyButton: "Verifikations-Checkliste oeffnen",
     docsButton: "OSS-Dokumentation oeffnen",
     repoButton: "EU-Open-Source-Leitfaden oeffnen",
     quickstartJumpButton: "Ersten Lauf am eigenen Agenten sehen",
@@ -2202,6 +2205,7 @@ const TECHNICAL_PAGE = {
     extendedButton: "Ouvrir les notes detaillees",
     opsButton: "Ouvrir le guide self-hosted",
     proofButton: "Ouvrir le guide starter UE",
+    verifyButton: "Ouvrir la checklist de verification",
     docsButton: "Ouvrir les docs OSS",
     repoButton: "Ouvrir le guide open-source UE",
     quickstartJumpButton: "Voir le premier run sur votre propre agent",
@@ -7227,7 +7231,7 @@ function renderFooter(page, localeCopy, href) {
           <a href="${href("disclaimer")}">${escapeHtml(localeCopy.footer.disclaimer)}</a>
           <a href="${href("cookies")}">${escapeHtml(localeCopy.footer.cookies)}</a>
           <a href="${href("contact")}">${escapeHtml(localeCopy.footer.contact)}</a>
-          <a href="${GITHUB_REPO}" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="${EU_GITHUB_GUIDE}" target="_blank" rel="noreferrer">GitHub</a>
         </div>
       </div>
     </footer>
@@ -7843,6 +7847,7 @@ function renderTechnical(locale, ctx) {
         <div class="button-row">
           <a class="button" href="${repoHref}" target="_blank" rel="noreferrer" data-track-event="technical_repo">${escapeHtml(copy.repoButton)}</a>
           <a class="button-ghost" href="${EU_SELF_HOSTED_GUIDE}" target="_blank" rel="noreferrer">${escapeHtml(copy.opsButton)}</a>
+          <a class="button-ghost" href="${EU_VERIFICATION_GUIDE}" target="_blank" rel="noreferrer">${escapeHtml(copy.verifyButton)}</a>
         </div>
       </div>
     </section>
@@ -9848,7 +9853,7 @@ function renderDocs(locale, ctx) {
         proof: ["Builder", "Start the provider-side draft and keep the public path grounded in the same minimum package flow.", "__builder__", "Open builder"],
         technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
         buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", EU_SELF_HOSTED_GUIDE, "Open on GitHub"],
-        boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
+        boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", EU_VERIFICATION_GUIDE, "Open on GitHub"],
       },
     },
     de: {
@@ -9865,7 +9870,7 @@ function renderDocs(locale, ctx) {
         proof: ["Builder", "Starten Sie den provider-seitigen Entwurf und halten Sie den oeffentlichen Pfad am gleichen Mindestpaket ausgerichtet.", "__builder__", "Builder oeffnen"],
         technology: ["Technischer Ueberblick", "Architektur, Verifikationsmodell, Artefaktvertraege und Vertrauensgrenze.", "__technology__", "Technischen Ueberblick oeffnen"],
         buyer: ["EU Self-Hosted-Leitfaden", "Wie der EU-Pfad auf eigener Infrastruktur laeuft und wie Artefakte unter eigener Kontrolle bleiben.", EU_SELF_HOSTED_GUIDE, "Auf GitHub oeffnen"],
-        boundary: ["Verifikations-Checkliste", "Was im erzeugten Paket zu pruefen ist und wie Ergebnisse reproduziert werden.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Auf GitHub oeffnen"],
+        boundary: ["Verifikations-Checkliste", "Was im erzeugten Paket zu pruefen ist und wie Ergebnisse reproduziert werden.", EU_VERIFICATION_GUIDE, "Auf GitHub oeffnen"],
       },
     },
     fr: {
@@ -9882,7 +9887,7 @@ function renderDocs(locale, ctx) {
         proof: ["Builder", "Commencez le brouillon cote fournisseur et gardez le parcours public aligne sur le meme paquet minimum.", "__builder__", "Ouvrir le builder"],
         technology: ["Vue technique", "Architecture, modele de verification, contrats d'artefacts et frontiere de confiance.", "__technology__", "Ouvrir la vue technique"],
         buyer: ["Guide self-hosted UE", "Comment executer le chemin UE sur votre propre infrastructure et garder les artefacts sous votre controle.", EU_SELF_HOSTED_GUIDE, "Ouvrir sur GitHub"],
-        boundary: ["Checklist de verification", "Ce qu'il faut verifier dans le paquet genere et comment reproduire les resultats.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Ouvrir sur GitHub"],
+        boundary: ["Checklist de verification", "Ce qu'il faut verifier dans le paquet genere et comment reproduire les resultats.", EU_VERIFICATION_GUIDE, "Ouvrir sur GitHub"],
       },
     },
   }[locale] || {
@@ -9899,7 +9904,7 @@ function renderDocs(locale, ctx) {
       proof: ["Builder", "Start the provider-side draft and keep the public path grounded in the same minimum package flow.", "__builder__", "Open builder"],
       technology: ["Technical Overview", "Architecture, verification model, artifact contracts, and trust boundary.", "__technology__", "Open technical overview"],
       buyer: ["EU self-hosted guidance", "How to run the EU path on your own infrastructure and keep artifacts under your control.", EU_SELF_HOSTED_GUIDE, "Open on GitHub"],
-      boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", `${GITHUB_REPO}/blob/main/docs/VERIFY.md`, "Open on GitHub"],
+      boundary: ["Verification checklist", "What to verify in the generated package and how to reproduce results.", EU_VERIFICATION_GUIDE, "Open on GitHub"],
     },
   };
   const hrefFor = (value) => {
@@ -10624,8 +10629,9 @@ function renderLlmsTxt(origin) {
 - [Français](${origin}/fr/)
 
 ## Source docs
-- [README](${GITHUB_REPO}#readme)
+- [EU open-source guide](${EU_GITHUB_GUIDE})
 - [EU operator runbook](${EU_RUNBOOK_GUIDE})
+- [EU verification checklist](${EU_VERIFICATION_GUIDE})
 `;
 }
 
@@ -10691,8 +10697,9 @@ function renderLlmsFullTxt(origin) {
 - The product automates packaging support, not legal classification or final approval
 
 ## Source docs and guides
-- [README](${GITHUB_REPO}#readme)
+- [EU open-source guide](${EU_GITHUB_GUIDE})
 - [EU operator runbook](${EU_RUNBOOK_GUIDE})
+- [EU verification checklist](${EU_VERIFICATION_GUIDE})
 `;
 }
 

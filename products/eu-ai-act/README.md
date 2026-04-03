@@ -62,7 +62,7 @@ npm run verify -- --reportDir <report-dir>
 - [Self-hosted](docs/self-hosted.md)
 - [Operator runbook](docs/runbook.md)
 - [Boundary](docs/boundary.md)
-- [Verification checklist](../../docs/VERIFY.md)
+- [Verification checklist](docs/verification.md)
 
 ## What To Ignore If You Only Need The EU Path
 

@@ -83,3 +83,4 @@ EU minimum outputs:
 - [Get started](get-started.md)
 - [EU starter](starter.md)
 - [Self-hosted](self-hosted.md)
+- [Verification checklist](verification.md)

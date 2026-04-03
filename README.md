@@ -97,9 +97,10 @@ Useful EU docs:
 - [products/eu-ai-act/docs/get-started.md](products/eu-ai-act/docs/get-started.md)
 - [products/eu-ai-act/docs/commands.md](products/eu-ai-act/docs/commands.md)
 - [products/eu-ai-act/docs/starter.md](products/eu-ai-act/docs/starter.md)
-- [docs/eu-ai-act-evidence-engine.md](docs/eu-ai-act-evidence-engine.md)
+- [products/eu-ai-act/docs/boundary.md](products/eu-ai-act/docs/boundary.md)
 - [products/eu-ai-act/docs/self-hosted.md](products/eu-ai-act/docs/self-hosted.md)
 - [products/eu-ai-act/docs/runbook.md](products/eu-ai-act/docs/runbook.md)
+- [products/eu-ai-act/docs/verification.md](products/eu-ai-act/docs/verification.md)
 
 ---
 
@@ -174,16 +175,16 @@ It does **not** include:
 | Engineering path | [docs/engineering-qualification-path.md](docs/engineering-qualification-path.md) |
 | Architecture | [docs/architecture.md](docs/architecture.md) |
 | Agent integration contract | [docs/agent-integration-contract.md](docs/agent-integration-contract.md) |
-| EU AI Act engine | [docs/eu-ai-act-evidence-engine.md](docs/eu-ai-act-evidence-engine.md) |
+| EU product boundary | [products/eu-ai-act/docs/boundary.md](products/eu-ai-act/docs/boundary.md) |
 | EU product surface | [products/eu-ai-act/README.md](products/eu-ai-act/README.md) |
 | EU getting started | [products/eu-ai-act/docs/get-started.md](products/eu-ai-act/docs/get-started.md) |
 | EU starter | [products/eu-ai-act/docs/starter.md](products/eu-ai-act/docs/starter.md) |
 | EU self-hosted guidance | [products/eu-ai-act/docs/self-hosted.md](products/eu-ai-act/docs/self-hosted.md) |
 | EU operator runbook | [products/eu-ai-act/docs/runbook.md](products/eu-ai-act/docs/runbook.md) |
+| EU verification checklist | [products/eu-ai-act/docs/verification.md](products/eu-ai-act/docs/verification.md) |
 | CI integration | [docs/ci.md](docs/ci.md) |
 | Security scanners | [docs/security-scanners.md](docs/security-scanners.md) |
 | Threat model | [docs/threat-model.md](docs/threat-model.md) |
-| Verification checklist | [docs/VERIFY.md](docs/VERIFY.md) |
 | Capability chronology | [docs/CHRONOLOGY.md](docs/CHRONOLOGY.md) |
 
 ---
