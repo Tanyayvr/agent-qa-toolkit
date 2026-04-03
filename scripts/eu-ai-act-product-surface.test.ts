@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { generateKeyPairSync } from "node:crypto";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -7,6 +8,8 @@ import { afterEach, describe, expect, it } from "vitest";
 const REPO_ROOT = process.cwd();
 const PRODUCT_ROOT = path.join(REPO_ROOT, "products", "eu-ai-act");
 const NPM_COMMAND = process.platform === "win32" ? "npm.cmd" : "npm";
+const NODE_COMMAND = process.execPath;
+const INSTALL_SCRIPT = path.join(PRODUCT_ROOT, "scripts", "install-shared-core.mjs");
 const SCRIPT_TEST_TIMEOUT_MS = 90_000;
 
 const tempRoots: string[] = [];
@@ -25,9 +28,26 @@ function runProductCommand(args: string[], env: NodeJS.ProcessEnv = process.env)
   });
 }
 
+function runNode(scriptAbs: string, args: string[] = [], env: NodeJS.ProcessEnv = process.env) {
+  return spawnSync(NODE_COMMAND, [scriptAbs, ...args], {
+    cwd: PRODUCT_ROOT,
+    env,
+    encoding: "utf8",
+  });
+}
+
 function writeJson(absPath: string, value: unknown) {
   mkdirSync(path.dirname(absPath), { recursive: true });
   writeFileSync(absPath, JSON.stringify(value, null, 2), "utf8");
+}
+
+function parseLastJsonLine(output: string) {
+  const lines = output.split(/\r?\n/);
+  const jsonStart = lines.findIndex((line) => line.trim().startsWith("{"));
+  if (jsonStart === -1) {
+    throw new Error(`No JSON object found in output:\n${output}`);
+  }
+  return JSON.parse(lines.slice(jsonStart).join("\n"));
 }
 
 function buildRunMeta(caseIds: string[], version: "baseline" | "new") {
@@ -115,11 +135,47 @@ describe("eu-ai-act product surface", () => {
     expect(result.stdout).toContain("workspace=.agent-qa/eu-ai-act-starter/surface-smoke");
   });
 
+  it("passes --draftJson through the starter wrapper", () => {
+    const root = makeTempRoot();
+    const draftJson = path.join(root, "eu-ai-act-legal-draft.json");
+    writeFileSync(
+      draftJson,
+      `${JSON.stringify({ artifact_type: "eu_ai_act_legal_draft", sections: [] }, null, 2)}\n`,
+      "utf8"
+    );
+
+    const result = runProductCommand([
+      "run",
+      "starter",
+      "--",
+      "--dry-run",
+      "--baseUrl",
+      "http://localhost:8787",
+      "--systemType",
+      "fraud",
+      "--profile",
+      "surface-draft",
+      "--draftJson",
+      draftJson,
+    ]);
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).toContain("builderDraft=");
+    expect(result.stdout).toContain("supplemental/builder-draft.json");
+  });
+
   it(
     "packages and verifies the minimum EU bundle from the product surface",
     () => {
       const root = makeTempRoot();
       const fixture = createEvaluatorFixture(root);
+      const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+      const privateKeyB64 = Buffer.from(
+        privateKey.export({ format: "der", type: "pkcs8" }) as Buffer
+      ).toString("base64");
+      const publicKeyB64 = Buffer.from(
+        publicKey.export({ format: "der", type: "spki" }) as Buffer
+      ).toString("base64");
 
       const packageResult = runProductCommand([
         "run",
@@ -138,7 +194,11 @@ describe("eu-ai-act product surface", () => {
         "--environment",
         fixture.environmentPath,
         "--no-trend",
-      ]);
+        "--sign",
+      ], {
+        ...process.env,
+        AQ_MANIFEST_PRIVATE_KEY: privateKeyB64,
+      });
 
       expect(packageResult.status, packageResult.stderr).toBe(0);
       expect(packageResult.stdout).toContain("Status: OK");
@@ -162,6 +222,25 @@ describe("eu-ai-act product surface", () => {
 
       expect(verifyResult.status, verifyResult.stderr).toBe(0);
       expect(verifyResult.stdout).toContain("Status: OK");
+
+      const strictJsonResult = runProductCommand([
+        "run",
+        "verify",
+        "--",
+        "--reportDir",
+        fixture.outDir,
+        "--strict",
+        "--json",
+      ], {
+        ...process.env,
+        AQ_MANIFEST_PUBLIC_KEY: publicKeyB64,
+      });
+
+      expect(strictJsonResult.status, strictJsonResult.stderr).toBe(0);
+      expect(parseLastJsonLine(strictJsonResult.stdout)).toMatchObject({
+        ok: true,
+        mode: "strict",
+      });
     },
     SCRIPT_TEST_TIMEOUT_MS
   );
@@ -183,4 +262,21 @@ describe("eu-ai-act product surface", () => {
     },
     20_000
   );
+
+  it("skips shared-core install when AQ_SKIP_SHARED_CORE_INSTALL=1", () => {
+    const result = runNode(INSTALL_SCRIPT, [], {
+      ...process.env,
+      AQ_SKIP_SHARED_CORE_INSTALL: "1",
+    });
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).not.toContain("Installing shared monorepo dependencies");
+  });
+
+  it("skips shared-core install when --skip-shared-core-install is passed", () => {
+    const result = runNode(INSTALL_SCRIPT, ["--skip-shared-core-install"]);
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).not.toContain("Installing shared monorepo dependencies");
+  });
 });
