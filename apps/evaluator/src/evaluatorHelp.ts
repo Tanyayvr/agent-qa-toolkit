@@ -19,7 +19,7 @@ Optional:
   --maxCaseBytes       Max bytes for a single case JSON payload (default: 10000000)
   --maxMetaBytes       Max bytes for run/config JSON files (default: 2000000)
   --retentionDays      Delete report directories older than N days (default: 0 = disabled)
-  --environment     JSON file with environment metadata; when provided, populated identity fields must match new run provenance
+  --environment     JSON file with environment metadata; top-level identity fields must match new run provenance, and legacy runs may also include baseline_provenance/new_provenance objects
   --complianceProfile  JSON file with compliance mapping
   --trend-db        SQLite path for historical trending (default: .agent-qa/trend.sqlite)
   --no-trend        Disable historical trending ingest

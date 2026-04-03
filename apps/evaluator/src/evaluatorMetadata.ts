@@ -38,6 +38,11 @@ export const REQUIRED_ENVIRONMENT_FIELDS = [
 export const EU_AI_ACT_REQUIRED_ENVIRONMENT_FIELDS = REQUIRED_ENVIRONMENT_FIELDS;
 
 export type RequiredEnvironmentField = typeof REQUIRED_ENVIRONMENT_FIELDS[number];
+export type RunProvenanceRecord = Record<RequiredEnvironmentField, string>;
+export type LegacyRunProvenanceOverlay = {
+  baseline?: RunProvenanceRecord;
+  new?: RunProvenanceRecord;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -217,9 +222,71 @@ export function normalizeProvidedEnvironmentContext(
   return Object.keys(normalized).length > 0 ? normalized : undefined;
 }
 
+function parseRunProvenanceRecord(value: unknown, label: string): RunProvenanceRecord {
+  if (!isRecord(value)) {
+    throw new Error(`${label} must be an object`);
+  }
+  const missing = listMissingRequiredEnvironmentFields(value);
+  if (missing.length > 0) {
+    throw new Error(`${label} is missing required fields: ${missing.join(", ")}`);
+  }
+  return Object.fromEntries(
+    REQUIRED_ENVIRONMENT_FIELDS.map((field) => [field, String(value[field]).trim()])
+  ) as RunProvenanceRecord;
+}
+
+export function stripLegacyRunProvenanceOverlay(
+  environment: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined {
+  const normalized = normalizeProvidedEnvironmentContext(environment);
+  if (!normalized) {
+    return undefined;
+  }
+  const { baseline_provenance: _baseline, new_provenance: _new, ...rest } = normalized;
+  return Object.keys(rest).length > 0 ? rest : undefined;
+}
+
+export function extractLegacyRunProvenanceOverlay(
+  environment: Record<string, unknown> | undefined
+): LegacyRunProvenanceOverlay | undefined {
+  if (!environment || typeof environment !== "object") {
+    return undefined;
+  }
+  const raw = environment as Record<string, unknown>;
+  const baseline = Object.prototype.hasOwnProperty.call(raw, "baseline_provenance")
+    ? parseRunProvenanceRecord(raw.baseline_provenance, "baseline_provenance")
+    : undefined;
+  const next = Object.prototype.hasOwnProperty.call(raw, "new_provenance")
+    ? parseRunProvenanceRecord(raw.new_provenance, "new_provenance")
+    : undefined;
+  if (!baseline && !next) {
+    return undefined;
+  }
+  return {
+    ...(baseline ? { baseline } : {}),
+    ...(next ? { new: next } : {}),
+  };
+}
+
+export function extractCanonicalEnvironmentProvenance(
+  environment: Record<string, unknown> | undefined
+): RunProvenanceRecord | undefined {
+  const normalized = stripLegacyRunProvenanceOverlay(environment);
+  if (!normalized) {
+    return undefined;
+  }
+  const missing = listMissingRequiredEnvironmentFields(normalized);
+  if (missing.length > 0) {
+    return undefined;
+  }
+  return Object.fromEntries(
+    REQUIRED_ENVIRONMENT_FIELDS.map((field) => [field, String(normalized[field]).trim()])
+  ) as RunProvenanceRecord;
+}
+
 export function extractRunProvenance(
   runMeta: Record<string, unknown> | undefined
-): Record<RequiredEnvironmentField, string> | undefined {
+): RunProvenanceRecord | undefined {
   if (!runMeta || typeof runMeta !== "object") {
     return undefined;
   }
@@ -238,10 +305,10 @@ export function extractRunProvenance(
 
 export function mergeEnvironmentWithCanonicalProvenance(params: {
   providedEnvironment?: Record<string, unknown>;
-  canonicalProvenance: Record<RequiredEnvironmentField, string>;
+  canonicalProvenance: RunProvenanceRecord;
 }): Record<string, unknown> {
   const { canonicalProvenance } = params;
-  const providedEnvironment = normalizeProvidedEnvironmentContext(params.providedEnvironment);
+  const providedEnvironment = stripLegacyRunProvenanceOverlay(params.providedEnvironment);
   if (!providedEnvironment) {
     return { ...canonicalProvenance };
   }

@@ -621,6 +621,168 @@ describe("evaluator orchestration", () => {
     await expect(mod.runEvaluator()).rejects.toThrow("Core qualification packaging requires baseline run provenance");
   });
 
+  it("backfills legacy baseline and new provenance from environment metadata", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const baselineDir = path.join(root, "runs", "baseline", "legacy-overlay");
+    const newDir = path.join(root, "runs", "new", "legacy-overlay");
+    const outDir = path.join(root, "reports", "legacy-overlay");
+    const envPath = path.join(root, "legacy-overlay-environment.json");
+
+    await writeJson(casesPath, [
+      {
+        id: "c1",
+        title: "legacy overlay case",
+        input: { user: "hello" },
+        expected: { must_include: ["ok"] },
+      },
+    ]);
+    await writeJson(envPath, {
+      agent_id: "legacy-agent",
+      agent_version: "legacy-agent-v2",
+      model: "gpt-legacy",
+      model_version: "2026-03-21",
+      prompt_version: "prompt-v2",
+      tools_version: "tools-v1",
+      config_hash: "cfg-002",
+      deployment_tier: "staging",
+      baseline_provenance: {
+        agent_id: "legacy-agent",
+        agent_version: "legacy-agent-v1",
+        model: "gpt-legacy",
+        model_version: "2026-03-01",
+        prompt_version: "prompt-v1",
+        tools_version: "tools-v1",
+        config_hash: "cfg-001",
+      },
+      new_provenance: {
+        agent_id: "legacy-agent",
+        agent_version: "legacy-agent-v2",
+        model: "gpt-legacy",
+        model_version: "2026-03-21",
+        prompt_version: "prompt-v2",
+        tools_version: "tools-v1",
+        config_hash: "cfg-002",
+      },
+    });
+    const okResp = {
+      case_id: "c1",
+      version: "baseline",
+      final_output: { content_type: "text", content: "ok" },
+      events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
+      proposed_actions: [],
+    };
+    await writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+    await writeJson(path.join(baselineDir, "c1.json"), okResp);
+    await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
+
+    const mod = await loadEvaluatorWithArgv([
+      "node",
+      "evaluator",
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--outDir",
+      outDir,
+      "--reportId",
+      "legacy-overlay",
+      "--environment",
+      envPath,
+      "--no-trend",
+    ]);
+
+    await mod.runEvaluator();
+
+    const report = JSON.parse(await readFile(path.join(outDir, "compare-report.json"), "utf-8")) as {
+      environment?: Record<string, unknown>;
+      provenance?: {
+        baseline?: Record<string, unknown>;
+        new?: Record<string, unknown>;
+      };
+    };
+    expect(report.provenance?.baseline).toMatchObject({
+      agent_id: "legacy-agent",
+      agent_version: "legacy-agent-v1",
+      config_hash: "cfg-001",
+    });
+    expect(report.provenance?.new).toMatchObject({
+      agent_id: "legacy-agent",
+      agent_version: "legacy-agent-v2",
+      config_hash: "cfg-002",
+    });
+    expect(report.environment).toMatchObject({
+      agent_id: "legacy-agent",
+      agent_version: "legacy-agent-v2",
+      deployment_tier: "staging",
+    });
+    expect(report.environment).not.toHaveProperty("baseline_provenance");
+    expect(report.environment).not.toHaveProperty("new_provenance");
+  });
+
+  it("fails when provided legacy overlay conflicts with recorded run provenance", async () => {
+    const casesPath = path.join(root, "cases.json");
+    const baselineDir = path.join(root, "runs", "baseline", "overlay-mismatch");
+    const newDir = path.join(root, "runs", "new", "overlay-mismatch");
+    const outDir = path.join(root, "reports", "overlay-mismatch");
+    const envPath = path.join(root, "overlay-mismatch-environment.json");
+
+    await writeJson(casesPath, [
+      {
+        id: "c1",
+        title: "overlay mismatch case",
+        input: { user: "hello" },
+        expected: { must_include: ["ok"] },
+      },
+    ]);
+    await writeJson(envPath, {
+      baseline_provenance: {
+        agent_id: "agent-demo",
+        agent_version: "wrong-version",
+        model: "gpt-4.1",
+        model_version: "2026-03-01",
+        prompt_version: "pv-1",
+        tools_version: "tv-1",
+        config_hash: "cfg-001",
+      },
+    });
+    const okResp = {
+      case_id: "c1",
+      version: "baseline",
+      final_output: { content_type: "text", content: "ok" },
+      events: [{ type: "final_output", ts: Date.now(), content_type: "text", content: "ok" }],
+      proposed_actions: [],
+    };
+    await writeJson(path.join(baselineDir, "run.json"), buildRunMeta(["c1"], "baseline"));
+    await writeJson(path.join(newDir, "run.json"), buildRunMeta(["c1"], "new"));
+    await writeJson(path.join(baselineDir, "c1.json"), okResp);
+    await writeJson(path.join(newDir, "c1.json"), { ...okResp, version: "new" });
+
+    const mod = await loadEvaluatorWithArgv([
+      "node",
+      "evaluator",
+      "--cases",
+      casesPath,
+      "--baselineDir",
+      baselineDir,
+      "--newDir",
+      newDir,
+      "--outDir",
+      outDir,
+      "--reportId",
+      "overlay-mismatch",
+      "--environment",
+      envPath,
+      "--no-trend",
+    ]);
+
+    await expect(mod.runEvaluator()).rejects.toThrow(
+      "Provided baseline_provenance does not match baseline run provenance"
+    );
+  });
+
   it("fails when provided environment metadata conflicts with new run provenance", async () => {
     const casesPath = path.join(root, "cases.json");
     const baselineDir = path.join(root, "runs", "baseline", "env-mismatch");

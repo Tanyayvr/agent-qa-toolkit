@@ -90,6 +90,68 @@ function createEvaluatorFixture(root: string) {
   return { casesPath, baselineDir, newDir, outDir, environmentPath };
 }
 
+function createLegacyEvaluatorFixture(root: string) {
+  const casesPath = path.join(root, "cases.json");
+  const baselineDir = path.join(root, "runs", "baseline", "legacy-r1");
+  const newDir = path.join(root, "runs", "new", "legacy-r1");
+  const outDir = path.join(root, "reports", "eu-package-legacy");
+  const environmentPath = path.join(root, "legacy-environment.json");
+
+  writeJson(casesPath, [
+    {
+      id: "c1",
+      title: "legacy eu package case",
+      input: { user: "hello" },
+      expected: { must_include: ["ok"] },
+    },
+  ]);
+  writeJson(path.join(baselineDir, "run.json"), { selected_case_ids: ["c1"] });
+  writeJson(path.join(newDir, "run.json"), { selected_case_ids: ["c1"] });
+  writeJson(path.join(baselineDir, "c1.json"), {
+    case_id: "c1",
+    version: "baseline",
+    final_output: { content_type: "text", content: "ok" },
+    events: [{ type: "final_output", ts: 1, content_type: "text", content: "ok" }],
+    proposed_actions: [],
+  });
+  writeJson(path.join(newDir, "c1.json"), {
+    case_id: "c1",
+    version: "new",
+    final_output: { content_type: "text", content: "ok" },
+    events: [{ type: "final_output", ts: 1, content_type: "text", content: "ok" }],
+    proposed_actions: [],
+  });
+  writeJson(environmentPath, {
+    agent_id: "legacy-eu-agent",
+    agent_version: "legacy-eu-agent-v2",
+    model: "legacy-model",
+    model_version: "2026-03-21",
+    prompt_version: "legacy-prompt-v2",
+    tools_version: "legacy-tools-v1",
+    config_hash: "legacy-config-002",
+    baseline_provenance: {
+      agent_id: "legacy-eu-agent",
+      agent_version: "legacy-eu-agent-v1",
+      model: "legacy-model",
+      model_version: "2026-03-01",
+      prompt_version: "legacy-prompt-v1",
+      tools_version: "legacy-tools-v1",
+      config_hash: "legacy-config-001",
+    },
+    new_provenance: {
+      agent_id: "legacy-eu-agent",
+      agent_version: "legacy-eu-agent-v2",
+      model: "legacy-model",
+      model_version: "2026-03-21",
+      prompt_version: "legacy-prompt-v2",
+      tools_version: "legacy-tools-v1",
+      config_hash: "legacy-config-002",
+    },
+  });
+
+  return { casesPath, baselineDir, newDir, outDir, environmentPath };
+}
+
 afterEach(() => {
   for (const root of tempRoots.splice(0, tempRoots.length)) {
     rmSync(root, { recursive: true, force: true });
@@ -275,6 +337,35 @@ describe("eu-ai-act compliance scripts", () => {
     ]);
 
     expect(result.status, result.stderr).toBe(0);
+  }, SCRIPT_TEST_TIMEOUT_MS);
+
+  it("packages successfully when legacy run provenance is provided via environment overlay", () => {
+    const root = makeTempRoot();
+    const fixture = createLegacyEvaluatorFixture(root);
+
+    const result = runNode(PACKAGE_SCRIPT, [
+      "--cases",
+      fixture.casesPath,
+      "--baselineDir",
+      fixture.baselineDir,
+      "--newDir",
+      fixture.newDir,
+      "--outDir",
+      fixture.outDir,
+      "--reportId",
+      "eu-package-legacy-overlay",
+      "--environment",
+      fixture.environmentPath,
+      "--no-trend",
+    ]);
+
+    expect(result.status, result.stderr).toBe(0);
+    const report = JSON.parse(readFileSync(path.join(fixture.outDir, "compare-report.json"), "utf8"));
+    expect(report.provenance?.baseline?.agent_version).toBe("legacy-eu-agent-v1");
+    expect(report.provenance?.new?.agent_version).toBe("legacy-eu-agent-v2");
+    expect(report.environment?.agent_version).toBe("legacy-eu-agent-v2");
+    expect(report.environment?.baseline_provenance).toBeUndefined();
+    expect(report.environment?.new_provenance).toBeUndefined();
   }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("can sign the EU bundle manifest and pass strict verification", () => {

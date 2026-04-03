@@ -3,6 +3,8 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  extractCanonicalEnvironmentProvenance,
+  extractLegacyRunProvenanceOverlay,
   extractRunProvenance,
   loadComplianceProfile,
   loadComplianceMapping,
@@ -13,6 +15,7 @@ import {
   resolveComplianceMapping,
   resolveTransferClass,
   listMissingEuAiActEnvironmentFields,
+  stripLegacyRunProvenanceOverlay,
 } from "./evaluatorMetadata";
 
 describe("evaluatorMetadata", () => {
@@ -128,6 +131,79 @@ describe("evaluatorMetadata", () => {
       agent_version: "v1",
       model: "model-a",
       deployment_tier: "staging",
+    });
+  });
+
+  it("extracts and strips legacy run provenance overlays from environment context", () => {
+    const environment = {
+      agent_id: "agent-a",
+      agent_version: "v2",
+      model: "model-a",
+      model_version: "2026-03-21",
+      prompt_version: "prompt-v2",
+      tools_version: "tools-v1",
+      config_hash: "cfg-002",
+      baseline_provenance: {
+        agent_id: "agent-a",
+        agent_version: "v1",
+        model: "model-a",
+        model_version: "2026-03-01",
+        prompt_version: "prompt-v1",
+        tools_version: "tools-v1",
+        config_hash: "cfg-001",
+      },
+      new_provenance: {
+        agent_id: "agent-a",
+        agent_version: "v2",
+        model: "model-a",
+        model_version: "2026-03-21",
+        prompt_version: "prompt-v2",
+        tools_version: "tools-v1",
+        config_hash: "cfg-002",
+      },
+      deployment_tier: "staging",
+    };
+
+    expect(extractLegacyRunProvenanceOverlay(environment)).toEqual({
+      baseline: {
+        agent_id: "agent-a",
+        agent_version: "v1",
+        model: "model-a",
+        model_version: "2026-03-01",
+        prompt_version: "prompt-v1",
+        tools_version: "tools-v1",
+        config_hash: "cfg-001",
+      },
+      new: {
+        agent_id: "agent-a",
+        agent_version: "v2",
+        model: "model-a",
+        model_version: "2026-03-21",
+        prompt_version: "prompt-v2",
+        tools_version: "tools-v1",
+        config_hash: "cfg-002",
+      },
+    });
+
+    expect(stripLegacyRunProvenanceOverlay(environment)).toEqual({
+      agent_id: "agent-a",
+      agent_version: "v2",
+      model: "model-a",
+      model_version: "2026-03-21",
+      prompt_version: "prompt-v2",
+      tools_version: "tools-v1",
+      config_hash: "cfg-002",
+      deployment_tier: "staging",
+    });
+
+    expect(extractCanonicalEnvironmentProvenance(environment)).toEqual({
+      agent_id: "agent-a",
+      agent_version: "v2",
+      model: "model-a",
+      model_version: "2026-03-21",
+      prompt_version: "prompt-v2",
+      tools_version: "tools-v1",
+      config_hash: "cfg-002",
     });
   });
 

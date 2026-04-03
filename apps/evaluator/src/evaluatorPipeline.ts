@@ -43,6 +43,8 @@ import {
   resolveFromRoot,
 } from "./evaluatorIo";
 import {
+  extractCanonicalEnvironmentProvenance,
+  extractLegacyRunProvenanceOverlay,
   extractRunProvenance,
   listMissingRequiredEnvironmentFields,
   listMissingEuAiActEnvironmentFields,
@@ -55,6 +57,7 @@ import {
   type RequiredEnvironmentField,
   type ComplianceCoverageRequirement,
   type ComplianceMappingEntry,
+  type RunProvenanceRecord,
 } from "./evaluatorMetadata";
 import { assessRedactionState, verifyRedactionCoverage } from "./evaluatorRedaction";
 import { buildSecurityScanners } from "./evaluatorScanners";
@@ -141,6 +144,10 @@ function describeMissingRunProvenance(meta: Record<string, unknown>): RequiredEn
     return listMissingRequiredEnvironmentFields(undefined);
   }
   return listMissingRequiredEnvironmentFields(provenance);
+}
+
+function equalRunProvenance(a: RunProvenanceRecord, b: RunProvenanceRecord): boolean {
+  return Object.entries(a).every(([field, value]) => b[field as RequiredEnvironmentField] === value);
 }
 
 function deriveAssumptionStateSide(
@@ -386,13 +393,42 @@ export async function runEvaluator(): Promise<void> {
   const cases = await readCases(casesPathAbs, maxCaseBytes);
   const baselineRun = await readRunDir(baselineDirAbs, maxCaseBytes, maxMetaBytes);
   const newRun = await readRunDir(newDirAbs, maxCaseBytes, maxMetaBytes);
-  const baselineProvenance = extractRunProvenance(baselineRun.meta);
-  const newProvenance = extractRunProvenance(newRun.meta);
+  const legacyRunProvenance = extractLegacyRunProvenanceOverlay(environment);
+  const canonicalEnvironmentProvenance = extractCanonicalEnvironmentProvenance(environment);
+  const resolveRunProvenance = (
+    label: "baseline" | "new",
+    recorded: RunProvenanceRecord | undefined,
+    provided: RunProvenanceRecord | undefined
+  ): RunProvenanceRecord | undefined => {
+    if (!recorded) {
+      return provided;
+    }
+    if (!provided) {
+      return recorded;
+    }
+    if (!equalRunProvenance(recorded, provided)) {
+      throw new CliUsageError(
+        `Provided ${label}_provenance does not match ${label} run provenance in run.json.\n\n${HELP_TEXT}`
+      );
+    }
+    return recorded;
+  };
+  const baselineProvenance = resolveRunProvenance(
+    "baseline",
+    extractRunProvenance(baselineRun.meta),
+    legacyRunProvenance?.baseline
+  );
+  const newProvenance = resolveRunProvenance(
+    "new",
+    extractRunProvenance(newRun.meta),
+    legacyRunProvenance?.new ?? canonicalEnvironmentProvenance
+  );
   if (!baselineProvenance) {
     const missing = describeMissingRunProvenance(baselineRun.meta);
     throw new CliUsageError(
       `Core qualification packaging requires baseline run provenance in run.json. Missing: ${missing.join(", ")}.\n`
-      + "Capture provenance in the runner via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH.\n\n"
+      + "Capture provenance in the runner via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH. "
+      + "For legacy runs, --environment may also include baseline_provenance/new_provenance objects.\n\n"
       + HELP_TEXT
     );
   }
@@ -400,7 +436,8 @@ export async function runEvaluator(): Promise<void> {
     const missing = describeMissingRunProvenance(newRun.meta);
     throw new CliUsageError(
       `Core qualification packaging requires new run provenance in run.json. Missing: ${missing.join(", ")}.\n`
-      + "Capture provenance in the runner via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH.\n\n"
+      + "Capture provenance in the runner via --environment <json> or env vars AGENT_ID, AGENT_VERSION, AGENT_MODEL, MODEL_VERSION, PROMPT_VERSION, TOOLS_VERSION, CONFIG_HASH. "
+      + "For legacy runs, --environment may also include baseline_provenance/new_provenance objects.\n\n"
       + HELP_TEXT
     );
   }
