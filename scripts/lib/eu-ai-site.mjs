@@ -1737,11 +1737,11 @@ const TECHNICAL_PAGE = {
   en: {
     title: "Technical Overview: from agent runs to an EU AI Act package | EU AI Evidence Builder",
     description:
-      "Architecture, verification, and trust model for CTOs and engineering leads deciding whether the EU AI evidence workflow is worth technical time.",
+      "Check how the EU AI Act path works on your own system, what the engine does, and where the technical and human boundaries still are.",
     eyebrow: "Technical Overview",
     headline: "Technical Overview: from agent runs to an EU AI Act package",
     intro:
-      "For CTOs and engineering leads deciding whether this is worth technical time now: what already exists, how to test fit on your own agent, what the engine actually does, where human approval still begins, and the fact that the default EU path here targets the provider side of a high-risk AI system.",
+      "Use this page to check how the EU path works on your own system: what you can test on your own agent, what the engine actually does, what its limits are, and what still stays with your team. The default EU path here targets the provider side of a high-risk AI system.",
     inspectTitle: "What to check first",
     inspectLead:
       "Before installation, a CTO should be able to see concrete outputs, explicit gates, the split between machine evidence and human-owned completion, and the minimum your team must already have for an honest first run.",
@@ -1921,11 +1921,11 @@ const TECHNICAL_PAGE = {
   de: {
     title: "Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen | EU AI Evidence Builder",
     description:
-      "Architektur, Verifikation und Vertrauensmodell fuer CTOs und Engineering-Leads, die entscheiden muessen, ob der EU-Nachweis-Workflow technische Zeit wert ist.",
+      "Pruefen Sie, wie der EU-Pfad auf Ihrem eigenen System funktioniert, was die Engine leistet und wo technische und menschliche Grenzen weiter gelten.",
     eyebrow: "Technischer Ueberblick",
     headline: "Technischer Ueberblick: von Agent-Runs zu reviewer-tauglichen EU-Nachweisen",
     intro:
-      "Fuer CTOs und Engineering-Leads, die entscheiden muessen, ob das Thema jetzt technische Zeit wert ist: was bereits real existiert, wie Sie den Fit am eigenen Agenten pruefen, was die Engine tatsaechlich leistet, wo menschliche Freigabe beginnt und dass der EU-Standardpfad hier die Provider-Seite eines Hochrisiko-KI-Systems adressiert.",
+      "Nutzen Sie diese Seite, um zu pruefen, wie der EU-Pfad auf Ihrem eigenen System funktioniert: was Sie am eigenen Agenten testen koennen, was die Engine tatsaechlich leistet, wo ihre Grenzen liegen und was weiter bei Ihrem Team bleibt. Der Standardpfad hier adressiert die Provider-Seite eines Hochrisiko-KI-Systems.",
     inspectTitle: "Was man zuerst pruefen sollte",
     inspectLead:
       "Vor jeder Installation sollte ein CTO konkrete Ausgaben, explizite Kontrollpunkte, die Trennung zwischen Maschinen-Nachweisen und menschlicher Vervollstaendigung sowie die minimalen Voraussetzungen fuer einen ehrlichen ersten Lauf sehen koennen.",
@@ -2105,11 +2105,11 @@ const TECHNICAL_PAGE = {
   fr: {
     title: "Vue technique : des runs agent aux preuves UE lisibles par un evaluateur | EU AI Evidence Builder",
     description:
-      "Architecture, verification et modele de confiance pour les CTO et engineering leads qui doivent decider si le workflow de preuve EU merite du temps technique.",
+      "Verifiez comment le parcours UE fonctionne sur votre propre systeme, ce que l'engine fait vraiment et ou restent les limites techniques et humaines.",
     eyebrow: "Vue technique",
     headline: "Vue technique : des runs agent aux preuves UE lisibles par un evaluateur",
     intro:
-      "Pour les CTO et engineering leads qui doivent decider si cela merite du temps technique maintenant : ce qui existe deja, comment tester l'adequation sur votre propre agent, ce que l'engine fait reellement, ou commence encore la validation humaine, et le fait que le parcours UE par defaut ici vise la partie fournisseur d'un systeme d'IA a haut risque.",
+      "Utilisez cette page pour verifier comment le parcours UE fonctionne sur votre propre systeme : ce que vous pouvez tester sur votre propre agent, ce que l'engine fait reellement, quelles sont ses limites et ce qui reste du ressort de votre equipe. Le parcours UE par defaut ici vise la partie fournisseur d'un systeme d'IA a haut risque.",
     inspectTitle: "Ce qu'il faut verifier d'abord",
     inspectLead:
       "Avant toute installation, un CTO doit pouvoir voir des sorties concretes, des verrous explicites, la separation entre preuve machine et completion humaine, ainsi que le minimum que votre equipe doit deja avoir pour un premier run honnete.",
