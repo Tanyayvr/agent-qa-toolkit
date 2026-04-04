@@ -4,8 +4,8 @@ import {
   type CaseTrendRow,
   type RunTrendRow,
 } from "trending";
-import type { CompareReport } from "./reportTypes";
-import type { EuAiActBundleArtifacts } from "./euAiActGovernance";
+import type { CompareReport } from "../reportTypes";
+import type { EuAiActBundleArtifacts } from "./governance";
 
 export type MonitoringHistoryStatus =
   | "history_current"

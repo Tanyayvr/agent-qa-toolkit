@@ -6,8 +6,8 @@ import {
   buildEuAiActHumanOversightSummary,
   buildEuAiActReleaseReview,
   type EuAiActBundleArtifacts,
-} from "./euAiActGovernance";
-import type { CompareReport, ComplianceCoverageEntry } from "./reportTypes";
+} from "./governance";
+import type { CompareReport, ComplianceCoverageEntry } from "../reportTypes";
 
 const bundleArtifacts: EuAiActBundleArtifacts = {
   compare_report_href: "compare-report.json",

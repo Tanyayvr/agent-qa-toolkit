@@ -1,15 +1,15 @@
-import { escHtml } from "./htmlFormatters";
-import type { EuAiActPostMarketMonitoring } from "./euAiActMonitoring";
+import { escHtml } from "../htmlFormatters";
+import type { EuAiActPostMarketMonitoring } from "./monitoring";
 import {
   buildEuAiActHumanOversightSummary,
   buildEuAiActReleaseReview,
   type EuAiActBundleArtifacts,
   type EuAiActHumanOversightSummary,
   type EuAiActReleaseReview,
-} from "./euAiActGovernance";
-import { listMissingEuAiActEnvironmentFields } from "./evaluatorMetadata";
-import type { Manifest } from "./manifest";
-import type { CompareReport, ComplianceCoverageEntry } from "./reportTypes";
+} from "./governance";
+import { listMissingEuAiActEnvironmentFields } from "../evaluatorMetadata";
+import type { Manifest } from "../manifest";
+import type { CompareReport, ComplianceCoverageEntry } from "../reportTypes";
 
 export type EuAiActContractMode = "minimum" | "full";
 

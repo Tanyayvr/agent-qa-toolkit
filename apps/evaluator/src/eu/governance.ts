@@ -1,4 +1,4 @@
-import type { CompareReport, ComplianceCoverageEntry } from "./reportTypes";
+import type { CompareReport, ComplianceCoverageEntry } from "../reportTypes";
 
 export type EuAiActBundleArtifacts = {
   compare_report_href: string;

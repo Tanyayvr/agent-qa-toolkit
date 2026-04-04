@@ -5,9 +5,9 @@ import path from "node:path";
 import Ajv from "ajv";
 import { afterEach, describe, expect, it } from "vitest";
 import { TrendStore } from "trending";
-import { buildEuAiActBundleArtifacts } from "./euAiActDossier";
-import { buildEuAiActPostMarketMonitoring, collectEuAiActMonitoring } from "./euAiActMonitoring";
-import type { CompareReport } from "./reportTypes";
+import { buildEuAiActBundleArtifacts } from "./dossier";
+import { buildEuAiActPostMarketMonitoring, collectEuAiActMonitoring } from "./monitoring";
+import type { CompareReport } from "../reportTypes";
 
 function mkReport(params: {
   reportId: string;

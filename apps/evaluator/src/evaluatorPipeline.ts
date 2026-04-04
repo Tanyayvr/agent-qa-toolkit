@@ -67,20 +67,14 @@ import {
   maybeAttachLargePayloadWarnings,
 } from "./evaluatorSummary";
 import { computeComplianceCoverage } from "./complianceCoverage";
-import {
-  buildEuAiActBundleArtifacts,
-  buildEuAiActBundleExports,
-  buildEuAiActComplianceBundle,
-  type EuAiActContractMode,
-} from "./euAiActDossier";
 import { finalizeManifest, writeRedactionSummaryIfNeeded } from "./evaluatorFinalization";
-import { buildEuAiActPostMarketMonitoring, collectEuAiActMonitoring } from "./euAiActMonitoring";
 import { buildRetentionArchiveControls, RETENTION_ARCHIVE_CONTROLS_HREF } from "./retentionArchiveControls";
 import { buildNormalizedToolTelemetryArtifact } from "./toolTelemetryArtifacts";
 import { ingestTrendIfEnabled } from "./evaluatorTrend";
 import { HELP_TEXT } from "./evaluatorHelp";
 import { cleanupOldReports } from "./evaluatorRetention";
 import { ExecutionQualityGateError } from "./evaluatorErrors";
+import type { EuAiActContractMode } from "./eu";
 
 import {
   computeExecutionQuality,
@@ -148,6 +142,10 @@ function describeMissingRunProvenance(meta: Record<string, unknown>): RequiredEn
 
 function equalRunProvenance(a: RunProvenanceRecord, b: RunProvenanceRecord): boolean {
   return Object.entries(a).every(([field, value]) => b[field as RequiredEnvironmentField] === value);
+}
+
+async function loadEuAiActRuntime() {
+  return import("./eu");
 }
 
 function deriveAssumptionStateSide(
@@ -1183,6 +1181,7 @@ export async function runEvaluator(): Promise<void> {
     report.compliance_coverage = complianceCoverage;
   }
   const requiresEuAiActBundle = report.compliance_coverage?.some((entry) => entry.framework === "EU_AI_ACT") === true;
+  const euAiActRuntime = requiresEuAiActBundle ? await loadEuAiActRuntime() : undefined;
   if (requiresEuAiActBundle) {
     const missingEnvironmentFields = listMissingEuAiActEnvironmentFields(report.environment);
     if (missingEnvironmentFields.length > 0) {
@@ -1193,13 +1192,13 @@ export async function runEvaluator(): Promise<void> {
       );
     }
   }
-  const euAiActBundleArtifacts = report.compliance_coverage?.some((entry) => entry.framework === "EU_AI_ACT")
-    ? buildEuAiActBundleArtifacts(euContract)
+  const euAiActBundleArtifacts = euAiActRuntime
+    ? euAiActRuntime.buildEuAiActBundleArtifacts(euContract)
     : undefined;
-  if (euAiActBundleArtifacts) {
+  if (euAiActBundleArtifacts && euAiActRuntime) {
     report.compliance_exports = {
       ...(report.compliance_exports ?? {}),
-      eu_ai_act: buildEuAiActBundleExports(euAiActBundleArtifacts),
+      eu_ai_act: euAiActRuntime.buildEuAiActBundleExports(euAiActBundleArtifacts),
     };
   }
   report.bundle_exports = {
@@ -1234,18 +1233,18 @@ export async function runEvaluator(): Promise<void> {
     responses: newRun.byId,
   });
 
-  if (euAiActBundleArtifacts) {
-    const postMarketMonitoring = buildEuAiActPostMarketMonitoring({
+  if (euAiActBundleArtifacts && euAiActRuntime) {
+    const postMarketMonitoring = euAiActRuntime.buildEuAiActPostMarketMonitoring({
       report,
       bundleArtifacts: euAiActBundleArtifacts,
       generatedAt: Date.now(),
-      collection: collectEuAiActMonitoring({
+      collection: euAiActRuntime.collectEuAiActMonitoring({
         report,
         trendIngestEnabled,
         ...(getArg("--trend-db") ? { trendDbArg: getArg("--trend-db") as string } : {}),
       }),
     });
-    const euAiActBundle = buildEuAiActComplianceBundle({
+    const euAiActBundle = euAiActRuntime.buildEuAiActComplianceBundle({
       report,
       manifest,
       postMarketMonitoring,

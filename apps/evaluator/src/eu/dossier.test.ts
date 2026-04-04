@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import Ajv from "ajv";
 import { describe, expect, it } from "vitest";
-import { buildEuAiActBundleArtifacts, buildEuAiActComplianceBundle } from "./euAiActDossier";
-import type { CompareReport } from "./reportTypes";
+import { buildEuAiActBundleArtifacts, buildEuAiActComplianceBundle } from "./dossier";
+import type { CompareReport } from "../reportTypes";
 
 const report: CompareReport = {
   contract_version: 5,
@@ -255,6 +255,10 @@ describe("euAiActDossier", () => {
         ],
       },
     });
+    expect(bundle).toBeDefined();
+    if (!bundle || !bundle.article73SeriousIncidentPack || !bundle.releaseReview) {
+      throw new Error("Expected the full EU AI Act bundle to include Article 73 and release review outputs");
+    }
     const coverageSchema = JSON.parse(
       readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-coverage-v1.schema.json"), "utf-8")
     );
@@ -348,10 +352,10 @@ describe("euAiActDossier", () => {
     expect(bundle?.article17QmsLite.document_scope.article).toBe("Art_17");
     expect(bundle?.annexVDeclarationContent.document_scope.annex).toBe("Annex_V");
     expect(bundle?.article17QmsLite.process_areas).toHaveLength(6);
-    expect(bundle?.article73SeriousIncidentPack.document_scope.article).toBe("Art_73");
-    expect(bundle?.article73SeriousIncidentPack.current_assessment.machine_triage_status).toBe("monitor");
+    expect(bundle.article73SeriousIncidentPack.document_scope.article).toBe("Art_73");
+    expect(bundle.article73SeriousIncidentPack.current_assessment.machine_triage_status).toBe("monitor");
     expect(bundle?.humanOversightSummary.review_queue).toEqual([]);
-    expect(bundle?.releaseReview.release_decision.status).toBe("approve");
+    expect(bundle.releaseReview.release_decision.status).toBe("approve");
     expect(bundle?.postMarketMonitoring.summary.monitoring_status).toBe("no_matching_history");
     expect(bundle?.annexIv.uncovered_areas).toContain(
       "Art_11: Full technical file still requires operator-authored material."
