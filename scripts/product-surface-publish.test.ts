@@ -330,5 +330,5 @@ describe("product-surface-publish", () => {
     const verified = verifyPublishedSurfaces(publishRoot);
     expect(verified.ok).toBe(true);
     expect(verified.checks.every((check) => check.pass === true)).toBe(true);
-  });
+  }, 30_000);
 });

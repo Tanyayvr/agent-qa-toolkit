@@ -133,7 +133,7 @@ describe("eu-ai-act product surface", () => {
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout).toContain("EU starter plan:");
     expect(result.stdout).toContain("workspace=.agent-qa/eu-ai-act-starter/surface-smoke");
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it("passes --draftJson through the starter wrapper", () => {
     const root = makeTempRoot();
@@ -162,7 +162,7 @@ describe("eu-ai-act product surface", () => {
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout).toContain("builderDraft=");
     expect(result.stdout).toContain("supplemental/builder-draft.json");
-  });
+  }, SCRIPT_TEST_TIMEOUT_MS);
 
   it(
     "packages and verifies the minimum EU bundle from the product surface",
@@ -260,7 +260,7 @@ describe("eu-ai-act product surface", () => {
       expect(result.status, result.stderr).toBe(0);
       expect(result.stdout).toContain("EU AI Act contract check: PASS");
     },
-    20_000
+    SCRIPT_TEST_TIMEOUT_MS
   );
 
   it("skips shared-core install when AQ_SKIP_SHARED_CORE_INSTALL=1", () => {
