@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import { buildEuAiActBundleArtifacts, buildEuAiActComplianceBundle } from "./dossier";
 import type { CompareReport } from "../reportTypes";
 
+const EU_SCHEMA_DIR = path.join(process.cwd(), "schemas", "eu-ai-act");
+
 const report: CompareReport = {
   contract_version: 5,
   report_id: "eu-dossier",
@@ -260,49 +262,49 @@ describe("euAiActDossier", () => {
       throw new Error("Expected the full EU AI Act bundle to include Article 73 and release review outputs");
     }
     const coverageSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-coverage-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-coverage-v1.schema.json"), "utf-8")
     );
     const evidenceSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-evidence-index-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-evidence-index-v1.schema.json"), "utf-8")
     );
     const annexSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-annex-iv-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-annex-iv-v1.schema.json"), "utf-8")
     );
     const article13Schema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-13-instructions-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-13-instructions-v1.schema.json"), "utf-8")
     );
     const article10Schema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-10-data-governance-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-10-data-governance-v1.schema.json"), "utf-8")
     );
     const article16Schema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-16-provider-obligations-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-16-provider-obligations-v1.schema.json"), "utf-8")
     );
     const article43Schema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-43-conformity-assessment-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-43-conformity-assessment-v1.schema.json"), "utf-8")
     );
     const article47Schema = JSON.parse(
       readFileSync(
-        path.join(process.cwd(), "schemas", "eu-ai-act-article-47-declaration-of-conformity-v1.schema.json"),
+        path.join(EU_SCHEMA_DIR, "eu-ai-act-article-47-declaration-of-conformity-v1.schema.json"),
         "utf-8"
       )
     );
     const riskRegisterSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-9-risk-register-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-9-risk-register-v1.schema.json"), "utf-8")
     );
     const monitoringPlanSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-72-monitoring-plan-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-72-monitoring-plan-v1.schema.json"), "utf-8")
     );
     const qmsLiteSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-17-qms-lite-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-17-qms-lite-v1.schema.json"), "utf-8")
     );
     const annexVSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-annex-v-declaration-content-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-annex-v-declaration-content-v1.schema.json"), "utf-8")
     );
     const incidentPackSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-article-73-serious-incident-pack-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-article-73-serious-incident-pack-v1.schema.json"), "utf-8")
     );
     const monitoringSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-post-market-monitoring-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-post-market-monitoring-v1.schema.json"), "utf-8")
     );
 
     expect(bundle?.exports.annex_iv_href).toBe("compliance/eu-ai-act-annex-iv.json");

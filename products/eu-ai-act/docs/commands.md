@@ -20,6 +20,10 @@ npm run starter -- --baseUrl http://localhost:8787 --systemType fraud --profile 
 npm run package -- --cases <cases> --baselineDir <baseline> --newDir <new> --outDir <out> --reportId <id>
 ```
 
+By default this uses the EU compliance profile shipped here:
+
+- `products/eu-ai-act/config/compliance-profile.json`
+
 ## Verify
 
 ```bash

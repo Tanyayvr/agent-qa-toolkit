@@ -9,6 +9,8 @@ import {
 } from "./governance";
 import type { CompareReport, ComplianceCoverageEntry } from "../reportTypes";
 
+const EU_SCHEMA_DIR = path.join(process.cwd(), "schemas", "eu-ai-act");
+
 const bundleArtifacts: EuAiActBundleArtifacts = {
   compare_report_href: "compare-report.json",
   evaluator_report_html_href: "report.html",
@@ -200,10 +202,10 @@ describe("euAiActGovernance", () => {
   it("builds oversight and release-review outputs with reviewer actions and schemas", () => {
     const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
     const oversightSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-human-oversight-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-human-oversight-v1.schema.json"), "utf-8")
     );
     const releaseSchema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-release-review-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-release-review-v1.schema.json"), "utf-8")
     );
 
     const oversight = buildEuAiActHumanOversightSummary({

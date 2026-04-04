@@ -9,6 +9,7 @@ import { EU_REVIEWER_PDF_REL_PATH } from "./lib/reviewer-pdf.mjs";
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..");
 const VERIFY_SCRIPT = path.join(REPO_ROOT, "scripts", "eu-ai-act-verify.mjs");
+const EU_SCHEMA_DIR = path.join(REPO_ROOT, "schemas", "eu-ai-act");
 const MANIFEST_NAME = "authority-response-bundle.json";
 const AUTHORITY_REQUEST_NAME = "authority-request.json";
 const TODO = "TODO";
@@ -182,7 +183,7 @@ function runSourceVerify(reportDir, strict) {
 }
 
 function validateBundleManifest(doc) {
-  const schema = readJson(path.join(REPO_ROOT, "schemas", "eu-ai-act-authority-response-bundle-v1.schema.json"));
+  const schema = readJson(path.join(EU_SCHEMA_DIR, "eu-ai-act-authority-response-bundle-v1.schema.json"));
   const ajv = new Ajv({ allErrors: true, strict: false });
   const validate = ajv.compile(schema);
   const ok = validate(doc);
@@ -193,7 +194,7 @@ function validateBundleManifest(doc) {
 }
 
 function validateSchema(schemaFileName, doc) {
-  const schema = readJson(path.join(REPO_ROOT, "schemas", schemaFileName));
+  const schema = readJson(path.join(EU_SCHEMA_DIR, schemaFileName));
   const ajv = new Ajv({ allErrors: true, strict: false });
   const validate = ajv.compile(schema);
   const ok = validate(doc);

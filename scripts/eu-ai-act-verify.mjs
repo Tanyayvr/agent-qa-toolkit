@@ -9,6 +9,7 @@ import { EU_REVIEWER_PDF_REL_PATH } from "./lib/reviewer-pdf.mjs";
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..");
 const CORE_VERIFY_SCRIPT = path.join(REPO_ROOT, "scripts", "agent-evidence-verify.mjs");
+const EU_SCHEMA_DIR = path.join(REPO_ROOT, "schemas", "eu-ai-act");
 const EU_CONTRACTS = new Set(["minimum", "full"]);
 const REQUIRED_EU_AI_ACT_ENVIRONMENT_FIELDS = [
   "agent_id",
@@ -430,7 +431,7 @@ function main() {
     allArtifactsPresent = allArtifactsPresent && present;
     if (!present) continue;
     const doc = readJson(path.join(reportDir, spec.href));
-    const schema = readJson(path.join(REPO_ROOT, "schemas", spec.schema));
+    const schema = readJson(path.join(EU_SCHEMA_DIR, spec.schema));
     const valid = ajv.validate(schema, doc);
     pushCheck(
       checks,

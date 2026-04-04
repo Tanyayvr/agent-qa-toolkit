@@ -70,7 +70,7 @@ The repository now keeps a tighter split between public product docs and interna
 
 - public entrypoint: [../README.md](../README.md)
 - public engineering path: [engineering-qualification-path.md](engineering-qualification-path.md)
-- public EU path: [eu-ai-act-evidence-engine.md](eu-ai-act-evidence-engine.md)
+- public EU path: [../products/eu-ai-act/README.md](../products/eu-ai-act/README.md)
 - public architecture and operator docs: this directory
 - internal messaging and GTM source of truth: `docs/internal/market/`
 

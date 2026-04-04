@@ -11,7 +11,7 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, "..");
 const CORE_PACKAGE_SCRIPT = path.join(REPO_ROOT, "scripts", "agent-evidence-package.mjs");
 const SIGN_SCRIPT = path.join(REPO_ROOT, "scripts", "manifest-sign.mjs");
 const VERIFY_SCRIPT = path.join(REPO_ROOT, "scripts", "eu-ai-act-verify.mjs");
-const DEFAULT_PROFILE = path.join(REPO_ROOT, "docs", "compliance-profile-eu-ai-act.json");
+const DEFAULT_PROFILE = path.join(REPO_ROOT, "products", "eu-ai-act", "config", "compliance-profile.json");
 const EU_CONTRACTS = new Set(["minimum", "full"]);
 
 function usage(exitCode = 0) {
@@ -20,7 +20,7 @@ function usage(exitCode = 0) {
     "  node scripts/eu-ai-act-package.mjs --cases <path> --baselineDir <path> --newDir <path> --outDir <path> --reportId <id> [options]",
     "",
     "Options:",
-    "  --complianceProfile <path>  Override compliance profile (default: docs/compliance-profile-eu-ai-act.json)",
+    "  --complianceProfile <path>  Override compliance profile (default: products/eu-ai-act/config/compliance-profile.json)",
     "  --contract <minimum|full>  EU packaging contract to enforce (default: minimum)",
     "  --no-verify                 Skip post-run compliance verification",
     "  --verify-strict            Run strict PVIP mode inside compliance verification",

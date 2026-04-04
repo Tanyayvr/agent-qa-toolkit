@@ -9,6 +9,8 @@ import { buildEuAiActBundleArtifacts } from "./dossier";
 import { buildEuAiActPostMarketMonitoring, collectEuAiActMonitoring } from "./monitoring";
 import type { CompareReport } from "../reportTypes";
 
+const EU_SCHEMA_DIR = path.join(process.cwd(), "schemas", "eu-ai-act");
+
 function mkReport(params: {
   reportId: string;
   generatedAt: number;
@@ -217,7 +219,7 @@ describe("euAiActMonitoring", () => {
 
     const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
     const schema = JSON.parse(
-      readFileSync(path.join(process.cwd(), "schemas", "eu-ai-act-post-market-monitoring-v1.schema.json"), "utf-8")
+      readFileSync(path.join(EU_SCHEMA_DIR, "eu-ai-act-post-market-monitoring-v1.schema.json"), "utf-8")
     );
 
     expect(monitoring.summary.monitoring_status).toBe("history_current");

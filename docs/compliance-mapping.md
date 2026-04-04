@@ -2,9 +2,6 @@
 
 This toolkit can optionally emit a compliance mapping block in `compare-report.json`.
 It is intended for enterprise reporting (ISO 42001 / NIST AI RMF).
-For the broader positioning and roadmap of this direction, see:
-
-- `docs/eu-ai-act-evidence-engine.md`
 
 ## Load from file (recommended)
 
@@ -18,7 +15,7 @@ Example profiles:
 
 - `docs/compliance-profile-iso42001.json`
 - `docs/compliance-profile-nist-ai-rmf.json`
-- `docs/compliance-profile-eu-ai-act.json`
+- `products/eu-ai-act/config/compliance-profile.json` for the EU product surface
 
 ## compare-report.json (optional)
 
@@ -42,4 +39,4 @@ Example profiles:
 ## Notes
 - Mapping is documentation-only and does not affect gating.
 - Teams can customize mapping per compliance profile.
-- Mapping alone is not the same thing as a compliance dossier; the recommended product direction is an evidence-engine export layer on top of the existing evidence pack.
+- Mapping alone is not the same thing as a compliance dossier.
